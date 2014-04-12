@@ -34,7 +34,7 @@ class interpreter(base):
         self.codehelp = "0"
         self.safety = "1"
         self.log = "0"
-        self.commands =["def ", "for ", "while ", "if ", "try", "import ", "from ", "class ", "global ", "except", "elif ", "else", "exec ", "eval "]
+        self.commands =["def ", "for ", "while ", "if ", "try", "import ", "from ", "class ", "global ", "except", "elif ", "else", "exec ", "eval ", "with "]
         self.charlist = [":", "=", "#"]
         self.maxcommand = 1
         for testcommand in self.commands:
