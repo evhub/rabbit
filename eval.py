@@ -18,9 +18,9 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+from .func import *
 from .data import *
 from .fraction import *
-from .funclib import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)

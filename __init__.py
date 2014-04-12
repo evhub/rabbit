@@ -51,11 +51,11 @@ File List:
     matrix (format, rand) : Utilities for using mathematical matrices.
     file (sys, format) : Utilities for managing different types of files.
 
-    funclib (matrix) : Utilities for managing functions as mathematical objects.
+    func (matrix) : Utilities for managing functions as mathematical objects.
     data (stats, matrix) : Utilities for managing statistical data.
     console (file) : Utilities for creating and managing basic windows.
 
-    eval (fraction, funclib, data) : Utilities for implementing the Rabbit language.
+    eval (fraction, func, data) : Utilities for implementing the Rabbit language.
     app (console) : Utilities for creating graphical applications.
 
     test (app) : A Python interpreter for testing purposes.
