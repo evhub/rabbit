@@ -18,9 +18,11 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+from .obj import *
 import os
 import subprocess
 import imp
+import time
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
@@ -112,3 +114,25 @@ def getos(findos=None):
             return osname
         else:
             return False
+
+class timer(object):
+    """An Interfacing Class For Clock Time."""
+    def __init__(self):
+        """Starts The Timer."""
+        self.reset()
+    def reset(self):
+        """Resets The Timer."""
+        self.start = time.clock()
+    def get(self):
+        """Return The Current Time Passed."""
+        return time.clock()-self.start
+    def lap(self):
+        """Returns The Current Time Passed And Resets The Timer."""
+        temptime = time.clock()
+        laptime = temptime-self.start
+        self.start = temptime
+        return laptime
+
+def thetime():
+    """Determines The Current Time."""
+    return time.ctime().split(" ")

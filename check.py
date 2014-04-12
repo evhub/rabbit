@@ -19,7 +19,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 from .base import *
-from .obj import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)

@@ -22,6 +22,11 @@ from __future__ import absolute_import, print_function, unicode_literals
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+try:
+    xrange
+except NameError:
+    xrange = range
+
 def typestr(obj):
     """Formats The Type Of Something Into A String."""
     return str(type(obj)).split("'")[1]
