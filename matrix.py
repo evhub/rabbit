@@ -91,10 +91,10 @@ class matrix(mctobject):
 
     def items(self):
         """Returns A List Of All Items In A Matrix."""
-        iterobj = []
+        out = []
         for y,x in self.coords():
-            iterobj.append(self.retreive(y, x))
-        return iterobj
+            out.append(self.retreive(y, x))
+        return out
 
     def trans(self):
         """Finds The Transpose."""
