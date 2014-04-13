@@ -47,16 +47,16 @@ File List:
 
     format (list) : Utilities for managing and formatting strings.
 
-    fraction (format, math) : Utilities for managing fraction objects.
-    matrix (format, rand) : Utilities for using mathematical matrices.
     file (sys, format) : Utilities for managing different types of files.
+    fraction (math, format) : Utilities for managing fraction objects.
+    matrix (rand, format) : Utilities for using mathematical matrices.
 
+    console (file) : Utilities for creating and managing basic windows.
     func (matrix) : Utilities for managing functions as mathematical objects.
     data (stats, matrix) : Utilities for managing statistical data.
-    console (file) : Utilities for creating and managing basic windows.
 
-    eval (fraction, func, data) : Utilities for implementing the Rabbit language.
     app (console) : Utilities for creating graphical applications.
+    eval (fraction, func, data) : Utilities for implementing the Rabbit language.
 
     test (app) : A Python interpreter for testing purposes.
     cmd (app, eval) : The standard Rabbit language interpreter."""
