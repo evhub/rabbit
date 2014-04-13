@@ -89,7 +89,7 @@ class random(object):
 
     def trial(self, p=0.5):
         """Returns True With Probability Equal To p."""
-        if self.getfloat() <= p:
+        if self.getfloat() < p:
             return True
         else:
             return False
