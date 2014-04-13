@@ -27,8 +27,8 @@ import string
 
 class lists(object):
     """A Container Class Used For Globals."""
-    yes = ["yes", "yes.", "y", "1", "true", "t", "true.", "y.", "t."]
-    no = ["no", "no.", "n", "0", "false", "f", "false.", "n.", "t."]
+    yes = ["yes", "yes.", "y", "1", "1.0", "true", "t", "true.", "y.", "t."]
+    no = ["no", "no.", "n", "0", "0.0", "false", "f", "false.", "n.", "f."]
     def __init__(self):
         """Initializes The Containers."""
         self.default()
