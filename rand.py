@@ -54,24 +54,24 @@ class random(object):
         self.advance()
         return self.state.digest()
 
-    def gethex(self):
+    def gethex(self, times=1):
         """Returns A Random Hexadecimal String Of Length 32."""
-        self.advance()
-        return self.state.hexdigest()
+        hexstring = ""
+        for x in xrange(0, int(times)):
+            self.advance()
+            hexstring += self.state.hexdigest()
+        return hexstring
 
-    def get(self):
+    def get(self, times=1):
         """Returns A Random Integer In The Range [0, maxget]."""
-        return int(self.gethex(), 16)
+        return int(self.gethex(times), 16)
 
     def getbits(self, bits=1):
         """Returns Random Bits Of A Certain Amount."""
-        bitstring = ""
-        for x in xrange(0, (bits+127)/128):
-            bitstring += self.gethex()
-        bitstring = int(bitstring, 16)
+        bitnum = self.get((bits+127)/128)
         for x in xrange(0, ((bits+127)/128)*128-bits):
-            bitstring = bitstring >> 1
-        return bitstring
+            bitnum = bitnum >> 1
+        return bitnum
 
     def getbool(self):
         """Returns A Random Boolean."""
@@ -91,7 +91,7 @@ class random(object):
         """Returns A Random Float In The Range [0, 1]."""
         return self.get()/float(self.maxget)
 
-    def trial(self, p=0.5):
+    def trial(self, p=0.5:
         """Returns True With Probability Equal To p."""
         if self.getfloat() < p:
             return True
@@ -116,9 +116,7 @@ class random(object):
         endpoint = float(rangestop)*self.maxget/rangestop
         test = float("inf")
         while test > endpoint:
-            test = 0
-            for x in xrange(0, tests):
-                test += self.get()
+            test = self.get(tests)
         return test % rangestop
 
     def chooserange(self, rangestart, rangestop):
