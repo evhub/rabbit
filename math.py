@@ -181,7 +181,7 @@ def factorial(x):
     """Implements The Factorial Function Over 0, The Positive Integers, And The Half-Integers."""
     if x == -0.5:
         return math.pi**0.5
-    elif x-0.5 == int(x-0.5):
+    elif x > 0 and x-0.5 == int(x-0.5):
         return x*factorial(x-1.0)
     else:
         return math.factorial(x)
