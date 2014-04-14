@@ -19,6 +19,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 from .sys import *
+from .math import *
 import md5
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -27,6 +28,8 @@ import md5
 
 class random(object):
     """A Class For Generating And Applying Pseudorandom Numbers."""
+    maxget = 340282366920938463463374607431768211455
+
     def __init__(self, key=None):
         """Initializes The Random Number Generator."""
         if key == None:
@@ -57,7 +60,7 @@ class random(object):
         return self.state.hexdigest()
 
     def get(self):
-        """Returns A Random Integer In The Range [0, 340282366920938463463374607431768211455]."""
+        """Returns A Random Integer In The Range [0, maxget]."""
         return int(self.gethex(), 16)
 
     def getbits(self, bits=1):
@@ -78,14 +81,15 @@ class random(object):
         """Returns Random Digits Of A Certain Amount."""
         digitstring = ""
         while len(digitstring) < digits:
-            digitstring += str(self.get())[1:]
-        while len(digitstring) > digits:
-            digitstring = digitstring[1:]
-        return digitstring
+            test = float("inf")
+            while test > str(self.maxnum)[0]*10.0**len(str(self.maxnum)):
+                test = self.get()
+            digitstring += test[1:]
+        return digitstring[:digits]
 
     def getfloat(self):
         """Returns A Random Float In The Range [0, 1]."""
-        return self.get()/340282366920938463463374607431768211455.0
+        return self.get()/float(self.maxget)
 
     def trial(self, p=0.5):
         """Returns True With Probability Equal To p."""
@@ -108,20 +112,14 @@ class random(object):
 
     def chooseint(self, rangestop):
         """Chooses A Random Integer From The Range [0, rangestop)."""
-        rangestop = int(rangestop)
-        if rangestop == 0:
-            return 0
-        ranges = []
-        stop = 0.0
-        for x in xrange(0, rangestop):
-            start = stop
-            stop += 340282366920938463463374607431768211455.0/rangestop
-            ranges.append([start, stop])
-        while True:
-            value = self.get()
-            for x in xrange(0, rangestop):
-                if isreal(value, ranges[x][0], ranges[x][1]) != None:
-                    return x
+        tests = math.ceil(float(self.maxget)/rangestop)
+        endpoint = float(self.maxget*tests)/rangestop
+        test = float("inf")
+        while test > endpoint:
+            test = 0
+            for x in xrange(0, tests):
+                test += self.get()
+        return test % rangestop
 
     def chooserange(self, rangestart, rangestop):
         """Chooses A Random Integer From The Range [rangestart, rangestop)."""

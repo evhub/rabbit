@@ -38,9 +38,9 @@ File List:
     web (obj) : Utilities for interfacing with the web.
 
     check (base) : Functions for analyzing objects for basic properties.
-    rand (sys) : Random number generation utilities.
     path (sys) : Utilities for implementing pathfinding.
     stats (math) : Advanced statistical functions.
+    rand (sys, math) : Random number generation utilities.
 
     list (check) : Utilities for managing lists and other containers.
     crypto (rand) : Cryptographic utilities.
