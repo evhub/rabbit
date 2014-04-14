@@ -16,7 +16,7 @@
 # DATA AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import
 
 from .sys import *
 from .math import *
@@ -30,29 +30,43 @@ class random(object):
     """A Class For Generating And Applying Pseudorandom Numbers."""
     maxget = 340282366920938463463374607431768211455
 
-    def __init__(self, key=None):
+    def __init__(self, key=None, debug=False):
         """Initializes The Random Number Generator."""
+        self.debug = bool(debug)
         if key == None:
             self.key = os.urandom(16)
         else:
             self.key = md5.new(key).digest()
         self.basestate = md5.new(self.key)
         self.counter = 0
+        self.bitstore = ""
+        self.digitstore = ""
 
     def goto(self, position=0):
         """Advances The Random Number Generator To A Position."""
-        self.counter = position
-        self.state = self.basestate.copy()
-        self.state.update(str(self.counter))
+        position = int(position)
+        if self.counter != position:
+            self.counter = position
+            self.state = self.basestate.copy()
+            self.state.update(str(self.counter))
 
     def advance(self, amount=1):
         """Advances The Random Number Generator."""
-        self.goto(self.counter+amount)
+        amount = int(amount)
+        if amount != 0:
+            self.goto(self.counter+amount)
+            self.bitstore = ""
+            self.digitstore = ""
 
-    def getraw(self):
-        """Returns A Random String Of Length 16."""
-        self.advance()
-        return self.state.digest()
+    def getraw(self, times=1):
+        """Returns A Random Unicode String Of Length 16."""
+        rawstring = ""
+        for x in xrange(0, int(times)):
+            self.advance()
+            rawstring += self.state.digest()
+        if self.debug and times > 0:
+            print("Generated Raw: "+repr(rawstring))
+        return rawstring
 
     def gethex(self, times=1):
         """Returns A Random Hexadecimal String Of Length 32."""
@@ -60,18 +74,31 @@ class random(object):
         for x in xrange(0, int(times)):
             self.advance()
             hexstring += self.state.hexdigest()
+        if self.debug and times > 0:
+            print("Generated Int: "+hexstring+" | "+str(int(hexstring, 16))+" | "+bin(int(hexstring, 16))[2:])
         return hexstring
 
     def get(self, times=1):
         """Returns A Random Integer In The Range [0, maxget]."""
-        return int(self.gethex(times), 16)
+        return int(self.gethex(times) or "0", 16)
 
     def getbits(self, bits=1):
         """Returns Random Bits Of A Certain Amount."""
-        bitnum = self.get((bits+127)/128)
-        for x in xrange(0, ((bits+127)/128)*128-bits):
-            bitnum = bitnum >> 1
-        return bitnum
+        newbits = bits
+        bitstring = ""
+        while newbits > 0 and len(self.bitstore) > 0:
+            bitstring += self.bitstore[0]
+            self.bitstore = self.bitstore[1:]
+            newbits -= 1
+        bit_length = self.maxget.bit_length()
+        tests = (newbits+bit_length-1)/bit_length
+        for x in xrange(0, tests):
+            test = bin(self.get(tests))[2:]
+            while len(test) < bit_length:
+                test = "0"+test
+            bitstring += test
+        self.bitstore += bitstring[bits:]
+        return int(bitstring[:bits], 2)
 
     def getbool(self):
         """Returns A Random Boolean."""
@@ -79,13 +106,24 @@ class random(object):
 
     def getdigits(self, digits=1):
         """Returns Random Digits Of A Certain Amount."""
+        newdigits = digits
         digitstring = ""
+        while newdigits > 0 and len(self.digitstore) > 0:
+            digitstring += self.digitstore[0]
+            self.digitstore = self.digitstore[1:]
+            newdigits -= 1
         while len(digitstring) < digits:
             test = float("inf")
             while test > int(str(self.maxget)[0])*10.0**len(str(self.maxget)):
                 test = self.get()
-            digitstring += str(test)[1:]
-        return str(digitstring[:digits])
+            test = str(test)
+            if len(test) >= len(str(self.maxget)):
+                test = test[1:]
+            while len(test) < len(str(self.maxget))-1:
+                test = "0"+test
+            digitstring += test
+        self.digitstore += digitstring[digits:]
+        return int(digitstring[:digits])
 
     def getfloat(self):
         """Returns A Random Float In The Range [0, 1]."""
