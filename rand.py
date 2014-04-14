@@ -82,10 +82,10 @@ class random(object):
         digitstring = ""
         while len(digitstring) < digits:
             test = float("inf")
-            while test > str(self.maxnum)[0]*10.0**len(str(self.maxnum)):
+            while test > int(str(self.maxget)[0])*10.0**len(str(self.maxget)):
                 test = self.get()
-            digitstring += test[1:]
-        return digitstring[:digits]
+            digitstring += str(test)[1:]
+        return str(digitstring[:digits])
 
     def getfloat(self):
         """Returns A Random Float In The Range [0, 1]."""
@@ -112,8 +112,8 @@ class random(object):
 
     def chooseint(self, rangestop):
         """Chooses A Random Integer From The Range [0, rangestop)."""
-        tests = math.ceil(float(self.maxget)/rangestop)
-        endpoint = float(self.maxget*tests)/rangestop
+        tests = int(math.ceil(rangestop/float(self.maxget)))
+        endpoint = float(rangestop)*self.maxget/rangestop
         test = float("inf")
         while test > endpoint:
             test = 0
