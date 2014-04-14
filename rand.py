@@ -91,7 +91,7 @@ class random(object):
         """Returns A Random Float In The Range [0, 1]."""
         return self.get()/float(self.maxget)
 
-    def trial(self, p=0.5:
+    def trial(self, p=0.5):
         """Returns True With Probability Equal To p."""
         if self.getfloat() < p:
             return True
