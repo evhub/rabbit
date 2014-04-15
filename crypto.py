@@ -18,6 +18,7 @@
 
 from __future__ import absolute_import, print_function
 
+from .format import *
 from .rand import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -56,6 +57,8 @@ class encoder(object):
 
     def compress(self, inputstring):
         """Turns A String Integer Back Into A String."""
+        if len(inputstring) % 2 == 1:
+            inputstring = "0"+inputstring
         outstring = ""
         y = 0
         for x in inputstring:
@@ -70,40 +73,23 @@ class encoder(object):
 
     def encode(self, inputstring, entropy=""):
         """Encodes A Message Into A String."""
-        inputint = self.intencode(inputstring, entropy)
-        gen = random(entropy+str(self.level)+self.key+str(len(inputint)))
-        slicer = gen.get()%len(inputint)
-        return self.compress(inputint[:slicer]+str(gen.getdigits(1))+inputint[slicer:])
+        return self.compress(self.intencode(inputstring, entropy))
 
     def decode(self, inputcode, entropy=""):
         """Decodes A Message From A String."""
-        inputint = self.expand(inputcode)
-        gen = random(entropy+str(self.level)+self.key+str(len(inputint)-1))
-        slicer = gen.get()%(len(inputint)-1)
-        return self.intdecode(inputint[:slicer]+inputint[slicer+1:], entropy)
+        return self.intdecode(self.expand(inputcode), entropy)
 
     def intencode(self, inputstring, entropy=""):
         """Encodes A Message Into An Integer."""
-        inputint = str(int("1"+self.binencode(inputstring, entropy),2))
-        gen = random(entropy+str(len(inputint))+str(self.level)+self.key)
-        xdigits = gen.getdigits(len(inputint))
-        newint = ""
-        for x in xrange(0,len(inputint)):
-            newint += str((int(inputint[x])+int(xdigits[x]))%10)
-        return newint
+        return str(int("1"+self.binencode(inputstring, entropy),2))
 
     def intdecode(self, inputint, entropy=""):
         """Decodes A Message From An Integer."""
-        gen = random(entropy+str(len(inputint))+str(self.level)+self.key)
-        xdigits = gen.getdigits(len(inputint))
-        newint = ""
-        for x in xrange(0,len(inputint)):
-            newint += str((int(inputint[x])-int(xdigits[x]))%10)
-        return self.bindecode(bin(int(newint))[3:], entropy)
+        return self.bindecode(bin(int(inputint))[3:], entropy)
 
     def binencode(self, inputstring, entropy=""):
         """Encodes A Message Into Binary."""
-        inputint = int("1"+self.expand(inputstring))
+        inputint = int(self.expand(inputstring))
         binstring = bin(self.stream(inputint, entropy))[2:]
         while len(binstring) < inputint.bit_length():
             binstring = "0"+binstring
@@ -111,7 +97,8 @@ class encoder(object):
 
     def bindecode(self, inputbin, entropy=""):
         """Decodes A Message From Binary."""
-        return self.compress(str(self.stream(int(inputbin,2), entropy, len(inputbin)))[1:])
+        intstring = str(self.stream(int(inputbin, 2), entropy, len(inputbin)))
+        return self.compress(intstring)
 
     def stream(self, inputint, entropy="", length=None):
         """Encodes An Integer Into Another Integer."""

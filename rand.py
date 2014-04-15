@@ -59,7 +59,7 @@ class random(object):
             self.digitstore = ""
 
     def getraw(self, times=1):
-        """Returns A Random Unicode String Of Length 16."""
+        """Returns A Random String Of Length 16."""
         rawstring = ""
         for x in xrange(0, int(times)):
             self.advance()

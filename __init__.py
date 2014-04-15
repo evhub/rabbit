@@ -40,23 +40,25 @@ File List:
     check (base) : Functions for analyzing objects for basic properties.
     path (sys) : Utilities for implementing pathfinding.
     stats (math) : Advanced statistical functions.
-    rand (sys, math) : Random number generation utilities.
+    rand (math, sys) : Random number generation utilities.
 
     list (check) : Utilities for managing lists and other containers.
-    crypto (rand) : Cryptographic utilities.
 
     format (list) : Utilities for managing and formatting strings.
 
-    file (sys, format) : Utilities for managing different types of files.
-    fraction (math, format) : Utilities for managing fraction objects.
-    matrix (rand, format) : Utilities for using mathematical matrices.
+    file (format, sys) : Utilities for managing different types of files.
+    fraction (format, math) : Utilities for managing fraction objects.
+    matrix (format, rand) : Utilities for using mathematical matrices.
+    crypto (format, rand) : Cryptographic utilities.
 
     console (file) : Utilities for creating and managing basic windows.
     func (matrix) : Utilities for managing functions as mathematical objects.
-    data (stats, matrix) : Utilities for managing statistical data.
+    data (matrix, stats) : Utilities for managing statistical data.
 
     app (console) : Utilities for creating graphical applications.
-    eval (fraction, func, data) : Utilities for implementing the Rabbit language.
+    eval (data, func, fraction) : Utilities for implementing the Rabbit language.
 
     test (app) : A Python interpreter for testing purposes.
-    cmd (app, eval) : The standard Rabbit language interpreter."""
+    cmd (eval, app) : The standard Rabbit language interpreter.
+
+    all (cmd, crypto, path, web) : All Rabbit functions in one place."""
