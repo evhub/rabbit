@@ -252,15 +252,13 @@ def splitinplace(inputlist, findstr, reserved="", domod=None):
         test = x.split(findstr)
         i = 0
         while i < len(test):
-            if i == 0:
-                last = "##"
-            elif haskey(test, i-1) != "" and haskey(test, i-1) != None:
+            if i > 0 and haskey(test, i-1):
                 last = test[i-1][-1]
             else:
-                last = "##"
-            if last in reserved:
+                last = ""
+            if last and last in reserved:
                 new = test.pop(i)
-                test[i-1] = test[i-1]+"-"+new
+                test[i-1] = test[i-1]+findstr+new
             elif test[i] == "":
                 test.pop(i)
                 if i < len(test):
@@ -304,4 +302,18 @@ def carefulsplit(inputstring, splitstring, holdstring='"'):
                 else:
                     hold = True
             out[-1] += x
+    return out
+
+def switchsplit(inputstring, splitstring):
+    """Splits A String By Whenever It Switches From Being In Something To Not In It."""
+    out = []
+    check = -1
+    for x in inputstring:
+        if check != 1 and x in splitstring:
+            out.append("")
+            check = 1
+        elif check != 0 and not x in splitstring:
+            out.append("")
+            check = 0
+        out[-1] += x
     return out

@@ -44,6 +44,9 @@ class funcfloat(numobject):
             self.funcstr = None
         else:
             self.funcstr = str(funcstr)
+    def copy(self):
+        """Returns A Copy Of The Float Function."""
+        return funcfloat(self.func, self.funcstr)
     def calc(self):
         """Calculates The Float Function."""
         return self.func(None)
@@ -72,25 +75,25 @@ class funcfloat(numobject):
     def __int__(self):
         """Retreives An Integer."""
         return int(self.calc())
-    def __add__(self, other):
+    def __iadd__(self, other):
         """Performs Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
             return self.calc()+other
-    def __div__(self, other):
+    def __idiv__(self, other):
         """Performs Division."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return self.calc()/other
-    def __mul__(self, other):
+    def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return self.calc()*other
-    def __pow__(self, other):
+    def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1.0 or isnull(other):
             return self
@@ -127,12 +130,15 @@ class strfunc(funcfloat):
         if variables == None:
             self.variables = ["x","y"]
         else:
-            self.variables = variables
+            self.variables = variables[:]
         if personals == None:
             self.personals = {}
         else:
-            self.personals = personals
+            self.personals = dict(personals)
         self.e = e
+    def copy(self):
+        """Copies The String Function."""
+        return strfunc(self.funcstr, self.e, self.variables, self.personals)
     def calc(self):
         """Calculates The String."""
         oldvars = self.e.setvars(self.personals)
@@ -163,7 +169,7 @@ class strfunc(funcfloat):
         if self.e.debug:
             self.e.info = " | int"
         return int(self.calc())
-    def __add__(self, other):
+    def __iadd__(self, other):
         """Performs Addition."""
         if other == 0 or isnull(other):
             return self
@@ -171,7 +177,7 @@ class strfunc(funcfloat):
             if self.e.debug:
                 self.e.info = " | add"
             return self.calc()+other
-    def __div__(self, other):
+    def __idiv__(self, other):
         """Performs Division."""
         if other == 1 or isnull(other):
             return self
@@ -179,7 +185,7 @@ class strfunc(funcfloat):
             if self.e.debug:
                 self.e.info = " | div"
             return self.calc()/other
-    def __mul__(self, other):
+    def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1 or isnull(other):
             return self
@@ -187,7 +193,7 @@ class strfunc(funcfloat):
             if self.e.debug:
                 self.e.info = " | mul"
             return self.calc()*other
-    def __pow__(self, other):
+    def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1 or isnull(other):
             return self
@@ -216,8 +222,12 @@ class strfloat(strfunc):
         self.e = e
         if variables == None:
             variables = []
+        else:
+            variables = variables[:]
         if personals == None:
             personals = {}
+        else:
+            personals = dict(personals)
         if check:
             test = self.e.find(funcstr, True, False)
         if check and isinstance(test, strfunc):
@@ -239,8 +249,23 @@ class strcalc(numobject):
     """Allows Strings Inside Evaluation."""
     def __init__(self, calcstr, e):
         """Initializes The Evaluator String."""
-        self.calcstr = str(calcstr).replace("\\n", "\n").replace("\\'", '"')
+        self.calcstr = ""
+        func = False
+        for x in str(calcstr):
+            if func:
+                func = False
+                if x == "'":
+                    x = '"'
+                elif x == "n":
+                    x = "\n"
+            elif x == "\\":
+                func = True
+                x = ""
+            self.calcstr += x
         self.e = e
+    def copy(self):
+        """Returns A Copy Of The Evaluator String."""
+        return strcalc(self.calcstr, self.e)
     def __float__(self):
         """Attempts To Get A Float."""
         return float(self.calcstr)
@@ -252,11 +277,11 @@ class strcalc(numobject):
         return self
     def __repr__(self):
         """Retreives A Representation."""
-        return '"'+self.calcstr+'"'
+        return '"'+self.calcstr.replace("\\","\\\\").replace('"',"\\'").replace("\n","\\n")+'"'
     def __str__(self):
         """Retreives The Evaluator String."""
         return self.calcstr
-    def __add__(self, other):
+    def __iadd__(self, other):
         """Performs Addition."""
         if other != 0 and not isnull(other):
             self.calcstr += self.e.prepare(other, True, False)
@@ -266,12 +291,12 @@ class strcalc(numobject):
         if other != 0 and not isnull(other):
             self.calcstr = self.e.prepare(other, True, False)+self.calcstr
         return self
-    def __div__(self, other):
+    def __idiv__(self, other):
         """Performs Division."""
         if other != 1 and not isnull(other):
             raise ValueError
         return self
-    def __mul__(self, other):
+    def __imul__(self, other):
         """Performs Multiplication."""
         if other != 1 and not isnull(other):
             self.calcstr *= int(other)
@@ -399,7 +424,10 @@ class derivfunc(funcfloat):
         if personals == None:
             self.personals = {}
         else:
-            self.personals = personals
+            self.personals = dict(personals)
+    def copy(self):
+        """Returns A Copy Of The Derivative Function."""
+        return derivfunc(self.funcstr, self.n, self.accuracy, self.scaledown, self.e, self.variables[0], self.personals)
     def calc(self, x=None):
         """Calculates The Derivative Function."""
         items = dict(self.personals)
@@ -431,7 +459,10 @@ class integfunc(derivfunc):
         if personals == None:
             self.personals = {}
         else:
-            self.personals = personals
+            self.personals = dict(personals)
+    def copy(self):
+        """Returns A Copy Of The Integral Function."""
+        return integfunc(self.funcstr, self.accuracy, self.e, self.variables[0], self.personals)
     def call(self, variables):
         """Calls The Integral Function."""
         if variables == None:
@@ -449,6 +480,9 @@ class derivfuncfloat(derivfunc):
         self.n = int(n)
         self.accuracy = float(accuracy)
         self.scaledown = float(scaledown)
+    def copy(self):
+        """Returns A Copy Of The Derivative Float Function."""
+        return integfunc(self.func, self.n, self.accuracy, self.scaledown)
     def calc(self, x=None):
         """Calculates The Derivative Function."""
         if x == None:
@@ -459,6 +493,9 @@ class derivfuncfloat(derivfunc):
 class integfuncfloat(integfunc, derivfuncfloat):
     """Implements An Integral Function Of A Fake Function."""
     def __init__(self, func, accuracy):
-        """Creates The Integral Function."""
+        """Creates The Integral Float Function."""
         self.func = func
         self.accuracy = float(accuracy)
+    def copy(self):
+        """Returns A Copy Of The Integral Function."""
+        return integfuncfloat(self.func, self.accuracy)

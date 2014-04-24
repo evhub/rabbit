@@ -135,7 +135,6 @@ class evaluator(object):
             self.call_roll,
             self.call_paren,
             self.call_method,
-            self.call_coeff,
             self.call_normal
             ]
         self.count = 0
@@ -830,19 +829,22 @@ class evaluator(object):
 
     def call_paren(self, inputstring):
         """Evaluates Parentheses."""
+        inputstring = strlist(switchsplit(inputstring, string.digits+".`"), "``")
         if "`" in inputstring:
+            if self.debug:
+                print(self.recursion*"  "+"(|) "+inputstring) 
             templist = inputstring.split("`")
             inputlist = []
             for x in xrange(0, len(templist)):
                 if x%2 == 1:
                     if "`"+templist[x]+"`" in self.variables:
                         inputlist.append("`"+templist[x]+"`")
-                    else:
+                    elif templist[x]:
                         num = int(self.eval_call(templist[x]))
                         if num < 0:
                             num += self.count
                         inputlist.append("`"+str(num)+"`")
-                elif templist[x] != "":
+                elif templist[x]:
                     inputlist.append(templist[x])
             values = []
             for x in xrange(0, len(inputlist)):
@@ -938,29 +940,6 @@ class evaluator(object):
                 test = test or not madeof(x, string.digits)
             if test:
                 return strfloat(inputstring+"()", self)
-
-    def call_coeff(self, inputstring):
-        """Performs Coefficient Multiplication."""
-        items = []
-        digit = -1
-        for x in inputstring:
-            if x in string.digits+".":
-                if digit != 1:
-                    items.append("")
-                    digit = 1
-                items[-1] += x
-            elif not self.isreserved(x):
-                if digit != 0:
-                    items.append("")
-                    digit = 0
-                items[-1] += x
-            else:
-                break
-        if len(items) > 1:
-            out = 1.0
-            for x in items:
-                out *= self.eval_call(x)
-            return out
 
     def call_normal(self, inputstring):
         """Returns Argument."""
