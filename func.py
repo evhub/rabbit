@@ -37,13 +37,11 @@ def varproc(variables):
 
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
-    def __init__(self, func, funcstr=None):
+    def __init__(self, func, funcstr, e):
         """Constructs The Float Function."""
         self.func = func
-        if funcstr == None:
-            self.funcstr = None
-        else:
-            self.funcstr = str(funcstr)
+        self.funcstr = str(funcstr or "()")
+        self.e = e
     def copy(self):
         """Returns A Copy Of The Float Function."""
         return funcfloat(self.func, self.funcstr)
@@ -59,16 +57,10 @@ class funcfloat(numobject):
             return self.func(variables)
     def __repr__(self):
         """Returns A String Representation."""
-        out = "("
-        if self.funcstr != None:
-            out += self.funcstr
-        return out+")"
+        return "("+self.funcstr+")"
     def __str__(self):
         """Retreives The Function String."""
-        if self.funcstr == None:
-            return "()"
-        else:
-            return self.funcstr
+        return self.funcstr
     def __float__(self):
         """Retreives A Float."""
         return float(self.calc())
@@ -107,26 +99,18 @@ class funcfloat(numobject):
         return other/self.calc()
     def __eq__(self, other):
         """Performs ==."""
-        if self.funcstr != None:
-            try:
-                other.funcstr
-            except AttributeError:
-                return self.funcstr == other
-            else:
-                return self.funcstr == other.funcstr
+        try:
+            other.funcstr
+        except AttributeError:
+            return self.funcstr == other
         else:
-            try:
-                other.func
-            except AttributeError:
-                return self.func == other
-            else:
-                return self.func == other.func
+            return self.funcstr == other.funcstr
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
     def __init__(self, funcstr, e, variables=None, personals=None):
         """Creates A Callable String Function."""
-        self.funcstr = str(funcstr)
+        self.funcstr = str(funcstr or "()")
         if variables == None:
             self.variables = ["x","y"]
         else:
@@ -138,7 +122,7 @@ class strfunc(funcfloat):
         self.e = e
     def copy(self):
         """Copies The String Function."""
-        return strfunc(self.funcstr, self.e, self.variables, self.personals)
+        return strfloat(self.funcstr, self.e, self.variables, self.personals)
     def calc(self):
         """Calculates The String."""
         oldvars = self.e.setvars(self.personals)
@@ -149,16 +133,19 @@ class strfunc(funcfloat):
         """Calls The String Function."""
         variables = varproc(variables)
         if variables == None:
-            return strfloat(self.funcstr, self.e, self.variables, self.personals)
-        items, self.e.overflow = useparams(variables, self.variables)
-        for k in self.personals:
-            if (not k in items) or items[k] == None:
-                items[k] = self.personals[k]
-        oldvars = self.e.setvars(items)
-        self.e.info = " \\>"
-        out = self.calc()
-        self.e.setvars(oldvars)
-        return out
+            return self
+        else:
+            allvars = diagmatrixlist(variables)
+            items, self.e.overflow = useparams(variables, self.variables)
+            items["__"] = allvars
+            for k in self.personals:
+                if (not k in items) or items[k] == None:
+                    items[k] = self.personals[k]
+            oldvars = self.e.setvars(items)
+            self.e.info = " \\>"
+            out = self.calc()
+            self.e.setvars(oldvars)
+            return out
     def __float__(self):
         """Retreives A Float."""
         if self.e.debug:
@@ -241,7 +228,7 @@ class strfloat(strfunc):
                 if y != test:
                     self.personals[x] = y
         else:
-            self.funcstr = str(funcstr)
+            self.funcstr = str(funcstr or "()")
             self.variables = variables
             self.personals = personals
 
@@ -294,20 +281,22 @@ class strcalc(numobject):
     def __idiv__(self, other):
         """Performs Division."""
         if other != 1 and not isnull(other):
-            raise ValueError
+            self.calcstr = self.calcstr[:int(len(self.calcstr)/other)]
         return self
     def __imul__(self, other):
         """Performs Multiplication."""
         if other != 1 and not isnull(other):
-            self.calcstr *= int(other)
+            self.calcstr = self.calcstr*int(other)+self.calcstr[:int(len(self.calcstr)*(other-int(other)))]
         return self
-    def __pow__(self, other):
+    def __ipow__(self, other):
         """Performs Exponentiation."""
         if other != 1 and not isnull(other):
-            raise ValueError
+            self *= len(self)**(other-1.0)
         return self
     def __eq__(self, other):
         """Performs ==."""
+        if isinstance(other, strcalc):
+            other = other.calcstr
         return self.calcstr == other
     def __len__(self):
         """Performs len."""
@@ -316,18 +305,18 @@ class strcalc(numobject):
         """Performs in."""
         return self.e.prepare(other, True, False) in self.calcstr
 
-class usefunc(object):
+class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
-    def __init__(self, dofunc, e, name=None, variables=None, extras=None, overflow=False):
+    def __init__(self, func, funcstr, e, variables=None, extras=None, overflow=False):
         """Creates A Callable Function."""
         self.overflow = bool(overflow)
-        self.dofunc = dofunc
+        self.func = func
         self.e = e
         if variables == None:
             self.variables = ["x"]
         else:
             self.variables = variables
-        self.name = name
+        self.funcstr = str(funcstr or "()")
         if extras == None:
             self.extras = {}
         else:
@@ -335,10 +324,7 @@ class usefunc(object):
     def call(self, params):
         """Calls The Function."""
         if params == None:
-            if self.name == None:
-                return matrix(0)
-            else:
-                return strfloat(self.name+":"+strlist(self.variables,":"), self.e, self.variables)
+            return strfloat(self.funcstr+":"+strlist(self.variables,":"), self.e, self.variables)
         elif len(params) < len(self.variables):
             for x in xrange(len(params), len(self.variables)):
                 if self.variables[x] in self.e.variables:
@@ -348,23 +334,20 @@ class usefunc(object):
         elif not self.overflow and len(params) > len(self.variables):
             self.e.overflow = params[len(self.variables):]
             params = params[:len(self.variables)]
-        return self.dofunc(*params, **self.extras)
+        return self.func(*params, **self.extras)
 
-class unifunc(object):
+class unifunc(funcfloat):
     """Universalizes Function Calls."""
-    def __init__(self, func, e, name=None):
+    def __init__(self, func, funcstr, e):
         """Constructs The Universalizer."""
-        self.name = name
+        self.funcstr = str(funcstr or "()")
         self.store = []
         self.precall = func
         self.e = e
     def call(self, args):
         """Performs A Universalized Function Call."""
         if args == None:
-            if self.name == None:
-                return matrix(0)
-            else:
-                return strfloat(self.name+":x", self.e, ["x"])
+            return strfloat(self.funcstr+":x", self.e, ["x"])
         elif islist(args):
             x = args[0]
             if len(args) > 1:
@@ -379,29 +362,26 @@ class unifunc(object):
                 self.store.append(self.precall())
         return self.store[x]
 
-class makefunc(object):
+class makefunc(funcfloat):
     """Creates A Normal Single-Variable Evaluator Function."""
-    def __init__(self, dofunc, e, name=None):
+    def __init__(self, func, funcstr, e):
         """Initializes The Evaluator Function."""
-        self.dofunc = dofunc
+        self.funcstr = str(funcstr or "()")
+        self.func = func
         self.e = e
-        self.name = name
     def call(variables):
         """Calls The Evaluator Function."""
         variables = varproc(variables)
         if variables == None:
-            if self.name == None:
-                return matrix(0)
-            else:
-                return strfloat(self.name+":x", self.e, ["x"])
+            return strfloat(self.funcstr+":x", self.e, ["x"])
         elif len(variables) == 0:
             return matrix(0)
         elif len(variables) == 1:
-            return self.dofunc(variables[0])
+            return self.func(variables[0])
         else:
             out = []
             for x in variables:
-                out.append(self.dofunc(x))
+                out.append(self.func(x))
             return diagmatrixlist(out)
 
 def collapse(item):
@@ -435,10 +415,12 @@ class derivfunc(funcfloat):
             return self.call([])
         else:
             items[self.variables[0]] = float(x)
-        oldvars = self.e.setvars(items)
-        out = self.e.calc(self.funcstr)
-        self.e.setvars(oldvars)
-        return out
+            items["__"] = matrix(1,1, x)
+            oldvars = self.e.setvars(items)
+            self.e.info = " \\>"
+            out = self.e.calc(self.funcstr)
+            self.e.setvars(oldvars)
+            return out
     def call(self, variables):
         """Calls The Derivative Function."""
         if variables == None:
@@ -474,12 +456,13 @@ class integfunc(derivfunc):
 
 class derivfuncfloat(derivfunc):
     """Implements A Derivative Function Of A Fake Function."""
-    def __init__(self, func, n, accuracy, scaledown):
+    def __init__(self, func, n, accuracy, scaledown, e):
         """Creates The Derivative Function."""
         self.func = func
         self.n = int(n)
         self.accuracy = float(accuracy)
         self.scaledown = float(scaledown)
+        self.e = e
     def copy(self):
         """Returns A Copy Of The Derivative Float Function."""
         return integfunc(self.func, self.n, self.accuracy, self.scaledown)
@@ -492,10 +475,11 @@ class derivfuncfloat(derivfunc):
 
 class integfuncfloat(integfunc, derivfuncfloat):
     """Implements An Integral Function Of A Fake Function."""
-    def __init__(self, func, accuracy):
+    def __init__(self, func, accuracy, e):
         """Creates The Integral Float Function."""
         self.func = func
         self.accuracy = float(accuracy)
+        self.e = e
     def copy(self):
         """Returns A Copy Of The Integral Function."""
         return integfuncfloat(self.func, self.accuracy)
