@@ -117,7 +117,8 @@ class evaluator(object):
             "true":1.0,
             "false":0.0,
             "__":matrix(0),
-            "_x":0.0,
+            "''":matrix(0),
+            "'x":0.0,
             "Dx":"D"
             }
         if variables != None:
@@ -631,7 +632,7 @@ class evaluator(object):
                 self.processor.adderror("VariableError", "Unable to process "+str(value))
                 return matrix(0)
 
-    def call_var(self, inputstring, varname="_"):
+    def call_var(self, inputstring, varname="'"):
         """Checks If Variable."""
         if inputstring in self.variables:
             if varname+inputstring in self.variables:

@@ -37,6 +37,8 @@ def varproc(variables):
 
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
+    allargs = "__"
+
     def __init__(self, func, e, funcstr="func"):
         """Constructs The Float Function."""
         self.funcstr = str(funcstr)
@@ -72,43 +74,43 @@ class funcfloat(numobject):
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.funcstr+"(__))+("+self.e.prepare(other, False, True)+")", self.e, ["__"], {self.funcstr:self})
+            return strfloat("("+self.funcstr+"("+self.allargs+"))+("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
     def __idiv__(self, other):
         """Performs Division."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.funcstr+"(__))/("+self.e.prepare(other, False, True)+")", self.e, ["__"], {self.funcstr:self})
+            return strfloat("("+self.funcstr+"("+self.allargs+"))/("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
     def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.funcstr+"(__))*("+self.e.prepare(other, False, True)+")", self.e, ["__"], {self.funcstr:self})
+            return strfloat("("+self.funcstr+"("+self.allargs+"))*("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.funcstr+"(__))^("+self.e.prepare(other, False, True)+")", self.e, ["__"], {self.funcstr:self})
+            return strfloat("("+self.funcstr+"("+self.allargs+"))^("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")+("+self.funcstr+"(__))", self.e, ["__"], {self.funcstr:self})
+            return strfloat("("+self.e.prepare(other, False, True)+")+("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")^("+self.funcstr+"(__))", self.e, ["__"], {self.funcstr:self})
+            return strfloat("("+self.e.prepare(other, False, True)+")^("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         if isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")/("+self.funcstr+"(__))", self.e, ["__"], {self.funcstr:self})
+            return strfloat("("+self.e.prepare(other, False, True)+")/("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
     def __eq__(self, other):
         """Performs ==."""
         try:
@@ -129,8 +131,8 @@ class strfunc(funcfloat):
             self.overflow = False
         else:
             self.variables = variables[:]
-            if "__" in self.variables:
-                self.variables.remove("__")
+            if self.allargs in self.variables:
+                self.variables.remove(self.allargs)
                 self.overflow = False
             else:
                 self.overflow = True
@@ -159,7 +161,7 @@ class strfunc(funcfloat):
                 items, self.e.overflow = useparams(variables, self.variables)
             else:
                 items, trash = useparams(variables, self.variables)
-            items["__"] = allvars
+            items[self.allargs] = allvars
             for k in self.personals:
                 if (not k in items) or items[k] == None:
                     items[k] = self.personals[k]
@@ -234,8 +236,8 @@ class strfloat(strfunc):
             overflow = False
         else:
             variables = variables[:]
-            if "__" in variables:
-                variables.remove("__")
+            if self.allargs in variables:
+                variables.remove(self.allargs)
                 overflow = False
             else:
                 overflow = True
@@ -456,7 +458,7 @@ class derivfunc(funcfloat):
             return self.call([])
         else:
             items[self.variables[0]] = float(x)
-            items["__"] = matrix(1,1, x)
+            items[self.allargs] = matrix(1,1, x)
             oldvars = self.e.setvars(items)
             self.e.info = " \\>"
             out = self.e.calc(self.floatstr)
