@@ -37,14 +37,14 @@ def varproc(variables):
 
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
-    def __init__(self, func, funcstr, e):
+    def __init__(self, func, e, funcstr="func"):
         """Constructs The Float Function."""
+        self.funcstr = str(funcstr)
         self.func = func
-        self.funcstr = str(funcstr or "()")
         self.e = e
     def copy(self):
         """Returns A Copy Of The Float Function."""
-        return funcfloat(self.func, self.funcstr)
+        return funcfloat(self.func, self.e, self.funcstr)
     def calc(self):
         """Calculates The Float Function."""
         return self.func(None)
@@ -72,31 +72,43 @@ class funcfloat(numobject):
         if other == 0.0 or isnull(other):
             return self
         else:
-            return self.calc()+other
+            return strfloat("("+self.funcstr+"(__))+("+self.e.prepare(other, False, True)+")", self.e, ["__"], {self.funcstr:self})
     def __idiv__(self, other):
         """Performs Division."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return self.calc()/other
+            return strfloat("("+self.funcstr+"(__))/("+self.e.prepare(other, False, True)+")", self.e, ["__"], {self.funcstr:self})
     def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return self.calc()*other
+            return strfloat("("+self.funcstr+"(__))*("+self.e.prepare(other, False, True)+")", self.e, ["__"], {self.funcstr:self})
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return self.calc()*other
+            return strfloat("("+self.funcstr+"(__))^("+self.e.prepare(other, False, True)+")", self.e, ["__"], {self.funcstr:self})
+    def __radd__(self, other):
+        """Performs Reverse Addition."""
+        if other == 0.0 or isnull(other):
+            return self
+        else:
+            return strfloat("("+self.e.prepare(other, False, True)+")+("+self.funcstr+"(__))", self.e, ["__"], {self.funcstr:self})
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
-        return other**self.calc()
+        if isnull(other):
+            return self
+        else:
+            return strfloat("("+self.e.prepare(other, False, True)+")^("+self.funcstr+"(__))", self.e, ["__"], {self.funcstr:self})
     def __rdiv__(self, other):
         """Performs Reverse Division."""
-        return other/self.calc()
+        if isnull(other):
+            return self
+        else:
+            return strfloat("("+self.e.prepare(other, False, True)+")/("+self.funcstr+"(__))", self.e, ["__"], {self.funcstr:self})
     def __eq__(self, other):
         """Performs ==."""
         try:
@@ -108,13 +120,20 @@ class funcfloat(numobject):
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
-    def __init__(self, funcstr, e, variables=None, personals=None):
+    def __init__(self, funcstr, e, variables=None, personals=None, name="func"):
         """Creates A Callable String Function."""
-        self.funcstr = str(funcstr or "()")
-        if variables == None:
-            self.variables = ["x","y"]
+        self.funcstr = str(funcstr or "func")
+        self.name = str(name)
+        if not variables:
+            self.variables = ["x", "y"]
+            self.overflow = False
         else:
             self.variables = variables[:]
+            if "__" in self.variables:
+                self.variables.remove("__")
+                self.overflow = False
+            else:
+                self.overflow = True
         if personals == None:
             self.personals = {}
         else:
@@ -136,7 +155,10 @@ class strfunc(funcfloat):
             return self
         else:
             allvars = diagmatrixlist(variables)
-            items, self.e.overflow = useparams(variables, self.variables)
+            if self.overflow:
+                items, self.e.overflow = useparams(variables, self.variables)
+            else:
+                items, trash = useparams(variables, self.variables)
             items["__"] = allvars
             for k in self.personals:
                 if (not k in items) or items[k] == None:
@@ -158,67 +180,75 @@ class strfunc(funcfloat):
         return int(self.calc())
     def __iadd__(self, other):
         """Performs Addition."""
-        if other == 0 or isnull(other):
+        if other == 0.0 or isnull(other):
             return self
         else:
-            if self.e.debug:
-                self.e.info = " | add"
-            return self.calc()+other
+            return strfloat("("+self.name+"("+strlist(self.variables,",")+"))+("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
     def __idiv__(self, other):
         """Performs Division."""
-        if other == 1 or isnull(other):
+        if other == 1.0 or isnull(other):
             return self
         else:
-            if self.e.debug:
-                self.e.info = " | div"
-            return self.calc()/other
+            return strfloat("("+self.name+"("+strlist(self.variables,",")+"))/("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
     def __imul__(self, other):
         """Performs Multiplication."""
-        if other == 1 or isnull(other):
+        if other == 1.0 or isnull(other):
             return self
         else:
-            if self.e.debug:
-                self.e.info = " | mul"
-            return self.calc()*other
+            return strfloat("("+self.name+"("+strlist(self.variables,",")+"))*("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
     def __ipow__(self, other):
         """Performs Exponentiation."""
-        if other == 1 or isnull(other):
+        if other == 1.0 or isnull(other):
             return self
         else:
-            if self.e.debug:
-                self.e.info = " | pow"
-            return self.calc()*other
+            return strfloat("("+self.name+"("+strlist(self.variables,",")+"))^("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+    def __radd__(self, other):
+        """Performs Reverse Addition."""
+        if other == 0.0 or isnull(other):
+            return self
+        else:
+            return strfloat("("+self.e.prepare(other, False, True)+")+("+self.name+"("+strlist(self.variables,",")+"))", self.e, self.variables, {self.name:self})
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
-        if self.e.debug:
-            self.e.info = " | rpow"
-        return other**self.calc()
+        if isnull(other):
+            return self
+        else:
+            return strfloat("("+self.e.prepare(other, False, True)+")^("+self.name+"("+strlist(self.variables,",")+"))", self.e, self.variables, {self.name:self})
     def __rdiv__(self, other):
         """Performs Reverse Division."""
-        if self.e.debug:
-            self.e.info = " | rdiv"
-        return other/self.calc()
+        if isnull(other):
+            return self
+        else:
+            return strfloat("("+self.e.prepare(other, False, True)+")/("+self.name+"("+strlist(self.variables,",")+"))", self.e, self.variables, {self.name:self})
     def find(self):
         """Simplifies The Function String."""
         self.funcstr = self.e.find(self.funcstr, False, False)
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
-    def __init__(self, funcstr, e, variables=None, personals=None, check=True):
+    def __init__(self, funcstr, e, variables=None, personals=None, check=True, name="func"):
         """Initializes The String Float."""
-        self.e = e
-        if variables == None:
-            variables = []
+        self.name = str(name)
+        if not variables:
+            variables = ["x", "y"]
+            overflow = False
         else:
             variables = variables[:]
+            if "__" in variables:
+                variables.remove("__")
+                overflow = False
+            else:
+                overflow = True
         if personals == None:
             personals = {}
         else:
             personals = dict(personals)
+        self.e = e
         if check:
             test = self.e.find(funcstr, True, False)
         if check and isinstance(test, strfunc):
             self.funcstr = test.funcstr
+            self.overflow = overflow and test.overflow
             self.variables = variables
             for x in test.variables:
                 if not x in self.variables:
@@ -228,7 +258,8 @@ class strfloat(strfunc):
                 if y != test:
                     self.personals[x] = y
         else:
-            self.funcstr = str(funcstr or "()")
+            self.funcstr = str(funcstr or "func")
+            self.overflow = overflow
             self.variables = variables
             self.personals = personals
 
@@ -307,20 +338,23 @@ class strcalc(numobject):
 
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
-    def __init__(self, func, funcstr, e, variables=None, extras=None, overflow=False):
+    def __init__(self, func, e, funcstr="func", variables=None, extras=None, overflow=False):
         """Creates A Callable Function."""
         self.overflow = bool(overflow)
-        self.func = func
-        self.e = e
+        self.funcstr = str(funcstr)
         if variables == None:
             self.variables = ["x"]
         else:
             self.variables = variables
-        self.funcstr = str(funcstr or "()")
         if extras == None:
             self.extras = {}
         else:
             self.extras = dict(extras)
+        self.func = func
+        self.e = e
+    def copy(self):
+        """Copies The Function."""
+        return usefunc(self.func, self.e, self.funcstr, self.variables, self.extras, self.overflow)
     def call(self, params):
         """Calls The Function."""
         if params == None:
@@ -338,12 +372,15 @@ class usefunc(funcfloat):
 
 class unifunc(funcfloat):
     """Universalizes Function Calls."""
-    def __init__(self, func, funcstr, e):
+    def __init__(self, func, e, funcstr="func"):
         """Constructs The Universalizer."""
-        self.funcstr = str(funcstr or "()")
+        self.funcstr = str(funcstr)
         self.store = []
         self.precall = func
         self.e = e
+    def copy(self):
+        """Copies The Universalizer Function."""
+        return unifunc(self.func, self.e, self.funcstr)
     def call(self, args):
         """Performs A Universalized Function Call."""
         if args == None:
@@ -364,11 +401,14 @@ class unifunc(funcfloat):
 
 class makefunc(funcfloat):
     """Creates A Normal Single-Variable Evaluator Function."""
-    def __init__(self, func, funcstr, e):
+    def __init__(self, func, e, funcstr="func"):
         """Initializes The Evaluator Function."""
-        self.funcstr = str(funcstr or "()")
+        self.funcstr = str(funcstr)
         self.func = func
         self.e = e
+    def copy(self):
+        """Copies The Evaluator Function."""
+        return makefunc(self.func, self.e, self.funcstr)
     def call(variables):
         """Calls The Evaluator Function."""
         variables = varproc(variables)
@@ -393,10 +433,10 @@ def collapse(item):
 
 class derivfunc(funcfloat):
     """Implements A Derivative Function."""
-    def __init__(self, funcstr, n, accuracy, scaledown, e, varname="x", personals=None):
+    def __init__(self, funcstr, n, accuracy, scaledown, e, varname="x", personals=None, name="func"):
         """Creates The Derivative Function."""
-        self.e = e
-        self.funcstr = funcstr
+        self.funcstr = str(name)
+        self.floatstr = str(funcstr)
         self.n = int(n)
         self.accuracy = float(accuracy)
         self.scaledown = float(scaledown)
@@ -405,9 +445,10 @@ class derivfunc(funcfloat):
             self.personals = {}
         else:
             self.personals = dict(personals)
+        self.e = e
     def copy(self):
         """Returns A Copy Of The Derivative Function."""
-        return derivfunc(self.funcstr, self.n, self.accuracy, self.scaledown, self.e, self.variables[0], self.personals)
+        return derivfunc(self.floatstr, self.n, self.accuracy, self.scaledown, self.e, self.variables[0], self.personals, self.funcstr)
     def calc(self, x=None):
         """Calculates The Derivative Function."""
         items = dict(self.personals)
@@ -418,7 +459,7 @@ class derivfunc(funcfloat):
             items["__"] = matrix(1,1, x)
             oldvars = self.e.setvars(items)
             self.e.info = " \\>"
-            out = self.e.calc(self.funcstr)
+            out = self.e.calc(self.floatstr)
             self.e.setvars(oldvars)
             return out
     def call(self, variables):
@@ -428,23 +469,25 @@ class derivfunc(funcfloat):
         elif len(variables) == 0:
             return matrix(0)
         else:
+            self.e.overflow = variables[1:]
             return deriv(self.calc, float(variables[0]), self.n, self.accuracy, self.scaledown)
 
 class integfunc(derivfunc):
     """Implements An Integral Function."""
-    def __init__(self, funcstr, accuracy, e, varname="x", personals=None):
+    def __init__(self, funcstr, accuracy, e, varname="x", personals=None, name="func"):
         """Creates The Integral Function."""
-        self.e = e
-        self.funcstr = funcstr
+        self.funcstr = str(name)
+        self.floatstr = str(funcstr)
         self.accuracy = float(accuracy)
         self.variables = [varname]
         if personals == None:
             self.personals = {}
         else:
             self.personals = dict(personals)
+        self.e = e
     def copy(self):
         """Returns A Copy Of The Integral Function."""
-        return integfunc(self.funcstr, self.accuracy, self.e, self.variables[0], self.personals)
+        return integfunc(self.floatstr, self.accuracy, self.e, self.variables[0], self.personals, self.funcstr)
     def call(self, variables):
         """Calls The Integral Function."""
         if variables == None:
@@ -452,11 +495,12 @@ class integfunc(derivfunc):
         elif len(variables) < 2:
             return matrix(0)
         else:
+            self.e.overflow = variables[2:]
             return defint(self.calc, float(variables[0]), float(variables[1]), self.accuracy)
 
 class derivfuncfloat(derivfunc):
     """Implements A Derivative Function Of A Fake Function."""
-    def __init__(self, func, n, accuracy, scaledown, e):
+    def __init__(self, func, n, accuracy, scaledown, e, name="func"):
         """Creates The Derivative Function."""
         self.func = func
         self.n = int(n)
@@ -465,7 +509,7 @@ class derivfuncfloat(derivfunc):
         self.e = e
     def copy(self):
         """Returns A Copy Of The Derivative Float Function."""
-        return integfunc(self.func, self.n, self.accuracy, self.scaledown)
+        return integfunc(self.func, self.n, self.accuracy, self.scaledown, self.e)
     def calc(self, x=None):
         """Calculates The Derivative Function."""
         if x == None:
@@ -475,11 +519,11 @@ class derivfuncfloat(derivfunc):
 
 class integfuncfloat(integfunc, derivfuncfloat):
     """Implements An Integral Function Of A Fake Function."""
-    def __init__(self, func, accuracy, e):
+    def __init__(self, func, accuracy, e, name="func"):
         """Creates The Integral Float Function."""
         self.func = func
         self.accuracy = float(accuracy)
         self.e = e
     def copy(self):
         """Returns A Copy Of The Integral Function."""
-        return integfuncfloat(self.func, self.accuracy)
+        return integfuncfloat(self.func, self.accuracy, self.e)

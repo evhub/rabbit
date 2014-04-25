@@ -189,11 +189,11 @@ def strlist(inputlist, delimeter=" ", converter=str):
     else:
         return outstring[:-len(delimeter)]
 
-def strdict(inputdict, seperator=":", delimeter=" "):
+def strdict(inputdict, seperator=":", delimeter=" ", termconverter=str, keyconverter=str):
     """Formats A Dictionary Into A String."""
     outstring = ""
     for x in inputdict:
-        outstring += str(x) + seperator + str(inputdict[x]) + delimeter
+        outstring += keyconverter(x) + seperator + termconverter(inputdict[x]) + delimeter
     return outstring[:-1]
 
 def dictdisplay(inputdict):

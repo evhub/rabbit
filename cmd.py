@@ -426,9 +426,9 @@ Import Commands:
                         except AttributeError:
                             return impclass()
                         else:
-                            return unifunc(impclass().unicall, "()", self.e)
+                            return unifunc(impclass().unicall, self.e)
                     else:
-                        return usefunc(impclass().precall, "()", self.e)
+                        return usefunc(impclass().precall, self.e)
                 else:
                     return impclass()
 
