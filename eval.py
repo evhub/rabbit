@@ -107,7 +107,7 @@ class evaluator(object):
             "chisqP":usefunc(chisqP, self, "chisqP", ["x", "df"], {"e":self}),
             "gamma":usefunc(gamma, self, "gamma", ["x"]),
             "gcd":usefunc(gcd, self, "gcd", ["x", "y"]),
-            "lcm":usefunc(lcm, self, "lcm", ["x", "y", "maxtries"]),
+            "lcm":usefunc(lcm, self, "lcm", ["x", "y"]),
             "perm":usefunc(perm, self, "perm", ["n", "k"]),
             "comb":usefunc(comb, self, "comb", ["n", "k"]),
             "i":complex(0.0, 1.0),

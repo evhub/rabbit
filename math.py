@@ -27,23 +27,17 @@ import math
 
 def gcd(a, b):
     """Calculates The Greatest Common Denominator Of Two Numbers."""
-    if a == 0:
+    if not a:
         return b
     else:
         return gcd(b%a, a)
 
-def lcm(a, b, maxtries=float("inf")):
+def lcm(a, b):
     """Calculates The Least Common Multiple Of Two Numbers."""
-    xa = a
-    xb = b
-    x = 0
-    while xa != xb and x < maxtries:
-        if xa < xb:
-            xa += a
-        elif xb < xa:
-            xb += b
-        x += 1
-    return xa
+    if not (a or b):
+        return 0
+    else:
+        return abs(a*b)/gcd(a,b)
 
 def isqrt(inputnum):
     """Performs sqrt In The Complex Plane."""
