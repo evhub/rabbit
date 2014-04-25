@@ -228,7 +228,7 @@ class evaluator(object):
             else:
                 if item.n != 1:
                     out += ":"+str(item.n)
-        elif bottom and isinstance(item, (strfunc, derivfunc)):
+        elif bottom and isinstance(item, strfunc):
             out = ""
             if isinstance(item, integfunc):
                 out += "S:"
@@ -244,10 +244,7 @@ class evaluator(object):
                     out += str(x)+":("+self.prepare(y, False, bottom)+"),"
                 out = out[:-1]+")"
             out += "\\"
-            if isinstance(item, derivfunc):
-                test = self.prepare(item.floatstr, False, bottom)
-            else:
-                test = self.prepare(item.funcstr, False, bottom)
+            test = self.prepare(item.funcstr, False, bottom)
             if madeof(test, string.digits) or not self.isreserved(test):
                 out += test
             else:
