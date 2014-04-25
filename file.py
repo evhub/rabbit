@@ -64,7 +64,7 @@ def runfile(filename, currentos=None):
         currentos = getos()
     else:
         currentos = str(currentos)
-    if currentos == "win":
+    if currentos.startswith("win"):
         os.startfile(str(filename))
     else:
         newfilename = ""

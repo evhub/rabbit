@@ -36,7 +36,7 @@ def namestr(obj):
     if "function" in typestr(obj):
         return str(obj).split(" ")[1]
     elif "method" in typestr(obj):
-        return str(obj).split(" ")[2].replace(">","").split(".")[-1]
+        return str(obj).split(" ")[2].split(".")[-1].replace(">","")
     else:
         return str(obj)
 

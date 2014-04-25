@@ -18,7 +18,7 @@
 
 from __future__ import absolute_import, print_function
 
-from .console import *
+from .gui import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)

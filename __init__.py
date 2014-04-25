@@ -51,11 +51,11 @@ File List:
     matrix (format, rand) : Utilities for using mathematical matrices.
     crypto (format, rand) : Cryptographic utilities.
 
-    console (file) : Utilities for creating and managing basic windows.
+    gui (file) : Utilities for creating and managing basic windows.
     func (matrix) : Utilities for managing functions as mathematical objects.
     data (matrix, stats) : Utilities for managing statistical data.
 
-    app (console) : Utilities for creating graphical applications.
+    app (gui) : Utilities for creating graphical applications.
     eval (data, func, fraction) : Utilities for implementing the Rabbit language.
 
     test (app) : A Python interpreter for testing purposes.

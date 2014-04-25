@@ -73,47 +73,16 @@ def scan(variables=None, lenfunc=len):
 
 def getos(findos=None):
     """Determines The Current Operating System."""
-    maclist = ["posix", "os2", "mac"]
-    otherlist = ["ce", "riscos", "java"]
-    osname = os.name
     if findos == None:
-        if osname == "nt":
-            return "win"
-        elif osname in maclist:
-            return "mac"
-        elif osname in otherlist:
-            return "other"
+        osname = os.name
+        if osname in ["nt", "win"]:
+            return "win."+osname
+        elif osname in ["posix", "os2", "mac"]:
+            return "mac."+osname
         else:
-            return "unknown"
-    else:
-        if "win" in findos:
-            if osname == "nt":
-                return osname
-            else:
-                return False
-        elif "mac" in findos:
-            if osname in maclist:
-                return osname
-            else:
-                return False
-        elif "other" in findos:
-            if osname in otherlist:
-                return osname
-            else:
-                return False
-        elif "unknown" in findos:
-            if osname == "nt":
-                return False
-            elif osname in maclist:
-                return False
-            elif osname in otherlist:
-                return False
-            else:
-                return osname
-        elif osname in findos:
             return osname
-        else:
-            return False
+    else:
+        return getos().startswith(str(findos))
 
 class timer(object):
     """An Interfacing Class For Clock Time."""
@@ -124,15 +93,15 @@ class timer(object):
         """Resets The Timer."""
         self.start = time.clock()
     def get(self):
-        """Return The Current Time Passed."""
+        """Gets The Current Time Passed."""
         return time.clock()-self.start
     def lap(self):
-        """Returns The Current Time Passed And Resets The Timer."""
+        """Gets The Current Time Passed And Resets The Timer."""
         temptime = time.clock()
         laptime = temptime-self.start
         self.start = temptime
         return laptime
 
 def thetime():
-    """Determines The Current Time."""
+    """Finds The Current Time."""
     return time.ctime().split(" ")
