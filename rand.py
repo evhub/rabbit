@@ -113,12 +113,13 @@ class random(object):
             self.digitstore = self.digitstore[1:]
             newdigits -= 1
         while len(digitstring) < digits:
+            maxnum = int(str(self.maxget)[0])*10**(len(str(self.maxget))-1)
             test = float("inf")
-            while test > int(str(self.maxget)[0])*10.0**len(str(self.maxget)):
+            while test >= maxnum:
                 test = self.get()
             test = str(test)
             if len(test) >= len(str(self.maxget)):
-                test = test[1:]
+                test = test[len(test)-len(str(self.maxget)):]
             while len(test) < len(str(self.maxget))-1:
                 test = "0"+test
             digitstring += test
@@ -151,11 +152,15 @@ class random(object):
     def chooseint(self, rangestop):
         """Chooses A Random Integer From The Range [0, rangestop)."""
         tests = int(math.ceil(rangestop/float(self.maxget)))
-        endpoint = float(rangestop)*self.maxget/rangestop
+        maxnum = float(rangestop)*self.maxget/rangestop
         test = float("inf")
-        while test > endpoint:
+        while test > maxnum:
             test = self.get(tests)
         return test % rangestop
+
+    def choosefloatint(self, rangestop):
+        """Chooses A Random Float From The Integer Range [0, rangestop]."""
+        return self.chooseint(rangestop)+self.getfloat()
 
     def chooserange(self, rangestart, rangestop):
         """Chooses A Random Integer From The Range [rangestart, rangestop)."""
@@ -164,6 +169,10 @@ class random(object):
     def choosefloatrange(self, rangestart, rangestop):
         """Chooses A Random Float From The Range [rangestart, rangestop]."""
         return self.choosefloat(rangestop-rangestart)+rangestart
+
+    def choosefloatintrange(self, rangestart, rangestop):
+        """Chooses A Random Float From The Integer Range [rangestart, rangestop]."""
+        return self.choosefloatint(rangestop-rangestart)+rangestart
 
     def choose(self, inputlist):
         """Chooses A Random Item From A List."""
