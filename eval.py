@@ -116,10 +116,10 @@ class evaluator(object):
             "none":matrix(0),
             "true":1.0,
             "false":0.0,
-            "__":matrix(0),
             "''":matrix(0),
             "'x":0.0,
-            "Dx":"D"
+            "Dx":"D",
+            funcfloat.allargs:matrix(0)
             }
         if variables != None:
             for k,v in variables.items():

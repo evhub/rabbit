@@ -124,7 +124,7 @@ class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
     def __init__(self, funcstr, e, variables=None, personals=None, name="func"):
         """Creates A Callable String Function."""
-        self.funcstr = str(funcstr or "func")
+        self.funcstr = str(funcstr)
         self.name = str(name)
         if not variables:
             self.variables = ["x", "y"]
@@ -260,7 +260,7 @@ class strfloat(strfunc):
                 if y != test:
                     self.personals[x] = y
         else:
-            self.funcstr = str(funcstr or "func")
+            self.funcstr = str(funcstr)
             self.overflow = overflow
             self.variables = variables
             self.personals = personals
