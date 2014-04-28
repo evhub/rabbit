@@ -215,19 +215,6 @@ class evaluator(object):
                 out = out[:-2]
             elif out.endswith("L"):
                 out = out[:-1]
-        elif bottom and isinstance(item, funcfloat) and isinstance(item, derivbase):
-            if isinstance(item, integbase):
-                out = "S:"
-            else:
-                out = "D:"
-            out += self.prepare(item.func, False, bottom)
-            try:
-                item.n
-            except AttributeError:
-                pass
-            else:
-                if item.n != 1:
-                    out += ":"+str(item.n)
         elif bottom and isinstance(item, strfunc):
             out = ""
             if isinstance(item, integbase):
@@ -257,7 +244,21 @@ class evaluator(object):
                 if item.n != 1:
                     out += ":"+str(item.n)
         elif bottom and isinstance(item, funcfloat):
-            out = "\\"+str(item)
+            if isinstance(item, derivbase):
+                if isinstance(item, integbase):
+                    out = "S:"
+                else:
+                    out = "D:"
+                out += self.prepare(item.func, False, bottom)
+                try:
+                    item.n
+                except AttributeError:
+                    pass
+                else:
+                    if item.n != 1:
+                        out += ":"+str(item.n)
+            else:
+                out = "\\"+str(item)
         elif bottom and isinstance(item, strcalc):
             out = repr(item)
         elif istext(item) or isinstance(item, (funcfloat, strcalc)) or getcheck(item) >= 1:
