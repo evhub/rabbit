@@ -111,6 +111,12 @@ class funcfloat(numobject):
             return self
         else:
             return strfloat("("+self.e.prepare(other, False, True)+")/("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+    def __rmul__(self, other):
+        """Performs Reverse Multiplication."""
+        if other == 1.0 or isnull(other):
+            return self
+        else:
+            return strfloat("("+self.e.prepare(other, False, True)+")*("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
     def __eq__(self, other):
         """Performs ==."""
         try:
@@ -181,43 +187,49 @@ class strfunc(funcfloat):
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.name+"("+strlist(self.variables,",")+"))+("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+            return strfloat("("+self.name+":"+strlist(self.variables,":")+")+("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
     def __idiv__(self, other):
         """Performs Division."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.name+"("+strlist(self.variables,",")+"))/("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+            return strfloat("("+self.name+":"+strlist(self.variables,":")+")/("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
     def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.name+"("+strlist(self.variables,",")+"))*("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+            return strfloat("("+self.name+":"+strlist(self.variables,":")+")*("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.name+"("+strlist(self.variables,",")+"))^("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+            return strfloat("("+self.name+":"+strlist(self.variables,":")+")^("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")+("+self.name+"("+strlist(self.variables,",")+"))", self.e, self.variables, {self.name:self})
+            return strfloat("("+self.e.prepare(other, False, True)+")+("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")^("+self.name+"("+strlist(self.variables,",")+"))", self.e, self.variables, {self.name:self})
+            return strfloat("("+self.e.prepare(other, False, True)+")^("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         if isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")/("+self.name+"("+strlist(self.variables,",")+"))", self.e, self.variables, {self.name:self})
+            return strfloat("("+self.e.prepare(other, False, True)+")/("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+    def __rmul__(self, other):
+        """Performs Reverse Multiplication."""
+        if other == 1.0 or isnull(other):
+            return self
+        else:
+            return strfloat("("+self.e.prepare(other, False, True)+")*("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
     def find(self):
         """Simplifies The Function String."""
         self.funcstr = self.e.find(self.funcstr, False, False)

@@ -919,7 +919,7 @@ class evaluator(object):
                 temp = strlist(values," < ",converter=lambda x: self.prepare(x, False, True, True))
                 print(self.recursion*"  "+"(>) "+temp)
                 self.recursion += 1
-            value = values[0]
+            value = (len(values) != 0 and values[0]) or matrix(0)
             for x in xrange(1, len(values)):
                 values[x] = values[x]
                 if isnum(value) or (iseval(value) and not hascall(value)):
