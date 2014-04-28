@@ -132,13 +132,14 @@ def appbind(app):
     app.text.bind("<Tab>", lambda event: app.drop())
     app.text.bind("<Shift-Tab>", lambda event: app.top())
 
-def boxbind(box, handler):
+def boxbind(box, handler=None):
     """Makes The Conventional Box Bindings."""
     box.main.bind("<Up>", lambda event: box.back())
     box.main.bind("<Down>", lambda event: box.forth())
     box.main.bind("<Control-z>", lambda event: box.main.delete(0, "end"))
     box.main.bind("<Control-f>", lambda event: box.clean())
-    box.main.bind("<Return>", handler)
+    if handler != None:
+        box.main.bind("<Return>", handler)
 
 def popup(which, message, title=None):
     """Displays A Pop-Up Message."""

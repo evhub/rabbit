@@ -927,6 +927,8 @@ class evaluator(object):
                 temp = strlist(values," < ",converter=lambda x: self.prepare(x, False, True, True))
                 print(self.recursion*"  "+"(>) "+temp)
                 self.recursion += 1
+            while len(values) > 0 and isnull(values[0]):
+                values.pop(0)
             value = (len(values) != 0 and values[0]) or matrix(0)
             for x in xrange(1, len(values)):
                 values[x] = values[x]

@@ -155,15 +155,17 @@ Import Commands:
             self.cmd_debug,
             self.cmd_errors,
             self.cmd_clear,
+            self.cmd_clean,
             self.cmd_while,
             self.cmd_for,
             self.cmd_if,
             self.cmd_get,
             self.cmd_run,
             self.cmd_save,
-            self.cmd_set,
             self.cmd_do,
             self.cmd_show,
+            self.cmd_del,
+            self.cmd_set,
             self.cmd_normal
             ]
         self.set_cmds = [
@@ -282,6 +284,17 @@ Import Commands:
             self.app.clear()
             return True
 
+    def cmd_clean(self, original):
+        """Removes Extra Parentheses."""
+        if superformat(original) == "clean":
+            todel = []
+            for x in self.e.variables:
+                if "`" in x:
+                    todel.append(x)
+            for x in todel:
+                del self.e.variables[x]
+            self.e.count = 0
+
     def cmd_while(self, original):
         """Performs while x do y."""
         if superformat(original).startswith("while "):
@@ -351,6 +364,25 @@ Import Commands:
         if superformat(original).startswith("save "):
             writefile(getfile(original[5:], "wb"), strlist(self.box.commands[:-2], "\n"))
             return True
+
+    def cmd_do(self, original):
+        """Evaluates Functions Silently."""
+        if superformat(original).startswith("do "):
+            test = self.calc(original[3:])
+            if test != None and not isnull(test):
+                self.ans.append(test)
+            return True
+
+    def cmd_show(self, original):
+        """Shows A Popup."""
+        if superformat(original).startswith("show "):
+            popup("Info", self.e.prepare(self.calc(original[5:]), True, False), "Output")
+            return True
+
+    def cmd_del(self, original):
+        """Deletes A Variable."""
+        if superformat(original).startswith("del ") and original[4:] in self.e.variables:
+            del self.e.variables[original[4:]]
 
     def cmd_set(self, original, varname="_"):
         """Evaluates Definition Commands."""
@@ -450,20 +482,6 @@ Import Commands:
         """Performs =."""
         if not self.e.isreserved(sides[0]):
             return sides[1]
-
-    def cmd_do(self, original):
-        """Evaluates Functions Silently."""
-        if superformat(original).startswith("do "):
-            test = self.calc(original[3:])
-            if test != None and not isnull(test):
-                self.ans.append(test)
-            return True
-
-    def cmd_show(self, original):
-        """Shows A Popup."""
-        if superformat(original).startswith("show "):
-            popup("Info", self.e.prepare(self.calc(original[5:]), True, False), "Output")
-            return True
 
     def cmd_normal(self, original):
         """Evaluates Functions."""
