@@ -57,23 +57,6 @@ def isnum(inputobject):
     """Determines If An Object Is A Number."""
     return isinstance(inputobject, (float, int, long, complex))
 
-def callfuncs(funclist, *args):
-    """Calls A List Of Functions."""
-    out = args
-    for f in reversed(funclist):
-        if hascall(f):
-            if islist(out):
-                out = f.call(out)
-            elif isinstance(out, tuple):
-                out = f.call(list(out))
-            else:
-                out = f.call([out])
-        elif islist(out) or isinstance(out, tuple):
-                out = f(*out)
-        else:
-            out = f(out)
-    return out
-
 def curry(func, arg, key=None):
     """Returns A Function With A Curried Argument."""
     if key == None:

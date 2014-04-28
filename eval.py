@@ -28,6 +28,8 @@ from .fraction import *
 
 class evaluator(object):
     """Evaluates Equations And Expressions."""
+    reserved = string.digits+':;@$~+*%/&|><!"=()[]\\,?`'
+
     def __init__(self, variables=None, processor=None, gen=None):
         """Initializes The Evaluator."""
         self.processor = processor
@@ -549,7 +551,10 @@ class evaluator(object):
         if len(out) == 0:
             return matrix(0)
         elif len(out) == 1:
-            return out[0]
+            if len(inputlist) > 1:
+                return matrix(1,1, out[0])
+            else:
+                return out[0]
         else:
             return diagmatrixlist(out)
 
@@ -831,7 +836,7 @@ class evaluator(object):
 
     def call_paren(self, inputstring):
         """Evaluates Parentheses."""
-        inputstring = strlist(switchsplit(inputstring, string.digits+".`"), "``")
+        inputstring = strlist(switchsplit(inputstring, string.digits, [x for x in string.printable if not self.isreserved(x)]), "``")
         if "`" in inputstring:
             if self.debug:
                 print(self.recursion*"  "+"(|) "+inputstring) 
@@ -1003,7 +1008,7 @@ class evaluator(object):
         if expression == "":
             return True
         for x in expression:
-            if x in string.digits+':;@$~+*%/&|><!"=()[]\\,?'+extra:
+            if x in self.reserved+extra:
                 return True
         return False
 
@@ -1080,7 +1085,12 @@ class evalfuncs(object):
         if variables == None or len(variables) == 0:
             return matrix(0)
         elif len(variables) == 1:
-            return matrix(1,1, variables[0])
+            if isinstance(variables[0], matrix):
+                return variables[0]
+            elif ismatrix(variables[0]):
+                return variables[0].tomatrix()
+            else:
+                return matrix(1,1, variables[0])
         elif len(variables) == 2:
             return rangematrix(collapse(variables[0]), collapse(variables[1])+1.0)
         else:

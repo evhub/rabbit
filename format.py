@@ -304,7 +304,7 @@ def carefulsplit(inputstring, splitstring, holdstring='"'):
             out[-1] += x
     return out
 
-def switchsplit(inputstring, splitstring):
+def switchsplit(inputstring, splitstring, otherstring=None):
     """Splits A String By Whenever It Switches From Being In Something To Not In It."""
     out = []
     check = -1
@@ -312,7 +312,7 @@ def switchsplit(inputstring, splitstring):
         if check != 1 and x in splitstring:
             out.append("")
             check = 1
-        elif check != 0 and not x in splitstring:
+        elif check != 0 and not x in splitstring and (not otherstring or x in otherstring):
             out.append("")
             check = 0
         out[-1] += x
