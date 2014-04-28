@@ -433,24 +433,8 @@ def collapse(item):
     else:
         return item
 
-class derivfunc(strfunc):
-    """Implements A Derivative Function."""
-    def __init__(self, funcstr, n, accuracy, scaledown, e, varname="x", personals=None, name="func"):
-        """Creates The Derivative Function."""
-        self.name = str(name)
-        self.funcstr = str(funcstr)
-        self.n = int(n)
-        self.accuracy = float(accuracy)
-        self.scaledown = float(scaledown)
-        self.variables = [varname]
-        if personals == None:
-            self.personals = {}
-        else:
-            self.personals = dict(personals)
-        self.e = e
-    def copy(self):
-        """Returns A Copy Of The Derivative Function."""
-        return derivfunc(self.funcstr, self.n, self.accuracy, self.scaledown, self.e, self.variables[0], self.personals, self.name)
+class derivbase(object):
+    """Holds Methods Used In Derivative Functions."""
     def calc(self, x=None):
         """Calculates The Derivative Function."""
         items = dict(self.personals)
@@ -474,7 +458,38 @@ class derivfunc(strfunc):
             self.e.overflow = variables[1:]
             return deriv(self.calc, float(variables[0]), self.n, self.accuracy, self.scaledown)
 
-class integfunc(derivfunc):
+class integbase(derivbase):
+    """Holdes Methods Used In Integral Functions."""
+    def call(self, variables):
+        """Calls The Integral Function."""
+        if variables == None:
+            return self
+        elif len(variables) < 2:
+            return matrix(0)
+        else:
+            self.e.overflow = variables[2:]
+            return defint(self.calc, float(variables[0]), float(variables[1]), self.accuracy)
+
+class derivfunc(strfunc, derivbase):
+    """Implements A Derivative Function."""
+    def __init__(self, funcstr, n, accuracy, scaledown, e, varname="x", personals=None, name="func"):
+        """Creates The Derivative Function."""
+        self.name = str(name)
+        self.funcstr = str(funcstr)
+        self.n = int(n)
+        self.accuracy = float(accuracy)
+        self.scaledown = float(scaledown)
+        self.variables = [varname]
+        if personals == None:
+            self.personals = {}
+        else:
+            self.personals = dict(personals)
+        self.e = e
+    def copy(self):
+        """Returns A Copy Of The Derivative Function."""
+        return derivfunc(self.funcstr, self.n, self.accuracy, self.scaledown, self.e, self.variables[0], self.personals, self.name)
+
+class integfunc(strfunc, integbase):
     """Implements An Integral Function."""
     def __init__(self, funcstr, accuracy, e, varname="x", personals=None, name="func"):
         """Creates The Integral Function."""
@@ -490,17 +505,8 @@ class integfunc(derivfunc):
     def copy(self):
         """Returns A Copy Of The Integral Function."""
         return integfunc(self.funcstr, self.accuracy, self.e, self.variables[0], self.personals, self.name)
-    def call(self, variables):
-        """Calls The Integral Function."""
-        if variables == None:
-            return self
-        elif len(variables) < 2:
-            return matrix(0)
-        else:
-            self.e.overflow = variables[2:]
-            return defint(self.calc, float(variables[0]), float(variables[1]), self.accuracy)
 
-class derivfuncfloat(funcfloat, derivfunc):
+class derivfuncfloat(funcfloat, derivbase):
     """Implements A Derivative Function Of A Fake Function."""
     def __init__(self, func, n, accuracy, scaledown, e, name="func"):
         """Creates The Derivative Function."""
@@ -520,7 +526,7 @@ class derivfuncfloat(funcfloat, derivfunc):
         else:
             return self.func.call([x])
 
-class integfuncfloat(integfunc, derivfuncfloat):
+class integfuncfloat(funcfloat, integbase):
     """Implements An Integral Function Of A Fake Function."""
     def __init__(self, func, accuracy, e, name="func"):
         """Creates The Integral Float Function."""

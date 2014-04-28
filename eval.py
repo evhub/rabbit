@@ -215,8 +215,8 @@ class evaluator(object):
                 out = out[:-2]
             elif out.endswith("L"):
                 out = out[:-1]
-        elif bottom and isinstance(item, derivfuncfloat):
-            if isinstance(item, integfunc):
+        elif bottom and isinstance(item, funcfloat) and isinstance(item, derivbase):
+            if isinstance(item, integbase):
                 out = "S:"
             else:
                 out = "D:"
@@ -230,9 +230,9 @@ class evaluator(object):
                     out += ":"+str(item.n)
         elif bottom and isinstance(item, strfunc):
             out = ""
-            if isinstance(item, integfunc):
+            if isinstance(item, integbase):
                 out += "S:"
-            elif isinstance(item, derivfunc):
+            elif isinstance(item, derivbase):
                 out += "D:"
             if len(item.variables) == 1 and len(item.personals) == 0:
                 out += "\\"+item.variables[0]
