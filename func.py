@@ -233,6 +233,12 @@ class strfunc(funcfloat):
     def find(self):
         """Simplifies The Function String."""
         self.funcstr = self.e.find(self.funcstr, False, False)
+    def getvars(self):
+        """Returns The Original Variable List."""
+        out = self.variables[:]
+        if not self.overflow:
+            out.append(self.allargs)
+        return out
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""

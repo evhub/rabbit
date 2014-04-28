@@ -168,7 +168,9 @@ class evaluator(object):
                 out = "("
                 for x in item.getdiag():
                     out += self.prepare(x, False, bottom)+","
-                out = out[:-1]+")"
+                if len(item) > 1:
+                    out = out[:-1]
+                out += ")"
             elif top or item.onlyrow():
                 out = ""
                 for y in item.a:
@@ -223,11 +225,12 @@ class evaluator(object):
                 out += "S:"
             elif isinstance(item, derivbase):
                 out += "D:"
-            if len(item.variables) == 1 and len(item.personals) == 0:
-                out += "\\"+item.variables[0]
-            elif len(item.variables) > 1 or len(item.personals) > 0:
-                out += "\\("+strlist(item.variables,",")
-                if len(item.variables) != 0:
+            variables = item.getvars()
+            if len(variables) == 1 and len(item.personals) == 0:
+                out += "\\"+variables[0]
+            elif len(variables) > 1 or len(item.personals) > 0:
+                out += "\\("+strlist(variables,",")
+                if len(variables) != 0:
                     out += ","
                 for x,y in item.personals.items():
                     out += str(x)+":("+self.prepare(y, False, bottom)+"),"
@@ -942,11 +945,11 @@ class evaluator(object):
     def call_method(self, inputstring):
         """Returns Method Instances."""
         if "." in inputstring:
-            test = False
+            test = True
             for x in inputstring.split("."):
-                test = test or not madeof(x, string.digits)
+                test = test and x and not madeof(x, string.digits)
             if test:
-                return strfloat(inputstring+"()", self)
+                return strfunc(inputstring+"("+funcfloat.allargs+")", self, [funcfloat.allargs])
 
     def call_normal(self, inputstring):
         """Returns Argument."""
