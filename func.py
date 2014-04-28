@@ -508,12 +508,12 @@ class integfunc(strfunc, integbase):
 
 class derivfuncfloat(funcfloat, derivbase):
     """Implements A Derivative Function Of A Fake Function."""
-    def __init__(self, func, n, accuracy, scaledown, e, name="func"):
+    def __init__(self, func, n, accuracy, scaledown, e, funcstr="func"):
         """Creates The Derivative Function."""
-        self.funcstr = str(funcstr)
         self.n = int(n)
         self.accuracy = float(accuracy)
         self.scaledown = float(scaledown)
+        self.funcstr = str(funcstr)
         self.func = func
         self.e = e
     def copy(self):
@@ -528,10 +528,10 @@ class derivfuncfloat(funcfloat, derivbase):
 
 class integfuncfloat(funcfloat, integbase):
     """Implements An Integral Function Of A Fake Function."""
-    def __init__(self, func, accuracy, e, name="func"):
+    def __init__(self, func, accuracy, e, funcstr="func"):
         """Creates The Integral Float Function."""
-        self.funcstr = str(funcstr)
         self.accuracy = float(accuracy)
+        self.funcstr = str(funcstr)
         self.func = func
         self.e = e
     def copy(self):
