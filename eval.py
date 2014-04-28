@@ -1607,7 +1607,7 @@ class evalfuncs(object):
                 else:
                     return derivfunc(func.funcstr, n, accuracy, scaledown, self.e, func.variables[0], func.personals)
             elif isinstance(func, funcfloat):
-                return derivfuncfloat(func, n, accuracy, scaledown, self)
+                return derivfuncfloat(func, n, accuracy, scaledown, self.e)
             else:
                 return derivfunc(str(func), n, accuracy, scaledown, self.e, varname)
 
@@ -1629,6 +1629,6 @@ class evalfuncs(object):
                 else:
                     return integfunc(func.funcstr, accuracy, self.e, func.variables[0], func.personals)
             elif isinstance(func, funcfloat):
-                return integfuncfloat(func, accuracy, self)
+                return integfuncfloat(func, accuracy, self.e)
             else:
                 return integfunc(str(func), accuracy, self.e, varname)

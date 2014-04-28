@@ -122,15 +122,15 @@ class funcfloat(numobject):
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
-    def __init__(self, funcstr, e, variables=[], personals=None, name="func"):
+    def __init__(self, funcstr, e, variables=[], personals=None, name="func", overflow=None):
         """Creates A Callable String Function."""
         self.funcstr = str(funcstr)
         self.name = str(name)
-        self.overflow = False
+        self.overflow = bool(overflow)
         self.variables = variables[:]
         if self.allargs in self.variables:
             self.variables.remove(self.allargs)
-        else:
+        elif overflow != None:
             self.overflow = True
         if personals == None:
             self.personals = {}
@@ -139,7 +139,7 @@ class strfunc(funcfloat):
         self.e = e
     def copy(self):
         """Copies The String Function."""
-        return strfloat(self.funcstr, self.e, self.variables, self.personals)
+        return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow)
     def calc(self):
         """Calculates The String."""
         oldvars = self.e.setvars(self.personals)
@@ -224,14 +224,14 @@ class strfunc(funcfloat):
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
-    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name="func"):
+    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name="func", overflow=None):
         """Initializes The String Float."""
         self.name = str(name)
-        overflow = False
+        overflow = bool(overflow)
         variables = variables[:]
         if self.allargs in variables:
             variables.remove(self.allargs)
-        else:
+        elif overflow != None:
             overflow = True
         if personals == None:
             personals = {}
