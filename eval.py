@@ -119,7 +119,7 @@ class evaluator(object):
             "''":matrix(0),
             "'x":0.0,
             "Dx":"D",
-            funcfloat.allargs:matrix(0)
+            "'"+funcfloat.allargs:matrix(0)
             }
         if variables != None:
             for k,v in variables.items():
