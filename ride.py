@@ -49,7 +49,7 @@ Import Commands:
     run <file>
         save <file>"""
 
-    def __init__(self, name="Code Editor", width=100, height=40, helpstring=None, debug=False, *initializers):
+    def __init__(self, name="RIDE", width=100, height=40, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
         self.debug_old = self.debug
