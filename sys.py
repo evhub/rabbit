@@ -105,3 +105,15 @@ class timer(object):
 def thetime():
     """Finds The Current Time."""
     return time.ctime().split(" ")
+
+colors = {"end":"\033[0m", "pink":"\033[95m", "purple":"\033[94m", "green":"\033[92m", "yellow":"\033[93m", "red":"\033[91m"}
+
+def addcolor(inputstring, color):
+    """Adds The Specified Color To The String."""
+    return colors[str(color)]+inputstring+colors["end"]
+
+def delcolor(inputstring):
+    """Removes Recognized Colors From A String."""
+    for x in colors:
+        inputstring = inputstring.replace(x, "")
+    return inputstring

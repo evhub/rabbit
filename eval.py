@@ -28,7 +28,7 @@ from .fraction import *
 
 class evaluator(object):
     """Evaluates Equations And Expressions."""
-    reserved = string.digits+':;@$~+*%/&|><!"=()[]\\,?`'
+    reserved = string.digits+':;@$~+-*^%/&|><!"=()[]\\,?`'
 
     def __init__(self, variables=None, processor=None, gen=None):
         """Initializes The Evaluator."""

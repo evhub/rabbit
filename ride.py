@@ -16,6 +16,8 @@
 # DATA AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+from __future__ import absolute_import, print_function
+
 from .cmd import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -52,17 +54,19 @@ Import Commands:
     run <file>
         save <file>"""
 
-    def __init__(self, name="RIDE", width=100, height=40, helpstring=None, debug=False, *initializers):
+    def __init__(self, name="RIDE", width=100, height=40, helpstring=None, refresh=400, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
         self.debug_old = self.debug
         self.root = Tkinter.Tk()
         self.root.title(str(name))
+        self.refresh = int(refresh)
         self.root.bind("<Escape>", lambda event: self.destroy())
         self.root.bind("<Control-r>", lambda event: self.run())
         self.root.bind("<Control-s>", lambda event: self.handle(self.save))
         self.root.bind("<Control-l>", lambda event: self.handle(self.load))
         self.root.bind("<Control-n>", lambda event: self.box.clear())
+        self.root.bind("<Key>", lambda event: self.highlight())
         self.button_frame = Tkinter.Frame(self.root, height=1, width=40)
         self.button_frame.pack(side="bottom")
         self.button_run = button(self.button_frame, "Run", self.run, pack=False)
@@ -73,7 +77,10 @@ Import Commands:
         self.button_save.main.pack(side="left")
         self.button_load = button(self.button_frame, "Load", lambda: self.handle(self.load), pack=False)
         self.button_load.main.pack(side="left")
-        self.box = texter(self.root, int(width), int(height))
+        self.box = texter(self.root, int(width), int(height), scroll=True)
+        self.box.colortag("reserved", "blue")
+        self.box.colortag("string", "darkgreen")
+        self.box.colortag("comment", "red")
         self.errorlog = {}
         self.ans = [matrix(0)]
         self.populator()
@@ -83,6 +90,7 @@ Import Commands:
             self.initialize()
         else:
             self.initialize(args=initializers)
+        self.register(lambda: self.highlightall(True), self.refresh)
 
     def populator(self):
         """Creates An Evaluator And Lists Of Commands."""
@@ -125,6 +133,48 @@ Import Commands:
         if not func(popup("Entry", "Enter The Name Of The File:", "File Control")):
             popup("Error", "Unable To Find File.")
 
+    def highlight(self, point="insert"):
+        """Checks The Last Character."""
+        point = str(point)
+        test = self.box.output(point+"-1c", point)
+        if "#" in test:
+            self.box.placetag("comment", point+"-1c", point)
+        elif '"' in test:
+            self.box.placetag("string", point+"-1c", point)
+        elif self.e.isreserved(test) and not test in string.digits:
+            self.box.placetag("reserved", point+"-1c", point)
+        return test
+
+    def clearhighlight(self):
+        """Clears Highlighting."""
+        self.box.remtag("comment")
+        self.box.remtag("string")
+        self.box.remtag("reserved")
+
+    def highlightall(self, refresh=False):
+        """Highlights All Characters."""
+        self.clearhighlight()
+        linelist = self.box.output().split("\n")
+        instring = False
+        incomment = False
+        for l in xrange(0, len(linelist)):
+            for c in xrange(0, len(linelist[l])+1):
+                point = str(l+1)+"."+str(c)
+                test = self.highlight(point)
+                if c == 1 and not test in string.whitespace:
+                    incomment = False
+                    instring = False
+                if not instring and test == "#":
+                    incomment = True
+                elif not incomment and test == '"':
+                    instring = not instring
+                elif incomment:
+                    self.box.placetag("comment", point+"-1c", point)
+                elif instring:
+                    self.box.placetag("string", point+"-1c", point)
+        if refresh:
+            self.register(lambda: self.highlightall(True), self.refresh)
+
     def load(self, name):
         """Loads A File."""
         try:
@@ -135,6 +185,7 @@ Import Commands:
             self.box.clear()
             self.box.display(readfile(tempfile))
             tempfile.close()
+            self.highlightall()
             return True
 
     def save(self, name, load=True):

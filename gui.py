@@ -39,7 +39,7 @@ class console(object):
         self.main = Tkinter.Frame(root, width=width)
         self.main.pack(side=str(side))
         self.text = Tkinter.Label(self.main, textvariable=self.message, height=height, width=width, wraplength=800, justify="left", anchor="sw")
-        self.text.pack(side="top")
+        self.text.pack(side="top", fill="both")
 
     def clear(self, message=""):
         """Clears The Display."""
@@ -180,7 +180,7 @@ class entry(object):
         width = int(width)
         self.main = Tkinter.Entry(root, width=width, **kwargs)
         if pack:
-            self.main.pack(side="bottom")
+            self.main.pack(side="bottom", fill="x")
         self.empty()
 
     def clear(self):
@@ -247,25 +247,87 @@ class entry(object):
 
 class texter(object):
     """A Graphical Class That Allows The Use Of A Text Entry Area."""
-    def __init__(self, root, x=100, y=None, pack=True, **kwargs):
+    def __init__(self, root, x=100, y=None, pack=True, scroll=False, **kwargs):
         """Initializes A Text Entry Area."""
         if y != None:
             kwargs["height"] = y
-        self.main = Tkinter.Text(root, width=x, **kwargs)
-        if pack:
-            self.main.pack(side="bottom")
+        if scroll:
+            self.frame = Tkinter.Frame(root, width=x+1)
+            self.main = Tkinter.Text(self.frame, width=x, **kwargs)
+            self.scroll = Tkinter.Scrollbar(orient="vertical", command=self.main.yview, borderwidth=1)
+            self.main.configure(yscrollcommand=self.scroll.set)
+            self.scroll.pack(side="right", fill="y")
+            self.main.pack(side="left", fill="both")
+            if pack:
+                self.frame.pack(side="bottom", fill="both")
+        else:
+            self.main = Tkinter.Text(root, width=x, **kwargs)
+            if pack:
+                self.main.pack(side="bottom", fill="both")
+        self.counter = -1
 
-    def output(self):
+    def output(self, start=1.0, stop="end"):
         """Gets Text Box Output."""
-        return sanitize(self.main.get(1.0, "end"))
+        return sanitize(self.main.get(start, stop))
 
     def display(self, text):
         """Sets The Contents Of The Text Entry Area."""
-        self.main.insert("insert", str(text))
+        self.main.insert("end", str(text))
 
-    def clear(self):
+    def clear(self, start=1.0, stop="end"):
         """Clears The Contents Of The Text Entry Area."""
-        self.main.delete(1.0, "end")
+        self.main.delete(start, stop)
+
+    def newtag(self, start="tag_"):
+        """Generates A New Tag."""
+        self.counter += 1
+        tag = str(start)
+        for x in str(self.counter):
+            tag += string.lowercase[int(x)]
+        return tag
+
+    def colortag(self, tag, color):
+        """Colors A Tag."""
+        self.main.tag_config(str(tag), foreground=str(color))
+
+    def placetag(self, tag, start, stop):
+        """Places A Tag On An Area."""
+        self.main.tag_add(str(tag), start, stop)
+
+    def color(self, start, stop, color):
+        """Colors Some Of The Text."""
+        tag = self.newtag()
+        self.placetag(tag, start, stop)
+        self.colortag(tag, color)
+        return tag
+
+    def tags(self):
+        """Returns All The Tags."""
+        return self.main.tag_names()
+
+    def deltag(self, tag):
+        """Deletes A Tag."""
+        self.main.tag_delete(str(tag))
+
+    def remtag(self, tag, start=1.0, stop="end"):
+        """Removes A Tag From The Area."""
+        self.main.tag_remove(str(tag), start, stop)
+
+    def deltags(self):
+        """Deletes All Tags."""
+        for x in self.tags():
+            if x != "sel":
+                self.deltag(x)
+        self.counter = -1
+
+    def allpoints(self):
+        """Returns All Points."""
+        out = []
+        linelist = self.output().split("\n")
+        for l in xrange(0, len(linelist)):
+            for c in xrange(0, len(linelist[l])+1):
+                out.append(str(l+1)+"."+str(c))
+        return out
 
 class button(object):
     """A Graphical Class That Implements A Button."""
