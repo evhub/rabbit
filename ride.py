@@ -79,7 +79,6 @@ Import Commands:
         self.button_load = button(self.button_frame, "Load", lambda: self.handle(self.load), pack=False)
         self.button_load.main.pack(side="left")
         self.box = texter(self.root, int(width), int(height), scroll=True)
-        self.box.colortag("command", "purple")
         self.box.colortag("reserved", "orange")
         self.box.colortag("string", "darkgreen")
         self.box.colortag("comment", "red")
@@ -150,7 +149,6 @@ Import Commands:
 
     def clearhighlight(self):
         """Clears Highlighting."""
-        self.box.remtag("command")
         self.box.remtag("comment")
         self.box.remtag("string")
         self.box.remtag("reserved")
