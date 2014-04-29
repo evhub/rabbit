@@ -1022,15 +1022,19 @@ class evaluator(object):
         if isnull(item):
             return None
         elif istext(item):
+            old = self.variables[varname]
             self.variables[varname] = value
             out = self.calc(item)
-        elif isinstance(item, funcfloat):
-            out = item.call([value])
+            self.variables[varname] = old
+        elif isinstance(item, funcfloat) or (iseval(item) and hascall(item)):
+            out = item.call(varproc(value))
         elif hasnum(item):
             return item
         else:
+            old = self.variables[varname]
             self.variables[varname] = value
             out = getcall(item)(None)
+            self.variables[varname] = old
         return self.call(out, value, varname)
 
 class evalfuncs(object):

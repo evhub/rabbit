@@ -45,7 +45,7 @@ Control Commands:
     for <list> do <command>
     while <condition> do <command>
     do <command>
-    del [variable]
+    del <variable>
     get [variable]
 Import Commands:
     <name> = import <file>
