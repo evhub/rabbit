@@ -181,10 +181,11 @@ Import Commands:
 
     def initialize(self, args=()):
         """Runs Any Files Fed To The Constructor."""
-        if not istext(args):
+        if istext(args):
+            self.evalfile(args)
+        else:
             for x in args:
                 self.initialize(x)
-        self.evalfile(args)
 
     def handler(self, event=None):
         """Handles A Return Event."""

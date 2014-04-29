@@ -49,7 +49,7 @@ Import Commands:
     run <file>
         save <file>"""
 
-    def __init__(self, name="Code Editor", debug=False):
+    def __init__(self, name="Code Editor", width=100, height=40, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
         self.debug_old = self.debug
@@ -70,11 +70,16 @@ Import Commands:
         self.button_save.main.pack(side="left")
         self.button_load = button(self.button_frame, "Load", lambda: self.handle(self.load), pack=False)
         self.button_load.main.pack(side="left")
-        self.box = texter(self.root, 100, 40)
+        self.box = texter(self.root, int(width), int(height))
         self.errorlog = {}
         self.ans = [matrix(0)]
         self.populator()
-        self.evalfile("Default.txt")
+        if helpstring != None:
+            self.helpstring = str(helpstring)
+        if initializers == ():
+            self.initialize()
+        else:
+            self.initialize(args=initializers)
 
     def populator(self):
         """Creates An Evaluator And Lists Of Commands."""
