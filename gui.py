@@ -28,17 +28,24 @@ import tkSimpleDialog
 
 class console(object):
     """A Graphical Class Used For Creating The PythonPlus Console."""
-    def __init__(self, root, display=None, height=35, width=100, side="bottom"):
+    def __init__(self, root, display=None, height=35, width=100, side="bottom", **kwargs):
         """Base Constructor For The PythonPlus Console."""
         self.message = Tkinter.StringVar()
         if display != None:
             self.message.set(str(display))
         self.history = []
         height = int(height)
-        width = int(width)
-        self.main = Tkinter.Frame(root, width=width)
+        if height != None:
+            kwargs["height"] = int(height)
+        if width != None:
+            width = int(width)
+            kwargs["width"] = width
+            kwargs["wraplength"] = width*8
+            self.main = Tkinter.Frame(root, width=width)
+        else:
+            self.main = Tkinter.Frame(root)
         self.main.pack(side=str(side))
-        self.text = Tkinter.Label(self.main, textvariable=self.message, height=height, width=width, wraplength=800, justify="left", anchor="sw")
+        self.text = Tkinter.Label(self.main, textvariable=self.message, justify="left", anchor="sw", **kwargs)
         self.text.pack(side="top", fill="both")
 
     def clear(self, message=""):
@@ -177,8 +184,9 @@ class entry(object):
             root = app
         else:
             root = app.main
-        width = int(width)
-        self.main = Tkinter.Entry(root, width=width, **kwargs)
+        if width != None:
+            kwargs["width"] = int(width)
+        self.main = Tkinter.Entry(root, **kwargs)
         if pack:
             self.main.pack(side="bottom", fill="x")
         self.empty()
@@ -247,13 +255,18 @@ class entry(object):
 
 class texter(object):
     """A Graphical Class That Allows The Use Of A Text Entry Area."""
-    def __init__(self, root, x=100, y=None, pack=True, scroll=False, **kwargs):
+    def __init__(self, root, width=100, y=None, pack=True, scroll=False, **kwargs):
         """Initializes A Text Entry Area."""
         if y != None:
             kwargs["height"] = y
         if scroll:
-            self.frame = Tkinter.Frame(root, width=x+1)
-            self.main = Tkinter.Text(self.frame, width=x, **kwargs)
+            if width != None:
+                width = int(width)
+                self.frame = Tkinter.Frame(root, width=width+1)
+                kwargs["width"] = width
+            else:
+                self.frame = Tkinter.Frame(root)
+            self.main = Tkinter.Text(self.frame, **kwargs)
             self.scroll = Tkinter.Scrollbar(orient="vertical", command=self.main.yview, borderwidth=1)
             self.main.configure(yscrollcommand=self.scroll.set)
             self.scroll.pack(side="right", fill="y")
@@ -261,7 +274,9 @@ class texter(object):
             if pack:
                 self.frame.pack(side="bottom", fill="both")
         else:
-            self.main = Tkinter.Text(root, width=x, **kwargs)
+            if width != None:
+                kwargs["width"] = int(width)
+            self.main = Tkinter.Text(root, **kwargs)
             if pack:
                 self.main.pack(side="bottom", fill="both")
         self.counter = -1
@@ -273,6 +288,10 @@ class texter(object):
     def display(self, text):
         """Sets The Contents Of The Text Entry Area."""
         self.main.insert("end", str(text))
+
+    def insert(self, text):
+        """Inserts Text."""
+        self.main.insert("insert", str(text))
 
     def clear(self, start=1.0, stop="end"):
         """Clears The Contents Of The Text Entry Area."""

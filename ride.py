@@ -43,7 +43,7 @@ Console Commands:
     clear
     clean
 Control Commands:
-    if <condition> then <command>
+    if <condition> do <command>
     for <list> do <command>
     while <condition> do <command>
     do <command>
@@ -62,6 +62,7 @@ Import Commands:
         self.root.title(str(name))
         self.refresh = int(refresh)
         self.root.bind("<Escape>", lambda event: self.destroy())
+        self.root.protocol("WM_DELETE_WINDOW", self.destroy)
         self.root.bind("<Control-r>", lambda event: self.run())
         self.root.bind("<Control-s>", lambda event: self.handle(self.save))
         self.root.bind("<Control-l>", lambda event: self.handle(self.load))
@@ -78,9 +79,11 @@ Import Commands:
         self.button_load = button(self.button_frame, "Load", lambda: self.handle(self.load), pack=False)
         self.button_load.main.pack(side="left")
         self.box = texter(self.root, int(width), int(height), scroll=True)
-        self.box.colortag("reserved", "blue")
+        self.box.colortag("command", "purple")
+        self.box.colortag("reserved", "orange")
         self.box.colortag("string", "darkgreen")
         self.box.colortag("comment", "red")
+        self.box.colortag("variable", "blue")
         self.errorlog = {}
         self.ans = [matrix(0)]
         self.populator()
@@ -141,15 +144,17 @@ Import Commands:
             self.box.placetag("comment", point+"-1c", point)
         elif '"' in test:
             self.box.placetag("string", point+"-1c", point)
-        elif self.e.isreserved(test) and not test in string.digits:
+        elif self.e.isreserved(test, ".'") and not test in string.digits:
             self.box.placetag("reserved", point+"-1c", point)
         return test
 
     def clearhighlight(self):
         """Clears Highlighting."""
+        self.box.remtag("command")
         self.box.remtag("comment")
         self.box.remtag("string")
         self.box.remtag("reserved")
+        self.box.remtag("variable")
 
     def highlightall(self, refresh=False):
         """Highlights All Characters."""
@@ -157,13 +162,18 @@ Import Commands:
         linelist = self.box.output().split("\n")
         instring = False
         incomment = False
+        last = ("", "1.0")
         for l in xrange(0, len(linelist)):
             for c in xrange(0, len(linelist[l])+1):
                 point = str(l+1)+"."+str(c)
                 test = self.highlight(point)
                 if c == 1 and not test in string.whitespace:
+                    if last[0] in self.e.variables or "'"+last[0] in self.e.variables:
+                        self.box.placetag("variable", last[1], point+"-2c")
                     incomment = False
                     instring = False
+                    last = ("", point+"-1c")
+                normal = False
                 if not instring and test == "#":
                     incomment = True
                 elif not incomment and test == '"':
@@ -172,6 +182,14 @@ Import Commands:
                     self.box.placetag("comment", point+"-1c", point)
                 elif instring:
                     self.box.placetag("string", point+"-1c", point)
+                elif not self.e.isreserved(test):
+                    normal = True
+                if normal:
+                    last = (last[0]+delspace(test), last[1])
+                else:
+                    if last[0] in self.e.variables or "'"+last[0] in self.e.variables:
+                        self.box.placetag("variable", last[1], point+"-1c")
+                    last = ("", point)
         if refresh:
             self.register(lambda: self.highlightall(True), self.refresh)
 

@@ -116,10 +116,9 @@ class evaluator(object):
             "e":math.e,
             "pi":math.pi,
             "none":matrix(0),
+            "''":matrix(0),
             "true":1.0,
             "false":0.0,
-            "''":matrix(0),
-            "'x":0.0,
             "Dx":"D",
             "'"+funcfloat.allargs:matrix(0)
             }

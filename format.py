@@ -97,13 +97,15 @@ def table(freqs, delimiter=",", seperator=" | "):
         out += "\n"
     return out[:-1]
 
-def basicformat(inputstring):
+def basicformat(inputstring, leading=True, tailing=True):
     """Performs Basic Formatting On A String."""
     out = str(inputstring).strip()
-    while len(out) != 0 and out[0] in string.whitespace:
-        out = out[1:]
-    while len(out) != 0 and out[-1] in string.whitespace:
-        out = out[:-1]
+    if leading:
+        while len(out) != 0 and out[0] in string.whitespace:
+            out = out[1:]
+    if tailing:
+        while len(out) != 0 and out[-1] in string.whitespace:
+            out = out[:-1]
     return out
 
 def superformat(inputstring):
