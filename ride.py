@@ -39,10 +39,13 @@ Console Commands:
     help [string]
     errors
     clear
+    clean
 Control Commands:
     if <condition> then <command>
     for <list> do <command>
     while <condition> do <command>
+    do <command>
+    del [variable]
     get [variable]
 Import Commands:
     <name> = import <file>
@@ -94,15 +97,17 @@ Import Commands:
             self.cmd_debug,
             self.cmd_errors,
             self.cmd_clear,
+            self.cmd_clean,
             self.cmd_while,
             self.cmd_for,
             self.cmd_if,
             self.cmd_get,
             self.cmd_run,
             self.cmd_save,
-            self.cmd_set,
             self.cmd_do,
             self.cmd_show,
+            self.cmd_del,
+            self.cmd_set,
             self.cmd_normal
             ]
         self.set_cmds = [

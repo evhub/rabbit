@@ -42,11 +42,13 @@ Console Commands:
     help [string]
     errors
     clear
+    clean
 Control Commands:
     if <condition> do <command>
     for <list> do <command>
     while <condition> do <command>
     do <command>
+    del [variable]
     get [variable]
 Import Commands:
     <name> = import <file>
