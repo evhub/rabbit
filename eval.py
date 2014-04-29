@@ -276,7 +276,7 @@ class evaluator(object):
         return str(out)
 
     def test(self, equation):
-        """Evaluates A Boolean Expression"""
+        """Evaluates A Boolean Expression."""
         if self.debug:
             self.info = " | test"
         return bool(self.calc(equation))
