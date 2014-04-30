@@ -84,6 +84,7 @@ Import Commands:
         self.box.colortag("comment", "red")
         self.box.colortag("variable", "blue")
         self.box.colortag("modifier", "darkgrey")
+        self.box.colortag("digit", "lightgrey")
         self.errorlog = {}
         self.ans = [matrix(0)]
         self.populator()
@@ -146,7 +147,9 @@ Import Commands:
             self.box.placetag("string", point+"-1c", point)
         elif test in "'.":
             self.box.placetag("modifier", point+"-1c", point)
-        elif self.e.isreserved(test) and not test in string.digits:
+        elif test in string.digits:
+            self.box.placetag("digit", point+"-1c", point)
+        elif self.e.isreserved(test):
             self.box.placetag("reserved", point+"-1c", point)
         return test
 
@@ -172,6 +175,8 @@ Import Commands:
                 if c == 1 and not test in string.whitespace:
                     if last[0] in self.e.variables or "'"+last[0] in self.e.variables or last[0] == funcfloat.allargs:
                         self.box.placetag("variable", last[1], point+"-2c")
+                    elif last[0] in ["inf", "nan"]:
+                        self.box.placetag("digit", last[1], point+"-2c")
                     incomment = False
                     instring = False
                     last = ("", point+"-1c")
@@ -191,6 +196,8 @@ Import Commands:
                 else:
                     if last[0] in self.e.variables or "'"+last[0] in self.e.variables or last[0] == funcfloat.allargs:
                         self.box.placetag("variable", last[1], point+"-1c")
+                    elif last[0] in ["inf", "nan"]:
+                        self.box.placetag("digit", last[1], point+"-1c")
                     last = ("", point)
         if refresh:
             self.register(lambda: self.highlightall(True), self.refresh)
