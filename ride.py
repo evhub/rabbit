@@ -83,6 +83,7 @@ Import Commands:
         self.box.colortag("string", "darkgreen")
         self.box.colortag("comment", "red")
         self.box.colortag("variable", "blue")
+        self.box.colortag("modifier", "darkgrey")
         self.errorlog = {}
         self.ans = [matrix(0)]
         self.populator()
@@ -139,11 +140,13 @@ Import Commands:
         """Checks The Last Character."""
         point = str(point)
         test = self.box.output(point+"-1c", point)
-        if "#" in test:
+        if test == "#":
             self.box.placetag("comment", point+"-1c", point)
-        elif '"' in test:
+        elif test == '"':
             self.box.placetag("string", point+"-1c", point)
-        elif self.e.isreserved(test, ".'") and not test in string.digits:
+        elif test in "'.":
+            self.box.placetag("modifier", point+"-1c", point)
+        elif self.e.isreserved(test) and not test in string.digits:
             self.box.placetag("reserved", point+"-1c", point)
         return test
 
@@ -153,6 +156,7 @@ Import Commands:
         self.box.remtag("string")
         self.box.remtag("reserved")
         self.box.remtag("variable")
+        self.box.remtag("modifier")
 
     def highlightall(self, refresh=False):
         """Highlights All Characters."""
@@ -166,7 +170,7 @@ Import Commands:
                 point = str(l+1)+"."+str(c)
                 test = self.highlight(point)
                 if c == 1 and not test in string.whitespace:
-                    if last[0] in self.e.variables or "'"+last[0] in self.e.variables:
+                    if last[0] in self.e.variables or "'"+last[0] in self.e.variables or last[0] == funcfloat.allargs:
                         self.box.placetag("variable", last[1], point+"-2c")
                     incomment = False
                     instring = False
@@ -185,7 +189,7 @@ Import Commands:
                 if normal:
                     last = (last[0]+delspace(test), last[1])
                 else:
-                    if last[0] in self.e.variables or "'"+last[0] in self.e.variables:
+                    if last[0] in self.e.variables or "'"+last[0] in self.e.variables or last[0] == funcfloat.allargs:
                         self.box.placetag("variable", last[1], point+"-1c")
                     last = ("", point)
         if refresh:
