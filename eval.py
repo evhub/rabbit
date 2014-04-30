@@ -343,12 +343,20 @@ class evaluator(object):
     def calc_pieces(self, expression):
         """Evaluates Piecewise Expressions."""
         for item in expression.split(";"):
-            item = item.split("@", 1)
-            if len(item) == 1:
-                return self.calc_check(item[0])
-            elif bool(self.calc_bool(item[1])):
-                return self.calc_check(item[0])
+            test = self.calc_condo(item)
+            if not isnull(test):
+                return test
         return matrix(0)
+
+    def calc_condo(self, item):
+        """Evaluates Conditions."""
+        item = item.rsplit("@", 1)
+        if len(item) == 1:
+            return self.calc_check(item[0])
+        elif bool(self.calc_bool(item[1])):
+            return self.calc_condo(item[0])
+        else:
+            return matrix(0)
 
     def calc_check(self, inputlist):
         """Handles Booleans."""
