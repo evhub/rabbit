@@ -675,30 +675,6 @@ def rangematrix(start, stop, step=1.0, fake=True):
             start += step
     return out
 
-def getmatrix(inputobject, func=diagmatrixlist):
-    """Converts The Object To A Matrix."""
-    inputobject = collapse(inputobject)
-    if isinstance(inputobject, matrix):
-        return inputobject
-    elif ismatrix(inputobject):
-        return inputobject.tomatrix()
-    elif islist(inputobject):
-        return func(inputobject)
-    else:
-        return matrix(1,1, inputobject)
-
-def merge(inputlist):
-    """Merges Items."""
-    out = []
-    for x in inputlist:
-        if islist(x):
-            out += merge(x)
-        elif ismatrix(x):
-            out += merge(getmatrix(x).getitems())
-        else:
-            out.append(x)
-    return out
-
 def totlen(inputlist):
     """Returns The Total Length Of An Object."""
     tot = 0.0

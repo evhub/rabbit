@@ -24,6 +24,37 @@ from .matrix import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+def collapse(item):
+    """Collapses An Argument."""
+    if isinstance(item, funcfloat):
+        return item.calc()
+    else:
+        return item
+
+def getmatrix(inputobject, func=diagmatrixlist):
+    """Converts The Object To A Matrix."""
+    inputobject = collapse(inputobject)
+    if isinstance(inputobject, matrix):
+        return inputobject
+    elif ismatrix(inputobject):
+        return inputobject.tomatrix()
+    elif islist(inputobject):
+        return func(inputobject)
+    else:
+        return matrix(1,1, inputobject)
+
+def merge(inputlist):
+    """Merges Items."""
+    out = []
+    for x in inputlist:
+        if islist(x):
+            out += merge(x)
+        elif ismatrix(x):
+            out += merge(getmatrix(x).getitems())
+        else:
+            out.append(x)
+    return out
+
 def varproc(variables):
     """Processes A Set Of Variables."""
     if variables == None or islist(variables) or isinstance(variables, dict):
@@ -435,13 +466,6 @@ class makefunc(funcfloat):
             for x in variables:
                 out.append(self.func(x))
             return diagmatrixlist(out)
-
-def collapse(item):
-    """Collapses An Argument."""
-    if isinstance(item, funcfloat):
-        return item.calc()
-    else:
-        return item
 
 class derivbase(object):
     """Holds Methods Used In Derivative Functions."""

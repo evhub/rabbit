@@ -53,12 +53,13 @@ File List:
 
     gui (file) : Utilities for creating and managing basic windows.
     func (matrix) : Utilities for managing functions as mathematical objects.
-    data (matrix, stats) : Utilities for managing statistical data.
 
     app (gui) : Utilities for creating graphical applications.
-    eval (data, func, fraction) : Utilities for implementing the Rabbit language.
+    data (func, stats) : Utilities for managing statistical data.
 
     test (app) : A Python interpreter for testing purposes.
+    eval (data, fraction) : Utilities for implementing the Rabbit language.
+
     cmd (eval, app) : The standard Rabbit language interpreter.
 
     ride (cmd) : The Rabbit Integrated Development Environment.
