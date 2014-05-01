@@ -396,6 +396,10 @@ Import Commands:
             if sides[0].endswith(":"):
                 sides[0] = sides[0][:-1]
                 docalc = True
+            elif sides[0][-1] in ["+", "*", "^", "%", "-", "/"]:
+                sides[1] = sides[0]+"("+sides[1]+")"
+                sides[0] = sides[0][:-1]
+                docalc = True
             else:
                 docalc = False
             if sides[0].endswith("<") and sides[1].startswith(">"):
