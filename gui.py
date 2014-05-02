@@ -285,13 +285,13 @@ class texter(object):
         """Gets Text Box Output."""
         return sanitize(self.main.get(start, stop))
 
-    def display(self, text):
+    def display(self, text, point="end"):
         """Sets The Contents Of The Text Entry Area."""
-        self.main.insert("end", str(text))
+        self.main.insert(point, str(text))
 
-    def insert(self, text):
+    def insert(self, text, modifier=""):
         """Inserts Text."""
-        self.main.insert("insert", str(text))
+        self.display(text, "insert"+str(modifier))
 
     def clear(self, start=1.0, stop="end"):
         """Clears The Contents Of The Text Entry Area."""

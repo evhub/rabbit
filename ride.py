@@ -40,7 +40,6 @@ Console Commands:
     <function>?
     help [string]
     errors
-    clear
     clean
 Control Commands:
     if <condition> do <command>
@@ -68,6 +67,7 @@ Import Commands:
         self.root.bind("<Control-l>", lambda event: self.handle(self.load))
         self.root.bind("<Control-n>", lambda event: self.box.clear())
         self.root.bind("<Key>", lambda event: self.highlight())
+        self.root.bind("<Return>", lambda event: self.endline())
         self.button_frame = Tkinter.Frame(self.root, height=1, width=40)
         self.button_frame.pack(side="bottom")
         self.button_run = button(self.button_frame, "Run", self.run, pack=False)
@@ -101,7 +101,6 @@ Import Commands:
         """Creates An Evaluator And Lists Of Commands."""
         self.pre_cmds = [
             self.do_find,
-            self.pre_question,
             self.pre_help,
             self.pre_cmd
             ]
@@ -109,7 +108,6 @@ Import Commands:
             self.do_find,
             self.cmd_debug,
             self.cmd_errors,
-            self.cmd_clear,
             self.cmd_clean,
             self.cmd_while,
             self.cmd_for,
@@ -137,6 +135,13 @@ Import Commands:
         """Handles A Function."""
         if not func(popup("Entry", "Enter The Name Of The File:", "File Control")):
             popup("Error", "Unable To Find File.")
+
+    def endline(self):
+        """Handles Help Questions."""
+        last = self.box.output("insert-1l", "insert-1c")
+        if last.endswith("?"):
+            self.box.clear("insert-1l", "insert-1c")
+            self.box.insert(self.findhelp(last[:-1]), "-1l")
 
     def highlight(self, point="insert"):
         """Checks The Last Character."""
