@@ -83,8 +83,9 @@ Import Commands:
         self.box.colortag("string", "darkgreen")
         self.box.colortag("comment", "red")
         self.box.colortag("variable", "blue")
-        self.box.colortag("modifier", "darkgrey")
-        self.box.colortag("digit", "lightgrey")
+        self.box.colortag("modifier", "cyan")
+        self.box.colortag("digit", "darkgrey")
+        self.box.colortag("builtin", "purple")
         self.errorlog = {}
         self.ans = [matrix(0)]
         self.populator()
@@ -145,7 +146,7 @@ Import Commands:
             self.box.placetag("comment", point+"-1c", point)
         elif test == '"':
             self.box.placetag("string", point+"-1c", point)
-        elif test in "'.":
+        elif test in "'":
             self.box.placetag("modifier", point+"-1c", point)
         elif test in string.digits:
             self.box.placetag("digit", point+"-1c", point)
@@ -160,6 +161,8 @@ Import Commands:
         self.box.remtag("reserved")
         self.box.remtag("variable")
         self.box.remtag("modifier")
+        self.box.remtag("digit")
+        self.box.remtag("builtin")
 
     def highlightall(self, refresh=False):
         """Highlights All Characters."""
@@ -167,35 +170,80 @@ Import Commands:
         linelist = self.box.output().split("\n")
         instring = False
         incomment = False
+        decimal = False
         last = ("", "1.0")
         for l in xrange(0, len(linelist)):
             for c in xrange(0, len(linelist[l])+1):
                 point = str(l+1)+"."+str(c)
                 test = self.highlight(point)
                 if c == 1 and not test in string.whitespace:
-                    if last[0] in self.e.variables or "'"+last[0] in self.e.variables or last[0] == funcfloat.allargs:
-                        self.box.placetag("variable", last[1], point+"-2c")
+                    if last[0] == funcfloat.allargs:
+                        self.box.placetag("builtin", last[1], point+"-2c")
+                    elif last[0] in self.e.variables:
+                        if isinstance(self.e.variables[last[0]], usefunc) or (isinstance(self.e.variables[last[0]], funcfloat) and not isinstance(self.e.variables[last[0]], strfunc)):
+                            self.box.placetag("builtin", last[1], point+"-2c")
+                        else:
+                            self.box.placetag("variable", last[1], point+"-2c")
+                    elif "'"+last[0] in self.e.variables:
+                        if isinstance(self.e.variables["'"+last[0]], usefunc) or (isinstance(self.e.variables["'"+last[0]], funcfloat) and not isinstance(self.e.variables["'"+last[0]], strfunc)):
+                            self.box.placetag("builtin", last[1], point+"-2c")
+                        else:
+                            self.box.placetag("variable", last[1], point+"-2c")
                     elif last[0] in ["inf", "nan"]:
                         self.box.placetag("digit", last[1], point+"-2c")
                     incomment = False
                     instring = False
+                    decimal = False
                     last = ("", point+"-1c")
                 normal = False
-                if not instring and test == "#":
-                    incomment = True
-                elif not incomment and test == '"':
-                    instring = not instring
-                elif incomment:
+                if incomment:
+                    self.box.remtag("comment", point+"-1c", point)
+                    self.box.remtag("string", point+"-1c", point)
+                    self.box.remtag("reserved", point+"-1c", point)
+                    self.box.remtag("modifier", point+"-1c", point)
+                    self.box.remtag("digit", point+"-1c", point)
                     self.box.placetag("comment", point+"-1c", point)
+                elif test == '"':
+                    instring = not instring
                 elif instring:
+                    self.box.remtag("comment", point+"-1c", point)
+                    self.box.remtag("string", point+"-1c", point)
+                    self.box.remtag("reserved", point+"-1c", point)
+                    self.box.remtag("modifier", point+"-1c", point)
+                    self.box.remtag("digit", point+"-1c", point)
                     self.box.placetag("string", point+"-1c", point)
+                elif test == "#":
+                    incomment = True
+                    decimal = False
+                elif test == ".":
+                    decimal = not decimal
+                    if decimal:
+                        decimal = point
+                elif decimal:
+                    if test in string.digits:
+                        self.box.remtag("reserved", decimal+"-1c", point+"-1c")
+                        self.box.placetag("digit", decimal+"-1c", point+"-1c")
+                    elif not self.e.isreserved(test):
+                        normal = True
+                    if not test in string.whitespace:
+                        decimal = False
                 elif not self.e.isreserved(test):
                     normal = True
                 if normal:
                     last = (last[0]+delspace(test), last[1])
                 else:
-                    if last[0] in self.e.variables or "'"+last[0] in self.e.variables or last[0] == funcfloat.allargs:
-                        self.box.placetag("variable", last[1], point+"-1c")
+                    if last[0] == funcfloat.allargs:
+                        self.box.placetag("builtin", last[1], point+"-1c")
+                    elif last[0] in self.e.variables:
+                        if isinstance(self.e.variables[last[0]], usefunc) or (isinstance(self.e.variables[last[0]], funcfloat) and not isinstance(self.e.variables[last[0]], strfunc)):
+                            self.box.placetag("builtin", last[1], point+"-1c")
+                        else:
+                            self.box.placetag("variable", last[1], point+"-1c")
+                    elif "'"+last[0] in self.e.variables:
+                        if isinstance(self.e.variables["'"+last[0]], usefunc) or (isinstance(self.e.variables["'"+last[0]], funcfloat) and not isinstance(self.e.variables["'"+last[0]], strfunc)):
+                            self.box.placetag("builtin", last[1], point+"-1c")
+                        else:
+                            self.box.placetag("variable", last[1], point+"-1c")
                     elif last[0] in ["inf", "nan"]:
                         self.box.placetag("digit", last[1], point+"-1c")
                     last = ("", point)
