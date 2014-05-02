@@ -243,13 +243,13 @@ def haskey(inputlist, key):
     else:
         return temp
 
-def clean(haystack, needle=""):
+def clean(haystack, needle="", func=False):
     """Recursively Removes An Item From A List."""
     cleaned = []
     for x in haystack:
         if islist(x):
             cleaned.append(clean(x, needle))
-        elif x != needle:
+        elif (not func and x != needle) or (func and not needle(x)):
             cleaned.append(x)
     return cleaned
 

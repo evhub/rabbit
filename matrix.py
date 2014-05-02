@@ -501,12 +501,18 @@ class matrix(mctobject):
             out.append(self.retreive(x))
         return out
 
-    def onlydiag(self):
+    def onlydiag(self, check=False):
         """Determines If The Matrix Is A Diagonal List."""
-        for y,x in self.coords():
-            if y != x and self.a[y][x] != self.prepare(0.0):
-                return False
-        return True
+        if check:
+            for y,x in self.coords():
+                if y != x and self.a[y][x] != self.prepare(0.0):
+                    return False
+            return True
+        else:
+            for x in self.a:
+                if not isinstance(x, fakelist):
+                    return False
+            return True
 
     def onlyrow(self):
         """Determines If The Matrix Is A Row List."""
@@ -693,3 +699,7 @@ def totlen(inputlist):
 def isnull(inputobject):
     """Determines If The Object Is An Empty Matrix."""
     return isinstance(inputobject, matrix) and len(inputobject) == 0
+
+def nonull(inputlist):
+    """Cleans The Input Of Empty Matrices."""
+    return clean(inputlist, isnull, True)

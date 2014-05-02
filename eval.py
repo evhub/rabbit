@@ -27,7 +27,7 @@ from .fraction import *
 
 class evaluator(object):
     """Evaluates Equations And Expressions."""
-    reserved = string.digits+':;@$~+-*^%/&|><!"=()[]\\,?`'
+    reserved = string.digits+':;@$~+-*^%/&|><!"=()[]\\,?`.'
 
     def __init__(self, variables=None, processor=None, gen=None):
         """Initializes The Evaluator."""
@@ -451,13 +451,15 @@ class evaluator(object):
         """Evaluates An Expression."""
         top = expression.split("~")
         for a in xrange(0, len(top)):
-            top[a] = top[a].split(",")
+            top[a] = top[a].split("..")
             for b in xrange(0, len(top[a])):
-                top[a][b] = splitinplace(top[a][b].split("+"), "-", "%/*^$:", 2)
+                top[a][b] = top[a][b].split(",")
                 for c in xrange(0, len(top[a][b])):
-                    top[a][b][c] = top[a][b][c].split("%")
+                    top[a][b][c] = splitinplace(top[a][b][c].split("+"), "-", "%/*^$:", 2)
                     for d in xrange(0, len(top[a][b][c])):
-                        top[a][b][c][d] = splitinplace(top[a][b][c][d].split("*"), "/")
+                        top[a][b][c][d] = top[a][b][c][d].split("%")
+                        for e in xrange(0, len(top[a][b][c][d])):
+                            top[a][b][c][d][e] = splitinplace(top[a][b][c][d][e].split("*"), "/")
         if self.debug:
             value = reassemble(top, ["~",",","+","%","*"])
             print(self.recursion*"  "+"=> "+value)
@@ -471,7 +473,7 @@ class evaluator(object):
     def eval_comp(self, complist, varname="x"):
         """Performs List Comprehension."""
         if len(complist) == 1:
-            return self.eval_list(complist[0])
+            return self.eval_join(complist[0])
         else:
             setvars = {}
             keys = []
@@ -483,11 +485,11 @@ class evaluator(object):
                     last = i
                 else:
                     keys.append(self.namefind(delist(i)))
-                    setvars[keys[-1]] = self.eval_list(last)
+                    setvars[keys[-1]] = self.eval_join(last)
                     last = None
             if last != None:
                 keys.append(varname)
-                setvars[keys[-1]] = self.eval_list(last)
+                setvars[keys[-1]] = self.eval_join(last)
             old = self.setvars(setvars)
             out = self.eval_comp_set(keys, setvars, item)
             self.setvars(old)
@@ -525,7 +527,7 @@ class evaluator(object):
                 for y in xrange(0, len(key)):
                     self.variables[key[y]] = units[x+y]
                 if len(keys) == 0:
-                    item = self.eval_list(tocalc)
+                    item = self.eval_join(tocalc)
                 else:
                     old = keys[:]
                     item = self.eval_comp_set(keys, setdict, tocalc)
@@ -546,9 +548,102 @@ class evaluator(object):
             for x in xrange(1, len(key)):
                 self.variables[key[x]] = matrix(0)
             if len(keys) == 0:
-                return self.eval_list(tocalc)
+                return self.eval_join(tocalc)
             else:
                 return self.eval_comp_set(keys, setdict, tocalc)
+
+    def eval_join(self, inputlist):
+        """Performs Concatenation."""
+        items = []
+        for x in inputlist:
+            items.append(self.eval_list(x))
+        items = nonull(items)
+        if len(items) == 0:
+            return matrix(0)
+        elif len(items) == 1:
+            return items[0]
+        else:
+            dostr = 0
+            dolist = 0
+            dobrack = 0
+            dodata = 0
+            domultidata = 0
+            domatrix = 0
+            rowlen = None
+            tot = len(items)
+            for x in items:
+                if isinstance(x, strcalc):
+                    dostr += 1
+                elif isinstance(x, matrix):
+                    dodata += 1
+                    if rowlen == None:
+                        rowlen = x.x
+                    if x.x == rowlen:
+                        domatrix += 1
+                        if rowlen == 2:
+                            domultidata += 1
+                    if len(x) == 1:
+                        dolist += 1
+                        dobrack += 1
+                    elif x.onlydiag():
+                        dolist += 1
+                    elif x.onlyrow():
+                        dobrack += 1
+                elif isinstance(x, multidata):
+                    domultidata += 1
+                elif isinstance(x, data):
+                    dodata += 1
+                else:
+                    domatrix -= 1
+                    domultidata -= 1
+                    tot -= 1
+            if dostr > 0:
+                out = strcalc("", self)
+                for x in items:
+                    out += x
+                return out
+            elif dolist == tot:
+                out = []
+                for x in items:
+                    if isinstance(x, matrix):
+                        out += x.getdiag()
+                    else:
+                        out.append(x)
+                return diagmatrixlist(out)
+            elif dobrack == tot:
+                out = []
+                for x in items:
+                    if isinstance(x, matrix):
+                        out += x[0]
+                    else:
+                        out.append(x)
+                return rowmatrixlist(out)
+            elif domatrix == tot:
+                out = []
+                for x in items:
+                    out += x.a
+                return matrixlist(out)
+            elif domultidata == tot:
+                out = []
+                for x in items:
+                    if isinstance(x, matrix):
+                        for l in x.a:
+                            out.append((l[0], l[1]))
+                    else:
+                        out += x.items()
+                return multidata(out)
+            elif dodata == tot:
+                out = []
+                for x in items:
+                    if isinstance(x, data):
+                        out += x.items()
+                    elif isinstance(x, matrix):
+                        out += x.getitems()
+                    else:
+                        out.append(x)
+                return data(out)
+            else:
+                raise TypeError
 
     def eval_list(self, inputlist):
         """Evaluates Matrices."""
