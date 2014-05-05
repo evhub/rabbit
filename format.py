@@ -74,6 +74,13 @@ def startswithany(inputstring, inputlist):
             return True
     return False
 
+def endswithany(inputstring, inputlist):
+    """Determines If A String Ends With Any Of A Set Of Items."""
+    for x in inputlist:
+        if inputstring.endswith(x):
+            return True
+    return False
+
 def madeof(inputstring, findstr):
     """Determines If A String Is Made Of Another String."""
     for x in inputstring:

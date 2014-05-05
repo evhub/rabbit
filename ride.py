@@ -137,11 +137,30 @@ Import Commands:
             popup("Error", "Unable To Find File.")
 
     def endline(self):
-        """Handles Help Questions."""
+        """Checks The Last Line."""
         last = self.box.output("insert-1l", "insert-1c")
         if last.endswith("?"):
             self.box.clear("insert-1l", "insert-1c")
             self.box.insert(self.findhelp(last[:-1]), "-1l")
+        else:
+            space = 0
+            start = True
+            instring = False
+            for x in last:
+                if start:
+                    if x in string.whitespace:
+                        space += 1
+                    else:
+                        start = False
+                if x == '"':
+                    instring = not instring
+                elif x in ["(", "["]:
+                    space += 1
+                elif x in [")", "]"]:
+                    space -= 1
+            if space <= 0 and endswithany(basicformat(last), "=:*+-%/^$@~\\|&;<>.,"):
+                space = 1
+            self.box.insert(" "*(space+instring))
 
     def highlight(self, point="insert"):
         """Checks The Last Character."""
