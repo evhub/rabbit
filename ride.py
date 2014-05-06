@@ -66,7 +66,7 @@ Import Commands:
         self.root.bind("<Control-s>", lambda event: self.handle(self.save))
         self.root.bind("<Control-l>", lambda event: self.handle(self.load))
         self.root.bind("<Control-n>", lambda event: self.box.clear())
-        self.root.bind("<Key>", lambda event: self.highlight())
+        self.root.bind("<Key>", lambda event: self.endchar())
         self.root.bind("<Return>", lambda event: self.endline())
         self.button_frame = Tkinter.Frame(self.root, height=1, width=40)
         self.button_frame.pack(side="bottom")
@@ -86,6 +86,7 @@ Import Commands:
         self.box.colortag("modifier", "cyan")
         self.box.colortag("digit", "darkgrey")
         self.box.colortag("builtin", "purple")
+        self.box.colortag("stringmod", "green")
         self.errorlog = {}
         self.ans = [matrix(0)]
         self.populator()
@@ -95,7 +96,7 @@ Import Commands:
             self.initialize()
         else:
             self.initialize(args=initializers)
-        self.register(lambda: self.highlightall(True), self.refresh)
+        self.register(lambda: self.endfile(True), self.refresh)
 
     def populator(self):
         """Creates An Evaluator And Lists Of Commands."""
@@ -175,7 +176,7 @@ Import Commands:
                 insert += "\\-"*space
             self.box.insert(insert)
 
-    def highlight(self, point="insert"):
+    def endchar(self, point="insert"):
         """Checks The Last Character."""
         point = str(point)
         test = self.box.output(point+"-1c", point)
@@ -191,28 +192,30 @@ Import Commands:
             self.box.placetag("reserved", point+"-1c", point)
         return test
 
-    def clearhighlight(self):
+    def remtags(self, start="1.0", end="end"):
         """Clears Highlighting."""
-        self.box.remtag("comment")
-        self.box.remtag("string")
-        self.box.remtag("reserved")
-        self.box.remtag("variable")
-        self.box.remtag("modifier")
-        self.box.remtag("digit")
-        self.box.remtag("builtin")
+        self.box.remtag("comment", start, end)
+        self.box.remtag("string", start, end)
+        self.box.remtag("reserved", start, end)
+        self.box.remtag("variable", start, end)
+        self.box.remtag("modifier", start, end)
+        self.box.remtag("digit", start, end)
+        self.box.remtag("builtin", start, end)
+        self.box.remtag("stringmod", start, end)
 
-    def highlightall(self, refresh=False):
-        """Highlights All Characters."""
-        self.clearhighlight()
+    def endfile(self, refresh=False):
+        """Checks All Characters."""
+        self.remtags()
         linelist = self.box.output().split("\n")
         instring = False
         incomment = False
         decimal = False
+        strmod = False
         last = ("", "1.0")
         for l in xrange(0, len(linelist)):
             for c in xrange(0, len(linelist[l])+1):
                 point = str(l+1)+"."+str(c)
-                test = self.highlight(point)
+                test = self.endchar(point)
                 if c == 1 and not test in string.whitespace:
                     if last[0] == funcfloat.allargs:
                         self.box.placetag("builtin", last[1], point+"-2c")
@@ -231,24 +234,29 @@ Import Commands:
                     incomment = False
                     instring = False
                     decimal = False
+                    strmod = False
                     last = ("", point+"-1c")
                 normal = False
                 if incomment:
-                    self.box.remtag("comment", point+"-1c", point)
-                    self.box.remtag("string", point+"-1c", point)
-                    self.box.remtag("reserved", point+"-1c", point)
-                    self.box.remtag("modifier", point+"-1c", point)
-                    self.box.remtag("digit", point+"-1c", point)
+                    self.remtags(point+"-1c", point)
                     self.box.placetag("comment", point+"-1c", point)
                 elif test == '"':
                     instring = not instring
+                    decimal = False
+                    strmod = False
                 elif instring:
-                    self.box.remtag("comment", point+"-1c", point)
-                    self.box.remtag("string", point+"-1c", point)
-                    self.box.remtag("reserved", point+"-1c", point)
-                    self.box.remtag("modifier", point+"-1c", point)
-                    self.box.remtag("digit", point+"-1c", point)
-                    self.box.placetag("string", point+"-1c", point)
+                    self.remtags(point+"-1c", point)
+                    if strmod:
+                        if test in "n'-":
+                            self.box.placetag("stringmod", point+"-1c", point)
+                        else:
+                            self.box.placetag("string", point+"-1c", point)
+                        strmod = False
+                    elif test == "\\":
+                        self.box.placetag("stringmod", point+"-1c", point)
+                        strmod = True
+                    else:
+                        self.box.placetag("string", point+"-1c", point)
                 elif test == "#":
                     incomment = True
                     decimal = False
@@ -285,7 +293,7 @@ Import Commands:
                         self.box.placetag("digit", last[1], point+"-1c")
                     last = ("", point)
         if refresh:
-            self.register(lambda: self.highlightall(True), self.refresh)
+            self.register(lambda: self.endfile(True), self.refresh)
 
     def load(self, name):
         """Loads A File."""
@@ -297,7 +305,7 @@ Import Commands:
             self.box.clear()
             self.box.display(readfile(tempfile))
             tempfile.close()
-            self.highlightall()
+            self.endfile()
             return True
 
     def save(self, name, load=True):
