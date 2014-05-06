@@ -118,7 +118,7 @@ Import Commands:
                 out += self.e.prepare(x, True, False)+"\n"
             out = out[:-1]
         self.show(out)
-        return strcalc(out, self.e)
+        return matrix(0)
 
     def anscall(self, variables):
         """Performs ans."""
