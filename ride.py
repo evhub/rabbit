@@ -167,13 +167,13 @@ Import Commands:
                     space += 1
                 elif not instring and x in [")", "]"]:
                     space -= 1
+            space += instring
             if space <= 0 and endswithany(basicformat(last), "=:*+-%/^$@~\\|&;<>.,"):
                 space = 1
+            insert = " "*space
             if instring:
-                space += 1
-                self.box.insert(" "*space+"\\-"*space)
-            else:
-                self.box.insert(" "*space)
+                insert += "\\-"*space
+            self.box.insert(insert)
 
     def highlight(self, point="insert"):
         """Checks The Last Character."""
