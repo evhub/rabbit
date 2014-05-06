@@ -170,7 +170,7 @@ Import Commands:
                 space = 1
             if instring:
                 space += 1
-                self.box.insert(" "space+"\\-"*space)
+                self.box.insert(" "*space+"\\-"*space)
             else:
                 self.box.insert(" "*space)
 
