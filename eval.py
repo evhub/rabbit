@@ -595,9 +595,10 @@ Global Operator Precedence List:
     def eval_join(self, inputlist):
         """Performs Concatenation."""
         items = []
-        for x in inputlist:
-            items.append(self.eval_list(x))
-        items = nonull(items)
+        for item in inputlist:
+            item = self.eval_list(item)
+            if not isnull(item):
+                items.append(item)
         if len(items) == 0:
             return matrix(0)
         elif len(items) == 1:

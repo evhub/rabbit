@@ -39,11 +39,9 @@ class matrix(mctobject):
         empty = self.prepare(empty)
         self.a = []
         if fake:
-            temp = fakelist(default=empty)
+            temp = fakelist(default=empty, length=self.x)
         else:
-            temp = []
-        for z in xrange(0, self.x):
-            temp.append(empty)
+            temp = [empty]*self.x
         for z in xrange(0, self.y):
             self.a.append(temp[:])
 
