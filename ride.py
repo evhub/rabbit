@@ -127,8 +127,8 @@ Import Commands:
             self.set_normal
             ]
         self.e = evaluator({
-            "print":self.printcall,
-            "ans":self.anscall
+            "print":funcfloat(self.printcall, self.e, "print"),
+            "ans":funcfloat(self.anscall, self.e, "ans")
             }, self)
 
     def handle(self, func):
@@ -148,19 +148,31 @@ Import Commands:
             instring = False
             for x in last:
                 if start:
-                    if x in string.whitespace:
+                    if start == 2:
+                        if x == "-":
+                            instring = True
+                            space -= 1
+                        else:
+                            start = False
+                    elif x in string.whitespace:
                         space += 1
+                    elif x == "\\":
+                        start = 2
                     else:
                         start = False
                 if x == '"':
                     instring = not instring
-                elif x in ["(", "["]:
+                elif not instring and x in ["(", "["]:
                     space += 1
-                elif x in [")", "]"]:
+                elif not instring and x in [")", "]"]:
                     space -= 1
             if space <= 0 and endswithany(basicformat(last), "=:*+-%/^$@~\\|&;<>.,"):
                 space = 1
-            self.box.insert(" "*(space+instring))
+            if instring:
+                space += 1
+                self.box.insert(" "space+"\\-"*space)
+            else:
+                self.box.insert(" "*space)
 
     def highlight(self, point="insert"):
         """Checks The Last Character."""

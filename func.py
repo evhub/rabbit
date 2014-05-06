@@ -319,6 +319,10 @@ class strcalc(numobject):
                     x = '"'
                 elif x == "n":
                     x = "\n"
+                elif x == "-":
+                    if len(self.calcstr) > 0:
+                        self.calcstr = self.calcstr[:-1]
+                    x = ""
             elif x == "\\":
                 func = True
                 x = ""

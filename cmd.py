@@ -176,9 +176,9 @@ Import Commands:
             self.set_normal
             ]
         self.e = evaluator({
-            "print":self.printcall,
-            "ans":self.anscall,
-            "grab":self.grabcall
+            "print":funcfloat(self.printcall, self.e, "print"),
+            "ans":funcfloat(self.anscall, self.e, "ans"),
+            "grab":funcfloat(self.grabcall, self.e, "grab")
             }, self)
 
     def initialize(self, args=()):
@@ -220,7 +220,7 @@ Import Commands:
                 break
             cmdlist[x] = carefulsplit(cmdlist[x], "#")[0]
             while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or cmdlist[x+1][0] in string.whitespace):
-                cmdlist[x] += cmdlist.pop(x+1)
+                cmdlist[x] += "\n"+cmdlist.pop(x+1)
             self.process(cmdlist[x])
             x += 1
 
