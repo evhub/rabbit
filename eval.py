@@ -343,8 +343,7 @@ class evaluator(object):
                 indexstr = "`"+str(self.count)+"`"
                 self.count += 1
                 command += indexstr
-                newcmd = self.calc_paren(x)
-                self.variables[indexstr] = newcmd
+                self.variables[indexstr] = self.calc_paren(x)
         return command
 
     def calc_pieces(self, expression):
