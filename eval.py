@@ -26,7 +26,41 @@ from .fraction import *
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class evaluator(object):
-    """Evaluates Equations And Expressions."""
+    """Evaluates Equations And Expressions.
+
+Global Operator Precedence List:
+    "       Opens and closes strings.
+    []      Opens and closes matrix rows.
+    ()      Opens and closes parentheses.
+
+    ;       Seperates conditionals (read as 'else').
+    @       Checks a conditional (read as 'if' or 'at').
+
+    |       Performs logical 'or'.
+    &       Performs logical 'and'.
+    >?!=<   Performs equality or inequality checks.
+
+    ~       Used in list looping.
+    ..      Performs concatenation.
+    ,       Seperates list elements.
+    +-      Performs addition and subtraction.
+    %       Performs modulo.
+    */      Performs multiplication and division.
+
+    $       Opens low-level parentheses.
+
+    var     Evaluates variables.
+    none    Evaluates empty expressions.
+    -       Evaluates negatives.
+    /       Evaluates recipricols.
+    ^       Evaluates exponentiation.
+    \       Evaluates lambdas.
+    !       Evaluates factorials.
+    :       Evaluates function calls.
+    d       Evaluates dice rolls.
+    `       Evaluates parentheses.
+    .       Evaluates methods.
+    normal  Evaluates numbers."""
     reserved = string.digits+':;@$~+-*^%/&|><!"=()[]\\,?`.'
 
     def __init__(self, variables=None, processor=None, gen=None):
@@ -417,12 +451,12 @@ class evaluator(object):
         """Evaluates The Equation Part Of A Boolean Expression."""
         if not islist(inputlist):
             return self.calc_eval(inputlist)
-        elif inputlist[0] == ">=" or inputlist[0] == "=>":
+        elif inputlist[0] in [">=", "=>"]:
             value = self.calc_round(inputlist[1])
             for x in xrange(2, len(inputlist)):
                 value = value >= self.calc_round(inputlist[x])
             return value
-        elif inputlist[0] == "<=" or inputlist[0] == "=<":
+        elif inputlist[0] in ["<=", "=<"]:
             value = self.calc_round(inputlist[1])
             for x in xrange(2, len(inputlist)):
                 value = value <= self.calc_round(inputlist[x])
@@ -437,12 +471,12 @@ class evaluator(object):
             for x in xrange(2, len(inputlist)):
                 value = value < self.calc_round(inputlist[x])
             return value
-        elif inputlist[0] == "!=" or inputlist[0] == "<>":
+        elif inputlist[0] in ["!=", "<>"]:
             value = self.calc_round(inputlist[1])
             for x in xrange(2, len(inputlist)):
                 value = value != self.calc_round(inputlist[x])
             return value
-        elif inputlist[0] == "=" or inputlist[0] == "?=":
+        elif inputlist[0] in ["=", "?="]:
             value = self.calc_round(inputlist[1])
             for x in xrange(2, len(inputlist)):
                 value = value == self.calc_round(inputlist[x])
