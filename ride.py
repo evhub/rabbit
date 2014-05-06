@@ -126,10 +126,11 @@ Import Commands:
             self.set_def,
             self.set_normal
             ]
-        self.e = evaluator({
+        self.e = evaluator(processor=self)
+        self.e.makevars({
             "print":funcfloat(self.printcall, self.e, "print"),
             "ans":funcfloat(self.anscall, self.e, "ans")
-            }, self)
+            })
 
     def handle(self, func):
         """Handles A Function."""

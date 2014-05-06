@@ -122,8 +122,7 @@ class evaluator(object):
             "'"+funcfloat.allargs:matrix(0)
             }
         if variables != None:
-            for k,v in variables.items():
-                self.variables[k] = v
+            self.makevars(variables)
         self.calls = [
             self.call_var,
             self.call_none,
@@ -139,6 +138,11 @@ class evaluator(object):
             self.call_normal
             ]
         self.count = 0
+
+    def makevars(self, variables):
+        """Forcibly Stores Variables."""
+        for k,v in variables.items():
+            self.variables[k] = v
 
     def store(self, name, value):
         """Stores A Variable."""
