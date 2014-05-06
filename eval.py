@@ -300,7 +300,11 @@ class evaluator(object):
 
     def calc_top(self, expression):
         """Begins Calculation."""
-        value = self.calc_paren(fullsplit(self.calc_brack(fullsplit(delspace(self.calc_string(expression)), "[", "]")), "(", ")"))
+        value = self.calc_paren(fullsplit(
+                    self.calc_brack(fullsplit(
+                        delspace(self.calc_string(expression)),
+                    "[", "]")),
+                "(", ")"))
         if self.debug:
             print(self.recursion*"  "+"| "+self.prepare(value, False, True, True))
         return self.calc_pieces(value)
@@ -320,7 +324,7 @@ class evaluator(object):
         return command
 
     def calc_brack(self, bracklist):
-        """Evaluates The Bracket Parts Of An Expression."""
+        """Evaluates The Bracket Part Of An Expression."""
         command = ""
         for x in bracklist:
             if istext(x):
