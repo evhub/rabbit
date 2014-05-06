@@ -47,8 +47,6 @@ Global Operator Precedence List:
     %       Performs modulo.
     */      Performs multiplication and division.
 
-    $       Opens low-level parentheses.
-
     var     Evaluates variables.
     none    Evaluates empty expressions.
     -       Evaluates negatives.
@@ -61,7 +59,8 @@ Global Operator Precedence List:
     `       Evaluates parentheses.
     .       Evaluates methods.
     normal  Evaluates numbers."""
-    reserved = string.digits+':;@$~+-*^%/&|><!"=()[]\\,?`.'
+
+    reserved = string.digits+':;@~+-*^%/&|><!"=()[]\\,?`.'
 
     def __init__(self, variables=None, processor=None, gen=None):
         """Initializes The Evaluator."""
@@ -496,7 +495,7 @@ Global Operator Precedence List:
             for b in xrange(0, len(top[a])):
                 top[a][b] = top[a][b].split(",")
                 for c in xrange(0, len(top[a][b])):
-                    top[a][b][c] = splitinplace(top[a][b][c].split("+"), "-", "%/*^$:", 2)
+                    top[a][b][c] = splitinplace(top[a][b][c].split("+"), "-", "%/*^:", 2)
                     for d in xrange(0, len(top[a][b][c])):
                         top[a][b][c][d] = top[a][b][c][d].split("%")
                         for e in xrange(0, len(top[a][b][c][d])):
@@ -735,14 +734,6 @@ Global Operator Precedence List:
         """Evaluates A Variable."""
         if self.debug:
             print(self.recursion*"  "+"-> "+inputstring)
-        inputstring = inputstring.split("$", 1)
-        if len(inputstring) == 1:
-            inputstring = inputstring[0]
-        elif len(inputstring) == 2:
-            indexstr = "`"+str(self.count)+"`"
-            self.count += 1
-            self.variables[indexstr] = inputstring[1]
-            inputstring = inputstring[0]+indexstr
         self.recursion += 1
         for func in self.calls:
             value = func(inputstring)
