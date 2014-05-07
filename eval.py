@@ -501,7 +501,7 @@ Global Operator Precedence List:
                         for e in xrange(0, len(top[a][b][c][d])):
                             top[a][b][c][d][e] = splitinplace(top[a][b][c][d][e].split("*"), "/")
         if self.debug:
-            value = reassemble(top, ["~",",","+","%","*"])
+            value = reassemble(top, ["~", ",", "+", "%", "*"])
             print(self.recursion*"  "+"=> "+value)
         self.recursion += 1
         out = self.eval_check(self.eval_comp(top))

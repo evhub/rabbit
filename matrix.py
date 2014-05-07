@@ -45,9 +45,11 @@ class matrix(mctobject):
         for z in xrange(0, self.y):
             self.a.append(temp[:])
 
-    def new(self):
+    def new(self, y=None, x=None, fake=None):
         """Creates A New Matrix With The Same Basic Attributes."""
-        return matrix(self.y, self.x, converter=self.converter)
+        if fake == None:
+            fake = self.onlydiag()
+        return matrix(y or self.y, x or self.x, converter=self.converter, fake=fake)
 
     def copy(self):
         """Creates A Copy Of The Matrix."""
@@ -133,7 +135,7 @@ class matrix(mctobject):
         """Performs Multiplication."""
         if isinstance(other, matrix):
             if self.x == other.y:
-                out = matrix(self.y, other.x, converter=self.converter)
+                out = self.new(self.y, other.x)
                 for y,x in out.coords():
                     v = 0
                     for z in xrange(0, self.x):
@@ -165,9 +167,11 @@ class matrix(mctobject):
                     out.store(y, x, self.retreive(y, x)+other.retreive(y, x))
             else:
                 raise IndexError
+        elif other == 0:
+            out = self.copy()
         elif self.onlydiag():
             length = self.lendiag()
-            out = matrix(length, length, converter=self.converter)
+            out = self.new(length, length)
             for x in xrange(0, length):
                 out.store(x, x, self.retreive(x)+other)
         else:
@@ -185,10 +189,10 @@ class matrix(mctobject):
                     self.store(y, x, self.retreive(y, x)+other.retreive(y, x))
             else:
                 raise IndexError
-        elif self.onlydiag():
+        elif other != 0 and self.onlydiag():
             for x in xrange(0, self.lendiag()):
                 self.store(x, x, self.retreive(x)+other)
-        else:
+        elif other != 0:
             for y,x in self.coords():
                 self.store(y, x, self.retreive(y, x)+other)
         return self
@@ -499,18 +503,15 @@ class matrix(mctobject):
             out.append(self.retreive(x))
         return out
 
-    def onlydiag(self, check=False):
+    def onlydiag(self):
         """Determines If The Matrix Is A Diagonal List."""
-        if check:
-            for y,x in self.coords():
-                if y != x and self.a[y][x] != self.prepare(0.0):
-                    return False
-            return True
-        else:
-            for x in self.a:
-                if not isinstance(x, fakelist):
-                    return False
-            return True
+        for x in self.a:
+            if not isinstance(x, fakelist):
+                return False
+        for y,x in self.coords():
+            if y != x and self.a[y][x] != self.prepare(0.0):
+                return False
+        return True
 
     def onlyrow(self):
         """Determines If The Matrix Is A Row List."""
