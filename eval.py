@@ -49,15 +49,15 @@ Global Operator Precedence List:
 
     var     Evaluates variables.
     none    Evaluates empty expressions.
-    -       Evaluates negatives.
-    /       Evaluates recipricols.
-    ^       Evaluates exponentiation.
-    \       Evaluates lambdas.
-    !       Evaluates factorials.
-    :       Evaluates function calls.
-    d       Evaluates dice rolls.
-    `       Evaluates parentheses.
-    .       Evaluates methods.
+    -       Denotes negatives.
+    /       Denotes reciprocals.
+    ^       Performs exponentiation.
+    \       Creates a lambda.
+    !       Performs factorial.
+    :       Performs function calls.
+    d       Performs dice rolls.
+    `       Denotes parentheses.
+    .       Denotes methods.
     normal  Evaluates numbers."""
 
     reserved = string.digits+':;@~+-*^%/&|><!"=()[]\\,?`.'
