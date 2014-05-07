@@ -91,31 +91,21 @@ class interpreter(base):
                 if not x.startswith("_"):
                     self.show("  "+x)
         elif codestring.startswith("help "):
-            stringname = ""
-            for x in xrange(5, len(codestring)):
-                stringname += codestring[x]
+            stringname = codestring[5:]
             self.docmd("self.app.display(" + stringname + ".__doc__)")
         elif codestring.startswith("print "):
-            stringname = ""
-            for x in xrange(6, len(codestring)):
-                stringname += codestring[x]
+            stringname = codestring[6:]
             self.docmd("self.app.display(" + stringname + ")")
         elif codestring.startswith("run "):
-            stringname = ""
-            for x in xrange(4, len(codestring)):
-                stringname += codestring[x]
+            stringname = codestring[4:]
             execfile(stringname)
         elif codestring.startswith("format "):
-            stringname = ""
-            for x in xrange(7, len(codestring)):
-                stringname += codestring[x]
+            stringname = codestring[7:]
             openedfile = openfile(stringname, "r+b")
             writefile(openedfile, readfile(openedfile))
             openedfile.close()
         elif codestring.startswith("compute "):
-            stringname = ""
-            for x in xrange(8, len(codestring)):
-                stringname += codestring[x]
+            stringname = codestring[8:]
             compute("__builtins__(" + stringname + ")", self.app.display)
         else:
             if formatisyes(self.codehelp):
