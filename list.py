@@ -47,7 +47,7 @@ class fakelist(cotobject):
 
     def append(self, item):
         """Appends An Item."""
-        self[len(self)] = item
+        self.store(len(self), item)
 
     def new(self, length=None, inputlist=None):
         """Creates An Empty Fake List With The Same Parameters."""
@@ -108,6 +108,13 @@ class fakelist(cotobject):
             return False
 
     def __setitem__(self, x, item):
+        """Checks An Index And Sets It To A Value."""
+        if -1*len(self) < x and x < len(self):
+            self.store(x, item)
+        else:
+            raise IndexError
+
+    def store(self, x, item):
         """Sets An Index To A Value."""
         x = int(x)
         if x < 0:
