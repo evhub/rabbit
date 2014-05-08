@@ -28,7 +28,7 @@ from .eval import *
 class mathbase(safebase):
     """A Base Class For PythonPlus Evaluators."""
     helpstring = """Basic Commands:
-    <command> [>> <command> >> <command>...]
+    <command> [~~ <command> ~~ <command>...]
     <name> [:]= <expression>
 Expressions:
     <item>, [<item>, <item>...]
@@ -261,7 +261,7 @@ Import Commands:
 
     def pre_cmd(self, inputstring):
         """Evaluates Commands."""
-        for original in carefulsplit(inputstring, ">>"):
+        for original in carefulsplit(inputstring, "~~"):
             if delspace(original) != "":
                 original = basicformat(original)
                 for func in self.cmds:

@@ -27,7 +27,7 @@ from .cmd import *
 class editor(mathbase):
     """The Rabbit Integrated Development Environment."""
     helpstring = """Basic Commands:
-    <command> [>> <command> >> <command>...]
+    <command> [~~ <command> ~~ <command>...]
     <name> [:]= <expression>
 Expressions:
     <item>, [<item>, <item>...]
