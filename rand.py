@@ -137,14 +137,6 @@ class random(object):
         else:
             return False
 
-    def getkey(self):
-        """Returns The Seed Key."""
-        return self.key
-
-    def getpos(self):
-        """Returns The Current Position."""
-        return self.counter
-
     def choosefloat(self, rangestop):
         """Chooses A Random Float From The Range [0, rangestop]."""
         return self.getfloat()*rangestop

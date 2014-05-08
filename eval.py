@@ -62,7 +62,7 @@ Global Operator Precedence List:
 
     reserved = string.digits+':;@~+-*^%/&|><!"=()[]\\,?`.'
 
-    def __init__(self, variables=None, processor=None, gen=None):
+    def __init__(self, variables=None, processor=None):
         """Initializes The Evaluator."""
         self.processor = processor
         try:
@@ -75,10 +75,6 @@ Global Operator Precedence List:
             self.info = ""
         self.recursion = 0
         self.overflow = []
-        if gen == None:
-            self.gen = random()
-        else:
-            self.gen = gen
         funcs = evalfuncs(self)
         self.variables = {
             "type":funcfloat(funcs.typecall, self, "type"),
@@ -116,6 +112,7 @@ Global Operator Precedence List:
             "data":funcfloat(funcs.datacall, self, "data"),
             "frac":funcfloat(funcs.fractcall, self, "frac"),
             "simp":funcfloat(funcs.simpcall, self, "simp"),
+            "d":funcfloat(funcs.randcall, self, "d"),
             "floor":usefunc(math.floor, self, "floor", ["x"]),
             "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
             "log":usefunc(math.log10, self, "log", ["x"]),
@@ -165,7 +162,6 @@ Global Operator Precedence List:
             self.call_lambda,
             self.call_fact,
             self.call_colon,
-            self.call_roll,
             self.call_paren,
             self.call_method,
             self.call_normal
@@ -254,6 +250,8 @@ Global Operator Precedence List:
                 out = out[:-2]
             elif out.endswith("L"):
                 out = out[:-1]
+        elif bottom and isinstance(item, rollfunc):
+            out = "d:"+self.prepare(item.stop, False, bottom)
         elif bottom and isinstance(item, strfunc):
             out = ""
             if isinstance(item, integbase):
@@ -954,22 +952,6 @@ Global Operator Precedence List:
                         self.overflow = []
                         value = getcall(value)(temp)
                 return value
-
-    def call_roll(self, inputstring):
-        """Evaluates A Roll."""
-        teststr = inputstring.split("d")
-        if len(teststr) == 2 and (teststr[0] == "" or isreal(teststr[0]) != None or teststr[0] in self.variables) and (isreal(teststr[1]) != None or teststr[1] in self.variables):
-            if teststr[0] == "":
-                teststr[0] = 1
-            else:
-                teststr[0] = int(self.eval_call(teststr[0]))
-            teststr[1] = int(self.eval_call(teststr[1]))
-            value = 0.0
-            if teststr[0] == 0 or teststr[1] == 0:
-                return value
-            for x in xrange(0, teststr[0]):
-                value += self.gen.chooseint(int(teststr[1]))+1
-            return value
 
     def call_paren(self, inputstring):
         """Evaluates Parentheses."""
@@ -1785,3 +1767,15 @@ class evalfuncs(object):
                 return integfuncfloat(func, accuracy, self.e)
             else:
                 return integfunc(str(func), accuracy, self.e, varname)
+
+    def randcall(self, variables):
+        """Returns A Random Number Generator Object."""
+        if variables == None or len(variables) == 0:
+            return matrix(0)
+        else:
+            stop = getnum(variables[0])
+            key = None
+            if len(variables) > 1:
+                key = self.e.prepare(variables[1], True, False)
+                self.e.overflow = variables[2:]
+            return rollfunc(stop, self.e, key)

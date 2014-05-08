@@ -935,3 +935,57 @@ def datamatrix(inputmatrix):
         return multidata(datax, datay)
     else:
         return data(inputmatrix.getitems())
+
+class rollfunc(strfunc):
+    """Implements A Random Number Generator Object."""
+    def __init__(self, stop, e, key=None, varname="times", name="rollfunc"):
+        """Creates The Random Number Generator."""
+        self.gen = random(key)
+        self.stop = float(stop)
+        self.funcstr = str(self.stop)
+        self.variables = [str(varname)]
+        self.name = str(name)
+        self.e = e
+    def copy(self):
+        """Copies The Random Number Generator."""
+        return rollfunc(self.stop, self.e, self.gen.key, self.name)
+    def calc(self, m=1.0):
+        """Generates A Random Number."""
+        stop = self.stop*m
+        if stop > 1 and stop == int(stop):
+            return 1+self.gen.chooseint(int(stop))
+        else:
+            return 1.0+self.gen.choosefloat(float(stop))
+    def call(self, variables):
+        """Generates Random Numbers."""
+        variables = varproc(variables)
+        if variables == None:
+            out = self
+        elif len(variables) == 0 or (len(variables) == 1 and isnull(variables[0])):
+            out = self.call([1.0])
+        elif len(variables) > 1:
+            out = self.call([diagmatrixlist(variables)])
+        elif isinstance(variables[0], (matrix, data, multidata)):
+            out = variables[0].code(lambda x: self.call([x]))
+        else:
+            out = 0.0
+            for x in xrange(0, int(variables[0])):
+                out += self.calc()
+            if variables[0] > int(variables[0]):
+                out += self.calc(variables[0]-int(variables[0]))
+        return out
+    def __float__(self):
+        """Retreives A Float."""
+        return float(self.calc())
+    def __int__(self):
+        """Retreives An Integer."""
+        return int(self.calc())
+    def __imul__(self, other):
+        """Performs Multiplication."""
+        if other == 1.0 or isnull(other):
+            return self
+        else:
+            return strfloat(self.name+":(("+self.e.prepare(other, False, True)+")*"+self.variables[0]+")", self.e, self.variables, {self.name:self, self.variables[0]:1.0})
+    def __rmul__(self, other):
+        """Performs Reverse Multiplication."""
+        return self.__imul__(other)

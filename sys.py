@@ -71,6 +71,14 @@ def scan(variables=None, lenfunc=len):
     out.sort()
     return out
 
+def printret(*args):
+    """Prints And Returns Values."""
+    print(*args)
+    if len(args) == 1:
+        return args[0]
+    elif len(args) > 1:
+        return args
+
 def getos(findos=None):
     """Determines The Current Operating System."""
     if findos == None:

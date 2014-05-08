@@ -404,6 +404,7 @@ class usefunc(funcfloat):
         return usefunc(self.func, self.e, self.funcstr, self.variables, self.extras, self.overflow)
     def call(self, params):
         """Calls The Function."""
+        params = varproc(params)
         if params == None:
             return strfloat(self.funcstr+":"+strlist(self.variables,":"), self.e, self.variables)
         elif len(params) < len(self.variables):
@@ -430,6 +431,7 @@ class unifunc(funcfloat):
         return unifunc(self.precall, self.e, self.funcstr)
     def call(self, args):
         """Performs A Universalized Function Call."""
+        args = varproc(args)
         if args == None:
             return strfloat(self.funcstr+":x", self.e, ["x"])
         elif islist(args):
@@ -488,6 +490,7 @@ class derivbase(object):
             return out
     def call(self, variables):
         """Calls The Derivative Function."""
+        variables = varproc(variables)
         if variables == None:
             return self
         elif len(variables) == 0:
@@ -510,14 +513,14 @@ class integbase(derivbase):
 
 class derivfunc(derivbase, strfunc):
     """Implements A Derivative Function."""
-    def __init__(self, funcstr, n, accuracy, scaledown, e, varname="x", personals=None, name="func"):
+    def __init__(self, funcstr, n, accuracy, scaledown, e, varname="x", personals=None, name="derivfunc"):
         """Creates The Derivative Function."""
         self.name = str(name)
         self.funcstr = str(funcstr)
         self.n = int(n)
         self.accuracy = float(accuracy)
         self.scaledown = float(scaledown)
-        self.variables = [varname]
+        self.variables = [str(varname)]
         if personals == None:
             self.personals = {}
         else:
@@ -530,12 +533,12 @@ class derivfunc(derivbase, strfunc):
 
 class integfunc(integbase, strfunc):
     """Implements An Integral Function."""
-    def __init__(self, funcstr, accuracy, e, varname="x", personals=None, name="func"):
+    def __init__(self, funcstr, accuracy, e, varname="x", personals=None, name="integfunc"):
         """Creates The Integral Function."""
         self.name = str(name)
         self.funcstr = str(funcstr)
         self.accuracy = float(accuracy)
-        self.variables = [varname]
+        self.variables = [str(varname)]
         if personals == None:
             self.personals = {}
         else:
@@ -548,7 +551,7 @@ class integfunc(integbase, strfunc):
 
 class derivfuncfloat(derivbase, funcfloat):
     """Implements A Derivative Function Of A Fake Function."""
-    def __init__(self, func, n, accuracy, scaledown, e, funcstr="func"):
+    def __init__(self, func, n, accuracy, scaledown, e, funcstr="derivfunc"):
         """Creates The Derivative Function."""
         self.n = int(n)
         self.accuracy = float(accuracy)
@@ -568,7 +571,7 @@ class derivfuncfloat(derivbase, funcfloat):
 
 class integfuncfloat(integbase, funcfloat):
     """Implements An Integral Function Of A Fake Function."""
-    def __init__(self, func, accuracy, e, funcstr="func"):
+    def __init__(self, func, accuracy, e, funcstr="integfunc"):
         """Creates The Integral Float Function."""
         self.accuracy = float(accuracy)
         self.funcstr = str(funcstr)
