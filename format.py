@@ -159,10 +159,10 @@ def listsuperformat(inputlist):
         newlist.append(superformat(y))
     return newlist
 
-def delspace(inputstring):
+def delspace(inputstring, wipestring=string.whitespace):
     """Removes All Whitespace From A String."""
     outstring = basicformat(inputstring)
-    for x in string.whitespace:
+    for x in wipestring:
         outstring = outstring.replace(x,"")
     return outstring
 
@@ -290,13 +290,14 @@ def splitinplace(inputlist, findstr, reserved="", domod=None):
                 outlist.append(findstr+test[i])
     return outlist
 
-def carefulsplit(inputstring, splitstring, holdstring='"'):
+def carefulsplit(inputstring, splitstring, holdstring='"', openstr="", closestr=""):
     """Splits A String By Something Not Inside Something Else."""
     out = [""]
     hold = False
+    level = 0
     check = 0
     for x in inputstring:
-        if not hold and x == splitstring[check]:
+        if not hold and level >= 0 and x == splitstring[check]:
             check += 1
             if check == len(splitstring):
                 out.append("")
@@ -306,10 +307,9 @@ def carefulsplit(inputstring, splitstring, holdstring='"'):
                 out[-1] += splitstring[:check]
                 check = 0
             if x == holdstring:
-                if hold:
-                    hold = False
-                else:
-                    hold = True
+                hold = not hold
+            level -= x == openstr
+            level += x == closestr
             out[-1] += x
     return out
 

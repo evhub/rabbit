@@ -57,10 +57,10 @@ Global Operator Precedence List:
     :       Performs function calls.
     d       Performs dice rolls.
     `       Denotes parentheses.
-    .       Denotes methods.
+    .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
 
-    reserved = string.digits+':;@~+-*^%/&|><!"=()[]\\,?`.'
+    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?`.'
 
     def __init__(self, variables=None, processor=None):
         """Initializes The Evaluator."""
@@ -187,7 +187,23 @@ Global Operator Precedence List:
 
     def prepare(self, item, top=False, bottom=True, indebug=False):
         """Prepares The Output Of An Evaluation."""
-        if isinstance(item, (data, multidata)):
+        if isinstance(item, classcalc):
+            out = "{"
+            if top:
+                out += "\n"
+            for k,v in item.variables.items():
+                out += " "+k+" = "+self.prepare(v, False, bottom)+" ~~"
+                if top:
+                    out += "\n"
+            if len(item.variables) > 0:
+                out = out[:-1*(3+top)]
+                if top:
+                    out += "\n"
+                out += " "
+            elif top:
+                out = out[:-1]
+            out += "}"
+        elif isinstance(item, (data, multidata)):
             if bottom:
                 out = "data:(" + self.prepare(item.tomatrix(), False, True) + ")"
             else:
@@ -204,12 +220,14 @@ Global Operator Precedence List:
                 out += ")"
             elif top or item.onlyrow():
                 out = ""
+                if not item.onlyrow():
+                    out += "matrix:\n"
                 for y in item.a:
-                    out += "["
+                    out += " ["
                     for x in y:
                         out += self.prepare(x, False, bottom)+","
-                    out = out[:-1]+"]\n"
-                out = out[:-1]
+                    out = out[:-1]+"]:\n"
+                out = out[:-2]
             else:
                 out = "matrix:["
                 for y in item.a:
@@ -333,7 +351,9 @@ Global Operator Precedence List:
         """Begins Calculation."""
         value = self.calc_paren(fullsplit(
                     self.calc_brack(fullsplit(
-                        delspace(self.calc_string(expression)),
+                        self.calc_class(fullsplit(
+                            delspace(self.calc_string(expression)),
+                        "{", "}")),
                     "[", "]")),
                 "(", ")"))
         if self.debug:
@@ -354,8 +374,30 @@ Global Operator Precedence List:
                 self.variables[indexstr] = strcalc(strlist[x], self)
         return command
 
+    def calc_class(self, curlylist):
+        """Evaluates The Curly Brackets In An Expression."""
+        command = ""
+        for x in curlylist:
+            if istext(x):
+                command += x
+            else:
+                indexstr = "`"+str(self.count)+"`"
+                self.count += 1
+                command += indexstr
+                oldvars = self.variables.copy()
+                returned = self.processor.returned
+                self.processor.process(self.calc_class(x))
+                self.processor.returned = returned
+                newvars = {}
+                for x in self.variables:
+                    if not self.isreserved(x) and (not x in oldvars or not self.variables[x] is oldvars[x]):
+                        newvars[x] = self.variables[x]
+                self.variables = oldvars
+                self.variables[indexstr] = classcalc(newvars, self)
+        return command
+
     def calc_brack(self, bracklist):
-        """Evaluates The Bracket Part Of An Expression."""
+        """Evaluates The Brackets In An Expression."""
         command = ""
         for x in bracklist:
             if istext(x):
@@ -499,7 +541,7 @@ Global Operator Precedence List:
                         for e in xrange(0, len(top[a][b][c][d])):
                             top[a][b][c][d][e] = splitinplace(top[a][b][c][d][e].split("*"), "/")
         if self.debug:
-            value = reassemble(top, ["~", ",", "+", "%", "*"])
+            value = reassemble(top, ["~", "..", ",", "+", "%", "*"])
             print(self.recursion*"  "+"=> "+value)
         self.recursion += 1
         out = self.eval_check(self.eval_comp(top))
@@ -703,16 +745,14 @@ Global Operator Precedence List:
 
     def eval_add(self, inputlist):
         """Evaluates The Addition Part Of An Expression."""
-        value = 0.0
-        done = 0
-        for x in inputlist:
-            item = self.eval_mod(x)
-            if not isnull(item):
-                value += item
-                done = 1
-        if done == 0:
+        if len(inputlist) == 0:
             return matrix(0)
         else:
+            value = self.eval_mod(inputlist[0])
+            for x in xrange(1, len(inputlist)):
+                item = self.eval_mod(inputlist[x])
+                if not isnull(item):
+                    value += item
             return value
 
     def eval_mod(self, inputlist):
@@ -724,10 +764,15 @@ Global Operator Precedence List:
 
     def eval_mul(self, inputlist):
         """Evaluates The Multiplication Part Of An Expression."""
-        value = self.eval_call(inputlist[0])
-        for x in xrange(1, len(inputlist)):
-            value *= self.eval_call(inputlist[x])
-        return value
+        if len(inputlist) == 0:
+            return matrix(0)
+        else:
+            value = self.eval_call(inputlist[0])
+            for x in xrange(1, len(inputlist)):
+                item = self.eval_call(inputlist[x])
+                if not isnull(item):
+                    value *= item
+            return value
 
     def eval_call(self, inputstring):
         """Evaluates A Variable."""
@@ -946,8 +991,13 @@ Global Operator Precedence List:
                         value = strcalc(item[int(params[0]):int(params[1])], self)
                 else:
                     self.overflow = []
+                    docalc = False
+                    if isnull(params[-1]):
+                        params.pop()
+                        docalc = True
                     value = getcall(item)(params)
-                    while len(self.overflow) > 0:
+                    while docalc or len(self.overflow) > 0:
+                        docalc = False
                         temp = self.overflow[:]
                         self.overflow = []
                         value = getcall(value)(temp)
@@ -1027,7 +1077,7 @@ Global Operator Precedence List:
                     values.append(-1.0)
                 elif "." in inputlist[x]:
                     itemlist = inputlist[x].split(".")
-                    if isreal(itemlist[0]) == None:
+                    if isreal(itemlist[0]) == None and not (itemlist[0] in self.variables and isinstance(self.variables[itemlist[0]], classcalc)):
                         itemlist[0] = self.funcfind(itemlist[0])
                         values.append(itemlist)
                     else:
@@ -1039,18 +1089,16 @@ Global Operator Precedence List:
                     if self.debug:
                         self.info = " (<)"
                     values[x] = self.calc(values[x])
+            values = clean(values, isnull, True)
             if self.debug:
                 temp = strlist(values," < ",converter=lambda x: self.prepare(x, False, True, True))
                 print(self.recursion*"  "+"(>) "+temp)
                 self.recursion += 1
-            while len(values) > 0 and isnull(values[0]):
-                values.pop(0)
             value = (len(values) != 0 and values[0]) or matrix(0)
             for x in xrange(1, len(values)):
                 values[x] = values[x]
                 if isnum(value) or (iseval(value) and not hascall(value)):
-                    if not isnull(values[x]):
-                        value *= values[x]
+                    value *= values[x]
                 elif isinstance(values[x], matrix) and values[x].onlydiag():
                     value = getcall(value)(values[x].getdiag())
                 else:
@@ -1063,11 +1111,18 @@ Global Operator Precedence List:
     def call_method(self, inputstring):
         """Returns Method Instances."""
         if "." in inputstring:
+            inputlist = inputstring.split(".")
             test = True
-            for x in inputstring.split("."):
+            for x in inputlist:
                 test = test and x and not madeof(x, string.digits)
             if test:
-                return strfunc(inputstring+"("+funcfloat.allargs+")", self, [funcfloat.allargs])
+                if inputlist[0] in self.variables and isinstance(self.variables[inputlist[0]], classcalc):
+                    out = "("+inputlist[0]+':"'+inputlist[1]+'")'
+                    for x in xrange(2, len(inputlist)):
+                        out += "."+inputlist[x]
+                    return self.calc(out)
+                else:
+                    return strfunc(inputstring+"("+funcfloat.allargs+")", self, [funcfloat.allargs])
 
     def call_normal(self, inputstring):
         """Returns Argument."""
@@ -1124,12 +1179,12 @@ Global Operator Precedence List:
         for x in self.variables:
             self.variables[x] = self.find(x, True, False)
 
-    def isreserved(self, expression, extra=""):
+    def isreserved(self, expression, extra="", allowed=""):
         """Determines If An Expression Contains Reserved Characters."""
         if expression == "":
             return True
         for x in expression:
-            if x in self.reserved+extra:
+            if x in delspace(self.reserved, allowed)+extra:
                 return True
         return False
 
@@ -1560,7 +1615,9 @@ class evalfuncs(object):
 
     def typecalc(self, item):
         """Finds A Type."""
-        if isinstance(item, data):
+        if isinstance(item, classcalc):
+            return strcalc("class")
+        elif isinstance(item, data):
             return strcalc("data")
         elif isinstance(item, multidata):
             return strcalc("multidata")
@@ -1698,8 +1755,8 @@ class evalfuncs(object):
             func = getcall(self.e.funcfind(variables[0]))
             item = collapse(variables[1])
             if len(variables) >= 3:
-                self.e.overflow = variables[3:]
                 start = variables[2]
+                self.e.overflow = variables[3:]
             else:
                 start = None
             if ismatrix(item):

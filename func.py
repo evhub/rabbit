@@ -163,12 +163,14 @@ class strfunc(funcfloat):
         """Creates A Callable String Function."""
         self.funcstr = str(funcstr)
         self.name = str(name)
-        self.overflow = bool(overflow)
         self.variables = variables[:]
         if self.allargs in self.variables:
             self.variables.remove(self.allargs)
-        elif overflow != None:
+            self.overflow = False
+        elif overflow == None:
             self.overflow = True
+        else:
+            self.overflow = bool(overflow)
         if personals == None:
             self.personals = {}
         else:
@@ -276,12 +278,14 @@ class strfloat(strfunc):
     def __init__(self, funcstr, e, variables=[], personals=None, check=True, name="func", overflow=None):
         """Initializes The String Float."""
         self.name = str(name)
-        overflow = bool(overflow)
-        variables = variables[:]
-        if self.allargs in variables:
-            variables.remove(self.allargs)
-        elif overflow != None:
+        self.variables = variables[:]
+        if self.allargs in self.variables:
+            self.variables.remove(self.allargs)
+            overflow = False
+        elif overflow == None:
             overflow = True
+        else:
+            overflow = bool(overflow)
         if personals == None:
             personals = {}
         else:
@@ -580,3 +584,67 @@ class integfuncfloat(integbase, funcfloat):
     def copy(self):
         """Returns A Copy Of The Integral Function."""
         return integfuncfloat(self.func, self.accuracy, self.e, self.funcstr)
+
+class classcalc(cotobject):
+    """Implements An Evaluator Dictionary."""
+    check = 1
+
+    def __init__(self, variables, e):
+        """Initializes The Dictionary."""
+        self.variables = dict(variables)
+        self.e = e
+    def copy(self):
+        """Copies The Dictionary."""
+        return classcalc(self.variables, self.e)
+    def calc(self, inputstring):
+        """Calculates A String In The Environment Of The Dictionary."""
+        oldvars = self.e.setvars(self.variables)
+        out = self.e.calc(inputstring)
+        self.e.setvars(oldvars)
+        return out
+    def items(self):
+        """Returns The Variables."""
+        return self.variables.copy()
+    def store(self, key, value):
+        """Stores An Item."""
+        test = self.e.prepare(key, False, False)
+        if not self.e.isreserved(test):
+            self.variables[delspace(test)] = value
+        else:
+            self.e.processor.adderror("ClassError", "Could not store "+test)
+    def retreive(self, key):
+        """Retreives An Item."""
+        test = self.e.prepare(key, False, False)
+        if not self.e.isreserved(test) and test in self.variables:
+            return self.variables[test]
+        else:
+            self.e.processor.adderror("ClassError", "Could not find "+test)
+            return matrix(0)
+    def call(self, variables):
+        """Calculates An Item."""
+        variables = varproc(variables)
+        if variables == None:
+            return self
+        elif len(variables) == 0:
+            return matrix(0)
+        else:
+            self.e.overflow = variables[1:]
+            return self.calc(self.retreive(variables[0]))
+    def remove(self, key):
+        """Removes An Item."""
+        test = self.e.prepare(key, False, False)
+        if not self.e.isreserved(test) and test in self.variables:
+            del self.variables[test]
+        else:
+            self.e.processor.adderror("ClassError", "Could not delete "+test)
+            return matrix(0)
+    def extend(self, other):
+        """Extends The Dictionary."""
+        if isinstance(other, classcalc):
+            for k,v in other.variables.items():
+                self.variables[k] = v
+            return self
+        elif other == 0:
+            return self
+        else:
+            raise TypeError

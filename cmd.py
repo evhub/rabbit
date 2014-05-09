@@ -194,7 +194,7 @@ Import Commands:
         """Handles A Return Event."""
         self.e.recursion = 0
         original = self.box.output()
-        cmd = carefulsplit(original, "#")[0]
+        cmd = carefulsplit(original, "#", '"')[0]
         if delspace(cmd) == "":
             self.process(self.box.commands[-2])
         else:
@@ -219,7 +219,7 @@ Import Commands:
         while True:
             if x == len(cmdlist):
                 break
-            cmdlist[x] = carefulsplit(cmdlist[x], "#")[0]
+            cmdlist[x] = carefulsplit(cmdlist[x], "#", '"')[0]
             while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or cmdlist[x+1][0] in string.whitespace):
                 cmdlist[x] += "\n"+cmdlist.pop(x+1)
             self.process(cmdlist[x])
@@ -261,7 +261,7 @@ Import Commands:
 
     def pre_cmd(self, inputstring):
         """Evaluates Commands."""
-        for original in carefulsplit(inputstring, "~~"):
+        for original in carefulsplit(inputstring, "~~", '"', "{", "}"):
             if delspace(original) != "":
                 original = basicformat(original)
                 for func in self.cmds:
@@ -386,7 +386,11 @@ Import Commands:
     def cmd_del(self, original):
         """Deletes A Variable."""
         if superformat(original).startswith("del ") and original[4:] in self.e.variables:
-            del self.e.variables[original[4:]]
+            original = original[4:]
+            del self.e.variables[original]
+            if self.debug:
+                print(self.e.recursion*"  "+"< "+self.e.prepare(original, False, True, True)+" >")
+            return True
 
     def cmd_set(self, original, varname="_"):
         """Evaluates Definition Commands."""
@@ -406,7 +410,7 @@ Import Commands:
             if sides[0].endswith("<") and sides[1].startswith(">"):
                 sides[0] = sides[0][:-1]
                 sides[1] = sides[1][1:]
-                if (delspace(sides[0]) in self.e.variables or not self.readytofunc(sides[0])) and not delspace(sides[1]) in self.e.variables and self.readytofunc(sides[1]):
+                if (delspace(sides[0]) in self.e.variables or not self.readytofunc(sides[0], allowed=".")) and not delspace(sides[1]) in self.e.variables and self.readytofunc(sides[1], allowed="."):
                     sides.reverse()
             elif sides[1].startswith(">"):
                 sides[1] = sides[1][1:]
@@ -414,6 +418,18 @@ Import Commands:
             elif sides[0].endswith("<"):
                 sides[0] = sides[0][:-1]
             sides[0] = delspace(sides[0])
+            useclass = None
+            if "." in sides[0]:
+                classlist = sides[0].split(".")
+                sides[0] = classlist.pop()
+                if classlist[0] in self.e.variables and isinstance(self.e.variables[classlist[0]], classcalc):
+                    useclass = self.e.variables[classlist[0]]
+                    for x in xrange(1, len(classlist)):
+                        useclass = useclass.retreive(classlist[x])
+                        if not isinstance(useclass, classcalc):
+                            return None
+                else:
+                    return None
             if self.readytofunc(sides[0]):
                 sides[1] = basicformat(sides[1])
                 for func in self.set_cmds:
@@ -431,19 +447,25 @@ Import Commands:
                                 value[1] = self.trycalc(value[1])
                             if self.debug:
                                 print(self.e.recursion*"  "+": "+self.e.prepare(value[0], False, True, True)+" = "+self.e.prepare(value[1], False, True, True))
-                            self.e.variables[value[0]] = value[1]
+                            if useclass == None:
+                                self.e.variables[value[0]] = value[1]
+                            else:
+                                useclass.store(value[0], value[1])
                         else:
                             if docalc:
                                 value = self.trycalc(value)
                             if self.debug:
                                 print(self.e.recursion*"  "+": "+self.e.prepare(sides[0], False, True, True)+" = "+self.e.prepare(value, False, True, True))
-                            self.e.variables[sides[0]] = value
+                            if useclass == None:
+                                self.e.variables[sides[0]] = value
+                            else:
+                                useclass.store(sides[0], value)
                         return True
 
-    def readytofunc(self, expression, extra=""):
+    def readytofunc(self, expression, extra="", allowed=""):
         """Determines If An Expression Could Be Turned Into A Function."""
         funcparts = expression.split("(", 1)
-        return funcparts[0] != "" and not self.e.isreserved(funcparts[0], extra) and (len(funcparts) == 1 or funcparts[1].endswith(")"))
+        return funcparts[0] != "" and not self.e.isreserved(funcparts[0], extra, allowed) and (len(funcparts) == 1 or funcparts[1].endswith(")"))
 
     def set_import(self, sides):
         """Performs x = import."""

@@ -79,13 +79,15 @@ class evalobject(object):
 
     def __imul__(self, other):
         """Performs *."""
-        for x in xrange(0, other):
+        for x in xrange(0, int(other)):
             self += self
+        return self
 
     def __ipow__(self, other):
         """Performs **."""
-        for x in xrange(0, other):
+        for x in xrange(0, int(other)):
             self *= self
+        return self
 
 class numobject(evalobject):
     """A Base Class For Objects."""
@@ -239,14 +241,33 @@ class cotobject(evalobject):
     def __delitem__(self, key):
         """Wraps remove."""
         self.remove(self[key])
+        return self
 
     def __iadd__(self, other):
         """Wraps extend."""
-        self.extend(other)
+        try:
+            test = other >= 0
+        except:
+            self.extend(other)
+        else:
+            if test:
+                self.extend(other)
+            else:
+                self.remove(-other)
+        return self
 
     def __isub__(self, other):
         """Wraps remove."""
-        self.remove(other)
+        try:
+            test = other >= 0
+        except:
+            self.remove(other)
+        else:
+            if test:
+                self.remove(other)
+            else:
+                self.extend(-other)
+        return self
 
     def __eq__(self, other):
         """Performs ==."""
