@@ -422,8 +422,8 @@ Import Commands:
             if "." in sides[0]:
                 classlist = sides[0].split(".")
                 sides[0] = classlist.pop()
-                if classlist[0] in self.e.variables and isinstance(self.e.variables[classlist[0]], classcalc):
-                    useclass = self.e.variables[classlist[0]]
+                useclass = self.e.find(classlist[0], True, False)
+                if isinstance(useclass, classcalc):
                     for x in xrange(1, len(classlist)):
                         useclass = useclass.retreive(classlist[x])
                         if not isinstance(useclass, classcalc):

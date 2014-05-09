@@ -30,6 +30,7 @@ class evaluator(object):
 
 Global Operator Precedence List:
     "       Opens and closes strings.
+    {}      Opens and closes classes.
     []      Opens and closes matrix rows.
     ()      Opens and closes parentheses.
 
@@ -1077,9 +1078,17 @@ Global Operator Precedence List:
                     values.append(-1.0)
                 elif "." in inputlist[x]:
                     itemlist = inputlist[x].split(".")
-                    if isreal(itemlist[0]) == None and not (itemlist[0] in self.variables and isinstance(self.variables[itemlist[0]], classcalc)):
+                    test = True
+                    for x in itemlist:
+                        test = test and x and not madeof(x, string.digits)
+                    if test:
                         itemlist[0] = self.funcfind(itemlist[0])
-                        values.append(itemlist)
+                        if not isinstance(itemlist[0], classcalc):
+                            values.append(itemlist)
+                        elif len(itemlist) == 2:
+                            values.append(itemlist[0].retreive(itemlist[1]))
+                        else:
+                            values.append(strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retreive(itemlist[1])]))
                     else:
                         values.append(self.find(inputlist[x], True, False))
                 else:
@@ -1116,13 +1125,13 @@ Global Operator Precedence List:
             for x in inputlist:
                 test = test and x and not madeof(x, string.digits)
             if test:
-                if inputlist[0] in self.variables and isinstance(self.variables[inputlist[0]], classcalc):
-                    out = "("+inputlist[0]+':"'+inputlist[1]+'")'
-                    for x in xrange(2, len(inputlist)):
-                        out += "."+inputlist[x]
-                    return self.calc(out)
+                inputlist[0] = self.funcfind(inputlist[0])
+                if not isinstance(inputlist[0], classcalc):
+                    return strfunc("firstfunc."+strlist(inputlist[1:], ".")+"("+funcfloat.allargs+")", self, [funcfloat.allargs], {"firstfunc":inputlist[0]})
+                elif len(inputlist) == 2:
+                    return inputlist[0].retreive(inputlist[1])
                 else:
-                    return strfunc(inputstring+"("+funcfloat.allargs+")", self, [funcfloat.allargs])
+                    return strfunc("inputclass."+strlist(inputlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retreive(inputlist[1])])
 
     def call_normal(self, inputstring):
         """Returns Argument."""
