@@ -78,6 +78,7 @@ Global Operator Precedence List:
         self.overflow = []
         funcs = evalfuncs(self)
         self.variables = {
+            "copy":funcfloat(funcs.copycall, self, "copy"),
             "type":funcfloat(funcs.typecall, self, "type"),
             "to":funcfloat(funcs.tocall, self, "to"),
             "str":funcfloat(funcs.strcall, self, "str"),
@@ -200,10 +201,9 @@ Global Operator Precedence List:
                 out = out[:-1*(3+top)]
                 if top:
                     out += "\n"
-                out += " "
             elif top:
                 out = out[:-1]
-            out += "}"
+            out += " }"
         elif isinstance(item, (data, multidata)):
             if bottom:
                 out = "data:(" + self.prepare(item.tomatrix(), False, True) + ")"
@@ -1229,6 +1229,21 @@ class evalfuncs(object):
             return matrix(0)
         else:
             return rowmatrixlist(variables)
+
+    def copycall(self, variables):
+        """Makes Copies Of Items."""
+        if variables == None or len(variables) == 0:
+            return matrix(0)
+        elif len(variables) == 1:
+            if iseval(variables[0]):
+                return variables[0].copy()
+            else:
+                return variables[0]
+        else:
+            out = []
+            for x in variables:
+                out.append(self.copycall([x]))
+            return diagmatrixlist(out)
 
     def getmatrixcall(self, variables):
         """Converts To Matrices."""
