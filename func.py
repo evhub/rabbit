@@ -599,6 +599,7 @@ class classcalc(cotobject):
     def calc(self, inputstring):
         """Calculates A String In The Environment Of The Dictionary."""
         oldvars = self.e.setvars(self.variables)
+        self.e.info = " | class"
         out = self.e.calc(inputstring)
         self.e.setvars(oldvars)
         return out
@@ -611,14 +612,17 @@ class classcalc(cotobject):
         if not self.e.isreserved(test):
             self.variables[delspace(test)] = value
         else:
-            self.e.processor.adderror("ClassError", "Could not store "+test)
+            self.e.processor.adderror("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
     def retreive(self, key):
         """Retreives An Item."""
         test = self.e.prepare(key, False, False)
         if not self.e.isreserved(test) and test in self.variables:
-            return self.variables[test]
+            if istext(self.variables[test]):
+                return self.calc(self.variables[test])
+            else:
+                return self.variables[test]
         else:
-            self.e.processor.adderror("ClassError", "Could not find "+test)
+            self.e.processor.adderror("ClassError", "Could not find "+test+" in "+self.e.prepare(self, False, True, True))
             return matrix(0)
     def call(self, variables):
         """Calculates An Item."""
@@ -629,14 +633,18 @@ class classcalc(cotobject):
             return matrix(0)
         else:
             self.e.overflow = variables[1:]
-            return self.calc(self.retreive(variables[0]))
+            return self.retreive(variables[0])
+    def __delitem__(self, key):
+        """Wraps remove."""
+        self.remove(key)
+        return self
     def remove(self, key):
         """Removes An Item."""
         test = self.e.prepare(key, False, False)
         if not self.e.isreserved(test) and test in self.variables:
             del self.variables[test]
         else:
-            self.e.processor.adderror("ClassError", "Could not delete "+test)
+            self.e.processor.adderror("ClassError", "Could not remove "+test+" from "+self.e.prepare(self, False, True, True))
             return matrix(0)
     def extend(self, other):
         """Extends The Dictionary."""

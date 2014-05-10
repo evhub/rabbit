@@ -71,14 +71,14 @@ def startswithany(inputstring, inputlist):
     """Determines If A String Starts With Any Of A Set Of Items."""
     for x in inputlist:
         if inputstring.startswith(x):
-            return True
+            return x
     return False
 
 def endswithany(inputstring, inputlist):
     """Determines If A String Ends With Any Of A Set Of Items."""
     for x in inputlist:
         if inputstring.endswith(x):
-            return True
+            return x
     return False
 
 def madeof(inputstring, findstr):
@@ -236,20 +236,29 @@ def reassemble(inputlist, seperators):
     else:
         return strlist(inputlist, seperators[0], lambda x: reassemble(x, seperators[1:]))
 
-def fullsplit(expression, openstr="(", closestr=")"):
-    """Fully Splits A List By An Open And A Close."""
+def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf")):
+    """Splits A List By An Open And A Close."""
     outlist = [""]
     feed = outlist
     directory = [feed]
+    level = 0
     for x in expression:
         if x == openstr:
-            feed.append([""])
-            feed = feed[len(feed)-1]
-            directory.append(feed)
+            if -level < maxlevel:
+                feed.append([""])
+                feed = feed[len(feed)-1]
+                directory.append(feed)
+            else:
+                feed[len(feed)-1] += openstr
+            level -= 1
         elif x == closestr:
-            directory.pop()
-            feed = directory[len(directory)-1]
-            feed.append("")
+            if -(1+level) < maxlevel:
+                directory.pop()
+                feed = directory[len(directory)-1]
+                feed.append("")
+            else:
+                feed[len(feed)-1] += closestr
+            level += 1
         else:
             feed[len(feed)-1] += x
     return clean(outlist)

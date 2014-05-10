@@ -385,11 +385,30 @@ Import Commands:
 
     def cmd_del(self, original):
         """Deletes A Variable."""
-        if superformat(original).startswith("del ") and original[4:] in self.e.variables:
+        if superformat(original).startswith("del "):
             original = original[4:]
-            del self.e.variables[original]
+            if original in self.e.variables:
+                del self.e.variables[original]
+            elif "." in original:
+                test = original.split(".")
+                item = test.pop()
+                useclass = self.e.find(test[0], True, False)
+                if isinstance(useclass, classcalc):
+                    last = useclass
+                    for x in xrange(1, len(test)):
+                        useclass = useclass.call([test[x]])
+                        if not isinstance(useclass, classcalc):
+                            self.adderror("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
+                            return True
+                else:
+                    self.adderror("VariableError", "Could not find class "+test[0])
+                    return True
+                useclass.remove(item)
+            else:
+                self.adderror("VariableError", "Could not find "+original)
+                return True
             if self.debug:
-                print(self.e.recursion*"  "+"< "+self.e.prepare(original, False, True, True)+" >")
+                print(self.e.recursion*"  "+"< "+original+" >")
             return True
 
     def cmd_set(self, original, varname="_"):
@@ -398,15 +417,15 @@ Import Commands:
             sides = original.split("=", 1)
             sides[0] = basicformat(sides[0])
             sides[1] = basicformat(sides[1])
+            docalc = False
             if sides[0].endswith(":"):
                 sides[0] = sides[0][:-1]
                 docalc = True
-            elif sides[0][-1] in ["+", "*", "^", "%", "-", "/"]:
+            test = endswithany(sides[0], ["+", "*", "^", "%", "-", "/", ":", "&", "|", "@", "..", ";", ","])
+            if test:
                 sides[1] = sides[0]+"("+sides[1]+")"
-                sides[0] = sides[0][:-1]
+                sides[0] = sides[0][:-1*len(test)]
                 docalc = True
-            else:
-                docalc = False
             if sides[0].endswith("<") and sides[1].startswith(">"):
                 sides[0] = sides[0][:-1]
                 sides[1] = sides[1][1:]
@@ -418,19 +437,37 @@ Import Commands:
             elif sides[0].endswith("<"):
                 sides[0] = sides[0][:-1]
             sides[0] = delspace(sides[0])
-            useclass = None
-            if "." in sides[0]:
-                classlist = sides[0].split(".")
-                sides[0] = classlist.pop()
-                useclass = self.e.find(classlist[0], True, False)
-                if isinstance(useclass, classcalc):
-                    for x in xrange(1, len(classlist)):
-                        useclass = useclass.retreive(classlist[x])
-                        if not isinstance(useclass, classcalc):
-                            return None
-                else:
-                    return None
-            if self.readytofunc(sides[0]):
+            if self.readytofunc(sides[0], allowed="."):
+                useclass = None
+                classlist = []
+                if "." in sides[0]:
+                    classlist += sides[0].split(".")
+                    sides[0] = classlist.pop()
+                    useclass = self.e.find(classlist[0], True, False)
+                    if isinstance(useclass, classcalc):
+                        for x in xrange(1, len(classlist)):
+                            last = useclass
+                            useclass = useclass.retreive(classlist[x])
+                            if not isinstance(useclass, classcalc):
+                                if istext(useclass) and len(classlist) == x+1:
+                                    sides[1] = "( "+useclass+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
+                                    sides[0] = classlist[x]
+                                    useclass = last
+                                    classlist = classlist[:x]
+                                    docalc = False
+                                    break
+                                else:
+                                    self.adderror("ClassError", "Could not set "+classlist[x]+" in "+self.e.prepare(last, False, True, True))
+                                    return True
+                    elif classlist[0] in self.e.variables and istext(self.e.variables[classlist[0]]) and len(classlist) == 1:
+                        sides[1] = "( "+self.e.variables[classlist[0]]+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
+                        sides[0] = classlist[0]
+                        useclass = None
+                        classlist = []
+                        docalc = False
+                    else:
+                        self.adderror("VariableError", "Could not find class "+classlist[0])
+                        return True
                 sides[1] = basicformat(sides[1])
                 for func in self.set_cmds:
                     value = func(sides)
@@ -446,7 +483,7 @@ Import Commands:
                             if docalc:
                                 value[1] = self.trycalc(value[1])
                             if self.debug:
-                                print(self.e.recursion*"  "+": "+self.e.prepare(value[0], False, True, True)+" = "+self.e.prepare(value[1], False, True, True))
+                                print(self.e.recursion*"  "+": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" = "+self.e.prepare(value[1], False, True, True))
                             if useclass == None:
                                 self.e.variables[value[0]] = value[1]
                             else:
@@ -455,7 +492,7 @@ Import Commands:
                             if docalc:
                                 value = self.trycalc(value)
                             if self.debug:
-                                print(self.e.recursion*"  "+": "+self.e.prepare(sides[0], False, True, True)+" = "+self.e.prepare(value, False, True, True))
+                                print(self.e.recursion*"  "+": "+strlist(classlist, ".")+"."*bool(classlist)+sides[0]+" = "+self.e.prepare(value, False, True, True))
                             if useclass == None:
                                 self.e.variables[sides[0]] = value
                             else:

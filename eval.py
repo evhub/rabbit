@@ -354,7 +354,7 @@ Global Operator Precedence List:
                     self.calc_brack(fullsplit(
                         self.calc_class(fullsplit(
                             delspace(self.calc_string(expression)),
-                        "{", "}")),
+                        "{", "}", 1)),
                     "[", "]")),
                 "(", ")"))
         if self.debug:
@@ -387,12 +387,12 @@ Global Operator Precedence List:
                 command += indexstr
                 oldvars = self.variables.copy()
                 returned = self.processor.returned
-                self.processor.process(self.calc_class(x))
+                self.processor.process(x[0])
                 self.processor.returned = returned
                 newvars = {}
-                for x in self.variables:
-                    if not self.isreserved(x) and (not x in oldvars or not self.variables[x] is oldvars[x]):
-                        newvars[x] = self.variables[x]
+                for v in self.variables:
+                    if not self.isreserved(v) and (not v in oldvars or not self.variables[v] is oldvars[v]):
+                        newvars[v] = self.variables[v]
                 self.variables = oldvars
                 self.variables[indexstr] = classcalc(newvars, self)
         return command
@@ -1021,7 +1021,7 @@ Global Operator Precedence List:
                         if num < 0:
                             num += self.count
                         inputlist.append("`"+str(num)+"`")
-                elif templist[x]:
+                else:
                     inputlist.append(templist[x])
             values = []
             for x in xrange(0, len(inputlist)):
@@ -1073,22 +1073,22 @@ Global Operator Precedence List:
                     else:
                         values.append(inputlist[x])
                 elif inputlist[x] == "":
-                    values.append(1.0)
+                    values.append(matrix(0))
                 elif inputlist[x] == "-":
                     values.append(-1.0)
                 elif "." in inputlist[x]:
                     itemlist = inputlist[x].split(".")
-                    test = True
-                    for x in itemlist:
-                        test = test and x and not madeof(x, string.digits)
+                    test = not itemlist[0] or not madeof(itemlist[0], string.digits)
+                    for x in xrange(1, len(itemlist)):
+                        test = test and itemlist[x] and not madeof(itemlist[x], string.digits)
                     if test:
-                        itemlist[0] = self.funcfind(itemlist[0])
+                        itemlist[0] = self.funcfind(itemlist[0] or values.pop())
                         if not isinstance(itemlist[0], classcalc):
                             values.append(itemlist)
                         elif len(itemlist) == 2:
-                            values.append(itemlist[0].retreive(itemlist[1]))
+                            values.append(itemlist[0].call([itemlist[1]]))
                         else:
-                            values.append(strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retreive(itemlist[1])]))
+                            values.append(strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].call([itemlist[1]])]))
                     else:
                         values.append(self.find(inputlist[x], True, False))
                 else:
@@ -1126,12 +1126,13 @@ Global Operator Precedence List:
                 test = test and x and not madeof(x, string.digits)
             if test:
                 inputlist[0] = self.funcfind(inputlist[0])
-                if not isinstance(inputlist[0], classcalc):
+                if isinstance(inputlist[0], classcalc):
+                    if len(inputlist) == 2:
+                        return inputlist[0].call([inputlist[1]])
+                    else:
+                        return strfunc("inputclass."+strlist(inputlist[2:], "."), self, ["inputclass"]).call([inputlist[0].call([inputlist[1]])])
+                elif not isnull(inputlist[0]):
                     return strfunc("firstfunc."+strlist(inputlist[1:], ".")+"("+funcfloat.allargs+")", self, [funcfloat.allargs], {"firstfunc":inputlist[0]})
-                elif len(inputlist) == 2:
-                    return inputlist[0].retreive(inputlist[1])
-                else:
-                    return strfunc("inputclass."+strlist(inputlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retreive(inputlist[1])])
 
     def call_normal(self, inputstring):
         """Returns Argument."""

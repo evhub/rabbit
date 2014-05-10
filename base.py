@@ -245,28 +245,12 @@ class cotobject(evalobject):
 
     def __iadd__(self, other):
         """Wraps extend."""
-        try:
-            test = other >= 0
-        except:
-            self.extend(other)
-        else:
-            if test:
-                self.extend(other)
-            else:
-                self.remove(-other)
+        self.extend(other)
         return self
 
     def __isub__(self, other):
         """Wraps remove."""
-        try:
-            test = other >= 0
-        except:
-            self.remove(other)
-        else:
-            if test:
-                self.remove(other)
-            else:
-                self.extend(-other)
+        self.remove(other)
         return self
 
     def __eq__(self, other):
