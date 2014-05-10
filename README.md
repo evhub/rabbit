@@ -41,14 +41,14 @@ Text evaluation does not generate debug output.
 
 The second stage is interpreter command resolution. This stage can vary based on the interpreter, but the commands below should always be expected to work, and will be evaluated at this stage.
 
-This stage mostly works in command-line syntax (spaces as argument seperators), but certain symbol operators (=, :=, ~~) are also evaluated at this step. The most important of these commands are:
+This stage mostly works in command-line syntax (spaces as argument seperators), but certain symbol operators (=, :=, ~~) are also evaluated at this step. The most common and important of these commands are:
 ```
-x = 1             # This will set the variable x to the yet-to-be-evaluated value 1
-x := x            # This will set the variable x to the result of evaluating x
-f(x) = x          # This is the preferable notation for creating functions
+x = 1             # Sets the variable x to the yet-to-be-evaluated value 1
+x := x            # Sets the variable x to the result of evaluating x
+f(x) = x          # The preferable notation for creating functions
 a = 1 ~~ b = 2    # The ~~ operator is used to seperate top-level commands
-del x             # This will delete the variable x
-debug             # This will start debug mode
+del x             # Deletes the variable x
+debug             # Toggles debug mode
 ```
 
 ##### Debug Output
