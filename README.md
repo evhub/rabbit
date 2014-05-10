@@ -23,4 +23,72 @@ The largest difference between Rabbit and any other programming language is that
 
 Beyond that, Rabbit uses very few special words in favor of mostly using special symbols. This serves to limit the core language features to the keyboard symbols, making it very clear what is a core language feature and what is not.
 
-Finally, Rabbit takes whitespace insensitivity to the extreme. Whitespace is only used in seperating arguments to interpreter commands and line continuations. In every other areas, all whitespace is deleted, meaning that whitespace can be used liberally in almost any situation, including the seperation of digits or parts of variable names.
+Finally, Rabbit takes whitespace insensitivity to the extreme. Whitespace is only used in line continuations, strings, and seperating arguments to interpreter commands. In every other area, all whitespace is deleted, meaning that whitespace can be used liberally in almost any situation, including the seperation of digits or parts of variable names.
+
+### Levels of Evaluation
+
+Every line of Rabbit code goes through at least four different stages in its evaluation. Each stage will use its own symbols in the debug output, and will deal with different types of commands or operations.
+
+#### 1. Text (run)
+
+The first stage is text evaluation. This is the only stage that is sometimes exempted: if working in a command-line interpreter (cmd.py, for example), this stage will be skipped, since it only has to do with evaluating multiple lines, but if working in an IDE (ride.py, for example) or running a file, the input will always go through this stage.
+
+The only thing done at this stage is line continuations. These are done by placing any amount of whitespace at the start of a line--doing so will automatically append that line to the one that came before it. This allows all of Rabbit's different control features to be spread out accross multiple lines in an easily readable, straightforward fashion.
+
+Text evaluation does not generate debug output.
+
+#### 2. Interpreter (cmd)
+
+The second stage is interpreter command resolution. This stage can vary based on the interpreter, but the commands below should always be expected to work, and will be evaluated at this stage.
+
+This stage mostly works in command-line syntax (spaces as argument seperators), but certain symbol operators (=, :=, ~~) are also evaluated at this step. The most important of these commands are:
+```
+x = 1             # This will set the variable x to the yet-to-be-evaluated value 1
+x := x            # This will set the variable x to the result of evaluating x
+f(x) = x          # This is the preferable notation for creating functions
+a = 1 ~~ b = 2    # The ~~ operator is used to seperate top-level commands
+del x             # This will delete the variable x
+debug             # This will start debug mode
+```
+
+##### Debug Output
+```
+: ON            # Shows that debug output has been turned on
+: a = 1         # Sets a to 1
+: f = \x\x      # Sets f to \x\x (same thing as setting f(x) to x)
+< g >           # Deletes g
+```
+
+#### 3. Command (calc)
+
+##### Debug Output
+```
+>>> x+1 <--------   # The arrows after the command indicate that it's top-level
+>>> f(x) | source   # Begins evaluating a command (source denotes who ordered the evaluation)
+| f`0`              # Shows the result of parentheses evaluation (everything inside a paren becomes `number`)
+2 <<< x+1           # Shown the result when a command has finished evaluating
+```
+
+#### 4. Equation (bool)
+
+##### Debug Output
+```
+=>> >;1+1;2       # Begins evaluating an equation (turns it into prefix notation and seperates with semicolons)
+0 <<= >;1+1;2     # Shows the result when an equation has finished evaluating
+```
+
+#### 5. Expression (eval)
+
+##### Debug Output
+```
+=> 1+1      # Begins evaluating an expression
+2 <= 1+1    # Shows the result when an expression has finished evaluating
+```
+
+#### 6. Term (call)
+
+##### Debug Output
+```
+-> 1              # Begins evaluating a term
+1 <- 1 | source   # Shows the result when a term has finished evaluating (source denotes who did the evaluation)
+```
