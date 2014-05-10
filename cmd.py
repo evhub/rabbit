@@ -68,6 +68,8 @@ Import Commands:
         self.populator()
         if helpstring != None:
             self.helpstring = str(helpstring)
+        if self.debug:
+            print(self.e.recursion*"  "+": ON")
         if initializers == ():
             self.initialize()
         else:
@@ -272,6 +274,10 @@ Import Commands:
     def cmd_debug(self, original):
         """Controls Debugging."""
         if superformat(original) == "debug":
+            if self.debug:
+                print(self.e.recursion*"  "+": OFF")
+            else:
+                print(self.e.recursion*"  "+": ON")
             self.debug = not self.debug
             self.e.debug = self.debug
             return True
@@ -297,6 +303,8 @@ Import Commands:
                     todel.append(x)
             for x in todel:
                 del self.e.variables[x]
+                if self.debug:
+                    print(self.e.recursion*"  "+"< "+x+" >")
             self.e.count = 0
 
     def cmd_while(self, original):

@@ -92,6 +92,8 @@ Import Commands:
         self.populator()
         if helpstring != None:
             self.helpstring = str(helpstring)
+        if self.debug:
+            print(self.e.recursion*"  "+": ON")
         if initializers == ():
             self.initialize()
         else:
