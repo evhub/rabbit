@@ -333,7 +333,7 @@ Import Commands:
 
     def cmd_get(self, original):
         """Performs get."""
-        if superformat(original).startswith("get"):
+        if superformat(original).startswith("get ") or superformat(original) == "get":
             original = original[3:]
             if delspace(original) == "":
                 showbuiltins = []

@@ -272,6 +272,12 @@ class strfunc(funcfloat):
         if not self.overflow:
             out.append(self.allargs)
         return out
+    def getpers(self):
+        """Returns The Modified Personals List."""
+        out = self.personals.copy()
+        if classcalc.selfarg in out:
+            out[classcalc.selfarg] = classcalc.selfarg
+        return out
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
@@ -587,12 +593,14 @@ class integfuncfloat(integbase, funcfloat):
 
 class classcalc(cotobject):
     """Implements An Evaluator Dictionary."""
+    selfarg = "self"
     check = 1
 
     def __init__(self, variables, e):
         """Initializes The Dictionary."""
-        self.variables = dict(variables)
+        self.variables = {}
         self.e = e
+        self.add(variables)
     def copy(self):
         """Copies The Dictionary."""
         return classcalc(self.variables, self.e)
@@ -606,10 +614,12 @@ class classcalc(cotobject):
     def items(self):
         """Returns The Variables."""
         return self.variables.copy()
-    def store(self, key, value):
+    def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = self.e.prepare(key, False, False)
-        if not self.e.isreserved(test):
+        if bypass or not self.e.isreserved(test):
+            if isinstance(value, strfunc):
+                value.personals[self.selfarg] = self
             self.variables[delspace(test)] = value
         else:
             self.e.processor.adderror("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
@@ -649,10 +659,13 @@ class classcalc(cotobject):
     def extend(self, other):
         """Extends The Dictionary."""
         if isinstance(other, classcalc):
-            for k,v in other.variables.items():
-                self.variables[k] = v
+            self.add(other.variables)
             return self
         elif other == 0:
             return self
         else:
             raise TypeError
+    def add(self, other):
+        """Adds Variables."""
+        for k,v in other.items():
+            self.store(k, v, True)

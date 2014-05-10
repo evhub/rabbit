@@ -278,13 +278,14 @@ Global Operator Precedence List:
             elif isinstance(item, derivbase):
                 out += "D:"
             variables = item.getvars()
-            if len(variables) == 1 and len(item.personals) == 0:
+            personals = item.getpers()
+            if len(variables) == 1 and len(personals) == 0:
                 out += "\\"+variables[0]
-            elif len(variables) > 1 or len(item.personals) > 0:
+            elif len(variables) > 1 or len(personals) > 0:
                 out += "\\("+strlist(variables,",")
                 if len(variables) != 0:
                     out += ","
-                for x,y in item.personals.items():
+                for x,y in personals.items():
                     out += str(x)+":("+self.prepare(y, False, bottom)+"),"
                 out = out[:-1]+")"
             out += "\\"
@@ -387,7 +388,7 @@ Global Operator Precedence List:
                 command += indexstr
                 oldvars = self.variables.copy()
                 returned = self.processor.returned
-                self.processor.process(x[0])
+                self.processor.process(strlist(x))
                 self.processor.returned = returned
                 newvars = {}
                 for v in self.variables:
@@ -1072,8 +1073,6 @@ Global Operator Precedence List:
                                 values[-1] = strcalc(values[-1], self)
                     else:
                         values.append(inputlist[x])
-                elif inputlist[x] == "":
-                    values.append(matrix(0))
                 elif inputlist[x] == "-":
                     values.append(-1.0)
                 elif "." in inputlist[x]:
@@ -1093,12 +1092,12 @@ Global Operator Precedence List:
                         values.append(self.find(inputlist[x], True, False))
                 else:
                     values.append(self.find(inputlist[x], True, False))
+            values = clean(values)
             for x in xrange(0, len(values)):
                 if istext(values[x]):
                     if self.debug:
                         self.info = " (<)"
                     values[x] = self.calc(values[x])
-            values = clean(values, isnull, True)
             if self.debug:
                 temp = strlist(values," < ",converter=lambda x: self.prepare(x, False, True, True))
                 print(self.recursion*"  "+"(>) "+temp)

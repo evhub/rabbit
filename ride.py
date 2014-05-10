@@ -217,7 +217,7 @@ Import Commands:
                 point = str(l+1)+"."+str(c)
                 test = self.endchar(point)
                 if c == 1 and not test in string.whitespace:
-                    if last[0] == funcfloat.allargs:
+                    if last[0] in [funcfloat.allargs, classcalc.selfarg]:
                         self.box.placetag("builtin", last[1], point+"-2c")
                     elif last[0] in self.e.variables:
                         if isinstance(self.e.variables[last[0]], usefunc) or (isinstance(self.e.variables[last[0]], funcfloat) and not isinstance(self.e.variables[last[0]], strfunc)):
@@ -277,7 +277,7 @@ Import Commands:
                 if normal:
                     last = (last[0]+delspace(test), last[1])
                 else:
-                    if last[0] == funcfloat.allargs:
+                    if last[0] in [funcfloat.allargs, classcalc.selfarg]:
                         self.box.placetag("builtin", last[1], point+"-1c")
                     elif last[0] in self.e.variables:
                         if isinstance(self.e.variables[last[0]], usefunc) or (isinstance(self.e.variables[last[0]], funcfloat) and not isinstance(self.e.variables[last[0]], strfunc)):
