@@ -1093,9 +1093,9 @@ Global Operator Precedence List:
                         if not isinstance(itemlist[0], classcalc):
                             values.append(itemlist)
                         elif len(itemlist) == 2:
-                            values.append(itemlist[0].call([itemlist[1]]))
+                            values.append(itemlist[0].retreive(itemlist[1]))
                         else:
-                            values.append(strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].call([itemlist[1]])]))
+                            values.append(strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retreive(itemlist[1])]))
                     else:
                         values.append(self.find(inputlist[x], True, False))
                 else:
@@ -1135,9 +1135,9 @@ Global Operator Precedence List:
                 inputlist[0] = self.funcfind(inputlist[0])
                 if isinstance(inputlist[0], classcalc):
                     if len(inputlist) == 2:
-                        return inputlist[0].call([inputlist[1]])
+                        return inputlist[0].retreive(inputlist[1])
                     else:
-                        return strfunc("inputclass."+strlist(inputlist[2:], "."), self, ["inputclass"]).call([inputlist[0].call([inputlist[1]])])
+                        return strfunc("inputclass."+strlist(inputlist[2:], "."), self, ["inputclass"]).call([inputlist[0].retreive(inputlist[1])])
                 elif not isnull(inputlist[0]):
                     return strfunc("firstfunc."+strlist(inputlist[1:], ".")+"("+funcfloat.allargs+")", self, [funcfloat.allargs], {"firstfunc":inputlist[0]})
 

@@ -404,7 +404,7 @@ Import Commands:
                 if isinstance(useclass, classcalc):
                     last = useclass
                     for x in xrange(1, len(test)):
-                        useclass = useclass.call([test[x]])
+                        useclass = useclass.retreive(test[x])
                         if not isinstance(useclass, classcalc):
                             self.adderror("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
                             return True
