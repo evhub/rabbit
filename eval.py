@@ -60,8 +60,10 @@ Global Operator Precedence List:
     `       Denotes parentheses.
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
-
     reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?`.'
+    varname = "x"
+    defprefix = "'"
+    lastname = "last"
 
     def __init__(self, variables=None, processor=None):
         """Initializes The Evaluator."""
@@ -147,11 +149,13 @@ Global Operator Precedence List:
             "e":math.e,
             "pi":math.pi,
             "none":matrix(0),
-            "''":matrix(0),
             "true":1.0,
             "false":0.0,
             "Dx":"D",
-            "'"+funcfloat.allargs:matrix(0)
+            self.defprefix*2:matrix(0),
+            self.defprefix+funcfloat.allargs:matrix(0),
+            self.defprefix+self.varname:matrix(0),
+            self.defprefix+self.lastname:matrix(0)
             }
         if variables != None:
             self.makevars(variables)
@@ -174,6 +178,24 @@ Global Operator Precedence List:
         """Forcibly Stores Variables."""
         for k,v in variables.items():
             self.variables[k] = v
+
+    def setvars(self, newvars):
+        """Sets New Variables."""
+        oldvars = {}
+        for k in newvars:
+            oldvars[k] = haskey(self.variables, k)
+        for k,v in newvars.items():
+            if k != v:
+                if v == None:
+                    if k in self.variables:
+                        del self.variables[k]
+                        if self.debug:
+                            print(self.recursion*"  "+": < "+self.prepare(k, False, True, True)+" >")
+                else:
+                    self.variables[k] = v
+                    if self.debug:
+                        print(self.recursion*"  "+": "+self.prepare(k, False, True, True)+" = "+self.prepare(v, False, True, True))
+        return oldvars
 
     def store(self, name, value):
         """Stores A Variable."""
@@ -552,12 +574,12 @@ Global Operator Precedence List:
         self.recursion -= 1
         return out
 
-    def eval_comp(self, complist, varname="x"):
+    def eval_comp(self, complist):
         """Performs List Comprehension."""
         if len(complist) == 1:
             return self.eval_join(complist[0])
         else:
-            setvars = {}
+            setvars = {self.lastname: matrix(0)}
             keys = []
             for x in xrange(1, len(complist)+1):
                 i = complist[len(complist)-x]
@@ -570,30 +592,12 @@ Global Operator Precedence List:
                     setvars[keys[-1]] = self.eval_join(last)
                     last = None
             if last != None:
-                keys.append(varname)
+                keys.append(self.varname)
                 setvars[keys[-1]] = self.eval_join(last)
             old = self.setvars(setvars)
             out = self.eval_comp_set(keys, setvars, item)
             self.setvars(old)
             return out
-
-    def setvars(self, newvars):
-        """Sets New Variables."""
-        oldvars = {}
-        for k in newvars:
-            oldvars[k] = haskey(self.variables, k)
-        for k,v in newvars.items():
-            if k != v:
-                if v == None:
-                    if k in self.variables:
-                        del self.variables[k]
-                        if self.debug:
-                            print(self.recursion*"  "+": < "+self.prepare(k, False, True, True)+" >")
-                else:
-                    self.variables[k] = v
-                    if self.debug:
-                        print(self.recursion*"  "+": "+self.prepare(k, False, True, True)+" = "+self.prepare(v, False, True, True))
-        return oldvars
 
     def eval_comp_set(self, keys, setdict, tocalc):
         """Performs Recursive Comprehension."""
@@ -616,6 +620,7 @@ Global Operator Precedence List:
                     keys = old
                 if not isnull(item):
                     new.append(item)
+                    self.variables[self.lastname] = new[-1]
             if value.onlydiag():
                 out = diagmatrixlist(new)
             else:
@@ -630,9 +635,12 @@ Global Operator Precedence List:
             for x in xrange(1, len(key)):
                 self.variables[key[x]] = matrix(0)
             if len(keys) == 0:
-                return self.eval_join(tocalc)
+                item = self.eval_join(tocalc)
             else:
-                return self.eval_comp_set(keys, setdict, tocalc)
+                item self.eval_comp_set(keys, setdict, tocalc)
+            if not isnull(item):
+                self.variables[self.lastname] = item
+            return item
 
     def eval_join(self, inputlist):
         """Performs Concatenation."""
@@ -817,11 +825,11 @@ Global Operator Precedence List:
                 self.processor.adderror("VariableError", "Unable to process "+str(value))
                 return matrix(0)
 
-    def call_var(self, inputstring, varname="'"):
+    def call_var(self, inputstring):
         """Checks If Variable."""
         if inputstring in self.variables:
-            if varname+inputstring in self.variables:
-                self.variables[varname] = self.call_var(varname+inputstring)
+            if self.defprefix+inputstring in self.variables:
+                self.variables[self.defprefix] = self.call_var(self.defprefix+inputstring)
             item = self.find(inputstring, True, False)
             if istext(item):
                 if self.debug:
@@ -832,8 +840,8 @@ Global Operator Precedence List:
             else:
                 value = getcall(item)(None)
             return value
-        elif varname+inputstring in self.variables:
-            return self.call_var(varname+inputstring)
+        elif self.defprefix+inputstring in self.variables:
+            return self.call_var(self.defprefix+inputstring)
 
     def call_none(self, inputstring):
         """Evaluates A Null."""
@@ -1197,11 +1205,13 @@ Global Operator Precedence List:
                 return True
         return False
 
-    def call(self, item, value, varname="x"):
+    def call(self, item, value, varname=None):
         """Evaluates An Item With A Value."""
         if isnull(item):
             return None
-        elif istext(item):
+        if varname == None:
+            varname = self.varname
+        if istext(item):
             old = self.variables[varname]
             self.variables[varname] = value
             out = self.calc(item)
@@ -1799,12 +1809,13 @@ class evalfuncs(object):
             else:
                 return item
 
-    def derivcall(self, variables, varname="x"):
+    def derivcall(self, variables):
         """Returns The nth Derivative Of A Function."""
         if variables == None or len(variables) == 0:
             return matrix(0)
         else:
             n = 1
+            varname = self.e.varname
             accuracy = 0.0001
             scaledown = 1.25
             func = variables[0]
@@ -1827,11 +1838,12 @@ class evalfuncs(object):
             else:
                 return derivfunc(str(func), n, accuracy, scaledown, self.e, varname)
 
-    def integcall(self, variables, varname="x"):
+    def integcall(self, variables):
         """Returns The Integral Of A Function."""
         if variables == None or len(variables) == 0:
             return matrix(0)
         else:
+            varname = self.e.varname
             accuracy = 0.0001
             func = variables[0]
             if len(variables) > 1:
