@@ -2,13 +2,29 @@ Rabbit
 ======
 
 Rabbit (PythonPlus) is a compilation of functions, classes, and variables that extend basic Python functionality.
-See the \_\_doc\_\_ string in \_\_init\_\_.py for more information. Keep reading below for a tutorial of how to use the rabbit language.
+See the \_\_doc\_\_ string in \_\_init\_\_.py for more information. Keep reading below for a tutorial of how to use the Rabbit language.
+
+### Using Rabbit in Python
+
+Using Rabbit in a Python program is fairly simple. Most Rabbit Python programs begin with a line that looks something like one of these (the latter is preferred but the former is more common):
+```
+from rabbit.all import *
+import rabbit.all as rabbit
+```
+
+From there, what you want to do depends on what you're using rabbit for. If you're not sure what rabbit can do, use the \_\_doc\_\_ string in \_\_init\_\_.py to find a module that looks interesting and then look over the functions that are in it.
+
+Some very common one-liners for initiating basic rabbit features are:
+```
+mathbase().start()  # Starts up the RabbitLang interpreter
+editor().start()    # Starts up the RabbitLang editor
+```
 
 ## RabbitLang
 
 RabbitLang, or more commonly just Rabbit, is one of the Rabbit module's core features. RabbitLang is a functional, dynamically typed, interpreted language written in Python. RabbitLang borrows heavily from both Python and Haskel, but is very different from both languages. The tutorial below should give you a basic idea of how to write code in RabbitLang using the provided tools.
 
-Core features:
+#### Core features
 * Dynamic typing
 * Dynamic scoping
 * Object-oriented
@@ -25,9 +41,11 @@ Beyond that, Rabbit uses very few special words in favor of mostly using special
 
 Finally, Rabbit takes whitespace insensitivity to the extreme. Whitespace is only used in line continuations, strings, and seperating arguments to interpreter commands. In every other area, all whitespace is deleted, meaning that whitespace can be used liberally in almost any situation, including the seperation of digits or parts of variable names.
 
+For more information, read the docstrings in eval.py.
+
 ### Levels of Evaluation
 
-Every line of Rabbit code goes through at least four different stages in its evaluation. Each stage will use its own symbols in the debug output, and will deal with different types of commands or operations.
+Every line of RabbitLang code goes through at least four different stages in its evaluation. Each stage will use its own symbols in the debug output, and will deal with different types of commands or operations.
 
 #### 1. Text (run)
 
@@ -41,14 +59,16 @@ Text evaluation does not generate debug output.
 
 The second stage is interpreter command resolution. This stage can vary based on the interpreter, but the commands below should always be expected to work, and will be evaluated at this stage.
 
-This stage mostly works in command-line syntax (spaces as argument seperators), but certain symbol operators (=, :=, ~~) are also evaluated at this step. The most common and important of these commands are:
+This stage mostly works in command-line syntax (spaces as argument seperators), but certain symbol operators are also evaluated at this stage. The most common and important commands and operators evaluated are:
 ```
+f(x) # a comment  # The # operator will tell the interpreter to ignore everything after it
 x = 1             # Sets the variable x to the yet-to-be-evaluated value 1
 x := x            # Sets the variable x to the result of evaluating x
 f(x) = x          # The preferable notation for creating functions
 a = 1 ~~ b = 2    # The ~~ operator is used to seperate top-level commands
 del x             # Deletes the variable x
 debug             # Toggles debug mode
+get               # Shows all set variables
 ```
 
 ##### Debug Output
@@ -148,4 +168,35 @@ x | var         # Evaluates variables
 ```
 -> 1              # Begins evaluating a term
 1 <- 1 | source   # Shows the result when a term has finished evaluating (source denotes who did the evaluation)
+```
+### Sample Programs
+
+#### Hello World
+```
+print("Hello, world!")    # The convential method, print is a built-in function just for this purpose
+show "Hello, world!"      # A common interpreter command, show will print its argument in a text box
+```
+
+#### Boolean Functions
+```
+bool(x) = \true @ x; \false
+not(x) = \false @ x; \true
+and(x,y) = \true @ x&y; \false
+nand(x,y) = \false @ x&y; \true
+or(x,y) = \true @ x|y; \false
+nor(x,y) = \false @ x|y; \true
+xor(x,y) = \true @ bool:x != bool:y; \false
+xnor(x,y) = \false @ bool:x != bool:y; \true
+```
+
+#### Basic Math
+```
+f'(x) = (D:\f):x
+sec(x) = 1/cos:x
+csc(x) = 1/sin:x
+cot(x) = 1/tan:x
+asec(x) = acos:(1/x)
+acsc(x) = asin:(1/x)
+acot(x) = atan:(1/x)
+cis(x) = cos(x)+i*sin(x)
 ```
