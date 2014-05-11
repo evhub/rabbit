@@ -637,7 +637,7 @@ Global Operator Precedence List:
             if len(keys) == 0:
                 item = self.eval_join(tocalc)
             else:
-                item self.eval_comp_set(keys, setdict, tocalc)
+                item = self.eval_comp_set(keys, setdict, tocalc)
             if not isnull(item):
                 self.variables[self.lastname] = item
             return item
@@ -761,7 +761,9 @@ Global Operator Precedence List:
             value = self.eval_mod(inputlist[0])
             for x in xrange(1, len(inputlist)):
                 item = self.eval_mod(inputlist[x])
-                if not isnull(item):
+                if isnull(value):
+                    value = item
+                elif not isnull(item):
                     value += item
             return value
 
@@ -780,7 +782,9 @@ Global Operator Precedence List:
             value = self.eval_call(inputlist[0])
             for x in xrange(1, len(inputlist)):
                 item = self.eval_call(inputlist[x])
-                if not isnull(item):
+                if isnull(value):
+                    value = item
+                elif not isnull(item):
                     value *= item
             return value
 
