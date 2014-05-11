@@ -31,7 +31,7 @@ Every line of Rabbit code goes through at least four different stages in its eva
 
 #### 1. Text (run)
 
-The first stage is text evaluation. This is the only stage that is sometimes exempted: if working in a command-line interpreter (cmd.py, for example), this stage will be skipped, since it only has to do with evaluating multiple lines, but if working in an IDE (ride.py, for example) or running a file, the input will always go through this stage.
+The first stage is text processing. This is the only stage that is sometimes exempted: if working in a command-line interpreter (cmd.py, for example), this stage will be skipped, since it only has to do with evaluating multiple lines, but if working in an IDE (ride.py, for example) or running a file, the input will always go through this stage.
 
 The only thing done at this stage is line continuations. These are done by placing any amount of whitespace at the start of a line--doing so will automatically append that line to the one that came before it. This allows all of Rabbit's different control features to be spread out accross multiple lines in an easily readable, straightforward fashion.
 
@@ -61,6 +61,18 @@ debug             # Toggles debug mode
 
 #### 3. Command (calc)
 
+The third stage is top-level operator evaluation. This stage, and all following stages, don't (usually) vary based on the interpreter, since the functions that carry them out are located in the evaluator class (eval.evaluator) instead of in the interpreter class (cmd.mathbase).
+
+All different types of paretheses as well as conditionals are evaluated at this stage. In order, the different operators evaluated are:
+```
+"hello, world"  # Strings (after this step whitespace is eliminated)
+{ x = 1 }       # Classes
+[1, 2, 3]       # Matrix rows
+(x+2)*2         # Parentheses
+f(x); g(x)      # Conditionals
+f(x) @ x>=0     # Conditions
+```
+
 ##### Debug Output
 ```
 >>> x+1 <--------   # The arrows after the command indicate that it's top-level
@@ -71,6 +83,22 @@ debug             # Toggles debug mode
 
 #### 4. Equation (bool)
 
+The fourth stage is boolean operator evaluation. The output of this stage will depend on whether it is being fed to an at clause. If it is, non-booleans will be made into booleans. If it isn't, booleans will be made into integers.
+
+All different logical, equality, and inequality operators are evaluated at this stage. The stage itself is seperated into two phases. In the first phase, the logical operators are evaluated, and in the second, the equality and inequality operators are evaluated. In order, the different operators evaluaed are:
+```
+x < -1 | x > 1        # Logical or
+0 <= x & x < 10       # Logical and
+x >= 2 | x => 2       # Greater than or equal to (both symbol orders are accepted)
+x <= 5 | x =< 5       # Less than or equal to (both symbol orders are accepted)
+x > 3                 # Greater than
+x < 4                 # Less than
+x != [ ] & x <> [ ]   # Not equal to (both symbols are accepted)
+x ?= 1 & x = 1        # Equal to (the question mark is optional)
+```
+
+In order, the 
+
 ##### Debug Output
 ```
 =>> >;1+1;2       # Begins evaluating an equation (turns it into prefix notation and seperates with semicolons)
@@ -79,6 +107,18 @@ debug             # Toggles debug mode
 
 #### 5. Expression (eval)
 
+The fifth stage is high-level operator evaluation.
+
+High-precedence mathematical and functional operators are evaluated at this stage. In order, the different operators evaluated are:
+```
+x~x^2~1,2,3   # List looping
+1,2 .. 3,4    # Concatenation
+1,2,3,4       # Lists
+1+2-3         # Addition and subtraction
+6 % 3         # Modulo
+3*4/5         # Multiplication and division
+```
+
 ##### Debug Output
 ```
 => 1+1      # Begins evaluating an expression
@@ -86,6 +126,23 @@ debug             # Toggles debug mode
 ```
 
 #### 6. Term (call)
+
+The sixth stage is low-level operator evaluation. Unlike stages 3-5, but like stage 2, instead of each expression going through every operator function, only the first term operator function to be able to handle the expression will be used. Often, however, it will then loop back up and perform another term evaluation.
+
+There is a standard order for term operator function evaluation, but in rare cases the interpreter may change the order of or add in additional term operator functions. All interpreters in this module are consistent with the standard order. In standard order, the different term functions and their operators are:
+```
+x | var         # Evaluates variables
+  | none        # Evaluates empty strings
+- | neg         # Performs negation
+/ | reciproc    # Performs division
+^ | exp         # Performs exponentiation
+\ | lambda      # Creates in-line functions
+! | fact        # Performs factorial
+: | colon       # Performs function calls
+` | paren       # Evaluates all forms of parentheses
+. | method      # Evaluates methods and functions of functions
+1 | normal      # Evaluates numbers
+```
 
 ##### Debug Output
 ```
