@@ -2,7 +2,7 @@ Rabbit
 ======
 
 Rabbit (PythonPlus) is a compilation of functions, classes, and variables that extend basic Python functionality.
-See the \_\_doc\_\_ string in \_\_init\_\_.py for more information. Keep reading below for a tutorial of how to use the Rabbit language.
+See the \_\_doc\_\_ string in \_\_init\_\_.py for more information.
 
 ### Using Rabbit in Python
 
