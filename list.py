@@ -263,7 +263,10 @@ def clean(haystack, needle="", func=False):
 def delist(inputlist):
     """Finds The First Item."""
     while islist(inputlist):
-        inputlist = inputlist[0]
+        if len(inputlist) == 0:
+            break
+        else:
+            inputlist = inputlist[0]
     return inputlist
 
 def mapto(keylist, termlist):

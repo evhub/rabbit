@@ -43,6 +43,11 @@ def iseval(inputobject):
     """Tests If An Object Is An Evaluator Class."""
     return getcheck(inputobject) > 0
 
+def isfunc(inputobject):
+    """Tests If An Object Is A Function."""
+    check = getcheck(inputobject)
+    return (check > 0 and hascall(inputobject)) or check == -2
+
 def ismatrix(inputobject):
     """Determines If An Object Could Be A Matrix."""
     return getcheck(inputobject) == 2
@@ -75,10 +80,3 @@ def getnum(inputobject):
 def getint(inputstring):
     """Formats A String Into An Integer."""
     return int(getnum(inputstring))
-
-def getcall(func):
-    """Gets The Callable Part Of A Function."""
-    if hascall(func):
-        return func.call
-    else:
-        return func

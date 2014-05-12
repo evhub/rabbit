@@ -65,7 +65,7 @@ f(x) # a comment  # The # operator will tell the interpreter to ignore everythin
 x = 1             # Sets the variable x to the yet-to-be-evaluated value 1
 x := x            # Sets the variable x to the result of evaluating x
 f(x) = x          # The preferable notation for creating functions
-a = 1 ~~ b = 2    # The ~~ operator is used to seperate top-level commands
+a = 1 ;; b = 2    # The ;; operator is used to seperate top-level commands
 del x             # Deletes the variable x
 debug             # Toggles debug mode
 get               # Shows all set variables

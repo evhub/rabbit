@@ -49,6 +49,13 @@ def hascall(func):
     else:
         return True
 
+def getcall(func):
+    """Gets The Callable Part Of A Function."""
+    if hascall(func):
+        return func.call
+    else:
+        return func
+
 def istext(inputobject):
     """Determines If An Object Is A String."""
     return isinstance(inputobject, (str, unicode))

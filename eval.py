@@ -216,7 +216,7 @@ Global Operator Precedence List:
             if top:
                 out += "\n"
             for k,v in item.variables.items():
-                out += " "+k+" = "+self.prepare(v, False, bottom)+" ~~"
+                out += " "+k+" = "+self.prepare(v, False, bottom)+" ;;"
                 if top:
                     out += "\n"
             if len(item.variables) > 0:
@@ -246,7 +246,9 @@ Global Operator Precedence List:
                 if not item.onlyrow():
                     out += "matrix:\n"
                 for y in item.a:
-                    out += " ["
+                    if not item.onlyrow():
+                        out += " "
+                    out += "["
                     for x in y:
                         out += self.prepare(x, False, bottom)+","
                     out = out[:-1]+"]:\n"
@@ -579,68 +581,63 @@ Global Operator Precedence List:
         if len(complist) == 1:
             return self.eval_join(complist[0])
         else:
-            setvars = {self.lastname: matrix(0)}
-            keys = []
-            for x in xrange(1, len(complist)+1):
-                i = complist[len(complist)-x]
-                if x == 1:
-                    item = i
-                elif x%2 == 0:
-                    last = i
+            item = self.eval_join(complist.pop())
+            if isinstance(item, strfunc):
+                item.personals[self.lastname] = matrix(0)
+            lists = []
+            argnum = 1
+            for x in reversed(xrange(0, len(complist))):
+                if not delist(complist[x]):
+                    argnum += 1
                 else:
-                    keys.append(self.namefind(delist(i)))
-                    setvars[keys[-1]] = self.eval_join(last)
-                    last = None
-            if last != None:
-                keys.append(self.varname)
-                setvars[keys[-1]] = self.eval_join(last)
-            old = self.setvars(setvars)
-            out = self.eval_comp_set(keys, setvars, item)
-            self.setvars(old)
-            return out
+                    lists.append((self.eval_join(complist[x]), argnum))
+                    argnum = 1
+            return self.eval_comp_set(lists, [], item)
 
-    def eval_comp_set(self, keys, setdict, tocalc):
+    def eval_comp_set(self, lists, args, func):
         """Performs Recursive Comprehension."""
-        key = keys.pop()
-        value = setdict[key]
-        key = key.split(",")
-        for x in xrange(0, len(key)):
-            key[x] = self.namefind(key[x])
+        value, argnum = lists.pop()
         if isinstance(value, matrix):
             units = value.getitems()
             new = []
-            for x in xrange(0, len(units)/len(key)):
-                for y in xrange(0, len(key)):
-                    self.variables[key[y]] = units[x+y]
-                if len(keys) == 0:
-                    item = self.eval_join(tocalc)
+            for x in xrange(0, len(units)/argnum):
+                for y in xrange(0, argnum):
+                    args.append(units[argnum*x+y])
+                if len(lists) == 0:
+                    if isfunc(func):
+                        item = getcall(func)(args)
+                    else:
+                        item = func
                 else:
-                    old = keys[:]
-                    item = self.eval_comp_set(keys, setdict, tocalc)
-                    keys = old
+                    item = self.eval_comp_set(lists, args, func)
+                for y in xrange(0, argnum):
+                    args.remove(units[argnum*x+y])
                 if not isnull(item):
                     new.append(item)
-                    self.variables[self.lastname] = new[-1]
+                    if isinstance(func, strfunc):
+                        func.personals[self.lastname] = item
             if value.onlydiag():
                 out = diagmatrixlist(new)
             else:
-                out = matrix(value.x, value.y)
+                out = value.new()
                 i = 0
                 for y,x in out.coords():
                     out.store(y,x, new[i])
                     i += 1
             return out
         else:
-            self.variables[key[0]] = value
-            for x in xrange(1, len(key)):
-                self.variables[key[x]] = matrix(0)
-            if len(keys) == 0:
-                item = self.eval_join(tocalc)
+            args.append(value)
+            if len(lists) == 0:
+                if isfunc(func):
+                    out = getcall(func)(args)
+                else:
+                    out = func
             else:
-                item = self.eval_comp_set(keys, setdict, tocalc)
-            if not isnull(item):
-                self.variables[self.lastname] = item
-            return item
+                out = self.eval_comp_set(lists, args, func)
+            args.remove(value)
+            if isinstance(func, strfunc) and not isnull(out):
+                func.personals[self.lastname] = out
+            return out
 
     def eval_join(self, inputlist):
         """Performs Concatenation."""
@@ -1117,7 +1114,7 @@ Global Operator Precedence List:
             value = (len(values) != 0 and values[0]) or matrix(0)
             for x in xrange(1, len(values)):
                 values[x] = values[x]
-                if isnum(value) or (iseval(value) and not hascall(value)):
+                if not isfunc(value):
                     value *= values[x]
                 elif isinstance(values[x], matrix) and values[x].onlydiag():
                     value = getcall(value)(values[x].getdiag())
@@ -1220,8 +1217,8 @@ Global Operator Precedence List:
             self.variables[varname] = value
             out = self.calc(item)
             self.variables[varname] = old
-        elif isinstance(item, funcfloat) or (iseval(item) and hascall(item)):
-            out = item.call(varproc(value))
+        elif isfunc(item):
+            out = getcall(item)(varproc(value))
         elif hasnum(item):
             return item
         else:
