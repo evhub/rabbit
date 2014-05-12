@@ -609,7 +609,7 @@ Global Operator Precedence List:
                     else:
                         item = func
                 else:
-                    item = self.eval_comp_set(lists, args, func)
+                    item = self.eval_comp_set(lists[:], args, func)
                 for y in xrange(0, argnum):
                     args.remove(units[argnum*x+y])
                 if not isnull(item):
