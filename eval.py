@@ -34,6 +34,7 @@ Global Operator Precedence List:
     []      Opens and closes matrix rows.
     ()      Opens and closes parentheses.
 
+    $       Seperates with clauses (read as 'where').
     ;       Seperates conditionals (read as 'else').
     @       Checks a conditional (read as 'if' or 'at').
 
@@ -41,7 +42,7 @@ Global Operator Precedence List:
     &       Performs logical 'and'.
     >?!=<   Performs equality or inequality checks.
 
-    ~       Used in list looping.
+    ~       Applies a list to a function for looping.
     ..      Performs concatenation.
     ,       Seperates list elements.
     +-      Performs addition and subtraction.
@@ -60,7 +61,7 @@ Global Operator Precedence List:
     `       Denotes parentheses.
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
-    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?`.'
+    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?`.$'
     varname = "x"
     defprefix = "'"
     lastname = "last"
@@ -384,7 +385,7 @@ Global Operator Precedence List:
                 "(", ")"))
         if self.debug:
             print(self.recursion*"  "+"| "+self.prepare(value, False, True, True))
-        return self.calc_pieces(value)
+        return self.calc_with(value)
 
     def calc_string(self, expression):
         """Evaluates The String Part Of An Expression."""
@@ -410,16 +411,8 @@ Global Operator Precedence List:
                 indexstr = "`"+str(self.count)+"`"
                 self.count += 1
                 command += indexstr
-                oldvars = self.variables.copy()
-                returned = self.processor.returned
-                self.processor.process(strlist(x))
-                self.processor.returned = returned
-                newvars = {}
-                for v in self.variables:
-                    if not self.isreserved(v) and (not v in oldvars or not self.variables[v] is oldvars[v]):
-                        newvars[v] = self.variables[v]
-                self.variables = oldvars
-                self.variables[indexstr] = classcalc(newvars, self)
+                self.variables[indexstr] = classcalc(self)
+                self.variables[indexstr].process(strlist(x))
         return command
 
     def calc_brack(self, bracklist):
@@ -444,6 +437,19 @@ Global Operator Precedence List:
                 command += indexstr
                 self.variables[indexstr] = self.calc_paren(x)
         return command
+
+    def calc_with(self, expression):
+        """Evaluates With Clauses."""
+        inputlist = expression.split("$")
+        if len(inputlist) == 1:
+            return self.calc_pieces(inputlist[0])
+        else:
+            inputlist.reverse()
+            item = inputlist.pop()
+            withclass = classcalc(self)
+            for x in inputlist:
+                withclass.process(x)
+            return withclass.calc(item)
 
     def calc_pieces(self, expression):
         """Evaluates Piecewise Expressions."""

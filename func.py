@@ -596,11 +596,22 @@ class classcalc(cotobject):
     selfarg = "self"
     check = 1
 
-    def __init__(self, variables, e):
+    def __init__(self, e, variables=None):
         """Initializes The Dictionary."""
         self.variables = {}
         self.e = e
-        self.add(variables)
+        if variables != None:
+            self.add(variables)
+    def process(self, command):
+        """Processes A Command And Puts The Result In The Variables."""
+        oldvars = self.e.variables.copy()
+        returned = self.e.processor.returned
+        self.e.processor.process(str(command))
+        self.e.processor.returned = returned
+        for v in self.e.variables:
+            if not self.e.isreserved(v) and (not v in oldvars or not self.e.variables[v] is oldvars[v]):
+                self.variables[v] = self.e.variables[v]
+        self.e.variables = oldvars
     def copy(self):
         """Copies The Dictionary."""
         return classcalc(self.variables, self.e)

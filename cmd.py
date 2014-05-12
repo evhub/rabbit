@@ -509,8 +509,12 @@ Import Commands:
 
     def readytofunc(self, expression, extra="", allowed=""):
         """Determines If An Expression Could Be Turned Into A Function."""
+        top = True
         funcparts = expression.split("(", 1)
-        return funcparts[0] != "" and not self.e.isreserved(funcparts[0], extra, allowed) and (len(funcparts) == 1 or funcparts[1].endswith(")"))
+        if len(funcparts) == 1 and "`" in funcparts[0]:
+            funcparts = funcparts[0].split("`", 1)
+            top = False
+        return funcparts[0] != "" and not self.e.isreserved(funcparts[0], extra, allowed) and (len(funcparts) == 1 or funcparts[1].endswith(")"*top or "`"))
 
     def set_import(self, sides):
         """Performs x = import."""
@@ -541,8 +545,17 @@ Import Commands:
 
     def set_def(self, sides):
         """Creates Functions."""
+        top = None
         if "(" in sides[0] and sides[0].endswith(")"):
-            sides[0] = sides[0][:-1].split("(", 1)
+            top = True
+        elif "`" in sides[0] and sides[0].endswith("`"):
+            top = False
+        if top != None:
+            if top:
+                sides[0] = sides[0][:-1].split("(", 1)
+            else:
+                sides[0] = sides[0].split("`", 1)
+                sides[0][1] = self.e.namefind("`"+sides[0][1])
             params = []
             personals = {}
             for x in sides[0][1].split(","):

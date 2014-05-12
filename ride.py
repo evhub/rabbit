@@ -171,7 +171,7 @@ Import Commands:
                 elif not instring and x in [")", "]", "}"]:
                     space -= 1
             space += instring
-            if space <= 0 and endswithany(basicformat(last), "=:*+-%/^@~\\|&;<>.,([{"):
+            if space <= 0 and endswithany(basicformat(last), "=:*+-%/^@~\\|&;<>.,([{$"):
                 space = 1
             insert = " "*space
             if instring:
