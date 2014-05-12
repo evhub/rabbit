@@ -131,7 +131,7 @@ The fifth stage is high-level operator evaluation.
 
 High-precedence mathematical and functional operators are evaluated at this stage. In order, the different operators evaluated are:
 ```
-x~x^2~1,2,3   # List looping
+1,2,3~\x\x    # List looping
 1,2 .. 3,4    # Concatenation
 1,2,3,4       # Lists
 1+2-3         # Addition and subtraction
