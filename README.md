@@ -43,6 +43,113 @@ Finally, Rabbit takes whitespace insensitivity to the extreme. Whitespace is onl
 
 For more information, read the docstrings in eval.py.
 
+### Basic Tutorial
+
+This tutorial will teach you all the basic syntax of RabbitLang as well as many of the basic concepts.
+
+First, before we begin, it should be understood that each code block that is not labeled as otherwise (such as debug output) will be valid Rabbit Code. In these code blocks, it will be common to use comments. Comments in Rabbit are anything after a pound symbol (#) on a line, and will be ignored.
+
+#### Rabbits Do Math
+
+Math in rabbit is very similar to in any other programming language. Rabbit's mathematical operators are fairly conventional:
+```
+1+1		# Addition (result = 2) (evaluated left to right, highest precedence)
+3-5		# Subtraction (result = -2) (evaluated left to right, highest precedence)
+2*3		# Multiplication (result = 6) (evaluated left to right, medium precedence)
+1/2		# Division (result = 0.5) (evaluated left to right, medium precedence)
+3^2		# Exponentiation (result = 9) (evaluated right to left, low precedence)
+8%3		# Modulo / Remainder (result = 2) (evaluated left to right, high precedence)
+```
+
+These different operations can, and should, be grouped using parentheses. Additionally, certain equivalent structures also exist:
+```
+2x		# Coefficient multiplication (evaluated left to right, very low precedence)
+2(x)	# Parentheses multiplication (evaluated left to right, very low precedence)
+```
+
+#### Rabbits Are Lazy
+
+Most lines of rabbit code constitute function or variable definitions. The syntax for these is fairly straightforward:
+```
+a = x+1				# A variable definition
+f(x,y) = 2(x+y)		# A function definition
+```
+
+You might notice that at the point when a is defined x has not yet been defined, and yet a is told that it needs to have one greater than the value of x. Not only will this construction not raise an error in Rabbit, Rabbit won't even known until you do something with a. That's because Rabbit uses lazy evaluation. By default, when you define a variable, Rabbit will simply store the string of characters you typed in and not actually do anything with it until you try to use it somewhere else. This can be very useful when wanting one variable (a) to reflect the possibly changing values of another variable (x).
+
+It is, however, possible to circumvent lazy evaluation and force Rabbit to figure out what the value is and calculate it then and there. This can't be used with functions, however, because that wouldn't make sense: Rabbit can't calculate them yet no matter what because they haven't been supplied with arguments. The syntax for circumventing lazy evaluation is very simple:
+```
+a := x+1		# The colon tells the interpreter not to do lazy evaluation
+```
+
+Because one of the most common reasons to circumvent lazy evaluation is to increment or decrement a variable, or otherwise use the variable itself in giving it a new value, special syntax was added to do so:
+```
+# The new syntax:
+a += x		# While addition is used here, most other mathematical operators will also work
+
+# The same thing in the old syntax:
+a := a+x
+```
+
+#### Rabbits Have Bools
+
+In addition to basic mathematical operators, Rabbit also features basic conditional operators, used most commonly in conditionals. Rabbit's conditionals use two symbols each with their own, well-defined, independent function, that when put together, allow the formation of conditions. Within them, logical, inequality, and equality operators can all be used. All of these symbols have higher precedence than mathematical operators, as well as themselves having a precedence of their own.
+
+The basic syntax for conditionals is:
+```
+x @ x>0			# The 'at' operator will perform the operation to the left only if the right is true (Python truth rules), otherwise returning none (right to left, high precedence)
+x ; 0			# The 'else' operator will check to see whether the item to the left is none, if so, it will continue to the right, if not, stop (left to right, highest precedence)
+x @ x>0; 0		# Together, these two operators allow the formation of if-else clauses
+```
+
+The different types of equality and inequality operators, in order of precedence, are:
+```
+1 | 0		# Or (result = 1) (left to right)
+0 & 1		# And (result = 0) (left to right)
+2 >= 2		# Greater than or equal to (=> also accepted) (result = 1) (left to right)
+3 <= 4		# Less than or equal to (=< also accepted) (result = 1) (left to right)
+3 > 5		# Greater than (result = 0) (left to right)
+6 < 6		# Less than (result = 0) (left to right)
+2 != 3		# Not equal to (<> also accepted) (result = 1) (left to right)
+5 ?= 4		# Equal to (= also accepted, but discouraged) (result = 0) (left to right)
+```
+These will return 1 when true and 0 when false, allowing them to properly function with the 'at' operator.
+
+#### Rabbits Use Matrices
+
+Rabbit uses three basic container objects, the list, the row, and the matrix. While initially these three objects appear to be very different, they're actually very similar. Rabbit actually uses mathematical matrices to store and compute all of them. In fact, each different container object is just a different way of storing data in a matrix. This means that on a base level, all three container objects behave very similarly. That doesn't mean, however, that Rabbit treats them all the same. Rabbit will detect what type of matrix each one is and adjust accordingly.
+
+We'll start with the list, the most common and the most useful container object in Rabbit, and consequently the one with the simplest syntax:
+```
+(1,2,3)		# This will define a 3 by 3 matrix with 1, 2, and 3 along its main diagonal (the other locations will be ignored or treated as zero unless something is done to them)
+1,2,3		# Lists are simply expressions separated by commas, the parentheses aren't necessary (left to right, high precedence)
+```
+Precedence for these and other container operations is between booleans and math. 
+
+Next is the row, so named because it is nothing more than a matrix with one row and many columns. The syntax for creating rows is:
+```
+[1,2,3]		# This will define a 1 by 3 matrix with the items 1, 2, and 3 in it
+[(1,2,3)]	# The colons are actually converting a list into a row, so the inside can actually be any list
+```
+
+Because it is more complicated and the syntax to define it includes operations you don't know yet, we'll hold off on explaining full matrices until later. For now we'll just tell you that they're just multiple rows joined together into a full matrix.
+
+Additionally, all the different container objects support various types of operations that can be performed on them. Because they are matrices, they all support basic matrix math. Additionally, there are a couple of other, special operations that can be done only with container objects, the syntax for which is:
+```
+[1,2] .. [3,4]	# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
+[1,2,3,4]:1		# Item indexes (result = 2) (left to right, lowest precedence, same as colon for function calls)
+(1,2,3):2		# These work for lists as well (result = 3)
+1,2,3~ \x\(x+1)	# Loops over the list with a function, the notation for which is coming up (result = 2,3,4) (right to left, highest precedence)
+```
+
+#### Rabbits Love Functions
+
+How to define functions was mentioned earlier but how to call them never was. Rabbit provides two different methods of calling functions, using colons and using parentheses. The two methods are similar in many ways but also very different.
+
+#### Rabbits Eat Strings
+
+#### Rabbits Take Classes
+
 ### Levels of Evaluation
 
 Every line of RabbitLang code goes through at least four different stages in its evaluation. Each stage will use its own symbols in the debug output, and will deal with different types of commands or operations.
@@ -83,12 +190,13 @@ get               # Shows all set variables
 
 The third stage is top-level operator evaluation. This stage, and all following stages, don't (usually) vary based on the interpreter, since the functions that carry them out are located in the evaluator class (eval.evaluator) instead of in the interpreter class (cmd.mathbase).
 
-All different types of paretheses as well as conditionals are evaluated at this stage. In order, the different operators evaluated are:
+All different types of parentheses as well as conditionals are evaluated at this stage. In order, the different operators evaluated are:
 ```
 "hello, world"  # Strings (after this step whitespace is eliminated)
 { x = 1 }       # Classes
 [1, 2, 3]       # Matrix rows
 (x+2)*2         # Parentheses
+x $ x = 1		# With clauses
 f(x); g(x)      # Conditionals
 f(x) @ x>=0     # Conditions
 ```
