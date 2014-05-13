@@ -944,81 +944,92 @@ Global Operator Precedence List:
                 for x in xrange(1, len(inputlist)):
                     params.append(self.eval_call(inputlist[x]))
                 item = self.funcfind(inputlist[0])
-                if isinstance(item, matrix):
-                    if len(params) == 1:
-                        if isinstance(params[0], matrix):
-                            value = item.retreive(int(params[0].retreive(0)), int(params[0].retreive(1)))
-                        else:
-                            value = item.retreive(int(params[0]))
-                    elif isinstance(params[0], matrix) and isinstance(params[1], matrix):
-                        if params[0].retreive(0) < 0:
-                            params[0].store(0,0, params[0].retreive(0)+item.y+1.0)
-                        if params[0].retreive(1) < 0:
-                            params[0].store(1,1, params[0].retreive(1)+item.x+1.0)
-                        if params[1].retreive(0) < 0:
-                            params[1].store(0,0, params[1].retreive(0)+item.y+1.0)
-                        if params[1].retreive(1) < 0:
-                            params[1].store(1,1, params[1].retreive(1)+item.x+1.0)
-                        if params[0].getdiag() == params[1].getdiag():
-                            value = matrix(1,1, item.retreive(int(params[0].retreive(0)), int(params[0].retreive(1))))
-                        elif params[0].retreive(0) == params[1].retreive(0):
-                            out = item[int(params[0].retreive(0))][int(params[0].retreive(1)):int(params[1].retreive(1))+1]
-                            value = diagmatrixlist(out)
-                        elif params[0].retreive(1) == params[1].retreive(1):
-                            item.flip()
-                            out = item[int(params[0].retreive(1))][int(params[0].retreive(0)):int(params[1].retreive(0))+1]
-                            value = diagmatrixlist(out)
-                        else:
-                            out = []
-                            if params[0].retreive(0) <= params[1].retreive(0):
-                                ymin, ymax = int(params[0].retreive(0)), int(params[1].retreive(0))
-                            else:
-                                ymin, ymax = int(params[1].retreive(0)), int(params[0].retreive(0))
-                            if params[0].retreive(1) <= params[1].retreive(1):
-                                xmin, xmax = int(params[0].retreive(1)), int(params[1].retreive(1))
-                            else:
-                                xmin, xmax = int(params[1].retreive(1)), int(params[0].retreive(1))
-                            for y in xrange(ymin, ymax+1):
-                                out.append([])
-                                for x in xrange(xmin, xmax+1):
-                                    out[-1].append(item.retreive(y,x))
-                            value = matrixlist(out)
-                    else:
-                        length = item.lendiag()
-                        params[0] = float(params[0])
-                        params[1] = float(params[1])
-                        if params[0] < 0:                
-                            params[0] += length+1.0
-                        if params[1] < 0:
-                            params[1] += length+1.0
-                        if params[0] == params[1]:
-                            value = matrix(1,1, item.retreive(int(params[1])))
-                        elif params[0] < params[1]:
-                            out = item.getdiag()[int(params[0]):int(params[1])]
-                            value = diagmatrixlist(out)
-                        else:
-                            out = item.getdiag()[int(params[1]):int(params[0])]
-                            out.reverse()
-                            value = diagmatrixlist(out)
-                elif isinstance(item, strcalc):
-                    item = item.calcstr
-                    if len(params) == 1:
-                        value = strcalc(item[int(params[0])], self)
-                    else:
-                        value = strcalc(item[int(params[0]):int(params[1])], self)
+                return self.call_colon_set(item, params)
+
+    def call_colon_set(self, item, params):
+        """Performs Colon Function Calls."""
+        print(item, params)
+        self.overflow = []
+        docalc = False
+        if isnull(params[-1]):
+            params.pop()
+            docalc = True
+        if isinstance(item, matrix):
+            if len(params) == 0:
+                value = item.retreive(0)
+            elif len(params) == 1:
+                if isinstance(params[0], matrix):
+                    value = item.retreive(int(params[0].retreive(0)), int(params[0].retreive(1)))
                 else:
-                    self.overflow = []
-                    docalc = False
-                    if isnull(params[-1]):
-                        params.pop()
-                        docalc = True
-                    value = getcall(item)(params)
-                    while docalc or len(self.overflow) > 0:
-                        docalc = False
-                        temp = self.overflow[:]
-                        self.overflow = []
-                        value = getcall(value)(temp)
-                return value
+                    value = item.retreive(int(params[0]))
+            elif isinstance(params[0], matrix) and isinstance(params[1], matrix):
+                if params[0].retreive(0) < 0:
+                    params[0].store(0,0, params[0].retreive(0)+item.y+1.0)
+                if params[0].retreive(1) < 0:
+                    params[0].store(1,1, params[0].retreive(1)+item.x+1.0)
+                if params[1].retreive(0) < 0:
+                    params[1].store(0,0, params[1].retreive(0)+item.y+1.0)
+                if params[1].retreive(1) < 0:
+                    params[1].store(1,1, params[1].retreive(1)+item.x+1.0)
+                if params[0].getdiag() == params[1].getdiag():
+                    value = matrix(1,1, item.retreive(int(params[0].retreive(0)), int(params[0].retreive(1))))
+                elif params[0].retreive(0) == params[1].retreive(0):
+                    out = item[int(params[0].retreive(0))][int(params[0].retreive(1)):int(params[1].retreive(1))+1]
+                    value = diagmatrixlist(out)
+                elif params[0].retreive(1) == params[1].retreive(1):
+                    item.flip()
+                    out = item[int(params[0].retreive(1))][int(params[0].retreive(0)):int(params[1].retreive(0))+1]
+                    value = diagmatrixlist(out)
+                else:
+                    out = []
+                    if params[0].retreive(0) <= params[1].retreive(0):
+                        ymin, ymax = int(params[0].retreive(0)), int(params[1].retreive(0))
+                    else:
+                        ymin, ymax = int(params[1].retreive(0)), int(params[0].retreive(0))
+                    if params[0].retreive(1) <= params[1].retreive(1):
+                        xmin, xmax = int(params[0].retreive(1)), int(params[1].retreive(1))
+                    else:
+                        xmin, xmax = int(params[1].retreive(1)), int(params[0].retreive(1))
+                    for y in xrange(ymin, ymax+1):
+                        out.append([])
+                        for x in xrange(xmin, xmax+1):
+                            out[-1].append(item.retreive(y,x))
+                    value = matrixlist(out)
+            else:
+                length = item.lendiag()
+                params[0] = float(params[0])
+                params[1] = float(params[1])
+                if params[0] < 0:                
+                    params[0] += length+1.0
+                if params[1] < 0:
+                    params[1] += length+1.0
+                if params[0] == params[1]:
+                    value = matrix(1,1, item.retreive(int(params[1])))
+                elif params[0] < params[1]:
+                    out = item.getdiag()[int(params[0]):int(params[1])]
+                    value = diagmatrixlist(out)
+                else:
+                    out = item.getdiag()[int(params[1]):int(params[0])]
+                    out.reverse()
+                    value = diagmatrixlist(out)
+            self.overflow = params[2:]
+        elif isinstance(item, strcalc):
+            item = item.calcstr
+            if len(params) == 0:
+                value = strcalc(item[-1], self)
+            elif len(params) == 1:
+                value = strcalc(item[int(params[0])], self)
+            else:
+                value = strcalc(item[int(params[0]):int(params[1])], self)
+                self.overflow = params[2:]
+        else:
+            value = getcall(item)(params)
+        while docalc or len(self.overflow) > 0:
+            docalc = False
+            temp = self.overflow[:]
+            self.overflow = []
+            value = self.call_colon_set(value, temp)
+        return value
 
     def call_paren(self, inputstring):
         """Evaluates Parentheses."""
