@@ -45,9 +45,11 @@ For more information, read the docstrings in eval.py.
 
 ### Basic Tutorial
 
-This tutorial will teach you all the basic syntax of RabbitLang as well as many of the basic concepts.
+This tutorial will teach you all the basic syntax of RabbitLang as well as many of the basic concepts. Two things before we begin.
 
-First, before we begin, it should be understood that each code block that is not labeled as otherwise (such as debug output) will be valid Rabbit Code. In these code blocks, it will be common to use comments. Comments in Rabbit are anything after a pound symbol (#) on a line, and will be ignored.
+First, it should be understood that each code block that is not labeled as otherwise (such as debug output) will be valid Rabbit Code. In these code blocks, it will be common to use comments. Comments in Rabbit are anything after a pound symbol (#) on a line, and will be ignored.
+
+Second, lines that don't start with setting a variable or function are just expressions. They can be placed anywhere, and if just placed on their own, will print the result.
 
 #### Rabbits Do Math
 
@@ -63,8 +65,8 @@ Math in rabbit is very similar to in any other programming language. Rabbit's ma
 
 These different operations can, and should, be grouped using parentheses. Additionally, certain equivalent structures also exist:
 ```
-2x		# Coefficient multiplication (evaluated left to right, very low precedence)
 2(x)	# Parentheses multiplication (evaluated left to right, very low precedence)
+2x		# Coefficient multiplication (evaluated left to right, very low precedence, same as parentheses)
 ```
 
 #### Rabbits Are Lazy
@@ -139,16 +141,84 @@ Additionally, all the different container objects support various types of opera
 [1,2] .. [3,4]	# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
 [1,2,3,4]:1		# Item indexes (result = 2) (left to right, lowest precedence, same as colon for function calls)
 (1,2,3):2		# These work for lists as well (result = 3)
+(1,2,3):0:2		# And can also be used to perform item indices (result = 1,2)
 1,2,3~ \x\(x+1)	# Loops over the list with a function, the notation for which is coming up (result = 2,3,4) (right to left, highest precedence)
 ```
 
 #### Rabbits Love Functions
 
-How to define functions was mentioned earlier but how to call them never was. Rabbit provides two different methods of calling functions, using colons and using parentheses. The two methods are similar in many ways but also very different.
+How to define functions was mentioned earlier but how to call them never was. Rabbit provides two different methods of calling functions, using colons and using parentheses. The two methods are similar in many ways but also very different. Here are a couple of examples that explain the differences:
+```
+# First, let's define three different functions, one that takes no arguments, we'll call it t,
+t() = 1 
+# One that takes one argument, we'll call it f,
+f(x) = x+1
+# And one that takes two arguments, we'll call it g
+g(x,y) = 2*x*y
+
+# First, we'll show two different, equivalent ways of calling the zero-variable function:
+t()+1
+t:+1
+# result = 2
+
+# Second, we'll show two different, equivalent ways of calling the one-variable function:
+f(2,)*3		# Note the use of a comma after the first variable--we'll learn why this is important later
+f:2*3
+# result = 9
+
+# Third, we'll show two different, equivalent ways of calling the two-variable function:
+g(2,3)-5
+g:2:3-5
+# result = 7
+
+# Now, we'll show ways in which the two syntaxes can differ. First, we'll talk about parentheses syntax.
+
+# Parentheses syntax essentially forms a list out of what is inside the parentheses, and then calls the function with those arguments.
+# That means that this:
+add(x,y,z) = x+y+z
+a = 1,2,3
+add(a)
+# Will call add with the three variables 1, 2, and 3, instead of with the one variable (1,2,3) as its argument. This can often be useful, as is shown in the example.
+
+# Colon syntax, on the other hand, will never do that. Whatever is after the first colon is the first argument, a second argument requires a second colon.
+# What colon syntax will do, however, that parentheses syntax will not, is curry multiple arguments. This is useful when dealing with functions that return other functions.
+# Before we can get into that, however, you need to understand how to define in-line functions, or lambdas.
+```
+
+Lambda syntax in Rabbit is fairly straightforward, with a couple of strange quirks that result from Rabbit being dynamically scoped. Lambdas are defined using the backslash (\) operator. Here're some examples of how to define different lambda functions:
+```
+\1				# A zero-argument function that returns 1
+\x\(x+1)		# A one-variable function (x) that returns that variable plus one (x+1)
+(\x\x)+1		# The same as above--Rabbit will just curry any basic mathematical operation done to a function
+\(x,y)\(x+y)	# A two-variable function that adds the two variables
+\(x,x:(1))\x	# A one-variable function, whose one variable defaults to one, that returns the variable
+				# This syntax is particularly useful because the defaults are evaluated in the scope where the function is defined instead of the scope where it is called, allowing arguments to be passed between scopes
+f(x) = x
+\f				# Since f is a previously defined function, this will just return that function
+\\f				# This syntax is required to create a new zero-variable function that returns f
+```
+
+Now that we know how to define lambdas, here's what's special about colon syntax:
+```
+gen_func(n) = \(x,n:(n))\(x%n)	# Creates and returns a function that will take the mod of its variable with the base equal to the variable of the generator
+gen_func:2:5					# Because gen_func only takes one variable, colon syntax will pass the remaining variables on to whatever is returned by gen_func
+# result = 5 % 2 = 1
+```
 
 #### Rabbits Eat Strings
 
-#### Rabbits Take Classes
+Strings in rabbit are also not complicated, and are really very similar to strings in any other language. Here's the basic syntax:
+```
+"hello, world"		# Creates a string--it should be noted that single quotes will NOT work--they are reserved for global defaults
+"Answer: "+2		# Strings support addition, even with other things that are not strings (result = "Answer: 2")
+"hello"*2			# Multiplication behaves like one would expect, in this case doubling the string (result = "hellohello")
+"01234":2			# Strings also support indexes, just like matrices (result = "2")
+"01234":1:3			# As well as indices, just like matrices (result = "12")
+```
+
+#### Advanced Rabbit
+
+That's currently the end of the basic Rabbit tutorial. More will likely be added soon to cover some of the newer or more complicated constructions, but the above should be sufficient to begin writing Rabbit code. See below for more information on how the actual processing of Rabbit code is done.
 
 ### Levels of Evaluation
 
@@ -169,6 +239,7 @@ The second stage is interpreter command resolution. This stage can vary based on
 This stage mostly works in command-line syntax (spaces as argument seperators), but certain symbol operators are also evaluated at this stage. The most common and important commands and operators evaluated are:
 ```
 f(x) # a comment  # The # operator will tell the interpreter to ignore everything after it
+x+1 			  # A plain expression will simply print the result to the console
 x = 1             # Sets the variable x to the yet-to-be-evaluated value 1
 x := x            # Sets the variable x to the result of evaluating x
 f(x) = x          # The preferable notation for creating functions
