@@ -300,7 +300,92 @@ Fourth is the default variable operator ('). In most cases, the single quote is 
 
 var = 2
 1+'var		# When the normal variable is redefined, the default isn't affected (result = 6)
-1+var		# But the normal variable is effected, now using its new value instead of the default (result = 3)
+1+var		# But the normal variable is, now using its new value instead of the default (result = 3)
+```
+
+#### Rabbits Come With Functions
+
+Rabbit comes with a lot of built-in functions. We'll list all of them below, but this list might not always stay updated. An updated list should always be available in eval.py and cmd.py. The different built-in rabbit functions are:
+```
+# Built-In Base Rabbit Functions:
+copy
+type
+to
+str
+repr
+chars
+calc
+fold
+D
+S
+L
+I
+list
+matrix
+cont
+det
+sum
+prod
+join
+merge
+sort
+reverse
+round
+num
+eval
+find
+split
+replace
+contains
+range
+len
+size
+abs
+data
+frac
+simp
+d
+floor
+ceil
+log
+ln
+sqrt
+tan
+sin
+cos
+atan
+asin
+acos
+deg
+rad
+normdist
+binomP
+hypgeoP
+tdist
+teq
+chisqdist
+chisqeq
+normP
+tP
+chisqP
+gamma
+gcd
+lcm
+perm
+comb
+
+# Built-In Base Rabbit Variables:
+i
+e
+pi
+none
+true
+false
+
+# Built-In Rabbit Interpreter Functions:
+ans
+grab
+print
 ```
 
 #### More Rabbits?
