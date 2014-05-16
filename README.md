@@ -142,7 +142,6 @@ Additionally, all the different container objects support various types of opera
 [1,2,3,4]:1		# Item indexes (result = 2) (left to right, lowest precedence, same as colon for function calls)
 (1,2,3):2		# These work for lists as well (result = 3)
 (1,2,3):0:2		# And can also be used to perform item indices (result = 1,2)
-1,2,3~ \x\(x+1)	# Loops over the list with a function, the notation for which is coming up (result = 2,3,4) (right to left, highest precedence)
 ```
 
 #### Rabbits Love Functions
@@ -216,9 +215,92 @@ Strings in rabbit are also not complicated, and are really very similar to strin
 "01234":1:3			# As well as indices, just like matrices (result = "12")
 ```
 
-#### Advanced Rabbit
+#### Rabbits Take Classes
 
-That's currently the end of the basic Rabbit tutorial. More will likely be added soon to cover some of the newer or more complicated constructions, but the above should be sufficient to begin writing Rabbit code. See below for more information on how the actual processing of Rabbit code is done.
+Classes in Rabbit are essentially namespace objects. What that means is that classes are just groups of commands that are fed to them, and then any new definitions put into their own namespace. The basic syntax for classes is:
+```
+{ x = 1 }		# Will create a class whose only variable, x, is set to 1
+			# NOTE: This will only work if x is not currently set to 1--if it is, Rabbit won't detect any change, and you'll end up with an empty class
+{ x = 1 ;; y = 2 }	# Because the interior of a class is just treated as a command, command seperators can be used to define multiple items inside of a class
+{ f(x) = x }		# That also means that functions can be defined within classes just the same as if they were being defined at the top level
+```
+
+Once a class has been created, a variety of different things can be done with it. The different sytnax for calling classes, and a further explanation of methods, is below:
+```
+a = { x := x+1 }	# Remember, any valid top-level command is valid inside of a class
+a.x + 1			# This will retreive x from the class a and add 1 to it
+a:"x+1"			# Same as above--this will evaluate "x+1" in the namespace of the class
+```
+
+Since class definitions can often get very long, it is reccomended that line continuations be used. Since we haven't introduced those yet, we'll do so here. Line continuations follow a very simple rule: any line that starts with whitespace will be added onto the previous line. It should be noted that this only works when running code from a file, not from the command line. Some common uses of this syntax are:
+```
+# Defining a piecewise function:
+f(x) =
+ x+1 @ x>0;
+ -1/x
+
+# Defining a class:
+a = {
+ f(x) = x ;;
+ x = 1
+ }
+```
+
+When a function is defined inside of a class this turns it into a method. Methods are the same as any old function, except that the class they are in will always be passed to them as the variable "self". Here's an example of a method:
+```
+a = {
+ fact(x, n) =				# Since this function is being defined inside of a class it becomes a method
+  x*self.fact(x-1, n-1) @ n>0;		# Here we use the self variable to allow the function to call itself
+  1
+ }
+```
+
+Since a very common use of classes is to define a temporary variable that is going to be used in multiple places but only in the same expression, with, or where, clauses were added to facilitate that. The syntax for these statements is:
+```
+# In with clause syntax:
+f(x) = gx*floor(gx) $ gx = g(x)		# Calls what comes before the dollar sign in the namespace of what comes after (right to left, highest precedence, right above at)
+# The same thing in class syntax:
+f(x) = { gx = g(x) } : "gx*floor(gx)"
+
+# In with clause syntax:
+g(x) = m(z) $ z = x^2 $ m(z) = z%10	# Multiple dollar signs are used instead of double semicolons to seperate multiple commands
+# The same thing in class syntax:
+g(x) = { z = x^2 ;; m(z) = z%10 } : "m(z)"
+```
+
+#### Other Rabbits
+
+Before we move on, there are three additional more complex, less-used operators that deserve attention.
+
+First is the loop operator (~). The loop operator allows for the looping of functions over lists. The basic syntax is:
+```
+1,2,3~ \x\x			# Loops over 1,2,3 with \x\x (result = (1,2,3)) (right to left, highest precedence for a mathematical operator)
+1,2,3,4~ \(x,y)\(x+y)		# Loops over 1,2,3,4, taking every two variables for each function call (result = (3,7))
+2,4,6,8~ \x\(last+x)		# Like a method, a loop function will be given a special variable "last" that will be set to the last value returned by the loop function in the loop
+10,20~ 1,2~ \(x,y)\(x+y)	# Loops over 1,2, within a loop over 10,20, feeding each into the function (result = ((11,12),(21,22)))
+```
+
+Second is the function of a function operator (.). While the syntax is the same as that for methods, since functions don't have methods, function of a function is used like methods for functions. The basic syntax is:
+```
+f(x) = x^2
+g(x) = x+1
+f.g(2)		# Read as f(g(x)) (result = 9)
+```
+
+Third is the default variable operator ('). In most cases, the single quote is reserved for use in variable names--most commonly put at the end of the name--but if put at the very beginning, it functions as the default variable operator. The basic use is:
+```
+'var = 5	# Works just like a normal function definition
+1+'var		# You can even still call it using its full name (result = 6)
+1+var		# Same as above--this will check for var first, and if it doesn't find it, then it will go to 'var (result = 6)
+
+var = 2
+1+'var		# When the normal variable is redefined, the default isn't affected (result = 6)
+1+var		# But the normal variable is effected, now using its new value instead of the default (result = 3)
+```
+
+#### More Rabbits?
+
+That's currently the end of the basic Rabbit tutorial. Check back here for information on additional features as they get added, and see below for more information on how the actual processing of Rabbit code is done.
 
 ### Levels of Evaluation
 
