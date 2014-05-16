@@ -270,7 +270,7 @@ g(x) = { z = x^2 ;; m(z) = z%10 } : "m(z)"
 
 #### Other Rabbits
 
-Before we move on, there are three additional more complex, less-used operators that deserve attention.
+Before we move on, there are four additional more complex, less-used operators that deserve attention.
 
 First is the loop operator (~). The loop operator allows for the looping of functions over lists. The basic syntax is:
 ```
@@ -287,7 +287,12 @@ g(x) = x+1
 f.g(2)		# Read as f(g(x)) (result = 9)
 ```
 
-Third is the default variable operator ('). In most cases, the single quote is reserved for use in variable names--most commonly put at the end of the name--but if put at the very beginning, it functions as the default variable operator. The basic use is:
+Third is the factorial operator (!). Because confusion is possible between factorials and not equals, parentheses should usually be used to make it unambiguous, since not equals will always take precedence. The basic syntax is:
+```
+(3!)+1	# The basic factorial operator (result = 7) (right to left, very low precedence)
+```
+
+Fourth is the default variable operator ('). In most cases, the single quote is reserved for use in variable names--most commonly put at the end of the name--but if put at the very beginning, it functions as the default variable operator. The basic use is:
 ```
 'var = 5	# Works just like a normal function definition
 1+'var		# You can even still call it using its full name (result = 6)
@@ -349,7 +354,7 @@ All different types of parentheses as well as conditionals are evaluated at this
 { x = 1 }       # Classes
 [1, 2, 3]       # Matrix rows
 (x+2)*2         # Parentheses
-x $ x = 1		# With clauses
+x $ x = 1	# With clauses
 f(x); g(x)      # Conditionals
 f(x) @ x>=0     # Conditions
 ```
