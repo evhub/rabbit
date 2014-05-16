@@ -141,6 +141,9 @@ class matrix(mctobject):
                     for z in xrange(0, self.x):
                         v += self.retreive(y, z)*other.retreive(z, x)
                     out.store(y, x, v)
+            elif self.onlyrow() and other.onlyrow() and self.x == other.x:
+                out = self*other.trans()
+                out = out.retreive(0, 0)
             else:
                 raise IndexError
         else:

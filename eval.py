@@ -948,7 +948,6 @@ Global Operator Precedence List:
 
     def call_colon_set(self, item, params):
         """Performs Colon Function Calls."""
-        print(item, params)
         self.overflow = []
         docalc = False
         if isnull(params[-1]):
@@ -1102,11 +1101,11 @@ Global Operator Precedence List:
                 elif inputlist[x] == "-":
                     values.append(-1.0)
                 elif "." in inputlist[x]:
-                    itemlist = inputlist[x].split(".")
-                    test = not itemlist[0] or not madeof(itemlist[0], string.digits)
-                    for x in xrange(1, len(itemlist)):
-                        test = test and itemlist[x] and not madeof(itemlist[x], string.digits)
-                    if test:
+                    itemlist = inputstring.split(".")
+                    isfloat = len(itemlist) < 3
+                    for x in itemlist:
+                        isfloat = isfloat and (not itemlist[0] or madeof(itemlist[0], string.digits))
+                    if not isfloat:
                         itemlist[0] = self.funcfind(itemlist[0] or values.pop())
                         if not isinstance(itemlist[0], classcalc):
                             values.append(itemlist)
@@ -1145,19 +1144,19 @@ Global Operator Precedence List:
     def call_method(self, inputstring):
         """Returns Method Instances."""
         if "." in inputstring:
-            inputlist = inputstring.split(".")
-            test = True
-            for x in inputlist:
-                test = test and x and not madeof(x, string.digits)
-            if test:
-                inputlist[0] = self.funcfind(inputlist[0])
-                if isinstance(inputlist[0], classcalc):
-                    if len(inputlist) == 2:
-                        return inputlist[0].retreive(inputlist[1])
+            itemlist = inputstring.split(".")
+            isfloat = len(itemlist) < 3
+            for x in itemlist:
+                isfloat = isfloat and (not itemlist[0] or madeof(itemlist[0], string.digits))
+            if not isfloat:
+                itemlist[0] = self.funcfind(itemlist[0])
+                if isinstance(itemlist[0], classcalc):
+                    if len(itemlist) == 2:
+                        return itemlist[0].retreive(itemlist[1])
                     else:
-                        return strfunc("inputclass."+strlist(inputlist[2:], "."), self, ["inputclass"]).call([inputlist[0].retreive(inputlist[1])])
-                elif not isnull(inputlist[0]):
-                    return strfunc("firstfunc."+strlist(inputlist[1:], ".")+"("+funcfloat.allargs+")", self, [funcfloat.allargs], {"firstfunc":inputlist[0]})
+                        return strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retreive(itemlist[1])])
+                elif not isnull(itemlist[0]):
+                    return strfunc("firstfunc."+strlist(itemlist[1:], ".")+"("+funcfloat.allargs+")", self, [funcfloat.allargs], {"firstfunc":itemlist[0]})
 
     def call_normal(self, inputstring):
         """Returns Argument."""
