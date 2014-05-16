@@ -186,8 +186,6 @@ Import Commands:
             self.box.placetag("comment", point+"-1c", point)
         elif test == '"':
             self.box.placetag("string", point+"-1c", point)
-        elif test == self.e.defprefix:
-            self.box.placetag("modifier", point+"-1c", point)
         elif test in string.digits:
             self.box.placetag("digit", point+"-1c", point)
         elif self.e.isreserved(test):
@@ -221,6 +219,8 @@ Import Commands:
                 if c == 1 and not test in string.whitespace:
                     if last[0] in [funcfloat.allargs, classcalc.selfarg, self.e.lastname]:
                         self.box.placetag("builtin", last[1], point+"-2c")
+                    elif last[0].startswith(self.e.defprefix):
+                        self.box.placetag("modifier", last[1], last[1]+"+1c")
                     elif last[0] in self.e.variables:
                         if isinstance(self.e.variables[last[0]], usefunc) or (isinstance(self.e.variables[last[0]], funcfloat) and not isinstance(self.e.variables[last[0]], strfunc)):
                             self.box.placetag("builtin", last[1], point+"-2c")
@@ -281,6 +281,8 @@ Import Commands:
                 else:
                     if last[0] in [funcfloat.allargs, classcalc.selfarg, self.e.lastname]:
                         self.box.placetag("builtin", last[1], point+"-1c")
+                    elif last[0].startswith(self.e.defprefix):
+                        self.box.placetag("modifier", last[1], last[1]+"+1c")
                     elif last[0] in self.e.variables:
                         if isinstance(self.e.variables[last[0]], usefunc) or (isinstance(self.e.variables[last[0]], funcfloat) and not isinstance(self.e.variables[last[0]], strfunc)):
                             self.box.placetag("builtin", last[1], point+"-1c")
