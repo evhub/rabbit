@@ -152,7 +152,7 @@ Global Operator Precedence List:
             "none":matrix(0),
             "true":1.0,
             "false":0.0,
-            "Dx":"D",
+            "D"+self.varname:"D",
             self.defprefix*2:matrix(0),
             self.defprefix+funcfloat.allargs:matrix(0),
             self.defprefix+self.varname:matrix(0),
