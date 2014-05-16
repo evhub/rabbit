@@ -136,7 +136,17 @@ Next is the row, so named because it is nothing more than a matrix with one row 
 
 Because it is more complicated and the syntax to define it includes operations you don't know yet, we'll hold off on explaining full matrices until later. For now we'll just tell you that they're just multiple rows joined together into a full matrix.
 
-Additionally, all the different container objects support various types of operations that can be performed on them. Because they are matrices, they all support basic matrix math. Additionally, there are a couple of other, special operations that can be done only with container objects, the syntax for which is:
+Additionally, all the different container objects support various types of operations that can be performed on them. Because they are matrices, they all support basic matrix math. The syntax for these basic operations is:
+```
+(1,2,3)*2			# Scalar multiplication (result = (2,3,6))
+(1,2,3)+10			# Applied addition (result = (11,12,13))
+(1,2)+(10,20)		# Matrix addition (result = (11,22))
+(1,2)*(10,20)		# Matrix multiplication (result = (10,40))
+[1,2]*[10,20]		# Dot product (result = 50)
+[1,0,0]%[0,1,0]		# Cross product (result = [0,0,1])
+```
+
+Additionally, there are a couple of other, special operations that can be done only with container objects, the syntax for which is:
 ```
 [1,2] .. [3,4]	# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
 [1,2,3,4]:1		# Item indexes (result = 2) (left to right, lowest precedence, same as colon for function calls)

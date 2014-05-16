@@ -77,6 +77,12 @@ class evalobject(object):
         out **= other
         return out
 
+    def __mod__(self, other):
+        """Performs Modulus."""
+        out = self.copy()
+        out %= other
+        return out
+
     def __imul__(self, other):
         """Performs *."""
         for x in xrange(0, int(other)):
@@ -162,13 +168,6 @@ class numobject(evalobject):
         while self >= other:
             self -= other
         return self
-
-    def __mod__(self, other):
-        """Implements Modulus."""
-        out = self.copy()
-        while out >= other:
-            out -= other
-        return out
 
     def __rmod__(self, other):
         """Implements Reverse Modulus."""
@@ -290,6 +289,16 @@ class mctobject(cotobject, numobject):
     def __ipow__(self, other):
         """Performs Exponentiation In-Place."""
         self.code(lambda x: x**other)
+        return self
+
+    def __imod__(self, other):
+        """Performs Modulus In-Place."""
+        self.code(lambda x: x%other)
+        return self
+
+    def __rmod__(self, other):
+        """Implements Reverse Modulus."""
+        self.code(lambda x: other%x)
         return self
 
     def __abs__(self):

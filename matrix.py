@@ -253,6 +253,24 @@ class matrix(mctobject):
         else:
             raise TypeError
 
+    def __imod__(self, other):
+        """Performs Modulus In-Place."""
+        if isinstance(other, matrix):
+            self = self.cross(other)
+        else:
+            self.code(lambda x: x%other)
+        return self
+
+    def __mod__(self, other):
+        """Performs Modulus."""
+        if isinstance(other, matrix):
+            out = self.cross(other)
+        else:
+            out = self.new()
+            for y,x in self.coords():
+                out.store(y, x, self.retreive(y, x)%other)
+        return out
+
     def __abs__(self):
         """Performs abs."""
         out = self**2.0
@@ -332,6 +350,20 @@ class matrix(mctobject):
         out.delrow(y)
         out.delcol(x)
         return out
+
+    def cross(self, other):
+        """Finds The Cross Product With Another Matrix."""
+        if self.x == other.x:
+            cross = self.copy()
+            for row in other.a:
+                cross.newrow(row)
+            cross.newrow([self.prepare(1.0)]*cross.x)
+            out = cross.new(1)
+            for x in xrange(0, out.x):
+                out.store(0,x, cross.minor(cross.y-1, x).det())
+            return out
+        else:
+            raise IndexError
 
     def C(self, y, x):
         """Finds The Cofactor For The Given Row And Column."""
