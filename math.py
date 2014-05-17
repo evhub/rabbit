@@ -29,6 +29,8 @@ def gcd(a, b):
     """Calculates The Greatest Common Denominator Of Two Numbers."""
     if not a:
         return b
+    elif a < 0:
+        return -gcd(b, -a)
     else:
         return gcd(b%a, a)
 
@@ -37,7 +39,7 @@ def lcm(a, b):
     if not (a or b):
         return 0
     else:
-        return abs(a*b)/gcd(a,b)
+        return abs(a)*abs(b)/gcd(a,b)
 
 def isqrt(inputnum):
     """Performs sqrt In The Complex Plane."""
@@ -187,3 +189,8 @@ def gamma(n, accuracy=0.00000001, stop=None):
     if stop == None:
         stop = -n*math.log(accuracy**(1/n)/n)/math.log(2.0)
     return defint(lambda x: x**(n-1.0)*math.e**(-1.0*x), 0.0, stop)
+
+def stirling(n):
+    """Implements The Stirling Approximation Of The Factorial."""
+    n = float(n)
+    return n**n*isqrt(2*math.pi*n)/math.e**n

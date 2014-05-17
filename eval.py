@@ -133,6 +133,7 @@ Global Operator Precedence List:
             "rad":usefunc(math.radians, self, "rad", ["x"]),
             "normdist":usefunc(normdist, self, "normdist", ["x", "mean", "stdev"]),
             "binomP":usefunc(binomP, self, "binomP", ["n", "p", "x"]),
+            "poissonP":usefunc(poissonP, self, "poissonP", ["lambda", "x"]),
             "hypgeoP":usefunc(hypgeoP, self, "hypgeoP", ["x", "n", "K", "N"]),
             "tdist":usefunc(tdist, self, "tdist", ["x", "df"]),
             "teq":usefunc(teq, self, "teq", ["df"], {"e":self}),

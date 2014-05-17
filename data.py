@@ -442,6 +442,14 @@ class data(mctobject):
         N = float(N)
         return ((N-n)/(N-1))**0.5
 
+    def medme(self, dev=1.96, N=None):
+        """Finds The Rank Margin Of Error For A Median."""
+        dev = float(dev)
+        n = float(len(self))
+        if N != None:
+            dev *= self.finpopcor(N)
+        return dev*n**0.5/2.0
+
     def meanme(self, dev=1.96, stdev=None, N=None):
         """Finds The Margin Of Error For A Mean."""
         dev = float(dev)
@@ -449,7 +457,7 @@ class data(mctobject):
             stdev = self.stdev()
         else:
             stdev = float(stdev)
-        n = len(self)
+        n = float(len(self))
         if N != None:
             stdev *= self.finpopcor(N)
         return dev*stdev/n**0.5

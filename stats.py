@@ -56,6 +56,22 @@ def binomstdev(n, p):
     p = float(p)
     return (n*p*(1.0-p))**0.5
 
+def poissonP(np, x):
+    """Calculates The Poisson Approximation Of The Binomial."""
+    np = float(np)
+    x = float(x)
+    return np**x*math.e**(-1*np)/factorial(x)
+
+def poissonE(np):
+    """Determines The Mean Of The Given Poisson Distribution."""
+    np = float(np)
+    return np
+
+def poissonstdev(np):
+    """Determines The Standard Deviation Of The Given Poisson Distribution."""
+    np = float(np)
+    return np**0.5
+
 def geoP(p, x):
     """Determines The Probability Of It Taking x Times For p To Happen."""
     p = float(p)
