@@ -24,7 +24,7 @@ editor().start()    # Starts up the RabbitLang editor
 
 RabbitLang, or more commonly just Rabbit, is one of the Rabbit module's core features. RabbitLang is a functional, dynamically typed, interpreted language written in Python. RabbitLang borrows heavily from both Python and Haskel, but is very different from both languages. The tutorial below should give you a basic idea of how to write code in RabbitLang using the provided tools.
 
-#### Core features
+#### Core Features
 * Dynamic typing
 * Dynamic scoping
 * Object-oriented
