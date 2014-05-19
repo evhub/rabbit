@@ -484,9 +484,10 @@ Global Operator Precedence List:
         for a in xrange(0, len(top)):
             top[a] = top[a].split("&")
             for b in xrange(0, len(top[a])):
-                for x in [">=", "=>", "<=", "=<", ">", "<", "!=", "<>", "?=", "="]:
-                    if x in top[a][b]:
-                        top[a][b] = top[a][b].split(x)
+                for x in [">=", "<=", ">", "<", "<>", "!=", "?=", "="]:
+                    test = splitany(top[a][b], [x, x[::-1]])
+                    if len(test) > 1:
+                        top[a][b] = test
                         top[a][b].reverse()
                         top[a][b].append(x)
                         top[a][b].reverse()
@@ -523,12 +524,12 @@ Global Operator Precedence List:
         """Evaluates The Equation Part Of A Boolean Expression."""
         if not islist(inputlist):
             return self.calc_eval(inputlist)
-        elif inputlist[0] in [">=", "=>"]:
+        elif inputlist[0] == ">=":
             value = self.calc_round(inputlist[1])
             for x in xrange(2, len(inputlist)):
                 value = value >= self.calc_round(inputlist[x])
             return value
-        elif inputlist[0] in ["<=", "=<"]:
+        elif inputlist[0] == "<=":
             value = self.calc_round(inputlist[1])
             for x in xrange(2, len(inputlist)):
                 value = value <= self.calc_round(inputlist[x])

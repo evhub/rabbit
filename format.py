@@ -236,6 +236,19 @@ def reassemble(inputlist, seperators):
     else:
         return strlist(inputlist, seperators[0], lambda x: reassemble(x, seperators[1:]))
 
+def splitany(inputstring, inputlist):
+    """Splits A String By Any Of The Items In A List."""
+    if len(inputlist) == 0:
+        return [inputstring]
+    else:
+        out = inputstring.split(inputlist[0])
+        for x in xrange(1, len(inputlist)):
+            new = []
+            for item in out:
+                new += item.split(inputlist[x])
+            out = new
+        return out
+
 def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf")):
     """Splits A List By An Open And A Close."""
     outlist = [""]

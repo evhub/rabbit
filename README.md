@@ -12,7 +12,7 @@ from rabbit.all import *
 import rabbit.all as rabbit
 ```
 
-From there, what you want to do depends on what you're using rabbit for. If you're not sure what rabbit can do, use the \_\_doc\_\_ string in \_\_init\_\_.py to find a module that looks interesting and then look over the functions that are in it.
+From there, what you want to do depends on what you're using Rabbit for. If you're not sure what Rabbit can do, use the \_\_doc\_\_ string in \_\_init\_\_.py to find a module that looks interesting and then look over the functions that are in it.
 
 Some very common one-liners for initiating basic rabbit features are:
 ```
@@ -112,7 +112,7 @@ The different types of equality and inequality operators, in order of precedence
 3 <= 4		# Less than or equal to (=< also accepted) (result = 1) (left to right)
 3 > 5		# Greater than (result = 0) (left to right)
 6 < 6		# Less than (result = 0) (left to right)
-2 != 3		# Not equal to (<> also accepted) (result = 1) (left to right)
+2 != 3		# Not equal to (<> or >< also accepted, but with higher precedence) (result = 1) (left to right)
 5 ?= 4		# Equal to (= also accepted, but discouraged) (result = 0) (left to right)
 ```
 These will return 1 when true and 0 when false, allowing them to properly function with the 'at' operator.
@@ -477,8 +477,6 @@ x < 4                 # Less than
 x != [ ] & x <> [ ]   # Not equal to (both symbols are accepted)
 x ?= 1 & x = 1        # Equal to (the question mark is optional)
 ```
-
-In order, the 
 
 ##### Debug Output
 ```
