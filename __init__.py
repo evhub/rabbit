@@ -27,7 +27,10 @@ __all__ = ["web", "path", "crypto", "ride"]
 __doc__ = """Overview:
     Rabbit (PythonPlus) is a compilation of functions, classes, and variables that extend basic Python functionality.
     Every single function, method, and class in Rabbit is documented, so have a look around, and feel free to contribute.
-    The most extensive feature of Rabbit is its own built-in programming language, found in rabbit.cmd and rabbit.eval.
+    The most extensive feature of Rabbit is its own built-in programming language, documented most thouroughly in the readme.
+
+Key:
+    name_of_module (dependency_one, dependency_two) : A description of the module.
 
 File List:
     obj () : Functions for managing objects at a base level.
