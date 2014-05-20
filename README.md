@@ -13,7 +13,7 @@ import rabbit.all as rabbit
 
 From there, what you want to do depends on what you're using Rabbit for. If you're not sure what Rabbit can do, use the \_\_doc\_\_ string in \_\_init\_\_.py to find a module that looks interesting and then look over the functions that are in it.
 
-Some very common one-liners for initiating basic rabbit features are:
+Some very common Python one-liners for initiating basic Rabbit features are:
 ```
 mathbase().start()  # Starts up the RabbitLang interpreter
 editor().start()    # Starts up the RabbitLang editor
