@@ -1,8 +1,7 @@
 Rabbit
 ======
 
-Rabbit (PythonPlus) is a compilation of functions, classes, and variables that extend basic Python functionality.
-See the \_\_doc\_\_ string in \_\_init\_\_.py for more information.
+Rabbit (PythonPlus) is a compilation of functions, classes, and variables that extend basic Python functionality. Every single function, method, and class in Rabbit is documented, so have a look around, and feel free to contribute.
 
 ### Using Rabbit in Python
 
@@ -22,7 +21,7 @@ editor().start()    # Starts up the RabbitLang editor
 
 ## RabbitLang
 
-RabbitLang, or more commonly just Rabbit, is one of the Rabbit module's core features. RabbitLang is a functional, dynamically typed, interpreted language written in Python. RabbitLang borrows heavily from both Python and Haskel, but is very different from both languages. The tutorial below should give you a basic idea of how to write code in RabbitLang using the provided tools.
+RabbitLang, or more commonly just Rabbit, is one of the Rabbit library's core features. RabbitLang is a functional, dynamically typed, interpreted language written in Python. RabbitLang borrows heavily from both Python and Haskel, but is very different from both languages. The tutorial below should give you a basic idea of how to write code in RabbitLang using the provided tools.
 
 #### Core Features
 * Dynamic typing
@@ -35,13 +34,11 @@ RabbitLang, or more commonly just Rabbit, is one of the Rabbit module's core fea
 
 ### Language Basics
 
-The largest difference between Rabbit and any other programming language is that each line of code is isolated. If I define a function in Python, for example, I will usually then enter multiple lines of code that define what that function does. Each line of code inside the function is not isolated: it's part of the function. In Rabbit, you cannot use multiple lines (not to be interpreted as actual single lines--almost all lines of code in rabbit will use continuations) to define the function--instead, you use RabbitLang's different integrated control features to define all the logic in the function in one fell swoop.
+The largest difference between Rabbit and any other programming language, an aspect of it being functional, is that each line of code is isolated. If one defines a function in Python, for example, one will usually then enter multiple lines of code that define what that function does. Each line of code inside the function, in such a case, is not isolated: it's part of the function. In Rabbit, you cannot use multiple lines (not to be interpreted as actual single lines; almost all lines of code in rabbit will use continuations) to define the function: instead, you can use RabbitLang's different integrated control features to define all the logic in the function in one fell swoop.
 
 Beyond that, Rabbit uses very few special words in favor of mostly using special symbols. This serves to limit the core language features to the keyboard symbols, making it very clear what is a core language feature and what is not.
 
 Finally, Rabbit takes whitespace insensitivity to the extreme. Whitespace is only used in line continuations, strings, and seperating arguments to interpreter commands. In every other area, all whitespace is deleted, meaning that whitespace can be used liberally in almost any situation, including the seperation of digits or parts of variable names.
-
-For more information, read the docstrings in eval.py.
 
 ### Basic Tutorial
 
@@ -55,33 +52,33 @@ Second, lines that don't start with setting a variable or function are just expr
 
 Math in rabbit is very similar to in any other programming language. Rabbit's mathematical operators are fairly conventional:
 ```
-1+1		# Addition (result = 2) (evaluated left to right, highest precedence)
-3-5		# Subtraction (result = -2) (evaluated left to right, highest precedence)
-2*3		# Multiplication (result = 6) (evaluated left to right, medium precedence)
-1/2		# Division (result = 0.5) (evaluated left to right, medium precedence)
-3^2		# Exponentiation (result = 9) (evaluated right to left, low precedence)
-8%3		# Modulo / Remainder (result = 2) (evaluated left to right, high precedence)
+1+1	# Addition (result = 2) (evaluated left to right, highest precedence)
+3-5	# Subtraction (result = -2) (evaluated left to right, highest precedence)
+2*3	# Multiplication (result = 6) (evaluated left to right, medium precedence)
+1/2	# Division (result = 0.5) (evaluated left to right, medium precedence)
+3^2	# Exponentiation (result = 9) (evaluated right to left, low precedence)
+8%3	# Modulo / Remainder (result = 2) (evaluated left to right, high precedence)
 ```
 
 These different operations can, and should, be grouped using parentheses. Additionally, certain equivalent structures also exist:
 ```
 2(x)	# Parentheses multiplication (evaluated left to right, very low precedence)
-2x		# Coefficient multiplication (evaluated left to right, very low precedence, same as parentheses)
+2x	# Coefficient multiplication (evaluated left to right, very low precedence, same as parentheses)
 ```
 
 #### Rabbits Are Lazy
 
 Most lines of rabbit code constitute function or variable definitions. The syntax for these is fairly straightforward:
 ```
-a = x+1				# A variable definition
+a = x+1			# A variable definition
 f(x,y) = 2(x+y)		# A function definition
 ```
 
-You might notice that at the point when a is defined x has not yet been defined, and yet a is told that it needs to have one greater than the value of x. Not only will this construction not raise an error in Rabbit, Rabbit won't even known until you do something with a. That's because Rabbit uses lazy evaluation. By default, when you define a variable, Rabbit will simply store the string of characters you typed in and not actually do anything with it until you try to use it somewhere else. This can be very useful when wanting one variable (a) to reflect the possibly changing values of another variable (x).
+You might notice that at the point when a is defined x has not yet been defined, and yet a is told that it needs to have one greater than the value of x. Not only will this construction not raise an error in Rabbit, Rabbit won't even known until you do something with a. That's because Rabbit uses lazy evaluation. By default, when you define a variable, Rabbit will simply store the string of characters you typed in and not actually do anything with it until you try to use it somewhere else. This can be very useful when wanting one variable (a) to reflect the possibly changing value of another variable (x).
 
 It is, however, possible to circumvent lazy evaluation and force Rabbit to figure out what the value is and calculate it then and there. This can't be used with functions, however, because that wouldn't make sense: Rabbit can't calculate them yet no matter what because they haven't been supplied with arguments. The syntax for circumventing lazy evaluation is very simple:
 ```
-a := x+1		# The colon tells the interpreter not to do lazy evaluation
+a := x+1	# The colon tells the interpreter not to do lazy evaluation
 ```
 
 Because one of the most common reasons to circumvent lazy evaluation is to increment or decrement a variable, or otherwise use the variable itself in giving it a new value, special syntax was added to do so:
@@ -95,7 +92,7 @@ a := a+x
 
 #### Rabbits Have Bools
 
-In addition to basic mathematical operators, Rabbit also features basic conditional operators, used most commonly in conditionals. Rabbit's conditionals use two symbols each with their own, well-defined, independent function, that when put together, allow the formation of conditions. Within them, logical, inequality, and equality operators can all be used. All of these symbols have higher precedence than mathematical operators, as well as themselves having a precedence of their own.
+In addition to basic mathematical operators, Rabbit also features basic boolean operators, used most commonly in conditionals. Rabbit's conditionals use two symbols each with their own, well-defined, independent function, that when put together, allow the formation of conditions. Within them, logical, inequality, and equality operators can all be used. All of these symbols have higher precedence than mathematical operators, as well as themselves having a precedence of their own.
 
 The basic syntax for conditionals is:
 ```
@@ -112,7 +109,7 @@ The different types of equality and inequality operators, in order of precedence
 3 <= 4		# Less than or equal to (=< also accepted) (result = 1) (left to right)
 3 > 5		# Greater than (result = 0) (left to right)
 6 < 6		# Less than (result = 0) (left to right)
-2 != 3		# Not equal to (<> or >< also accepted, but with higher precedence) (result = 1) (left to right)
+2 != 3		# Not equal to (<> or >< also accepted, and with a higher precedence) (result = 1) (left to right)
 5 ?= 4		# Equal to (= also accepted, but discouraged) (result = 0) (left to right)
 ```
 These will return 1 when true and 0 when false, allowing them to properly function with the 'at' operator.
@@ -126,20 +123,20 @@ We'll start with the list, the most common and the most useful container object 
 (1,2,3)		# This will define a 3 by 3 matrix with 1, 2, and 3 along its main diagonal (the other locations will be ignored or treated as zero unless something is done to them)
 1,2,3		# Lists are simply expressions separated by commas, the parentheses aren't necessary (left to right, high precedence)
 ```
-Precedence for these and other container operations is between booleans and math. 
+Precedence for these and other container operators is between that of boolean operators and that of mathematical operators. 
 
 Next is the row, so named because it is nothing more than a matrix with one row and many columns. The syntax for creating rows is:
 ```
 [1,2,3]		# This will define a 1 by 3 matrix with the items 1, 2, and 3 in it
-[(1,2,3)]	# The colons are actually converting a list into a row, so the inside can actually be any list
+[(1,2,3)]	# The brackets are actually converting a list into a row, so the inside can actually be any list
 ```
 
-Because it is more complicated and the syntax to define it includes operations you don't know yet, we'll hold off on explaining full matrices until later. For now we'll just tell you that they're just multiple rows joined together into a full matrix.
+Because it is more complicated and the syntax to define it includes operations you don't know yet, we'll hold off on explaining full matrices until we get to the built-in function that allows them to be created. For now we'll just tell you that they're just multiple rows joined together into a full matrix.
 
 Additionally, all the different container objects support various types of operations that can be performed on them. Because they are matrices, they all support basic matrix math. The syntax for these basic operations is:
 ```
-(1,2,3)*2			# Scalar multiplication (result = (2,3,6))
-(1,2,3)+10			# Applied addition (result = (11,12,13))
+(1,2,3)*2		# Scalar multiplication (result = (2,3,6))
+(1,2,3)+10		# Applied addition (result = (11,12,13))
 (1,2)+(10,20)		# Matrix addition (result = (11,22))
 (1,2)*(10,20)		# Matrix multiplication (result = (10,40))
 [1,2]*[10,20]		# Dot product (result = 50)
@@ -148,7 +145,7 @@ Additionally, all the different container objects support various types of opera
 
 Additionally, there are a couple of other, special operations that can be done only with container objects, the syntax for which is:
 ```
-[1,2] .. [3,4]	# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
+[1,2] .. [3,4]		# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
 [1,2,3,4]:1		# Item indexes (result = 2) (left to right, lowest precedence, same as colon for function calls)
 (1,2,3):2		# These work for lists as well (result = 3)
 (1,2,3):0:2		# And can also be used to perform item indices (result = 1,2)
@@ -194,23 +191,23 @@ add(a)
 # Before we can get into that, however, you need to understand how to define in-line functions, or lambdas.
 ```
 
-Lambda syntax in Rabbit is fairly straightforward, with a couple of strange quirks that result from Rabbit being dynamically scoped. Lambdas are defined using the backslash (\) operator. Here're some examples of how to define different lambda functions:
+Lambda syntax in Rabbit is fairly straightforward, with a couple of strange quirks that result from Rabbit being dynamically scoped. Lambdas are defined using the backslash (\\) operator. Here're some examples of how to define different lambda functions:
 ```
-\1				# A zero-argument function that returns 1
+\1			# A zero-argument function that returns 1
 \x\(x+1)		# A one-variable function (x) that returns that variable plus one (x+1)
 (\x\x)+1		# The same as above--Rabbit will just curry any basic mathematical operation done to a function
-\(x,y)\(x+y)	# A two-variable function that adds the two variables
-\(x,x:(1))\x	# A one-variable function, whose one variable defaults to one, that returns the variable
-				# This syntax is particularly useful because the defaults are evaluated in the scope where the function is defined instead of the scope where it is called, allowing arguments to be passed between scopes
+\(x,y)\(x+y)		# A two-variable function that adds the two variables
+\(x,x:(1))\x		# A one-variable function, whose one variable defaults to one, that returns the variable
+			# This syntax is particularly useful because the defaults are evaluated in the scope where the function is defined instead of the scope where it is called, allowing arguments to be passed between scopes
 f(x) = x
-\f				# Since f is a previously defined function, this will just return that function
-\\f				# This syntax is required to create a new zero-variable function that returns f
+\f			# Since f is a previously defined function, this will just return that function
+\\f			# This syntax is required to create a new zero-variable function that returns f
 ```
 
 Now that we know how to define lambdas, here's what's special about colon syntax:
 ```
-gen_func(n) = \(x,n:(n))\(x%n)	# Creates and returns a function that will take the mod of its variable with the base equal to the variable of the generator
-gen_func:2:5					# Because gen_func only takes one variable, colon syntax will pass the remaining variables on to whatever is returned by gen_func
+gen_func(n) = \(x,n:(n))\(x%n)		# Creates and returns a function that will take the mod of its variable with the base equal to the variable of the generator
+gen_func:2:5				# Because gen_func only takes one variable, colon syntax will pass the remaining variables on to whatever is returned by gen_func
 # result = 5 % 2 = 1
 ```
 
@@ -218,11 +215,11 @@ gen_func:2:5					# Because gen_func only takes one variable, colon syntax will p
 
 Strings in rabbit are also not complicated, and are really very similar to strings in any other language. Here's the basic syntax:
 ```
-"hello, world"		# Creates a string--it should be noted that single quotes will NOT work--they are reserved for global defaults
+"hello, world"		# Creates a string--it should be noted that single quotes will NOT work--they are reserved for creating defaults
 "Answer: "+2		# Strings support addition, even with other things that are not strings (result = "Answer: 2")
-"hello"*2			# Multiplication behaves like one would expect, in this case doubling the string (result = "hellohello")
-"01234":2			# Strings also support indexes, just like matrices (result = "2")
-"01234":1:3			# As well as indices, just like matrices (result = "12")
+"hello"*2		# Multiplication behaves like one would expect, in this case doubling the string (result = "hellohello")
+"01234":2		# Strings also support indexes, just like matrices (result = "2")
+"01234":1:3		# As well as indices, just like matrices (result = "12")
 ```
 
 #### Rabbits Take Classes
@@ -230,16 +227,16 @@ Strings in rabbit are also not complicated, and are really very similar to strin
 Classes in Rabbit are essentially namespace objects. What that means is that classes are just groups of commands that are fed to them, and then any new definitions put into their own namespace. The basic syntax for classes is:
 ```
 { x = 1 }		# Will create a class whose only variable, x, is set to 1
-			# NOTE: This will only work if x is not currently set to 1--if it is, Rabbit won't detect any change, and you'll end up with an empty class
+			# Note that this will only work if x is not currently set to 1--if it is, Rabbit won't detect any change, and you'll end up with an empty class
 { x = 1 ;; y = 2 }	# Because the interior of a class is just treated as a command, command seperators can be used to define multiple items inside of a class
 { f(x) = x }		# That also means that functions can be defined within classes just the same as if they were being defined at the top level
 ```
 
 Once a class has been created, a variety of different things can be done with it. The different sytnax for calling classes, and a further explanation of methods, is below:
 ```
-a = { x := x+1 }	# Remember, any valid top-level command is valid inside of a class
-a.x + 1			# This will retreive x from the class a and add 1 to it
-a:"x+1"			# Same as above--this will evaluate "x+1" in the namespace of the class
+a = { x = 1 ;; x := x+1 }	# Remember, any valid top-level command is valid inside of a class
+a.x + 1				# This will retreive x from the class and add 1 to it (result = 3)
+a:"x+1"				# Same as above--this will evaluate "x+1" in the namespace of the class (result = 3)
 ```
 
 Since class definitions can often get very long, it is reccomended that line continuations be used. Since we haven't introduced those yet, we'll do so here. Line continuations follow a very simple rule: any line that starts with whitespace will be added onto the previous line. It should be noted that this only works when running code from a file, not from the command line. Some common uses of this syntax are:
@@ -265,7 +262,7 @@ a = {
  }
 ```
 
-Since a very common use of classes is to define a temporary variable that is going to be used in multiple places but only in the same expression, with, or where, clauses were added to facilitate that. The syntax for these statements is:
+Since a very common use of classes is to define a temporary variable that is going to be used in multiple places but only in the same expression, with/where clauses were added to facilitate that. The syntax for these statements is:
 ```
 # In with clause syntax:
 f(x) = gx*floor(gx) $ gx = g(x)		# Calls what comes before the dollar sign in the namespace of what comes after (right to left, highest precedence, right above at)
@@ -280,13 +277,13 @@ g(x) = { z = x^2 ;; m(z) = z%10 } : "m(z)"
 
 #### Other Rabbits
 
-Before we move on, there are four additional more complex, less-used operators that deserve attention.
+Before we move on, there are some remaining, more complex, less-used operators that deserve attention.
 
 First is the loop operator (~). The loop operator allows for the looping of functions over lists. The basic syntax is:
 ```
 1,2,3~ \x\x			# Loops over 1,2,3 with \x\x (result = (1,2,3)) (right to left, highest precedence for a mathematical operator)
 1,2,3,4~ \(x,y)\(x+y)		# Loops over 1,2,3,4, taking every two variables for each function call (result = (3,7))
-2,4,6,8~ \x\(last+x)		# Like a method, a loop function will be given a special variable "last" that will be set to the last value returned by the loop function in the loop
+2,4,6,8~ \x\(last+x)		# Like a method, a loop function will be given a special variable "last" that will be set to the last value returned by the loop function in the loop (result = (2,6,8,14))
 10,20~ 1,2~ \(x,y)\(x+y)	# Loops over 1,2, within a loop over 10,20, feeding each into the function (result = ((11,12),(21,22)))
 ```
 
@@ -315,7 +312,7 @@ var = 2
 
 #### Rabbits Come With Functions
 
-Rabbit comes with a lot of built-in functions. We'll list all of them below, but this list might not always stay updated. An updated list should always be available in eval.py and cmd.py. The different built-in rabbit functions are:
+Rabbit comes with a lot of built-in functions. We'll list all of them below, but this list might not always stay updated. An updated list should always be able to be compiled by looking at eval.py and cmd.py. The different built-in Rabbit functions are:
 ```
 # Built-In Base Rabbit Functions:
 copy
@@ -375,10 +372,13 @@ tdist
 teq
 chisqdist
 chisqeq
+Fdist
+Feq
 normP
 tP
 chisqP
 poissonP
+FP
 gamma
 gcd
 lcm
@@ -406,6 +406,8 @@ That's currently the end of the basic Rabbit tutorial. Check back here for infor
 ### Levels of Evaluation
 
 Every line of RabbitLang code goes through at least four different stages in its evaluation. Each stage will use its own symbols in the debug output, and will deal with different types of commands or operations.
+
+For more information beyond what is covered here, read the evaluator docstring in eval.py.
 
 #### 1. Text (run)
 
