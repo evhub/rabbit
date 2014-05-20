@@ -914,7 +914,7 @@ Global Operator Precedence List:
                     if ":" in x:
                         x = x.split(":", 1)
                         personals[x[0]] = self.find(x[1], True, False)
-                    else:
+                    elif x != "":
                         params.append(x)
                 if out[1].startswith("\\"):
                     return strfloat(out[1][1:], self, params, personals, check=False)
