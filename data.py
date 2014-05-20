@@ -25,6 +25,44 @@ from .stats import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+def teq(df, e=None):
+    """Finds The t Distribution For The Given Degrees Of Freedom."""
+    if e == None:
+        e = evaluator()
+    v = float(df)
+    n = v+1.0
+    return strfunc(e.prepare(gamma(n/2.0) / ((math.pi*v)**0.5 * gamma(v/2.0))) + "/" + "(1+x^2/" + e.prepare(v) + ")^" + e.prepare(n/2.0), e, ["x"])
+
+def tP(start, stop, df, e=None):
+    """Finds The Cumulative Probability Between Two t Values."""
+    eq = teq(df, e)
+    return defint(lambda x: eq.call([x]), start, stop)
+
+def chisqeq(df, e=None):
+    """Finds The Chi Squared Distribution For The Given Degrees Of Freedom."""
+    if e == None:
+        e = evaluator()
+    v = float(df)
+    return strfunc("x^"+e.prepare((v-2.0)/2.0)+"*e^(-x/2)/"+e.prepare(2.0**(v/2.0)*gamma(v/2.0)), e, ["x"])
+
+def chisqP(stop, df, e=None):
+    """Finds The Probability Beyond A Chi Squared Value."""
+    eq = chisqeq(df, e)
+    return 1.0-defint(lambda x: eq.call([x]), 0.0, stop)
+
+def Feq(dfT, dfE, e=None):
+    """Finds The F Distribution For The Given Degrees Of Freedom."""
+    if e == None:
+        e = evaluator()
+    v = float(dfT)
+    w = float(dfE)
+    return strfunc(e.prepare((v/w)**(v/2)*gamma((v+w)/2.0)/(gamma(v/2.0)*gamma(w/2.0)))+"*x^"+e.prepare((v-2.0)/2.0)+"/(1+"+e.prepare(v/w)+"x)^"+e.prepare((v+w)/2.0), e, ["x"])
+
+def FP(stop, dfT, dfE, e=None):
+    """Finds The Probability Beyond An F Value."""
+    eq = Feq(dfT, dfE, e)
+    return 1.0-defint(lambda x: eq.call([x]), 0.0, stop)
+
 class data(mctobject):
     """Implements A Data Set."""
 
@@ -590,6 +628,19 @@ class data(mctobject):
             tot += (x-mean)**3.0
         return tot/(float(len(self))*float(self.stdev())**3.0)
 
+    def I(self, med=None, stdev=None):
+        """Finds The Spearnan Index Of Skewness."""
+        if med == None:
+            med = float(self.med())
+        else:
+            med = float(med)
+        if stdev == None:
+            stdev = float(self.stdev())
+        else:
+            stdev = float(stdev)
+        mean = float(self.mean())
+        return (mean-median)*3.0/stdev
+
     def __contains__(self, other):
         """Searches For An Item."""
         if float(other) in self.units:
@@ -879,6 +930,10 @@ class multidata(mctobject):
     def df(self):
         """Finds The Degrees Of Freedom."""
         return self.x.df()-1.0
+
+    def dfE(self):
+        """Finds The Error Degrees Of Freedom."""
+        return self.x.df()+self.y.df()
 
     def tomatrix(self):
         """Creates A Matrix Out Of The Data."""

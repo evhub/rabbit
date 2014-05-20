@@ -178,6 +178,26 @@ def chisqP(stop, df, e=None):
     eq = chisqeq(df, e)
     return 1.0-defint(lambda x: eq.call([x]), 0.0, stop)
 
+def Fdist(x, dfT, dfE):
+    """Implements The F Distribution For The Given Degrees Of Freedom."""
+    x = float(x)
+    v = float(dfT)
+    w = float(dfE)
+    return gamma((v+w)/2.0)*(v/w)**(v/2)*x**((v-2.0)/2.0)/(gamma(v/2.0)*gamma(w/2.0)*(1+x*v/w)**((v+w)/2.0))
+
+def Feq(dfT, dfE, e=None):
+    """Finds The F Distribution For The Given Degrees Of Freedom."""
+    if e == None:
+        e = evaluator()
+    v = float(dfT)
+    w = float(dfE)
+    return strfunc(e.prepare((v/w)**(v/2)*gamma((v+w)/2.0)/(gamma(v/2.0)*gamma(w/2.0)))+"*x^"+e.prepare((v-2.0)/2.0)+"/(1+"+e.prepare(v/w)+"x)^"+e.prepare((v+w)/2.0), e, ["x"])
+
+def FP(stop, dfT, dfE, e=None):
+    """Finds The Probability Beyond An F Value."""
+    eq = Feq(dfT, dfE, e)
+    return 1.0-defint(lambda x: eq.call([x]), 0.0, stop)
+
 def contmean(func, start=-20.0, stop=20.0, accuracy=0.0001):
     """Finds The Mean Of A Continous Function."""
     start = float(start)

@@ -139,9 +139,12 @@ Global Operator Precedence List:
             "teq":usefunc(teq, self, "teq", ["df"], {"e":self}),
             "chisqdist":usefunc(chisqdist, self, "chisqdist", ["x", "df"]),
             "chisqeq":usefunc(chisqeq, self, "chisqeq", ["df"], {"e":self}),
+            "Fdist":usefunc(Fdist, self, "Fdist", ["x", "dfT", "dfE"]),
+            "Feq":usefunc(Feq, self, "Feq", ["dfT", "dfE"], {"e":self}),
             "normP":usefunc(normP, self, "normP", ["x", "y", "mean", "stdev"]),
             "tP":usefunc(tP, self, "tP", ["x", "y", "df"], {"e":self}),
             "chisqP":usefunc(chisqP, self, "chisqP", ["x", "df"], {"e":self}),
+            "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], {"e":self}),
             "gamma":usefunc(gamma, self, "gamma", ["x"]),
             "gcd":usefunc(gcd, self, "gcd", ["x", "y"]),
             "lcm":usefunc(lcm, self, "lcm", ["x", "y"]),
@@ -1103,10 +1106,10 @@ Global Operator Precedence List:
                 elif inputlist[x] == "-":
                     values.append(-1.0)
                 elif "." in inputlist[x]:
-                    itemlist = inputstring.split(".")
+                    itemlist = inputlist[x].split(".")
                     isfloat = len(itemlist) < 3
-                    for x in itemlist:
-                        isfloat = isfloat and (not itemlist[0] or madeof(itemlist[0], string.digits))
+                    for item in itemlist:
+                        isfloat = isfloat and (not item or madeof(item, string.digits))
                     if not isfloat:
                         itemlist[0] = self.funcfind(itemlist[0] or values.pop())
                         if not isinstance(itemlist[0], classcalc):
@@ -1148,8 +1151,8 @@ Global Operator Precedence List:
         if "." in inputstring:
             itemlist = inputstring.split(".")
             isfloat = len(itemlist) < 3
-            for x in itemlist:
-                isfloat = isfloat and (not itemlist[0] or madeof(itemlist[0], string.digits))
+            for item in itemlist:
+                isfloat = isfloat and (not item or madeof(item, string.digits))
             if not isfloat:
                 itemlist[0] = self.funcfind(itemlist[0])
                 if isinstance(itemlist[0], classcalc):
