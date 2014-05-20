@@ -27,6 +27,7 @@ RabbitLang, or more commonly just Rabbit, is one of the Rabbit library's core fe
 * Dynamic typing
 * Dynamic scoping
 * Object-oriented
+* Interpreted
 * Functional
 * Not whitespace sensitive
 * Good for complex math
