@@ -29,9 +29,9 @@ def gcd(a, b):
     """Calculates The Greatest Common Denominator Of Two Numbers."""
     if not a:
         return b
-    elif a < 0:
-        return -gcd(b, -a)
     else:
+        a = abs(a)
+        b = abs(b)
         return gcd(b%a, a)
 
 def lcm(a, b):
@@ -39,7 +39,9 @@ def lcm(a, b):
     if not (a or b):
         return 0
     else:
-        return abs(a)*abs(b)/gcd(a,b)
+        a = abs(a)
+        b = abs(b)
+        return a*b/gcd(a,b)
 
 def isqrt(inputnum):
     """Performs sqrt In The Complex Plane."""
