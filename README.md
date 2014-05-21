@@ -273,7 +273,7 @@ f(x) = { gx = g(x) } : "gx*floor(gx)"
 # In with clause syntax:
 g(x) = m(z) $ z = x^2 $ m(z) = z%10	# Multiple dollar signs are used instead of double semicolons to seperate multiple commands
 # The same thing in class syntax:
-g(x) = { z = x^2 ;; m(z) = z%10 } : "m(z)"
+g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
 ```
 
 #### Other Rabbits
