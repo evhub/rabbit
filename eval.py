@@ -86,7 +86,6 @@ Global Operator Precedence List:
             "to":funcfloat(funcs.tocall, self, "to"),
             "str":funcfloat(funcs.strcall, self, "str"),
             "repr":funcfloat(funcs.reprcall, self, "repr"),
-            "chars":funcfloat(funcs.charscall, self, "chars"),
             "calc":funcfloat(funcs.docalc, self, "calc"),
             "fold":funcfloat(funcs.foldcall, self, "fold"),
             "D":funcfloat(funcs.derivcall, self, "D"),
@@ -964,6 +963,8 @@ Global Operator Precedence List:
             elif len(params) == 1:
                 if isinstance(params[0], matrix):
                     value = item.retreive(int(params[0].retreive(0)), int(params[0].retreive(1)))
+                elif item.onlyrow():
+                    value = item.retreive(0, int(params[0]))
                 else:
                     value = item.retreive(int(params[0]))
             elif isinstance(params[0], matrix) and isinstance(params[1], matrix):
@@ -1706,7 +1707,9 @@ class evalfuncs(object):
         else:
             out = ""
             for x in variables:
-                if ismatrix(x):
+                if isinstance(x, strcalc):
+                    out += str(x)
+                elif ismatrix(x):
                     out += self.strcall(getmatrix(x).getitems())
                 else:
                     out += self.e.prepare(x, True, False)
@@ -1724,17 +1727,6 @@ class evalfuncs(object):
                 else:
                     out += self.e.prepare(x, False, True)
             return strcalc(out, self.e)
-
-    def charscall(self, variables):
-        """Performs chars."""
-        if variables == None:
-            return matrix(0)
-        else:
-            out = []
-            for x in variables:
-                for y in self.e.prepare(x, True, False):
-                    out.append(strcalc(y, self.e))
-            return diagmatrixlist(out)
 
     def abscall(self, variables):
         """Performs abs."""

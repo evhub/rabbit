@@ -316,88 +316,87 @@ var = 2
 Rabbit comes with a lot of built-in functions. We'll list all of them below, but this list might not always stay updated. An updated list should always be able to be compiled by looking at eval.py and cmd.py. The different built-in Rabbit functions are:
 ```
 # Built-In Base Rabbit Functions:
-copy
-type
-to
-str
-repr
-chars
-calc
-fold
-D
-S
-L
-I
-list
-matrix
-cont
-det
-sum
-prod
-join
-merge
-sort
-reverse
-round
-num
-eval
-find
-split
-replace
-contains
-range
-len
-size
-abs
-data
-frac
-simp
-d
-floor
-ceil
-log
-ln
-sqrt
-tan
-sin
-cos
-atan
-asin
-acos
-deg
-rad
-normdist
-binomP
-hypgeoP
-tdist
-teq
-chisqdist
-chisqeq
-Fdist
-Feq
-normP
-tP
-chisqP
-poissonP
-FP
-gamma
-gcd
-lcm
-perm
-comb
+D					# Derivative
+FP					# F distribution probability integral
+Fdist				# F distribution
+Feq					# F distribution equation
+I					# Identity matrix
+L					# List to row
+S					# Definite integral
+abs					# Absolute value
+acos				# Arc cosine
+asin				# Arc sine
+atan				# Arc tangent
+binomP				# Discrete binomial distribution
+calc				# Calculate a string of code
+ceil				# Ceiling function
+chisqP				# Chi squared distribution probability integral
+chisqdist			# Chi squared distribution
+chisqeq				# Chi squared distribution equation
+comb				# Combinations
+cont				# Convert to container
+contains			# Equivalent to in
+copy				# Make a copy
+cos					# Cosine
+d					# Random number dice
+data				# Create data
+deg					# Degrees
+det					# Determinant
+eval				# Evaluate a function
+find				# Find the position of an item in a container
+floor				# Floor function
+fold				# Fold a function over a container
+frac				# Convert to fraction
+gamma				# Gamma function
+gcd					# Greatest common denominator
+hypgeoP				# Discrete hypergeometric distribution
+join				# Join containers
+lcm					# Least common multiple
+len					# Length
+list				# Convert to or create list
+ln					# Natural logarithm
+log					# Base 10 logarithm
+matrix				# Convert to or create matrix
+merge				# Merge containers
+normP				# Normal distribution probability integral
+normdist			# Normal distribution
+num					# Convert to number
+perm				# Permutations
+poissonP			# Poisson distribution probability integral
+prod				# Product of items
+rad					# Radians
+range				# Create a range
+replace				# Replace an item with an item
+repr				# Get representation
+reverse				# Reverse items
+round				# Round item
+simp				# Convert to simplest fraction
+sin					# Sine
+size				# Recursive length
+sort				# Sort container
+split				# Split container
+sqrt				# Complex square root
+str					# Convert to string
+sum					# Sum items
+tP					# t distribution probability integral
+tan					# Tangent
+tdist				# t distribution
+teq					# t distribution equation
+to					# Convert to specified type
+type				# Get type of item
 
 # Built-In Base Rabbit Variables:
-i
-e
-pi
-none
-true
-false
+e					# Euler's number
+false				# 0
+i					# Imaginary unit
+none				# ()
+pi					# Circumference over diameter
+true				# 1
 
 # Built-In Rabbit Interpreter Functions:
-ans
-grab
-print
+ans					# Last answer
+grab				# Last line
+print				# Print string
 ```
 
 #### More Rabbits?

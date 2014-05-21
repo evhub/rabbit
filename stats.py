@@ -141,7 +141,7 @@ def tP(start, stop, df, e=None):
     eq = teq(df, e)
     return defint(lambda x: eq.call([x]), start, stop)
 
-def chisqmean(df):
+def chisqE(df):
     """Determines The Mean Of The Chi Squared Distribution Given."""
     return float(df)
 
@@ -177,6 +177,11 @@ def chisqP(stop, df, e=None):
     """Finds The Probability Beyond A Chi Squared Value."""
     eq = chisqeq(df, e)
     return 1.0-defint(lambda x: eq.call([x]), 0.0, stop)
+
+def FE(dfE):
+    """Determines The Mean Of The F Distribution Given."""
+    w = float(dfE)
+    return w/(w-2.0)
 
 def Fdist(x, dfT, dfE):
     """Implements The F Distribution For The Given Degrees Of Freedom."""

@@ -392,6 +392,12 @@ class strcalc(numobject):
     def __contains__(self, other):
         """Performs in."""
         return self.e.prepare(other, True, False) in self.calcstr
+    def tomatrix(self):
+        """Returns A Matrix Of The Characters."""
+        out = []
+        for x in self.calcstr:
+            out.append(strcalc(x, self.e))
+        return diagmatrixlist(out)
 
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
