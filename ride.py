@@ -137,7 +137,8 @@ Import Commands:
 
     def handle(self, func):
         """Handles A Function."""
-        if not func(popup("Entry", "Enter The Name Of The File:", "File Control")):
+        inputstring = popup("Entry", "Enter The Name Of The File:", "File Control")
+        if inputstring and not func(inputstring):
             popup("Error", "Unable To Find File.")
 
     def endline(self):
