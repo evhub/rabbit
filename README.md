@@ -316,14 +316,14 @@ var = 2
 Rabbit comes with a lot of built-in functions. We'll list all of them below, but this list might not always stay updated. An updated list should always be able to be compiled by looking at eval.py and cmd.py. The different built-in Rabbit functions are:
 ```
 # Built-In Base Rabbit Functions:
-D					# Derivative
-FP					# F distribution probability integral
+D				# Derivative
+FP				# F distribution probability integral
 Fdist				# F distribution
-Feq					# F distribution equation
-I					# Identity matrix
-L					# List to row
-S					# Definite integral
-abs					# Absolute value
+Feq				# F distribution equation
+I				# Identity matrix
+L				# List to row
+S				# Definite integral
+abs				# Absolute value
 acos				# Arc cosine
 asin				# Arc sine
 atan				# Arc tangent
@@ -337,64 +337,64 @@ comb				# Combinations
 cont				# Convert to container
 contains			# Equivalent to in
 copy				# Make a copy
-cos					# Cosine
-d					# Random number dice
+cos				# Cosine
+d				# Random number dice
 data				# Create data
-deg					# Degrees
-det					# Determinant
+deg				# Degrees
+det				# Determinant
 eval				# Evaluate a function
 find				# Find the position of an item in a container
 floor				# Floor function
 fold				# Fold a function over a container
 frac				# Convert to fraction
 gamma				# Gamma function
-gcd					# Greatest common denominator
+gcd				# Greatest common denominator
 hypgeoP				# Discrete hypergeometric distribution
 join				# Join containers
-lcm					# Least common multiple
-len					# Length
+lcm				# Least common multiple
+len				# Length
 list				# Convert to or create list
-ln					# Natural logarithm
-log					# Base 10 logarithm
+ln				# Natural logarithm
+log				# Base 10 logarithm
 matrix				# Convert to or create matrix
 merge				# Merge containers
 normP				# Normal distribution probability integral
 normdist			# Normal distribution
-num					# Convert to number
+num				# Convert to number
 perm				# Permutations
 poissonP			# Poisson distribution probability integral
 prod				# Product of items
-rad					# Radians
+rad				# Radians
 range				# Create a range
 replace				# Replace an item with an item
 repr				# Get representation
 reverse				# Reverse items
 round				# Round item
 simp				# Convert to simplest fraction
-sin					# Sine
+sin				# Sine
 size				# Recursive length
 sort				# Sort container
 split				# Split container
 sqrt				# Complex square root
-str					# Convert to string
-sum					# Sum items
-tP					# t distribution probability integral
-tan					# Tangent
+str				# Convert to string
+sum				# Sum items
+tP				# t distribution probability integral
+tan				# Tangent
 tdist				# t distribution
-teq					# t distribution equation
-to					# Convert to specified type
+teq				# t distribution equation
+to				# Convert to specified type
 type				# Get type of item
 
 # Built-In Base Rabbit Variables:
-e					# Euler's number
+e				# Euler's number
 false				# 0
-i					# Imaginary unit
+i				# Imaginary unit
 none				# ()
-pi					# Circumference over diameter
+pi				# Circumference over diameter
 true				# 1
 
 # Built-In Rabbit Interpreter Functions:
-ans					# Last answer
+ans				# Last answer
 grab				# Last line
 print				# Print string
 ```
