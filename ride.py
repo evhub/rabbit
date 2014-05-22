@@ -55,6 +55,7 @@ Import Commands:
 
     def __init__(self, name="RIDE", width=100, height=40, helpstring=None, refresh=600, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
+        self.doshow = True
         self.debug = bool(debug)
         self.debug_old = self.debug
         self.root = Tkinter.Tk()
@@ -65,7 +66,9 @@ Import Commands:
         self.root.bind("<Control-r>", lambda event: self.run())
         self.root.bind("<Control-s>", lambda event: self.handle(self.save))
         self.root.bind("<Control-l>", lambda event: self.handle(self.load))
-        self.root.bind("<Control-n>", lambda event: self.box.clear())
+        self.root.bind("<Control-n>", lambda event: self.clear())
+        self.root.bind("<Control-f>", lambda event: self.search())
+        self.root.bind("<Control-Tab>", lambda event: self.endsearch())
         self.root.bind("<Key>", lambda event: self.endchar())
         self.root.bind("<Return>", lambda event: self.endline())
         self.button_frame = Tkinter.Frame(self.root, height=1, width=40)
@@ -87,6 +90,7 @@ Import Commands:
         self.box.colortag("digit", "darkgrey")
         self.box.colortag("builtin", "purple")
         self.box.colortag("stringmod", "green")
+        self.box.colortag("search", highlight="yellow")
         self.errorlog = {}
         self.ans = [matrix(0)]
         self.populator()
@@ -140,6 +144,13 @@ Import Commands:
         inputstring = popup("Entry", "Enter The Name Of The File:", "File Control")
         if inputstring and not func(inputstring):
             popup("Error", "Unable To Find File.")
+
+    def search(self):
+        """Starts A Search."""
+        inputstring = popup("Entry", "Search For What:", "Search Dialog")
+        if inputstring:
+            for x in self.box.search(inputstring):
+                self.box.placetag("search", x, x+"+"+str(len(inputstring))+"c")
 
     def endline(self):
         """Checks The Last Line."""
@@ -203,6 +214,10 @@ Import Commands:
         self.box.remtag("digit", start, end)
         self.box.remtag("builtin", start, end)
         self.box.remtag("stringmod", start, end)
+
+    def endsearch(self):
+        """Clears Search Highlighting."""
+        self.box.remtag("search", "1.0", "end")
 
     def endfile(self, refresh=False):
         """Checks All Characters."""
@@ -300,6 +315,12 @@ Import Commands:
         if refresh:
             self.register(lambda: self.endfile(True), self.refresh)
 
+    def clear(self):
+        """Clears The Box."""
+        self.endsearch()
+        self.remtags()
+        self.box.clear()
+
     def load(self, name):
         """Loads A File."""
         try:
@@ -307,7 +328,7 @@ Import Commands:
         except IOError:
             return None
         else:
-            self.box.clear()
+            self.clear()
             self.box.display(readfile(tempfile))
             tempfile.close()
             self.endfile()
@@ -338,15 +359,18 @@ Import Commands:
 
     def check(self):
         """Checks The Module."""
+        self.doshow = False
         self.run()
+        self.doshow = True
         self.showerrors()
 
     def show(self, arg):
         """Displays Something."""
-        if not istext(arg):
-            arg = self.e.prepare(arg)
-        if arg != "()":
-            popup("Info", arg, "Output")
+        if self.doshow:
+            if not istext(arg):
+                arg = self.e.prepare(arg)
+            if arg != "()":
+                popup("Info", arg, "Output")
 
     def destroy(self):
         """Ends The Editor."""

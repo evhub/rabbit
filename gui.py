@@ -28,7 +28,7 @@ import tkSimpleDialog
 
 class console(object):
     """A Graphical Class Used For Creating The PythonPlus Console."""
-    def __init__(self, root, display=None, height=35, width=100, side="bottom", **kwargs):
+    def __init__(self, root, display=None, height=35, width=100, side="bottom", doshow=True, **kwargs):
         """Base Constructor For The PythonPlus Console."""
         self.message = Tkinter.StringVar()
         if display != None:
@@ -47,21 +47,28 @@ class console(object):
         self.main.pack(side=str(side))
         self.text = Tkinter.Label(self.main, textvariable=self.message, justify="left", anchor="sw", **kwargs)
         self.text.pack(side="top", fill="both")
+        self.doshow = bool(doshow)
 
     def clear(self, message=""):
         """Clears The Display."""
         self.message.set(str(message))
         self.history = []
 
+    def silence(self, state=False):
+        """Turns On And Off Displaying."""
+        self.doshow = bool(state)
+        return self.doshow
+
     def display(self, message=None, *messages):
         """Displays A Message."""
-        newmessage = "\n"
-        if message != None:
-            newmessage += str(message)
-        for x in messages:
-            newmessage += " " + str(x)
-        self.drop()
-        self.message.set(self.message.get() + newmessage)
+        if self.doshow:
+            newmessage = "\n"
+            if message != None:
+                newmessage += str(message)
+            for x in messages:
+                newmessage += " " + str(x)
+            self.drop()
+            self.message.set(self.message.get() + newmessage)
 
     def up(self, event=None):
         """Moves The Display Up."""
@@ -305,9 +312,14 @@ class texter(object):
             tag += string.lowercase[int(x)]
         return tag
 
-    def colortag(self, tag, color):
+    def colortag(self, tag, color=None, highlight=None):
         """Colors A Tag."""
-        self.main.tag_config(str(tag), foreground=str(color))
+        args = {}
+        if color:
+            args["foreground"] = color
+        if highlight:
+            args["background"] = highlight
+        self.main.tag_config(str(tag), **args)
 
     def placetag(self, tag, start, stop):
         """Places A Tag On An Area."""
@@ -346,6 +358,21 @@ class texter(object):
         for l in xrange(0, len(linelist)):
             for c in xrange(0, len(linelist[l])+1):
                 out.append(str(l+1)+"."+str(c))
+        return out
+
+    def find(self, item, start="1.0", stop="end"):
+        """Finds An Item."""
+        return self.main.search(str(item), start, stopindex=stop)
+
+    def search(self, item):
+        """Finds All Occurences Of An Item."""
+        out = []
+        pos = "1.0"
+        while pos:
+            pos = self.find(item, pos)
+            if pos:
+                out.append(pos)
+                pos += "+1c"
         return out
 
 class button(object):
