@@ -53,25 +53,25 @@ Second, lines that don't start with setting a variable or function are just expr
 
 Math in rabbit is very similar to in any other programming language. Rabbit's mathematical operators are fairly conventional:
 ```
-1+1	# Addition (result = 2) (evaluated left to right, highest precedence)
-3-5	# Subtraction (result = -2) (evaluated left to right, highest precedence)
-2*3	# Multiplication (result = 6) (evaluated left to right, medium precedence)
-1/2	# Division (result = 0.5) (evaluated left to right, medium precedence)
-3^2	# Exponentiation (result = 9) (evaluated right to left, low precedence)
-8%3	# Modulo / Remainder (result = 2) (evaluated left to right, high precedence)
+1+1		# Addition (result = 2) (evaluated left to right, highest precedence)
+3-5		# Subtraction (result = -2) (evaluated left to right, highest precedence)
+2*3		# Multiplication (result = 6) (evaluated left to right, medium precedence)
+1/2		# Division (result = 0.5) (evaluated left to right, medium precedence)
+3^2		# Exponentiation (result = 9) (evaluated right to left, low precedence)
+8%3		# Modulo / Remainder (result = 2) (evaluated left to right, high precedence)
 ```
 
 These different operations can, and should, be grouped using parentheses. Additionally, certain equivalent structures also exist:
 ```
 2(x)	# Parentheses multiplication (evaluated left to right, very low precedence)
-2x	# Coefficient multiplication (evaluated left to right, very low precedence, same as parentheses)
+2x		# Coefficient multiplication (evaluated left to right, very low precedence, same as parentheses)
 ```
 
 #### Rabbits Are Lazy
 
 Most lines of rabbit code constitute function or variable definitions. The syntax for these is fairly straightforward:
 ```
-a = x+1			# A variable definition
+a = x+1				# A variable definition
 f(x,y) = 2(x+y)		# A function definition
 ```
 
@@ -136,8 +136,8 @@ Because it is more complicated and the syntax to define it includes operations y
 
 Additionally, all the different container objects support various types of operations that can be performed on them. Because they are matrices, they all support basic matrix math. The syntax for these basic operations is:
 ```
-(1,2,3)*2		# Scalar multiplication (result = (2,3,6))
-(1,2,3)+10		# Applied addition (result = (11,12,13))
+(1,2,3)*2			# Scalar multiplication (result = (2,3,6))
+(1,2,3)+10			# Applied addition (result = (11,12,13))
 (1,2)+(10,20)		# Matrix addition (result = (11,22))
 (1,2)*(10,20)		# Matrix multiplication (result = (10,40))
 [1,2]*[10,20]		# Dot product (result = 50)
@@ -147,9 +147,9 @@ Additionally, all the different container objects support various types of opera
 Additionally, there are a couple of other, special operations that can be done only with container objects, the syntax for which is:
 ```
 [1,2] .. [3,4]		# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
-[1,2,3,4]:1		# Item indexes (result = 2) (left to right, lowest precedence, same as colon for function calls)
-(1,2,3):2		# These work for lists as well (result = 3)
-(1,2,3):0:2		# And can also be used to perform item indices (result = 1,2)
+[1,2,3,4]:1			# Item indexes (result = 2) (left to right, lowest precedence, same as colon for function calls)
+(1,2,3):2			# These work for lists as well (result = 3)
+(1,2,3):0:2			# And can also be used to perform item indices (result = 1,2)
 ```
 
 #### Rabbits Love Functions
@@ -194,21 +194,21 @@ add(a)
 
 Lambda syntax in Rabbit is fairly straightforward, with a couple of strange quirks that result from Rabbit being dynamically scoped. Lambdas are defined using the backslash (\\) operator. Here're some examples of how to define different lambda functions:
 ```
-\1			# A zero-argument function that returns 1
+\1				# A zero-argument function that returns 1
 \x\(x+1)		# A one-variable function (x) that returns that variable plus one (x+1)
 (\x\x)+1		# The same as above--Rabbit will just curry any basic mathematical operation done to a function
-\(x,y)\(x+y)		# A two-variable function that adds the two variables
-\(x,x:(1))\x		# A one-variable function, whose one variable defaults to one, that returns the variable
-			# This syntax is particularly useful because the defaults are evaluated in the scope where the function is defined instead of the scope where it is called, allowing arguments to be passed between scopes
+\(x,y)\(x+y)	# A two-variable function that adds the two variables
+\(x,x:(1))\x	# A one-variable function, whose one variable defaults to one, that returns the variable
+					# This syntax is particularly useful because the defaults are evaluated in the scope where the function is defined instead of the scope where it is called, allowing arguments to be passed between scopes
 f(x) = x
-\f			# Since f is a previously defined function, this will just return that function
-\\f			# This syntax is required to create a new zero-variable function that returns f
+\f				# Since f is a previously defined function, this will just return that function
+\\f				# This syntax is required to create a new zero-variable function that returns f
 ```
 
 Now that we know how to define lambdas, here's what's special about colon syntax:
 ```
 gen_func(n) = \(x,n:(n))\(x%n)		# Creates and returns a function that will take the mod of its variable with the base equal to the variable of the generator
-gen_func:2:5				# Because gen_func only takes one variable, colon syntax will pass the remaining variables on to whatever is returned by gen_func
+gen_func:2:5						# Because gen_func only takes one variable, colon syntax will pass the remaining variables on to whatever is returned by gen_func
 # result = 5 % 2 = 1
 ```
 
@@ -218,17 +218,17 @@ Strings in rabbit are also not complicated, and are really very similar to strin
 ```
 "hello, world"		# Creates a string--it should be noted that single quotes will NOT work--they are reserved for creating defaults
 "Answer: "+2		# Strings support addition, even with other things that are not strings (result = "Answer: 2")
-"hello"*2		# Multiplication behaves like one would expect, in this case doubling the string (result = "hellohello")
-"01234":2		# Strings also support indexes, just like matrices (result = "2")
-"01234":1:3		# As well as indices, just like matrices (result = "12")
+"hello"*2			# Multiplication behaves like one would expect, in this case doubling the string (result = "hellohello")
+"01234":2			# Strings also support indexes, just like matrices (result = "2")
+"01234":1:3			# As well as indices, just like matrices (result = "12")
 ```
 
 #### Rabbits Take Classes
 
 Classes in Rabbit are essentially namespace objects. What that means is that classes are just groups of commands that are fed to them, and then any new definitions put into their own namespace. The basic syntax for classes is:
 ```
-{ x = 1 }		# Will create a class whose only variable, x, is set to 1
-			# Note that this will only work if x is not currently set to 1--if it is, Rabbit won't detect any change, and you'll end up with an empty class
+{ x = 1 }			# Will create a class whose only variable, x, is set to 1
+						# Note that this will only work if x is not currently set to 1--if it is, Rabbit won't detect any change, and you'll end up with an empty class
 { x = 1 ;; y = 2 }	# Because the interior of a class is just treated as a command, command seperators can be used to define multiple items inside of a class
 { f(x) = x }		# That also means that functions can be defined within classes just the same as if they were being defined at the top level
 ```
@@ -236,8 +236,8 @@ Classes in Rabbit are essentially namespace objects. What that means is that cla
 Once a class has been created, a variety of different things can be done with it. The different sytnax for calling classes, and a further explanation of methods, is below:
 ```
 a = { x = 1 ;; x := x+1 }	# Remember, any valid top-level command is valid inside of a class
-a.x + 1				# This will retreive x from the class and add 1 to it (result = 3)
-a:"x+1"				# Same as above--this will evaluate "x+1" in the namespace of the class (result = 3)
+a.x + 1						# This will retreive x from the class and add 1 to it (result = 3)
+a:"x+1"						# Same as above--this will evaluate "x+1" in the namespace of the class (result = 3)
 ```
 
 Since class definitions can often get very long, it is reccomended that line continuations be used. Since we haven't introduced those yet, we'll do so here. Line continuations follow a very simple rule: any line that starts with whitespace will be added onto the previous line. It should be noted that this only works when running code from a file, not from the command line. Some common uses of this syntax are:
@@ -257,7 +257,7 @@ a = {
 When a function is defined inside of a class this turns it into a method. Methods are the same as any old function, except that the class they are in will always be passed to them as the variable "self". Here's an example of a method:
 ```
 a = {
- fact(x, n) =				# Since this function is being defined inside of a class it becomes a method
+ fact(x, n) =						# Since this function is being defined inside of a class it becomes a method
   x*self.fact(x-1, n-1) @ n>0;		# Here we use the self variable to allow the function to call itself
   1
  }
@@ -266,12 +266,12 @@ a = {
 Since a very common use of classes is to define a temporary variable that is going to be used in multiple places but only in the same expression, with/where clauses were added to facilitate that. The syntax for these statements is:
 ```
 # In with clause syntax:
-f(x) = gx*floor(gx) $ gx = g(x)		# Calls what comes before the dollar sign in the namespace of what comes after (right to left, highest precedence, right above at)
+f(x) = gx*floor(gx) $ gx = g(x)			# Calls what comes before the dollar sign in the namespace of what comes after (right to left, highest precedence, right above at)
 # The same thing in class syntax:
 f(x) = { gx = g(x) } : "gx*floor(gx)"
 
 # In with clause syntax:
-g(x) = m(z) $ z = x^2 $ m(z) = z%10	# Multiple dollar signs are used instead of double semicolons to seperate multiple commands
+g(x) = m(z) $ z = x^2 $ m(z) = z%10		# Multiple dollar signs are used instead of double semicolons to seperate multiple commands
 # The same thing in class syntax:
 g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
 ```
@@ -282,7 +282,7 @@ Before we move on, there are some remaining, more complex, less-used operators t
 
 First is the loop operator (~). The loop operator allows for the looping of functions over lists. The basic syntax is:
 ```
-1,2,3~ \x\x			# Loops over 1,2,3 with \x\x (result = (1,2,3)) (right to left, highest precedence for a mathematical operator)
+1,2,3~ \x\x					# Loops over 1,2,3 with \x\x (result = (1,2,3)) (right to left, highest precedence for a mathematical operator)
 1,2,3,4~ \(x,y)\(x+y)		# Loops over 1,2,3,4, taking every two variables for each function call (result = (3,7))
 2,4,6,8~ \x\(last+x)		# Like a method, a loop function will be given a special variable "last" that will be set to the last value returned by the loop function in the loop (result = (2,6,8,14))
 10,20~ 1,2~ \(x,y)\(x+y)	# Loops over 1,2, within a loop over 10,20, feeding each into the function (result = ((11,12),(21,22)))
@@ -297,7 +297,7 @@ f.g(2)		# Read as f(g(x)) (result = 9)
 
 Third is the factorial operator (!). Because confusion is possible between factorials and not equals, parentheses should usually be used to make it unambiguous, since not equals will always take precedence. The basic syntax is:
 ```
-(3!)+1	# The basic factorial operator (result = 7) (right to left, very low precedence)
+(3!)+1		# The basic factorial operator (result = 7) (right to left, very low precedence)
 ```
 
 Fourth is the default variable operator ('). In most cases, the single quote is reserved for use in variable names--most commonly put at the end of the name--but if put at the very beginning, it functions as the default variable operator. The basic use is:
@@ -311,6 +311,12 @@ var = 2
 1+var		# But the normal variable is, now using its new value instead of the default (result = 3)
 ```
 
+Fifth is the execute operator (:). When a colon is placed at before an item with nothing before it, it will execute its argument as a top-level command. The basic syntax is:
+```
+:"x = 5"	# This will execute "x = 5" as a top-level command, setting x to 5
+x			# result = 5
+```
+
 #### Rabbits Come With Functions
 
 Rabbit comes with a lot of built-in functions. We'll list all of them below, but this list might not always stay updated. An updated list should always be able to be compiled by looking at eval.py and cmd.py. The different built-in Rabbit functions are:
@@ -318,85 +324,85 @@ Rabbit comes with a lot of built-in functions. We'll list all of them below, but
 # Built-In Base Rabbit Functions:
 D				# Derivative
 FP				# F distribution probability integral
-Fdist				# F distribution
+Fdist			# F distribution
 Feq				# F distribution equation
 I				# Identity matrix
 L				# List to row
 S				# Definite integral
 abs				# Absolute value
-acos				# Arc cosine
-asin				# Arc sine
-atan				# Arc tangent
-binomP				# Discrete binomial distribution
-calc				# Calculate a string of code
-ceil				# Ceiling function
-chisqP				# Chi squared distribution probability integral
-chisqdist			# Chi squared distribution
-chisqeq				# Chi squared distribution equation
-comb				# Combinations
-cont				# Convert to container
-contains			# Equivalent to in
-copy				# Make a copy
+acos			# Arc cosine
+asin			# Arc sine
+atan			# Arc tangent
+binomP			# Discrete binomial distribution
+calc			# Calculate a string of code
+ceil			# Ceiling function
+chisqP			# Chi squared distribution probability integral
+chisqdist		# Chi squared distribution
+chisqeq			# Chi squared distribution equation
+comb			# Combinations
+cont			# Convert to container
+contains		# Equivalent to in
+copy			# Make a copy
 cos				# Cosine
 d				# Random number dice
-data				# Create data
+data			# Create data
 deg				# Degrees
 det				# Determinant
-eval				# Evaluate a function
-find				# Find the position of an item in a container
-floor				# Floor function
-fold				# Fold a function over a container
-frac				# Convert to fraction
-gamma				# Gamma function
+eval			# Evaluate a function
+find			# Find the position of an item in a container
+floor			# Floor function
+fold			# Fold a function over a container
+frac			# Convert to fraction
+gamma			# Gamma function
 gcd				# Greatest common denominator
-hypgeoP				# Discrete hypergeometric distribution
-join				# Join containers
+hypgeoP			# Discrete hypergeometric distribution
+join			# Join containers
 lcm				# Least common multiple
 len				# Length
-list				# Convert to or create list
+list			# Convert to or create list
 ln				# Natural logarithm
 log				# Base 10 logarithm
-matrix				# Convert to or create matrix
-merge				# Merge containers
-normP				# Normal distribution probability integral
-normdist			# Normal distribution
+matrix			# Convert to or create matrix
+merge			# Merge containers
+normP			# Normal distribution probability integral
+normdis			# Normal distribution
 num				# Convert to number
-perm				# Permutations
-poissonP			# Poisson distribution probability integral
-prod				# Product of items
+perm			# Permutations
+poissonP		# Poisson distribution probability integral
+prod			# Product of items
 rad				# Radians
-range				# Create a range
-replace				# Replace an item with an item
-repr				# Get representation
-reverse				# Reverse items
-round				# Round item
-simp				# Convert to simplest fraction
+range			# Create a range
+replace			# Replace an item with an item
+repr			# Get representation
+reverse			# Reverse items
+round			# Round item
+simp			# Convert to simplest fraction
 sin				# Sine
-size				# Recursive length
-sort				# Sort container
-split				# Split container
-sqrt				# Complex square root
+size			# Recursive length
+sort			# Sort container
+split			# Split container
+sqrt			# Complex square root
 str				# Convert to string
 sum				# Sum items
 tP				# t distribution probability integral
 tan				# Tangent
-tdist				# t distribution
+tdist			# t distribution
 teq				# t distribution equation
 to				# Convert to specified type
-type				# Get type of item
+type			# Get type of item
 
 # Built-In Base Rabbit Variables:
 e				# Euler's number
-false				# 0
+false			# 0
 i				# Imaginary unit
-none				# ()
+none			# ()
 pi				# Circumference over diameter
-true				# 1
+true			# 1
 
 # Built-In Rabbit Interpreter Functions:
 ans				# Last answer
-grab				# Last line
-print				# Print string
+grab			# Last line
+print			# Print string
 ```
 
 #### More Rabbits?
@@ -424,7 +430,7 @@ The second stage is interpreter command resolution. This stage can vary based on
 This stage mostly works in command-line syntax (spaces as argument seperators), but certain symbol operators are also evaluated at this stage. The most common and important commands and operators evaluated are:
 ```
 f(x) # a comment	# The # operator will tell the interpreter to ignore everything after it
-x+1			# A plain expression will simply print the result to the console
+x+1					# A plain expression will simply print the result to the console
 x = 1             	# Sets the variable x to the yet-to-be-evaluated value 1
 x := x            	# Sets the variable x to the result of evaluating x
 f(x) = x          	# The preferable notation for creating functions
@@ -452,7 +458,7 @@ All different types of parentheses as well as conditionals are evaluated at this
 { x = 1 }       # Classes
 [1, 2, 3]       # Matrix rows
 (x+2)*2         # Parentheses
-x $ x = 1	# With clauses
+x $ x = 1		# With clauses
 f(x); g(x)      # Conditionals
 f(x) @ x>=0     # Conditions
 ```
