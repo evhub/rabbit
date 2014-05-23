@@ -658,9 +658,11 @@ class classcalc(cotobject):
             return self
         elif len(variables) == 0:
             return matrix(0)
-        else:
-            self.e.overflow = variables[1:]
+        elif len(variables) == 1:
             return self.calc(self.e.prepare(variables[0], False, False))
+        else:
+            self.store(variables[0], variables[1])
+            return matrix(0)
     def __delitem__(self, key):
         """Wraps remove."""
         self.remove(key)
