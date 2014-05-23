@@ -525,23 +525,22 @@ Import Commands:
             except IOError:
                 self.adderror("IOError", "Could not find for import file "+str(sides[1]))
             else:
-                impclass.Hook = self
-                try:
-                    impclass.call
-                except AttributeError:
+                if iseval(impclass):
+                    return impclass(self)
+                elif hascall(impclass):
+                    return funcfloat(impclass(self).call, self.e, sides[0])
+                else:
                     try:
                         impclass.precall
                     except AttributeError:
                         try:
                             impclass.unicall
                         except AttributeError:
-                            return impclass()
+                            return impclass(self)
                         else:
-                            return unifunc(impclass().unicall, self.e)
+                            return unifunc(impclass(self).unicall, self.e, sides[0])
                     else:
-                        return usefunc(impclass().precall, self.e)
-                else:
-                    return impclass()
+                        return usefunc(impclass(self).precall, self.e, sides[0])
 
     def set_def(self, sides):
         """Creates Functions."""
