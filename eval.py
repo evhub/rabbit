@@ -720,7 +720,7 @@ Global Operator Precedence List:
                 out = []
                 for x in items:
                     out += x.a
-                return matrixlist(out)
+                return matrixlist(out, float)
             elif domultidata == tot:
                 out = []
                 for x in items:
@@ -954,7 +954,7 @@ Global Operator Precedence List:
         """Performs Colon Function Calls."""
         self.overflow = []
         docalc = False
-        if isnull(params[-1]):
+        if len(params) > 0 and isnull(params[-1]):
             params.pop()
             docalc = True
         if isinstance(item, matrix):
@@ -999,7 +999,7 @@ Global Operator Precedence List:
                         out.append([])
                         for x in xrange(xmin, xmax+1):
                             out[-1].append(item.retreive(y,x))
-                    value = matrixlist(out)
+                    value = matrixlist(out, float)
             else:
                 length = item.lendiag()
                 params[0] = float(params[0])
@@ -1562,19 +1562,15 @@ class evalfuncs(object):
         if variables == None or len(variables) == 0:
             return matrix(0)
         elif len(variables) == 1:
-            variables[0] = collapse(variables[0])
-            if ismatrix(variables[0]):
-                variables[0] = getmatrix(variables[0])
-                if variables[0].onlydiag():
-                    out = variables[0].getdiag()
-                    out.reverse()
-                    return diagmatrixlist(out)
-                else:
-                    out = variables[0].items()
-                    out.reverse()
-                    return matrixitems(out)
+            variables[0] = getmatrix(collapse(variables[0]))
+            if variables[0].onlydiag():
+                out = variables[0].getdiag()
+                out.reverse()
+                return diagmatrixlist(out)
             else:
-                return matrix(1,1, variables[0])
+                out = variables[0].items()
+                out.reverse()
+                return matrixitems(out, variables[0].y)
         else:
             return reversecall([joincall(variables)])
 
@@ -1640,8 +1636,13 @@ class evalfuncs(object):
                 for t in variables[0].getitems():
                     funcs.append(self.typestr(t))
                 args = []
-                for x in xrange(0, len(funcs)):
-                    args.append(varstrings[x])
+                for x in xrange(1, len(funcs)+1):
+                    varstring = ""
+                    while x > len(varstrings):
+                        varstring += varstrings[x%len(varstrings)-1]
+                        x /= len(varstrings)
+                    varstring += varstrings[x-1]
+                    args.append(varstring)
                 out = ""
                 for x in xrange(0, len(funcs)):
                     out += funcs[x]+":"+args[x]+","
@@ -1666,8 +1667,6 @@ class evalfuncs(object):
             item = "frac"
         elif item == "string":
             item = "str"
-        elif item == "function" or item == "complex":
-            item = "eval"
         return item
 
     def typecalc(self, item):
@@ -1741,6 +1740,8 @@ class evalfuncs(object):
         """Performs data."""
         if variables == None:
             return matrix(0)
+        elif len(variables) == 1 and isinstance(variables[0], data):
+            return variables[0]
         elif len(variables) == 1:
             return datamatrix(variables[0])
         elif len(variables) == 2 and isinstance(variables[0], data) and isinstance(variables[1], data):
@@ -1759,7 +1760,7 @@ class evalfuncs(object):
         elif len(variables) == 1:
             if isinstance(variables[0], fraction):
                 out = variables[0]
-            elif isinstance(variables[0], float):
+            elif isnum(variables[0]):
                 out = fractionfloat(variables[0])
             else:
                 out = fraction(variables[0])

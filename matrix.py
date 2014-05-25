@@ -683,7 +683,7 @@ def matrixstr(inputstr, converter=float):
             ys[x][z] = converter(ys[x][z])
     return matrixlist(ys, converter)
 
-def matrixlist(inputlist, converter=None):
+def matrixlist(inputlist, converter=float, fake=False):
     """Converts A List Of Lists Into A Matrix."""
     if converter == None:
         converter = type(inputlist[0][0])
@@ -691,7 +691,7 @@ def matrixlist(inputlist, converter=None):
     for x in xrange(1,len(inputlist)):
         if len(inputlist[x]) != xlen:
             raise IndexError
-    out = matrix(len(inputlist), xlen, converter=converter, fake=True)
+    out = matrix(len(inputlist), xlen, converter=converter, fake=bool(fake))
     out.a = inputlist[:]
     out.convert()
     return out
