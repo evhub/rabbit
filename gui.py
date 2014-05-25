@@ -27,9 +27,9 @@ import tkSimpleDialog
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class console(object):
-    """A Graphical Class Used For Creating The PythonPlus Console."""
+    """A Graphical Class Used For Creating A Fake Console."""
     def __init__(self, root, display=None, height=35, width=100, side="bottom", doshow=True, **kwargs):
-        """Base Constructor For The PythonPlus Console."""
+        """Base Constructor For The Fake Console."""
         self.message = Tkinter.StringVar()
         if display != None:
             self.message.set(str(display))
@@ -118,8 +118,14 @@ class console(object):
         """Retreives All The Lines."""
         return self.message.get().split("\n") + self.history
 
+    def dobind(self):
+        """Makes The Conventional Bindings."""
+        self.text.bind("<MouseWheel>", app.scroll)
+        self.text.bind("<Tab>", lambda event: app.drop())
+        self.text.bind("<Shift-Tab>", lambda event: app.top())
+
 def startconsole(handler=None, message=None, name="PythonPlus", height=None, root=None):
-    """Initializes An Instance Of The PythonPlus Console."""
+    """Initializes An Instance Of The Fake Console."""
     if root == None:
         root = Tkinter.Tk()
     rootbind(root)
@@ -128,10 +134,10 @@ def startconsole(handler=None, message=None, name="PythonPlus", height=None, roo
         app = console(root, message, height)
     else:
         app = console(root, message)
-    appbind(app)
+    app.dobind()
     if handler != None:
         box = entry(app)
-        boxbind(box, handler)
+        box.dobind(handler)
         return root, app, box
     else:
         return root, app
@@ -139,21 +145,6 @@ def startconsole(handler=None, message=None, name="PythonPlus", height=None, roo
 def rootbind(root):
     """Makes The Conventional Root Bindings."""
     root.bind("<Escape>", lambda event: root.destroy())
-
-def appbind(app):
-    """Makes The Conventional App Bindings."""
-    app.text.bind("<MouseWheel>", app.scroll)
-    app.text.bind("<Tab>", lambda event: app.drop())
-    app.text.bind("<Shift-Tab>", lambda event: app.top())
-
-def boxbind(box, handler=None):
-    """Makes The Conventional Box Bindings."""
-    box.main.bind("<Up>", lambda event: box.back())
-    box.main.bind("<Down>", lambda event: box.forth())
-    box.main.bind("<Control-z>", lambda event: box.main.delete(0, "end"))
-    box.main.bind("<Control-f>", lambda event: box.clean())
-    if handler != None:
-        box.main.bind("<Return>", handler)
 
 def popup(which, message, title=None):
     """Displays A Pop-Up Message."""
@@ -260,6 +251,15 @@ class entry(object):
             self.commands.append("")
         self.position = len(self.commands)-1
 
+    def dobind(self, handler=None):
+        """Makes The Conventional Bindings."""
+        self.main.bind("<Up>", lambda event: box.back())
+        self.main.bind("<Down>", lambda event: box.forth())
+        self.main.bind("<Control-z>", lambda event: box.main.delete(0, "end"))
+        self.main.bind("<Control-f>", lambda event: box.clean())
+        if handler != None:
+            self.main.bind("<Return>", handler)
+
 class texter(object):
     """A Graphical Class That Allows The Use Of A Text Entry Area."""
     def __init__(self, root, width=100, y=None, pack=True, scroll=False, **kwargs):
@@ -286,7 +286,7 @@ class texter(object):
             self.main = Tkinter.Text(root, **kwargs)
             if pack:
                 self.main.pack(side="bottom", fill="both")
-        self.counter = -1
+        self.counter = 0
 
     def output(self, start=1.0, stop="end"):
         """Gets Text Box Output."""
@@ -304,12 +304,15 @@ class texter(object):
         """Clears The Contents Of The Text Entry Area."""
         self.main.delete(start, stop)
 
-    def newtag(self, start="tag_"):
+    def newtag(self, start="tag_", tagnames=string.lowercase):
         """Generates A New Tag."""
         self.counter += 1
         tag = str(start)
-        for x in str(self.counter):
-            tag += string.lowercase[int(x)]
+        x = self.counter
+        while x > len(tagnames):
+            tag += tagnames[x%len(tagnames)-1]
+            x /= len(tagnames)
+        tag += tagnames[x-1]
         return tag
 
     def colortag(self, tag, color=None, highlight=None):

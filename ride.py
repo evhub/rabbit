@@ -321,10 +321,10 @@ Import Commands:
         self.remtags()
         self.box.clear()
 
-    def load(self, name):
+    def load(self, name, tempfile=None):
         """Loads A File."""
         try:
-            tempfile = openfile(name, "rb")
+            tempfile = tempfile or openfile(name, "rb")
         except IOError:
             return None
         else:
@@ -342,10 +342,10 @@ Import Commands:
             return None
         else:
             writefile(tempfile, self.box.output())
-            tempfile.close()
             if load:
-                return self.load(name)
+                return self.load(name, tempfile)
             else:
+                tempfile.close()
                 return True
 
     def run(self):
