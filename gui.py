@@ -120,9 +120,9 @@ class console(object):
 
     def dobind(self):
         """Makes The Conventional Bindings."""
-        self.text.bind("<MouseWheel>", app.scroll)
-        self.text.bind("<Tab>", lambda event: app.drop())
-        self.text.bind("<Shift-Tab>", lambda event: app.top())
+        self.text.bind("<MouseWheel>", self.scroll)
+        self.text.bind("<Tab>", lambda event: self.drop())
+        self.text.bind("<Shift-Tab>", lambda event: self.top())
 
 def startconsole(handler=None, message=None, name="PythonPlus", height=None, root=None):
     """Initializes An Instance Of The Fake Console."""
@@ -253,10 +253,10 @@ class entry(object):
 
     def dobind(self, handler=None):
         """Makes The Conventional Bindings."""
-        self.main.bind("<Up>", lambda event: box.back())
-        self.main.bind("<Down>", lambda event: box.forth())
-        self.main.bind("<Control-z>", lambda event: box.main.delete(0, "end"))
-        self.main.bind("<Control-f>", lambda event: box.clean())
+        self.main.bind("<Up>", lambda event: self.back())
+        self.main.bind("<Down>", lambda event: self.forth())
+        self.main.bind("<Control-z>", lambda event: self.main.delete(0, "end"))
+        self.main.bind("<Control-f>", lambda event: self.clean())
         if handler != None:
             self.main.bind("<Return>", handler)
 

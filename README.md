@@ -147,6 +147,7 @@ Additionally, all the different container objects support various types of opera
 Additionally, there are a couple of other, special operations that can be done only with container objects, the syntax for which is:
 ```
 [1,2] .. [3,4]		# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
+(1,2) ** 2			# Repeat (result = (1,2,1,2))
 [1,2,3,4]:1			# Item indexes (result = 2) (left to right, lowest precedence, same as colon for function calls)
 (1,2,3):2			# These work for lists as well (result = 3)
 (1,2,3):0:2			# And can also be used to perform item indices (result = 1,2)
@@ -195,7 +196,7 @@ add(a)
 Lambda syntax in Rabbit is fairly straightforward, with a couple of strange quirks that result from Rabbit being dynamically scoped. Lambdas are defined using the backslash (\\) operator. Here're some examples of how to define different lambda functions:
 ```
 \1				# A zero-argument function that returns 1
-\x\(x+1)		# A one-variable function (x) that returns that variable plus one (x+1)
+\x\(x+1)		# A one-variable function that returns that variable plus one
 (\x\x)+1		# The same as above--Rabbit will just curry any basic mathematical operation done to a function
 \(x,y)\(x+y)	# A two-variable function that adds the two variables
 \(x,x:(1))\x	# A one-variable function, whose one variable defaults to one, that returns the variable
@@ -328,7 +329,6 @@ D				# Derivative
 FP				# F distribution probability integral
 Fdist			# F distribution
 Feq				# F distribution equation
-I				# Identity matrix
 L				# List to row
 S				# Definite integral
 abs				# Absolute value
@@ -460,7 +460,7 @@ All different types of parentheses as well as conditionals are evaluated at this
 { x = 1 }       # Classes
 [1, 2, 3]       # Matrix rows
 (x+2)*2         # Parentheses
-x $ x = 1		# With clauses
+x $ x = 1		# With clauses (result = 1)
 f(x); g(x)      # Conditionals
 f(x) @ x>=0     # Conditions
 ```
@@ -501,12 +501,13 @@ The fifth stage is high-level operator evaluation.
 
 High-precedence mathematical and functional operators are evaluated at this stage. In order, the different operators evaluated are:
 ```
-1,2,3~\x\x    # List looping
-1,2 .. 3,4    # Concatenation
-1,2,3,4       # Lists
-1+2-3         # Addition and subtraction
-6 % 3         # Modulo
-3*4/5         # Multiplication and division
+1,2,3~ \x\x   # List looping (result = (1,2,3))
+1,2 .. 3,4    # Concatenation (result = (1,2,3,4))
+1,2 ** 2      # Repeat (result = (1,2,1,2))
+1,2,3,4       # Lists (result = (1,2,3,4))
+1+2-3         # Addition and subtraction (result = 0)
+6 % 3         # Modulo (result = 0)
+3*4/5         # Multiplication and division (result = 2.4)
 ```
 
 ##### Debug Output

@@ -91,7 +91,6 @@ Global Operator Precedence List:
             "D":funcfloat(funcs.derivcall, self, "D"),
             "S":funcfloat(funcs.integcall, self, "S"),
             "L":funcfloat(funcs.brackcall, self, "L"),
-            "I":funcfloat(funcs.repeatcall, self, "I"),
             "list":funcfloat(funcs.listcall, self, "list"),
             "matrix":funcfloat(funcs.matrixcall, self, "matrix"),
             "cont":funcfloat(funcs.getmatrixcall, self, "cont"),
@@ -569,15 +568,17 @@ Global Operator Precedence List:
         for a in xrange(0, len(top)):
             top[a] = top[a].split("..")
             for b in xrange(0, len(top[a])):
-                top[a][b] = top[a][b].split(",")
+                top[a][b] = top[a][b].split("**")
                 for c in xrange(0, len(top[a][b])):
-                    top[a][b][c] = splitinplace(top[a][b][c].split("+"), "-", "%/*^:", 2)
+                    top[a][b][c] = top[a][b][c].split(",")
                     for d in xrange(0, len(top[a][b][c])):
-                        top[a][b][c][d] = top[a][b][c][d].split("%")
+                        top[a][b][c][d] = splitinplace(top[a][b][c][d].split("+"), "-", "%/*^:", 2)
                         for e in xrange(0, len(top[a][b][c][d])):
-                            top[a][b][c][d][e] = splitinplace(top[a][b][c][d][e].split("*"), "/")
+                            top[a][b][c][d][e] = top[a][b][c][d][e].split("%")
+                            for f in xrange(0, len(top[a][b][c][d][e])):
+                                top[a][b][c][d][e][f] = splitinplace(top[a][b][c][d][e][f].split("*"), "/")
         if self.debug:
-            value = reassemble(top, ["~", "..", ",", "+", "%", "*"])
+            value = reassemble(top, ["~", "..", "**", ",", "+", "%", "*"])
             print(self.recursion*"  "+"=> "+value)
         self.recursion += 1
         out = self.eval_check(self.eval_comp(top))
@@ -653,7 +654,7 @@ Global Operator Precedence List:
         """Performs Concatenation."""
         items = []
         for item in inputlist:
-            item = self.eval_list(item)
+            item = self.eval_repeat(item)
             if not isnull(item):
                 items.append(item)
         if len(items) == 0:
@@ -742,6 +743,25 @@ Global Operator Precedence List:
                 return data(out)
             else:
                 raise TypeError
+
+    def eval_repeat(self, inputlist):
+        """Evaluates Repeats."""
+        if len(inputlist) == 1:
+            return self.eval_list(inputlist[0])
+        else:
+            out = self.eval_list(inputlist[0])
+            if isinstance(out, matrix) and out.onlydiag():
+                out = out.getitems()
+            for x in xrange(1, len(inputlist)):
+                num = getint(self.eval_list(inputlist[x]))
+                if islist(out):
+                    out *= num
+                else:
+                    out = diagmatrix(num, out)
+            if islist(out):
+                return diagmatrixlist(out)
+            else:
+                return out
 
     def eval_list(self, inputlist):
         """Evaluates Matrices."""
@@ -1335,15 +1355,6 @@ class evalfuncs(object):
             variables[1] = collapse(variables[1])-variables[0]
             variables[2] = collapse(variables[2])+variables[1]
             return rangematrix(variables[0], variables[2], variables[1])
-
-    def repeatcall(self, variables):
-        """Constructs A Repeating Matrix List."""
-        if variables == None or len(variables) == 0:
-            return matrix(0)
-        elif len(variables) == 1:
-            return diagmatrix(getint(variables[0]))
-        else:
-            return diagmatrix(getint(variables[0]), variables[1])
 
     def sumcall(self, variables):
         """Finds A Sum."""
