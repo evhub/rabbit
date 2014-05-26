@@ -291,19 +291,30 @@ First is the loop operator (~). The loop operator allows for the looping of func
 10,20~ 1,2~ \(x,y)\(x+y)	# Loops over 1,2, within a loop over 10,20, feeding each into the function (result = ((11,12),(21,22)))
 ```
 
-Second is the function of a function operator (.). While the syntax is the same as that for methods, since functions don't have methods, function of a function is used like methods for functions. The basic syntax is:
+Second is the multi-set operator (,). When parentheses are used at the top level in the name of a variable to be set, a multi-variable set is performed. The basic syntax is:
+```
+a,b = (1,2)		# Sets a to 1 and b to 2
+a,b = (1,2,3)	# Sets a to 1 and b to (2,3)
+a,b = 1			# Sets a to 1 and b to none
+smoosh(a) =
+ x .. smoosh(xs) @ xs;
+ (x,)
+ $ x,xs = a		# This syntax can be used in with clauses to great effect
+```
+
+Third is the function of a function operator (.). While the syntax is the same as that for methods, since functions don't have methods, function of a function is used like methods for functions. The basic syntax is:
 ```
 f(x) = x^2
 g(x) = x+1
 f.g(2)		# Read as f(g(x)) (result = 9)
 ```
 
-Third is the factorial operator (!). Because confusion is possible between factorials and not equals, parentheses should usually be used to make it unambiguous, since not equals will always take precedence. The basic syntax is:
+Fourth is the factorial operator (!). Because confusion is possible between factorials and not equals, parentheses should usually be used to make it unambiguous, since not equals will always take precedence. The basic syntax is:
 ```
 (3!)+1		# The basic factorial operator (result = 7) (right to left, very low precedence)
 ```
 
-Fourth is the default variable operator ('). In most cases, the single quote is reserved for use in variable names--most commonly put at the end of the name--but if put at the very beginning, it functions as the default variable operator. The basic use is:
+Fifth is the default variable operator ('). In most cases, the single quote is reserved for use in variable names--most commonly put at the end of the name--but if put at the very beginning, it functions as the default variable operator. The basic use is:
 ```
 'var = 5	# Works just like a normal function definition
 1+'var		# You can even still call it using its full name (result = 6)
@@ -314,7 +325,7 @@ var = 2
 1+var		# But the normal variable is, now using its new value instead of the default (result = 3)
 ```
 
-Fifth is the execute operator (:). When a colon is placed at before an item with nothing before it, it will execute its argument as a top-level command. The basic syntax is:
+Sixth is the execute operator (:). When a colon is placed at before an item with nothing before it, it will execute its argument as a top-level command. The basic syntax is:
 ```
 :"x = 5"	# This will execute "x = 5" as a top-level command, setting x to 5
 x			# result = 5
