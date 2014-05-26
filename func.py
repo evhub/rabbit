@@ -41,7 +41,7 @@ def getmatrix(inputobject, func=diagmatrixlist):
     elif islist(inputobject):
         return func(inputobject)
     else:
-        return matrix(1,1, inputobject)
+        return matrix(1,1, inputobject, fake=(func==diagmatrixlist))
 
 def merge(inputlist):
     """Merges Items."""
@@ -498,7 +498,7 @@ class derivbase(object):
             return self.call([])
         else:
             items[self.variables[0]] = float(x)
-            items[self.allargs] = matrix(1,1, x)
+            items[self.allargs] = matrix(1,1, x, fake=True)
             oldvars = self.e.setvars(items)
             self.e.info = " \\>"
             out = self.e.calc(self.funcstr)

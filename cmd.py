@@ -419,7 +419,7 @@ Import Commands:
                 print(self.e.recursion*"  "+"< "+original+" >")
             return True
 
-    def cmd_set(self, original, varname="_"):
+    def cmd_set(self, original):
         """Evaluates Definition Commands."""
         if "=" in original:
             sides = original.split("=", 1)
@@ -429,10 +429,10 @@ Import Commands:
             if sides[0].endswith(":"):
                 sides[0] = sides[0][:-1]
                 docalc = True
-            test = endswithany(sides[0], ["+", "*", "^", "%", "-", "/", ":", "&", "|", "@", "..", ";", ","])
+            test = endswithany(sides[0], ["+", "**", "*", "^", "%", "-", "/", ":", "&", "|", "@", "..", ";", ","])
             if test:
-                sides[1] = sides[0]+"("+sides[1]+")"
                 sides[0] = sides[0][:-1*len(test)]
+                sides[1] = "("+sides[0]+")"+test+"("+sides[1]+")"
                 docalc = True
             if sides[0].endswith("<") and sides[1].startswith(">"):
                 sides[0] = sides[0][:-1]
@@ -444,68 +444,99 @@ Import Commands:
                 sides.reverse()
             elif sides[0].endswith("<"):
                 sides[0] = sides[0][:-1]
-            sides[0] = delspace(sides[0])
-            if self.readytofunc(sides[0], allowed="."):
-                useclass = None
-                classlist = []
-                if "." in sides[0]:
-                    classlist += sides[0].split(".")
-                    sides[0] = classlist.pop()
-                    useclass = self.e.find(classlist[0], True, False)
-                    if isinstance(useclass, classcalc):
-                        for x in xrange(1, len(classlist)):
-                            last = useclass
-                            useclass = useclass.retreive(classlist[x])
-                            if not isinstance(useclass, classcalc):
-                                if istext(useclass) and len(classlist) == x+1:
-                                    sides[1] = "( "+useclass+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
-                                    sides[0] = classlist[x]
-                                    useclass = last
-                                    classlist = classlist[:x]
-                                    docalc = False
-                                    break
-                                else:
-                                    self.adderror("ClassError", "Could not set "+classlist[x]+" in "+self.e.prepare(last, False, True, True))
-                                    return True
-                    elif classlist[0] in self.e.variables and istext(self.e.variables[classlist[0]]) and len(classlist) == 1:
-                        sides[1] = "( "+self.e.variables[classlist[0]]+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
-                        sides[0] = classlist[0]
-                        useclass = None
-                        classlist = []
-                        docalc = False
+            sides[0] = carefulsplit(sides[0], ",", openstr="(", closestr=")")
+            if len(sides[0]) > 1:
+                sides[1] = self.calc(sides[1])
+                if isinstance(sides[1], matrix) and sides[1].onlydiag():
+                    sides[1] = sides[1].getitems()
+                else:
+                    sides[1] = [sides[1]]
+                out = False
+                for x in xrange(0, len(sides[0])):
+                    if x == len(sides[0])-1:
+                        toset = sides[1][x:]
                     else:
-                        self.adderror("VariableError", "Could not find class "+classlist[0])
-                        return True
-                sides[1] = basicformat(sides[1])
-                for func in self.set_cmds:
-                    value = func(sides)
-                    if value != None:
-                        if istext(value):
-                            check = 0
-                        else:
-                            try:
-                                check = len(value)
-                            except:
-                                check = -1
-                        if check >= 2:
-                            if docalc:
-                                value[1] = self.trycalc(value[1])
-                            if self.debug:
-                                print(self.e.recursion*"  "+": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" = "+self.e.prepare(value[1], False, True, True))
-                            if useclass == None:
-                                self.e.variables[value[0]] = value[1]
+                        toset = sides[1][x:x+1]
+                    if len(toset) == 0:
+                        toset = matrix(0)
+                    elif len(toset) == 1:
+                        toset = toset[0]
+                    else:
+                        toset = diagmatrixlist(toset)
+                    out = self.cmd_set_do([sides[0][x], self.e.wrap(toset)], docalc) or out
+                return out
+            else:
+                sides[0] = sides[0][0]
+                return self.cmd_set_do(sides, docalc)
+                
+    def cmd_set_do(self, sides, docalc):
+        """Performs The Definition Command."""
+        sides[0] = sides[0].split("(", 1)
+        if len(sides[0]) > 1:
+            sides[0] = delspace(sides[0][0])+sides[0][1]
+        else:
+            sides[0] = delspace(sides[0][0])
+        if self.readytofunc(sides[0], allowed="."):
+            useclass = None
+            classlist = []
+            if "." in sides[0]:
+                classlist += sides[0].split(".")
+                sides[0] = classlist.pop()
+                useclass = self.e.find(classlist[0], True, False)
+                if isinstance(useclass, classcalc):
+                    for x in xrange(1, len(classlist)):
+                        last = useclass
+                        useclass = useclass.retreive(classlist[x])
+                        if not isinstance(useclass, classcalc):
+                            if istext(useclass) and len(classlist) == x+1:
+                                sides[1] = "( "+useclass+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
+                                sides[0] = classlist[x]
+                                useclass = last
+                                classlist = classlist[:x]
+                                docalc = False
+                                break
                             else:
-                                useclass.store(value[0], value[1])
+                                self.adderror("ClassError", "Could not set "+classlist[x]+" in "+self.e.prepare(last, False, True, True))
+                                return True
+                elif classlist[0] in self.e.variables and istext(self.e.variables[classlist[0]]) and len(classlist) == 1:
+                    sides[1] = "( "+self.e.variables[classlist[0]]+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
+                    sides[0] = classlist[0]
+                    useclass = None
+                    classlist = []
+                    docalc = False
+                else:
+                    self.adderror("VariableError", "Could not find class "+classlist[0])
+                    return True
+            sides[1] = basicformat(sides[1])
+            for func in self.set_cmds:
+                value = func(sides)
+                if value != None:
+                    if istext(value):
+                        check = 0
+                    else:
+                        try:
+                            check = len(value)
+                        except:
+                            check = -1
+                    if check >= 2:
+                        if docalc:
+                            value[1] = self.trycalc(value[1])
+                        if self.debug:
+                            print(self.e.recursion*"  "+": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" = "+self.e.prepare(value[1], False, True, True))
+                        if useclass == None:
+                            self.e.variables[value[0]] = value[1]
                         else:
-                            if docalc:
-                                value = self.trycalc(value)
-                            if self.debug:
-                                print(self.e.recursion*"  "+": "+strlist(classlist, ".")+"."*bool(classlist)+sides[0]+" = "+self.e.prepare(value, False, True, True))
-                            if useclass == None:
-                                self.e.variables[sides[0]] = value
-                            else:
-                                useclass.store(sides[0], value)
-                        return True
+                            useclass.store(value[0], value[1])
+                    else:
+                        if docalc:
+                            value = self.trycalc(value)
+                        if self.debug:
+                            print(self.e.recursion*"  "+": "+strlist(classlist, ".")+"."*bool(classlist)+sides[0]+" = "+self.e.prepare(value, False, True, True))
+                        if useclass == None:
+                            self.e.variables[sides[0]] = value
+                        else:
+                            useclass.store(sides[0], value)
+                    return True
 
     def readytofunc(self, expression, extra="", allowed=""):
         """Determines If An Expression Could Be Turned Into A Function."""

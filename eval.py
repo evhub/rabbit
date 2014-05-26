@@ -389,6 +389,13 @@ Global Operator Precedence List:
             print(self.recursion*"  "+"| "+self.prepare(value, False, True, True))
         return self.calc_with(value)
 
+    def wrap(self, item):
+        """Wraps An Item In Parentheses."""
+        indexstr = "`"+str(self.count)+"`"
+        self.count += 1
+        self.variables[indexstr] = item
+        return indexstr
+
     def calc_string(self, expression):
         """Evaluates The String Part Of An Expression."""
         strlist = expression.split('"')
@@ -397,10 +404,7 @@ Global Operator Precedence List:
             if x%2 == 0:
                 command += strlist[x]
             else:
-                indexstr = "`"+str(self.count)+"`"
-                self.count += 1
-                command += indexstr
-                self.variables[indexstr] = strcalc(strlist[x], self)
+                command += self.wrap(strcalc(strlist[x], self))
         return command
 
     def calc_class(self, curlylist):
@@ -434,10 +438,7 @@ Global Operator Precedence List:
             if istext(x):
                 command += x
             else:
-                indexstr = "`"+str(self.count)+"`"
-                self.count += 1
-                command += indexstr
-                self.variables[indexstr] = self.calc_paren(x)
+                command += self.wrap(self.calc_paren(x))
         return command
 
     def calc_with(self, expression):
@@ -774,7 +775,7 @@ Global Operator Precedence List:
             return matrix(0)
         elif len(out) == 1:
             if len(inputlist) > 1:
-                return matrix(1,1, out[0])
+                return matrix(1,1, out[0], fake=True)
             else:
                 return out[0]
         else:
@@ -997,7 +998,7 @@ Global Operator Precedence List:
                 if params[1].retreive(1) < 0:
                     params[1].store(1,1, params[1].retreive(1)+item.x+1.0)
                 if params[0].getdiag() == params[1].getdiag():
-                    value = matrix(1,1, item.retreive(int(params[0].retreive(0)), int(params[0].retreive(1))))
+                    value = matrix(1,1, item.retreive(int(params[0].retreive(0)), int(params[0].retreive(1))), fake=True)
                 elif params[0].retreive(0) == params[1].retreive(0):
                     out = item[int(params[0].retreive(0))][int(params[0].retreive(1)):int(params[1].retreive(1))+1]
                     value = diagmatrixlist(out)
@@ -1029,7 +1030,7 @@ Global Operator Precedence List:
                 if params[1] < 0:
                     params[1] += length+1.0
                 if params[0] == params[1]:
-                    value = matrix(1,1, item.retreive(int(params[1])))
+                    value = matrix(1,1, item.retreive(int(params[1])), fake=True)
                 elif params[0] < params[1]:
                     out = item.getdiag()[int(params[0]):int(params[1])]
                     value = diagmatrixlist(out)
@@ -1347,7 +1348,7 @@ class evalfuncs(object):
             elif ismatrix(variables[0]):
                 return variables[0].tomatrix()
             else:
-                return matrix(1,1, variables[0])
+                return matrix(1,1, variables[0], fake=True)
         elif len(variables) == 2:
             return rangematrix(collapse(variables[0]), collapse(variables[1])+1.0)
         else:
@@ -1556,7 +1557,7 @@ class evalfuncs(object):
                     outy.append(y)
                 return multidata(outx, outy)
             elif not isinstance(variables[0], matrix):
-                return matrix(1,1, variables[0])
+                return matrix(1,1, variables[0], fake=True)
             elif variables[0].onlydiag():
                 out = variables[0].getdiag()
                 out.sort()
