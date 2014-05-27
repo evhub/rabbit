@@ -541,7 +541,7 @@ class matrix(mctobject):
     def onlydiag(self):
         """Determines If The Matrix Is A Diagonal List."""
         for y in xrange(0, len(self.a)):
-            if not (isinstance(self.a[y], fakelist) and len(self.a[y].a) == 1 and y in self.a[y].a):
+            if not (isinstance(self.a[y], fakelist) and (len(self.a[y].a) == 0 or (len(self.a[y].a) == 1 and y in self.a[y].a))):
                 return False
         return True
 

@@ -374,7 +374,11 @@ class strcalc(numobject):
     def __imul__(self, other):
         """Performs Multiplication."""
         if other != 1 and not isnull(other):
-            self.calcstr = self.calcstr*int(other)+self.calcstr[:int(len(self.calcstr)*(other-int(other)))]
+            if other < 0:
+                self.calcstr = self.calcstr[::-1]
+                self *= -other
+            else:
+                self.calcstr = self.calcstr*int(other)+self.calcstr[:int(len(self.calcstr)*(other-int(other)))]
         return self
     def __ipow__(self, other):
         """Performs Exponentiation."""

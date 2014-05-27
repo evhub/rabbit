@@ -136,25 +136,32 @@ class fakelist(cotobject):
         else:
             raise IndexError
 
-    def __getslice__(self, start, stop):
+    def __getslice__(self, start, stop, step=1):
         """Gets A Fake Slice."""
-        start = int(start)
-        if start < 0:
-            start += len(self)
-        elif start > len(self):
-            raise IndexError
-        stop = int(stop)
-        if stop < 0:
-            stop += len(self)
-        elif stop > len(self):
-            stop = len(self)
-        if start > stop:
-            raise IndexError
-        out = self.new(stop-start)
-        for x in self.a:
-            if start <= x and x < stop:
-                out.a[x-start] = self.a[x]
-        return out
+        step = int(step)
+        if step == 0:
+            return self.new(0)
+        elif step < 0:
+            self.reverse()
+            return self[start:stop:-step]
+        else:
+            start = int(start)
+            if start < 0:
+                start += len(self)
+            elif start > len(self):
+                raise IndexError
+            stop = int(stop)
+            if stop < 0:
+                stop += len(self)
+            elif stop > len(self):
+                stop = len(self)
+            if start > stop:
+                raise IndexError
+            out = self.new((stop-start)/step)
+            for x in self.a:
+                if start <= x and x < stop and x%step == 0:
+                    out.a[x-start] = self.a[x]
+            return out
 
     def sort(self):
         """Sorts The Fake List."""

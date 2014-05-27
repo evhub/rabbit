@@ -44,6 +44,7 @@ Global Operator Precedence List:
 
     ~       Applies a list to a function for looping.
     ..      Performs concatenation.
+    **      Performs repeat.
     ,       Seperates list elements.
     +-      Performs addition and subtraction.
     %       Performs modulo.
@@ -756,9 +757,12 @@ Global Operator Precedence List:
             for x in xrange(1, len(inputlist)):
                 num = getint(self.eval_list(inputlist[x]))
                 if islist(out):
-                    out *= num
+                    if num < 0:
+                        out = out[::-1]*(-num)
+                    else:
+                        out *= num
                 else:
-                    out = diagmatrix(num, out)
+                    out = [out]*abs(num)
             if islist(out):
                 return diagmatrixlist(out)
             else:
