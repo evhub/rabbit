@@ -188,6 +188,10 @@ a = 1,2,3
 add(a)
 # Will call add with the three variables 1, 2, and 3, instead of with the one variable (1,2,3) as its argument. This can often be useful, as is shown in the example.
 
+# Parentheses syntax also supports catch-all calling. If a function is called with too many arguments, the extra ones will be grouped in a list and put in the last argument.
+plusone(l) = l~\x\(x+1)
+plusone(1,2,3)		# result = (2,3,4)
+
 # Colon syntax, on the other hand, will never do that. Whatever is after the first colon is the first argument, a second argument requires a second colon.
 # What colon syntax will do, however, that parentheses syntax will not, is curry multiple arguments. This is useful when dealing with functions that return other functions.
 # Before we can get into that, however, you need to understand how to define in-line functions, or lambdas.
