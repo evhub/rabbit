@@ -56,7 +56,6 @@ Global Operator Precedence List:
     /       Denotes reciprocals.
     ^       Performs exponentiation.
     \       Creates a lambda.
-    !       Performs factorial.
     :       Performs function calls.
     d       Performs dice rolls.
     `       Denotes parentheses.
@@ -130,6 +129,7 @@ Global Operator Precedence List:
             "acos":usefunc(math.acos, self, "acos", ["x"]),
             "deg":usefunc(math.degrees, self, "deg", ["x"]),
             "rad":usefunc(math.radians, self, "rad", ["x"]),
+            "fact":usefunc(factorial, self, "fact", ["x"]),
             "normdist":usefunc(normdist, self, "normdist", ["x", "mean", "stdev"]),
             "binomP":usefunc(binomP, self, "binomP", ["n", "p", "x"]),
             "poissonP":usefunc(poissonP, self, "poissonP", ["lambda", "x"]),
@@ -170,7 +170,6 @@ Global Operator Precedence List:
             self.call_reciproc,
             self.call_exp,
             self.call_lambda,
-            self.call_fact,
             self.call_colon,
             self.call_paren,
             self.call_method,
@@ -950,7 +949,7 @@ Global Operator Precedence List:
                             out[1] = str(self.variables[out[1]])
                     return strfloat(out[1], self, params, personals)
 
-    def call_fact(self, inputstring):
+    def call(self, inputstring):
         """Evaluates !."""
         if inputstring.endswith("!"):
             return factorial(self.eval_call(inputstring[:-1]))
