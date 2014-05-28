@@ -334,18 +334,18 @@ Import Commands:
             self.endfile()
             return True
 
-    def save(self, name, load=True):
+    def save(self, name, load=True, tempfile=None):
         """Saves To A File."""
         try:
-            tempfile = openfile(name, "r+b")
+            tempfile = tempfile or openfile(name, "r+b")
         except IOError:
             return None
         else:
             writefile(tempfile, self.box.output())
+            tempfile.close()
             if load:
-                return self.load(name, tempfile)
+                return self.load(name)
             else:
-                tempfile.close()
                 return True
 
     def run(self):

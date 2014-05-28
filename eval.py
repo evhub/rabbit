@@ -101,7 +101,7 @@ Global Operator Precedence List:
             "join":funcfloat(funcs.joincall, self, "join"),
             "merge":funcfloat(funcs.mergecall, self, "merge"),
             "sort":funcfloat(funcs.sortcall, self, "sort"),
-            "reverse":funcfloat(funcs.reversecall, self, "reverse"),
+            "rev":funcfloat(funcs.reversecall, self, "rev"),
             "round":funcfloat(funcs.roundcall, self, "round"),
             "num":funcfloat(funcs.numcall, self, "num"),
             "eval":funcfloat(funcs.collapsecall, self, "eval"),
