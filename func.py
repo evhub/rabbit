@@ -619,7 +619,9 @@ class classcalc(cotobject):
         self.e.processor.process(str(command))
         self.e.processor.returned = returned
         for v in self.e.variables:
-            if not self.e.isreserved(v) and (not v in oldvars or not self.e.variables[v] is oldvars[v]):
+            if self.e.isreserved(v):
+                oldvars[v] = self.e.variables[v]
+            elif not v in oldvars or not self.e.variables[v] is oldvars[v]:
                 self.variables[v] = self.e.variables[v]
         self.e.variables = oldvars
     def copy(self):

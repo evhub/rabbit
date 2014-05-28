@@ -129,7 +129,7 @@ Precedence for these and other container operators is between that of boolean op
 Next is the row, so named because it is nothing more than a matrix with one row and many columns. The syntax for creating rows is:
 ```
 [1,2,3]		# This will define a 1 by 3 matrix with the items 1, 2, and 3 in it
-[(1,2,3)]	# The brackets are actually converting a list into a row, so the inside can actually be any list
+[(1,2,3)]	# Same as above--the brackets are actually converting a list into a row, so the inside can actually be any list
 ```
 
 Because it is more complicated and the syntax to define it includes operations you don't know yet, we'll hold off on explaining full matrices until we get to the built-in function that allows them to be created. For now we'll just tell you that they're just multiple rows joined together into a full matrix.
@@ -559,26 +559,10 @@ print("Hello, world!")    # The convential method, print is a built-in function 
 show "Hello, world!"      # A common interpreter command, show will print its argument in a text box
 ```
 
-#### Boolean Functions
+#### Quick Sort
 ```
-bool(x) = \true @ x; \false
-not(x) = \false @ x; \true
-and(x,y) = \true @ x&y; \false
-nand(x,y) = \false @ x&y; \true
-or(x,y) = \true @ x|y; \false
-nor(x,y) = \false @ x|y; \true
-xor(x,y) = \true @ bool:x != bool:y; \false
-xnor(x,y) = \false @ bool:x != bool:y; \true
-```
-
-#### Basic Math
-```
-f'(x) = (D:\f):x
-sec(x) = 1/cos:x
-csc(x) = 1/sin:x
-cot(x) = 1/tan:x
-asec(x) = acos:(1/x)
-acsc(x) = asin:(1/x)
-acot(x) = atan:(1/x)
-cis(x) = cos(x)+i*sin(x)
+qsort(l) = (
+  qsort:(as~\x\(x@x<=a)) .. a, .. qsort:(as~\x\(x@x>a))
+  $ a,as = l
+  ) @ l
 ```

@@ -979,9 +979,6 @@ Global Operator Precedence List:
         """Performs Colon Function Calls."""
         self.overflow = []
         docalc = False
-        if len(params) > 0 and isnull(params[-1]):
-            params.pop()
-            docalc = True
         if isinstance(item, matrix):
             if len(params) == 0:
                 value = item.retreive(0)
@@ -1071,13 +1068,17 @@ Global Operator Precedence List:
             inputlist = []
             for x in xrange(0, len(templist)):
                 if x%2 == 1:
-                    if "`"+templist[x]+"`" in self.variables:
-                        inputlist.append("`"+templist[x]+"`")
-                    elif templist[x]:
-                        num = int(self.eval_call(templist[x]))
-                        if num < 0:
-                            num += self.count
-                        inputlist.append("`"+str(num)+"`")
+                    if templist[x]:
+                        name = "`"+templist[x]+"`"
+                        if not name in self.variables:
+                            num = int(self.eval_call(templist[x]))
+                            if num < 0:
+                                num += self.count
+                            name = "`"+str(num)+"`"
+                        if name in self.variables:
+                            inputlist.append(name)
+                        else:
+                            self.processor.adderror("VariableError", "Could not find parentheses "+name)
                 else:
                     inputlist.append(templist[x])
             values = []
@@ -1571,7 +1572,7 @@ class evalfuncs(object):
                 out.sort()
                 return matrixitems(out)
         else:
-            return sortcall([mergecall(variables)])
+            return self.sortcall([mergecall(variables)])
 
     def reversecall(self, variables):
         """Performs reverse."""
@@ -1588,7 +1589,7 @@ class evalfuncs(object):
                 out.reverse()
                 return matrixitems(out, variables[0].y)
         else:
-            return reversecall([joincall(variables)])
+            return self.reversecall([joincall(variables)])
 
     def containscall(self, variables):
         """Performs contains."""

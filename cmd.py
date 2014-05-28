@@ -446,25 +446,29 @@ Import Commands:
                 sides[0] = sides[0][:-1]
             sides[0] = carefulsplit(sides[0], ",", openstr="(", closestr=")")
             if len(sides[0]) > 1:
-                sides[1] = self.calc(sides[1])
-                if isinstance(sides[1], matrix) and sides[1].onlydiag():
-                    sides[1] = sides[1].getitems()
-                else:
-                    sides[1] = [sides[1]]
-                out = False
-                for x in xrange(0, len(sides[0])):
-                    if x == len(sides[0])-1:
-                        toset = sides[1][x:]
+                test = True
+                for x in sides[0]:
+                    test = test and self.readytofunc(x)
+                if test:
+                    sides[1] = self.calc(sides[1])
+                    if isinstance(sides[1], matrix) and sides[1].onlydiag():
+                        sides[1] = sides[1].getitems()
                     else:
-                        toset = sides[1][x:x+1]
-                    if len(toset) == 0:
-                        toset = matrix(0)
-                    elif len(toset) == 1:
-                        toset = toset[0]
-                    else:
-                        toset = diagmatrixlist(toset)
-                    out = self.cmd_set_do([sides[0][x], self.e.wrap(toset)], docalc) or out
-                return out
+                        sides[1] = [sides[1]]
+                    out = False
+                    for x in xrange(0, len(sides[0])):
+                        if x == len(sides[0])-1:
+                            toset = sides[1][x:]
+                        else:
+                            toset = sides[1][x:x+1]
+                        if len(toset) == 0:
+                            toset = matrix(0)
+                        elif len(toset) == 1:
+                            toset = toset[0]
+                        else:
+                            toset = diagmatrixlist(toset)
+                        out = self.cmd_set_do([sides[0][x], self.e.wrap(toset)], docalc) or out
+                    return out
             else:
                 sides[0] = sides[0][0]
                 return self.cmd_set_do(sides, docalc)
@@ -591,9 +595,9 @@ Import Commands:
             for x in sides[0][1].split(","):
                 if ":" in x:
                     x = x.split(":", 1)
-                    personals[x[0]] = self.e.find(x[1], True, False)
+                    personals[delspace(x[0])] = self.e.find(x[1], True, False)
                 elif x != "":
-                    params.append(x)
+                    params.append(delspace(x))
             return (sides[0][0], strfunc(sides[1], self.e, params, personals))
 
     def set_normal(self, sides):
