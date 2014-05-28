@@ -473,7 +473,7 @@ Import Commands:
         """Performs The Definition Command."""
         sides[0] = sides[0].split("(", 1)
         if len(sides[0]) > 1:
-            sides[0] = delspace(sides[0][0])+sides[0][1]
+            sides[0] = delspace(sides[0][0])+"("+sides[0][1]
         else:
             sides[0] = delspace(sides[0][0])
         if self.readytofunc(sides[0], allowed="."):
