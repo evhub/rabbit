@@ -1165,7 +1165,10 @@ Global Operator Precedence List:
                 if not isfunc(value):
                     value *= values[x]
                 elif isinstance(values[x], matrix) and values[x].onlydiag():
-                    value = getcall(value)(values[x].getdiag())
+                    args = values[x].getdiag()
+                    if isinstance(value, (strfunc, usefunc)) and value.overflow and len(args) > len(value.variables):
+                        args = args[:len(value.variables)-1] + [diagmatrixlist(args[len(value.variables)-1:])]
+                    value = getcall(value)(args)
                 else:
                     value = getcall(value)([values[x]])
             if self.debug:

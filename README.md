@@ -331,6 +331,11 @@ Sixth is the execute operator (:). When a colon is placed at before an item with
 x			# result = 5
 ```
 
+Seventh is the all arguments variable (__). When __ is passed as an argument to a function it sets it to a list of all the arguments passed. The basic syntax is:
+```
+applycos(__) = __~cos
+```
+
 #### Rabbits Come With Functions
 
 Rabbit comes with a lot of built-in functions. We'll list all of them below, but this list might not always stay updated. An updated list should always be able to be compiled by looking at eval.py and cmd.py. The different built-in Rabbit functions are:
