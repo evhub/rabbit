@@ -106,6 +106,7 @@ The different types of equality and inequality operators, in order of precedence
 ```
 1 | 0		# Or (result = 1) (left to right)
 0 & 1		# And (result = 0) (left to right)
+! 0			# Not (result = 1) (left to right)
 2 >= 2		# Greater than or equal to (=> also accepted) (result = 1) (left to right)
 3 <= 4		# Less than or equal to (=< also accepted) (result = 1) (left to right)
 3 > 5		# Greater than (result = 0) (left to right)
@@ -496,6 +497,7 @@ All different logical, equality, and inequality operators are evaluated at this 
 ```
 x < -1 | x > 1        # Logical or
 0 <= x & x < 10       # Logical and
+! x                   # Logical not
 x >= 2 | x => 2       # Greater than or equal to (both symbol orders are accepted)
 x <= 5 | x =< 5       # Less than or equal to (both symbol orders are accepted)
 x > 3                 # Greater than

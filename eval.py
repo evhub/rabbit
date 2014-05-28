@@ -486,14 +486,21 @@ Global Operator Precedence List:
         for a in xrange(0, len(top)):
             top[a] = top[a].split("&")
             for b in xrange(0, len(top[a])):
+                new = []
+                if top[a][b].startswith("!"):
+                    top[a][b] = top[a][b][1:]
+                    new.append("!")
+                found = False
                 for x in [">=", "<=", ">", "<", "<>", "!=", "?=", "="]:
                     test = splitany(top[a][b], [x, x[::-1]])
                     if len(test) > 1:
-                        top[a][b] = test
-                        top[a][b].reverse()
-                        top[a][b].append(x)
-                        top[a][b].reverse()
+                        new.append(x)
+                        new += test
+                        found = True
                         break
+                if not found:
+                    new.append(top[a][b])
+                top[a][b] = new
         if self.debug:
             value = reassemble(top, ["|", "&", ";"])
             print(self.recursion*"  "+"=>> "+value)
@@ -526,6 +533,12 @@ Global Operator Precedence List:
         """Evaluates The Equation Part Of A Boolean Expression."""
         if not islist(inputlist):
             return self.calc_eval(inputlist)
+        elif len(inputlist) == 0:
+            return matrix(0)
+        elif len(inputlist) == 1:
+            return self.calc_eval(inputlist[0])
+        elif inputlist[0] == "!":
+            return not self.bool_eq(inputlist[1:])
         elif inputlist[0] == ">=":
             value = self.calc_round(inputlist[1])
             for x in xrange(2, len(inputlist)):
