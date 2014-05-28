@@ -42,9 +42,6 @@ Console Commands:
     errors
     clean
 Control Commands:
-    if <condition> do <command>
-    for <list> do <command>
-    while <condition> do <command>
     do <command>
     del <variable>
     get [variable]
@@ -116,9 +113,6 @@ Import Commands:
             self.cmd_debug,
             self.cmd_errors,
             self.cmd_clean,
-            self.cmd_while,
-            self.cmd_for,
-            self.cmd_if,
             self.cmd_get,
             self.cmd_run,
             self.cmd_save,
