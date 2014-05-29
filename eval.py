@@ -231,9 +231,9 @@ Global Operator Precedence List:
             out += " }"
         elif isinstance(item, (data, multidata)):
             if bottom:
-                out = "data:(" + self.prepare(item.tomatrix(), False, True) + ")"
+                out = "data:(" + self.prepare(getmatrix(item), False, True) + ")"
             else:
-                out = self.prepare(item.tomatrix(), top, bottom)
+                out = self.prepare(getmatrix(item), top, bottom)
         elif isinstance(item, matrix):
             if len(item) == 0:
                 out = "()"
@@ -1366,7 +1366,7 @@ class evalfuncs(object):
             if isinstance(variables[0], matrix):
                 return variables[0]
             elif hasmatrix(variables[0]):
-                return variables[0].tomatrix()
+                return getmatrix(variables[0])
             else:
                 return matrix(1,1, variables[0], fake=True)
         elif len(variables) == 2:
@@ -1519,7 +1519,7 @@ class evalfuncs(object):
             for x in xrange(1, len(variables)):
                 items.append(collapse(variables[x]))
             if isinstance(variables[0], strcalc):
-                return self.strcall([self.splitcall([variables[0].tomatrix]+items)])
+                return self.strcall([self.splitcall([getmatrix(variables[0])]+items)])
             elif hasmatrix(variables[0]):
                 out = [[]]
                 for x in getmatrix(variables[0]).getitems():
@@ -1828,21 +1828,27 @@ class evalfuncs(object):
             else:
                 return diagmatrixlist(out)
 
-    def foldcall(self, variables):
+    def foldcall(self, variables, func=None, overflow=True):
         """Folds A Function Over A Matrix."""
         if variables == None or len(variables) == 0:
             return matrix(0)
         elif len(variables) == 1:
             return getcall(self.e.funcfind(variables[0]))(self.e.variables)
         else:
-            func = getcall(self.e.funcfind(variables[0]))
+            func = func or getcall(self.e.funcfind(variables[0]))
             item = collapse(variables[1])
             if len(variables) >= 3:
                 start = variables[2]
-                self.e.overflow = variables[3:]
+                if overflow:
+                    self.e.overflow = variables[3:]
             else:
                 start = None
-            if hasmatrix(item):
+            if isinstance(variables[0], strcalc):
+                variables[0] = None
+                variables[1] = item
+                variables = variables[:3]
+                return self.strcall([self.foldcall(variables, func, False)])
+            elif hasmatrix(item):
                 item = getmatrix(item)
                 if len(item) == 0:
                     return matrix(0)
