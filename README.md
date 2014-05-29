@@ -39,7 +39,7 @@ The largest difference between Rabbit and any other programming language, an asp
 
 Beyond that, Rabbit uses very few special words in favor of mostly using special symbols. This serves to limit the core language features to the keyboard symbols, making it very clear what is a core language feature and what is not.
 
-Finally, Rabbit takes whitespace insensitivity to the extreme. Whitespace is only used in line continuations, strings, and seperating arguments to interpreter commands. In every other area, all whitespace is deleted, meaning that whitespace can be used liberally in almost any situation, including the seperation of digits or parts of variable names.
+Finally, Rabbit takes whitespace insensitivity to the extreme. Whitespace is only used in line continuations, strings, and separating arguments to interpreter commands. In every other area, all whitespace is deleted, meaning that whitespace can be used liberally in almost any situation, including the separation of digits or parts of variable names.
 
 ### Basic Tutorial
 
@@ -137,7 +137,7 @@ Because it is more complicated and the syntax to define it includes operations y
 
 Additionally, all the different container objects support various types of operations that can be performed on them. Because they are matrices, they all support basic matrix math. The syntax for these basic operations is:
 ```
-(1,2,3)*2			# Scalar multiplication (result = (2,3,6))
+(1,2,3)*2			# Scalar multiplication (result = (2,4,6))
 (1,2,3)+10			# Applied addition (result = (11,12,13))
 (1,2)+(10,20)		# Matrix addition (result = (11,22))
 (1,2)*(10,20)		# Matrix multiplication (result = (10,40))
@@ -186,7 +186,7 @@ g:2:3-5
 # That means that this:
 add(x,y,z) = x+y+z
 a = 1,2,3
-add(a)
+add(a)				# result = 6
 # Will call add with the three variables 1, 2, and 3, instead of with the one variable (1,2,3) as its argument. This can often be useful, as is shown in the example.
 
 # Parentheses syntax also supports catch-all calling. If a function is called with too many arguments, the extra ones will be grouped in a list and put in the last argument.
@@ -235,7 +235,7 @@ Classes in Rabbit are essentially namespace objects. What that means is that cla
 ```
 { x = 1 }			# Will create a class whose only variable, x, is set to 1
 						# Note that this will only work if x is not currently set to 1--if it is, Rabbit won't detect any change, and you'll end up with an empty class
-{ x = 1 ;; y = 2 }	# Because the interior of a class is just treated as a command, command seperators can be used to define multiple items inside of a class
+{ x = 1 ;; y = 2 }	# Because the interior of a class is just treated as a command, command separators can be used to define multiple items inside of a class
 { f(x) = x }		# That also means that functions can be defined within classes just the same as if they were being defined at the top level
 ```
 
@@ -245,7 +245,7 @@ a := { x = 1 ;; x := x+1 }	# Remember, any valid top-level command is valid insi
 a.x + 1						# This will retreive x from the class and add 1 to it (result = 3)
 a:"x+1"						# Same as above--this will evaluate "x+1" in the namespace of the class (result = 3)
 a.z = 5						# Sets z to 5 inside the class
-a:"z":5						# Same as above--this will set "z" in the class to 5
+a:"z":5						# Same as above--this will set "z" in the class to 5 (result = 5)
 ```
 
 Since class definitions can often get very long, it is reccomended that line continuations be used. Since we haven't introduced those yet, we'll do so here. Line continuations follow a very simple rule: any line that starts with whitespace will be added onto the previous line. It should be noted that this only works when running code from a file, not from the command line. Some common uses of this syntax are:
@@ -279,7 +279,7 @@ f(x) = gx*floor(gx) $ gx = g(x)			# Calls what comes before the dollar sign in t
 f(x) = { gx = g(x) } : "gx*floor(gx)"
 
 # In with clause syntax:
-g(x) = m(z) $ z = x^2 $ m(z) = z%10		# Multiple dollar signs are used instead of double semicolons to seperate multiple commands
+g(x) = m(z) $ z = x^2 $ m(z) = z%10		# Multiple dollar signs are used instead of double semicolons to separate multiple commands
 # The same thing in class syntax:
 g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
 ```
@@ -291,8 +291,8 @@ Before we move on, there are some remaining, more complex, less-used operators t
 First is the loop operator (~). The loop operator allows for the looping of functions over lists. The basic syntax is:
 ```
 1,2,3~ \x\x					# Loops over 1,2,3 with \x\x (result = (1,2,3)) (right to left, highest precedence for a mathematical operator)
-1,2,3,4~ \(x,y)\(x+y)		# Loops over 1,2,3,4, taking every two variables for each function call (result = (3,7))
-2,4,6,8~ \x\(last+x)		# Like a method, a loop function will be given a special variable "last" that will be set to the last value returned by the loop function in the loop (result = (2,6,8,14))
+1,2,3,4~~ \(x,y)\(x+y)		# Loops over 1,2,3,4, taking every two items for each function call (result = (3,7))
+2,4,6,8~ \x\(last+x)		# Like a method, a loop function will be given a special variable "last" that will be set to the last value returned by the loop function in the loop (result = (2,6,12,20))
 10,20~ 1,2~ \(x,y)\(x+y)	# Loops over 1,2, within a loop over 10,20, feeding each into the function (result = ((11,12),(21,22)))
 ```
 
@@ -445,14 +445,14 @@ Text evaluation does not generate debug output.
 
 The second stage is interpreter command resolution. This stage can vary based on the interpreter, but the commands below should always be expected to work, and will be evaluated at this stage.
 
-This stage mostly works in command-line syntax (spaces as argument seperators), but certain symbol operators are also evaluated at this stage. The most common and important commands and operators evaluated are:
+This stage mostly works in command-line syntax (spaces as argument separators), but certain symbol operators are also evaluated at this stage. The most common and important commands and operators evaluated are:
 ```
 f(x) # a comment	# The # operator will tell the interpreter to ignore everything after it
 x+1					# A plain expression will simply print the result to the console
 x = 1             	# Sets the variable x to the yet-to-be-evaluated value 1
 x := x            	# Sets the variable x to the result of evaluating x
 f(x) = x          	# The preferable notation for creating functions
-a = 1 ;; b = 2    	# The ;; operator is used to seperate top-level commands
+a = 1 ;; b = 2    	# The ;; operator is used to separate top-level commands
 del x             	# Deletes the variable x
 debug             	# Toggles debug mode
 get               	# Shows all set variables
@@ -493,7 +493,7 @@ f(x) @ x>=0     # Conditions
 
 The fourth stage is boolean operator evaluation. The output of this stage will depend on whether it is being fed to an at clause. If it is, non-booleans will be made into booleans. If it isn't, booleans will be made into integers.
 
-All different logical, equality, and inequality operators are evaluated at this stage. The stage itself is seperated into two phases. In the first phase, the logical operators are evaluated, and in the second, the equality and inequality operators are evaluated. In order, the different operators evaluaed are:
+All different logical, equality, and inequality operators are evaluated at this stage. The stage itself is separated into two phases. In the first phase, the logical operators are evaluated, and in the second, the equality and inequality operators are evaluated. In order, the different operators evaluaed are:
 ```
 x < -1 | x > 1        # Logical or
 0 <= x & x < 10       # Logical and
@@ -508,7 +508,7 @@ x ?= 1 & x = 1        # Equal to (the question mark is optional)
 
 ##### Debug Output
 ```
-=>> >;1+1;2       # Begins evaluating an equation (turns it into prefix notation and seperates with semicolons)
+=>> >;1+1;2       # Begins evaluating an equation (turns it into prefix notation and separates with semicolons)
 0 <<= >;1+1;2     # Shows the result when an equation has finished evaluating
 ```
 

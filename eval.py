@@ -1065,8 +1065,10 @@ Global Operator Precedence List:
             else:
                 value = strcalc(item[int(params[0]):int(params[1])], self)
                 self.overflow = params[2:]
-        else:
+        elif isfunc(item):
             value = getcall(item)(params)
+        else:
+            value = item
         while docalc or len(self.overflow) > 0:
             docalc = False
             temp = self.overflow[:]
