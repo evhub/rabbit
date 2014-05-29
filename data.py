@@ -672,20 +672,6 @@ class data(mctobject):
             self.sort()
         return self.units[int(index)]
 
-    def __float__(self):
-        """Retreives A Float Of The First Item."""
-        if len(self) == 0:
-            return 0.0
-        else:
-            return float(self[0])
-
-    def __int__(self):
-        """Retreives An Integer Of The First Item."""
-        if len(self) == 0:
-            return 0.0
-        else:
-            return int(self[0])
-
 class multidata(mctobject):
     """Implements A Multivariate Data Set."""
 
@@ -978,14 +964,6 @@ class multidata(mctobject):
         else:
             return self.items() == other
 
-    def __float__(self):
-        """Retreives A Float Of The First Item."""
-        return float(self.x)
-
-    def __int__(self):
-        """Retreives An Integer Of The First Item."""
-        return int(self.x)
-
 def datamatrix(inputmatrix):
     """Converts A Matrix Into Data."""
     inputmatrix = getmatrix(inputmatrix)
@@ -1051,4 +1029,6 @@ class rollfunc(strfunc):
             return strfloat(self.name+":(("+self.e.prepare(other, False, True)+")*"+self.variables[0]+")", self.e, self.variables, {self.name:self, self.variables[0]:1.0})
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
-        return self.__imul__(other)
+        out = self.copy()
+        out *= other
+        return out

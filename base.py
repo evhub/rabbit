@@ -263,6 +263,20 @@ class cotobject(evalobject):
         else:
             return False
 
+    def __cmp__(self, other):
+        """Performs comparison."""
+        try:
+            test = tuple(other.items())
+        except AttributeError:
+            test = tuple(other)
+        items = tuple(self.items())
+        if items == test:
+            return 0
+        elif items > test:
+            return 1
+        else:
+            return -1
+
 class mctobject(cotobject, numobject):
     """A Base Class For Mathematical Container Objects."""
 

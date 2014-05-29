@@ -570,20 +570,6 @@ class matrix(mctobject):
             out.store(y,x, round(out.retreive(y,x), n))
         return out
 
-    def __float__(self):
-        """Retreives A Float Of The First Item."""
-        if len(self) == 0:
-            return 0.0
-        else:
-            return float(self.retreive())
-
-    def __int__(self):
-        """Retreives An Integer Of The First Item."""
-        if len(self) == 0:
-            return 0
-        else:
-            return int(self.retreive())
-
     def df(self):
         """Finds The Degrees Of Freedom."""
         return (self.x-1.0)*(self.y-1.0)
