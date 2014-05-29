@@ -217,7 +217,7 @@ Import Commands:
                 break
             cmdlist[x] = carefulsplit(cmdlist[x], "#", '"')[0]
             while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or cmdlist[x+1][0] in string.whitespace):
-                cmdlist[x] += "\n"+cmdlist.pop(x+1)
+                cmdlist[x] += "\n"+carefulsplit(cmdlist.pop(x+1), "#", '"')[0]
             self.process(cmdlist[x])
             x += 1
 
@@ -423,7 +423,7 @@ Import Commands:
             if sides[0].endswith(":"):
                 sides[0] = sides[0][:-1]
                 docalc = True
-            test = endswithany(sides[0], ["+", "**", "*", "^", "%", "-", "/", ":", "&", "|", "@", "..", ";", ","])
+            test = endswithany(sides[0], ["+", "**", "*", "^", "%", "-", "/", ":", "&", "|", "@", "..", ";", ",", "(", ".", "$"])
             if test:
                 sides[0] = sides[0][:-1*len(test)]
                 sides[1] = "("+sides[0]+")"+test+"("+sides[1]+")"
