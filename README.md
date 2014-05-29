@@ -102,7 +102,13 @@ x ; 0			# The 'else' operator will check to see whether the item to the left is 
 x @ x>0; 0		# Together, these two operators allow the formation of if-else clauses
 ```
 
-Rabbit's equality and inequality operators are dynamic and follow make-your-own-operator syntax, using =/?, <, <, ! as the different components. Essentially, if any operators are found Rabbit will look at the thing to their right and the thing to their left. It will then compare them, returning 1 if any of the operators finds a match, and 0 if none of the operators finds a match. Every not operator included will invert the result. The whole result will then only be 1 if all the groups of operators return 1. This syntax allows for a lot of very powerful, dynamic expressions. Some examples of these are:
+After conditionals next in the precedence order are the unary operators. There are two, the syntax for which is:
+```
+? 5			# Gets a boolean (result = 1)
+! 5			# Gets the opposite boolean (result = 0)
+```
+
+After that are Rabbit's equality and inequality operators. These are dynamic and follow make-your-own-operator syntax, using =/?, <, <, ! as the different components. Essentially, if any operators are found Rabbit will look at the thing to their right and the thing to their left. It will then compare them, returning 1 if any of the operators finds a match, and 0 if none of the operators finds a match. Every not operator included will invert the result. The whole result will then only be 1 if all the groups of operators return 1. This syntax allows for a lot of very powerful, dynamic expressions. Some examples of these are:
 ```
 1 ?= 1		# The preferred way to do equality, in practice, both of those operators work the same and if either one of them (? and =) was exempted it would still work (result = 1)
 1 >=< 2		# Obviously this homemade operator is nonsensical because it would always return 1, but it would still work (result = 1)
