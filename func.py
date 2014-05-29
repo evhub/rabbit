@@ -33,7 +33,7 @@ def collapse(item):
 
 def ismatrix(inputobject):
     """Checks Whether An Object Is A Matrix."""
-    return hasmatrix(inputobject) and not isinstance(strcalc)
+    return hasmatrix(inputobject) and not isinstance(inputobject, strcalc)
 
 def getmatrix(inputobject, func=diagmatrixlist):
     """Converts The Object To A Matrix."""

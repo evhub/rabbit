@@ -622,7 +622,9 @@ Global Operator Precedence List:
     def eval_comp_set(self, lists, args, func):
         """Performs Recursive Comprehension."""
         value, argnum = lists.pop()
-        if isinstance(value, matrix):
+        if hasmatrix(value):
+            fromstring = isinstance(value, strcalc)
+            value = getmatrix(value)
             units = value.getitems()
             new = []
             for x in xrange(0, len(units)/argnum):
@@ -641,7 +643,9 @@ Global Operator Precedence List:
                     new.append(item)
                     if isinstance(func, strfunc):
                         func.personals[self.lastname] = item
-            if value.onlydiag():
+            if fromstring:
+                out = strcalc(strlist(new, "", converter=lambda x: self.prepare(x, True, False)), self)
+            elif value.onlydiag():
                 out = diagmatrixlist(new)
             else:
                 out = value.new()
