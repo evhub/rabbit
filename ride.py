@@ -37,7 +37,6 @@ Expressions:
     "string"
 Console Commands:
     show <expression>
-    <function>?
     help [string]
     errors
     clean
@@ -149,39 +148,35 @@ Import Commands:
     def endline(self):
         """Checks The Last Line."""
         last = self.box.output("insert-1l", "insert-1c")
-        if last.endswith("?"):
-            self.box.clear("insert-1l", "insert-1c")
-            self.box.insert(self.findhelp(last[:-1]), "-1l")
-        else:
-            space = 0
-            start = True
-            instring = False
-            for x in last:
-                if start:
-                    if start == 2:
-                        if x == "-":
-                            instring = True
-                            space -= 1
-                        start = False
-                    elif x in string.whitespace:
-                        space += 1
-                    elif x == "\\":
-                        start = 2
-                    else:
-                        start = False
-                if x == '"':
-                    instring = not instring
-                elif not instring and x in ["(", "[", "{"]:
+        space = 0
+        start = True
+        instring = False
+        for x in last:
+            if start:
+                if start == 2:
+                    if x == "-":
+                        instring = True
+                        space -= 1
+                    start = False
+                elif x in string.whitespace:
                     space += 1
-                elif not instring and x in [")", "]", "}"]:
-                    space -= 1
-            space += instring
-            if space <= 0 and endswithany(basicformat(last), "=:*+-%/^@~\\|&;<>.,([{$"):
-                space = 1
-            insert = " "*space
-            if instring:
-                insert += "\\-"*space
-            self.box.insert(insert)
+                elif x == "\\":
+                    start = 2
+                else:
+                    start = False
+            if x == '"':
+                instring = not instring
+            elif not instring and x in ["(", "[", "{"]:
+                space += 1
+            elif not instring and x in [")", "]", "}"]:
+                space -= 1
+        space += instring
+        if space <= 0 and endswithany(basicformat(last), "=:*+-%/^@~\\|&;<>.,([{$"):
+            space = 1
+        insert = " "*space
+        if instring:
+            insert += "\\-"*space
+        self.box.insert(insert)
 
     def endchar(self, point="insert"):
         """Checks The Last Character."""

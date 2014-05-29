@@ -487,19 +487,23 @@ Global Operator Precedence List:
             top[a] = top[a].split("&")
             for b in xrange(0, len(top[a])):
                 new = []
-                if top[a][b].startswith("!"):
+                feeds = [new]
+                test = startswithany(top[a][b], ["!", "?"])
+                if test:
                     top[a][b] = top[a][b][1:]
-                    new.append("!")
+                    new.append(test)
+                    new.append([])
+                    feeds.append(new[-1])
                 found = False
-                for x in [">=", "<=", ">", "<", "<>", "!=", "?=", "="]:
+                for x in [">=", "<=", ">", "<", "<>", "!=", "!", "?=", "?", "="]:
                     test = splitany(top[a][b], [x, x[::-1]])
                     if len(test) > 1:
-                        new.append(x)
-                        new += test
+                        feeds[-1].append(x)
+                        feeds[-1] += test
                         found = True
                         break
                 if not found:
-                    new.append(top[a][b])
+                    feeds[-1].append(top[a][b])
                 top[a][b] = new
         if self.debug:
             value = reassemble(top, ["|", "&", ";"])
@@ -537,8 +541,11 @@ Global Operator Precedence List:
             return matrix(0)
         elif len(inputlist) == 1:
             return self.calc_eval(inputlist[0])
-        elif inputlist[0] == "!":
-            return not self.bool_eq(inputlist[1:])
+        elif len(inputlist) == 2 and islist(inputlist[1]):
+            if inputlist[0] == "!":
+                return not self.bool_eq(inputlist[1])
+            elif inputlist[0] == "?":
+                return bool(self.bool_eq(inputlist[1]))
         elif inputlist[0] == ">=":
             value = self.calc_round(inputlist[1])
             for x in xrange(2, len(inputlist)):
@@ -559,12 +566,12 @@ Global Operator Precedence List:
             for x in xrange(2, len(inputlist)):
                 value = value < self.calc_round(inputlist[x])
             return value
-        elif inputlist[0] in ["!=", "<>"]:
+        elif inputlist[0] in ["!=", "<>", "!"]:
             value = self.calc_round(inputlist[1])
             for x in xrange(2, len(inputlist)):
                 value = value != self.calc_round(inputlist[x])
             return value
-        elif inputlist[0] in ["=", "?="]:
+        elif inputlist[0] in ["?=", "=", "?"]:
             value = self.calc_round(inputlist[1])
             for x in xrange(2, len(inputlist)):
                 value = value == self.calc_round(inputlist[x])

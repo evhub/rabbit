@@ -38,7 +38,6 @@ Expressions:
     "string"
 Console Commands:
     show <expression>
-    <function>?
     help [string]
     errors
     clear
@@ -147,7 +146,6 @@ Import Commands:
         """Creates An Evaluator And Lists Of Commands."""
         self.pre_cmds = [
             self.do_find,
-            self.pre_question,
             self.pre_help,
             self.pre_cmd
             ]
@@ -316,11 +314,11 @@ Import Commands:
             original = original[4:]
             forlist = original.split(" do ", 1)
             forlist[0] = self.calc(forlist[0])
-            if not isinstance(forlist[0], matrix):
+            if not hasmatrix(forlist[0]):
                 self.e.variables[varname] = forlist[0]
                 self.process(forlist[1])
             else:
-                for x in forlist[0].getitems():
+                for x in getmatrix(forlist[0]).getitems():
                     self.e.variables[varname] = x
                     self.process(forlist[1])
             return True
