@@ -257,6 +257,13 @@ def haskey(inputlist, key):
     else:
         return temp
 
+def containsany(searchlist, itemlist):
+    """Determines If A List Contains Any Of A Set Of Items."""
+    for x in itemlist:
+        if x in searchlist:
+            return x
+    return False
+
 def clean(haystack, needle="", func=False):
     """Recursively Removes An Item From A List."""
     cleaned = []

@@ -102,19 +102,12 @@ x ; 0			# The 'else' operator will check to see whether the item to the left is 
 x @ x>0; 0		# Together, these two operators allow the formation of if-else clauses
 ```
 
-The different types of equality and inequality operators, in order of precedence, are:
+Rabbit's equality and inequality operators are dynamic and follow make-your-own-operator syntax, using =/?, <, <, ! as the different components. Essentially, if any operators are found Rabbit will look at the thing to their right and the thing to their left. It will then compare them, returning 1 if any of the operators finds a match, and 0 if none of the operators finds a match. Every not operator included will invert the result. The whole result will then only be 1 if all the groups of operators return 1. This syntax allows for a lot of very powerful, dynamic expressions. Some examples of these are:
 ```
-1 | 0		# Or (result = 1) (left to right)
-0 & 1		# And (result = 0) (left to right)
-! 0			# Not (result = 1) (left to right)
-2 >= 2		# Greater than or equal to (=> also accepted) (result = 1) (left to right)
-3 <= 4		# Less than or equal to (=< also accepted) (result = 1) (left to right)
-3 > 5		# Greater than (result = 0) (left to right)
-6 < 6		# Less than (result = 0) (left to right)
-2 != 3		# Not equal to (<> or >< also accepted, and with a higher precedence) (result = 1) (left to right)
-5 ?= 4		# Equal to (= also accepted, but discouraged) (result = 0) (left to right)
+1 ?= 1		# The preferred way to do equality, in practice, both of those operators work the same and if either one of them (? and =) was exempted it would still work (result = 1)
+1 >=< 2		# Obviously this homemade operator is nonsensical because it would always return 1, but it would still work (result = 1)
+1 < 2 < 3	# This will do what it should, and check to see whether 1<2 & 2<3 (result = 1)
 ```
-These will return 1 when true and 0 when false, allowing them to properly function with the 'at' operator.
 
 #### Rabbits Use Matrices
 
@@ -493,17 +486,18 @@ f(x) @ x>=0     # Conditions
 
 The fourth stage is boolean operator evaluation. The output of this stage will depend on whether it is being fed to an at clause. If it is, non-booleans will be made into booleans. If it isn't, booleans will be made into integers.
 
-All different logical, equality, and inequality operators are evaluated at this stage. The stage itself is separated into two phases. In the first phase, the logical operators are evaluated, and in the second, the equality and inequality operators are evaluated. In order, the different operators evaluaed are:
+All different logical, equality, and inequality operators are evaluated at this stage. The stage itself is separated into two phases. In the first phase, the logical operators are evaluated, and in the second, the equality and inequality operators are evaluated. Make-your-own operators are used here, so, in no order, the different operators evaluaed are:
 ```
 x < -1 | x > 1        # Logical or
 0 <= x & x < 10       # Logical and
 ! x                   # Logical not
-x >= 2 | x => 2       # Greater than or equal to (both symbol orders are accepted)
-x <= 5 | x =< 5       # Less than or equal to (both symbol orders are accepted)
+? x                   # Get boolean
+x >= 2 | x => 2       # Greater than or equal to
+x <= 5 | x =< 5       # Less than or equal to
 x > 3                 # Greater than
 x < 4                 # Less than
-x != [ ] & x <> [ ]   # Not equal to (both symbols are accepted)
-x ?= 1 & x = 1        # Equal to (the question mark is optional)
+x != [ ] & x <> [ ]   # Not equal to
+x ?= 1 & x = 1        # Equal to
 ```
 
 ##### Debug Output

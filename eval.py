@@ -485,28 +485,8 @@ Global Operator Precedence List:
         top = equation.split("|")
         for a in xrange(0, len(top)):
             top[a] = top[a].split("&")
-            for b in xrange(0, len(top[a])):
-                new = []
-                feeds = [new]
-                test = startswithany(top[a][b], ["!", "?"])
-                if test:
-                    top[a][b] = top[a][b][1:]
-                    new.append(test)
-                    new.append([])
-                    feeds.append(new[-1])
-                found = False
-                for x in [">=", "<=", ">", "<", "<>", "!=", "!", "?=", "?", "="]:
-                    test = splitany(top[a][b], [x, x[::-1]])
-                    if len(test) > 1:
-                        feeds[-1].append(x)
-                        feeds[-1] += test
-                        found = True
-                        break
-                if not found:
-                    feeds[-1].append(top[a][b])
-                top[a][b] = new
         if self.debug:
-            value = reassemble(top, ["|", "&", ";"])
+            value = reassemble(top, ["|", "&"])
             print(self.recursion*"  "+"=>> "+value)
         self.recursion += 1
         out = self.bool_or(top)
@@ -526,62 +506,59 @@ Global Operator Precedence List:
 
     def bool_and(self, inputlist):
         """Evaluates The And Part Of A Boolean Expression."""
-        value = self.bool_eq(inputlist[0])
+        value = self.bool_unary(inputlist[0])
         for x in xrange(1, len(inputlist)):
             if not value:
                 break
-            value = value and self.bool_eq(inputlist[x])
+            value = value and self.bool_unary(inputlist[x])
         return value
 
-    def bool_eq(self, inputlist):
+    def bool_unary(self, inputstring):
+        """Evaluates The Unary Part Of A Boolean Expression."""
+        if inputstring.startswith("!"):
+            return not self.bool_unary(inputstring[1:])
+        elif inputstring.startswith("?"):
+            return bool(self.bool_unary(inputstring[1:]))
+        else:
+            return self.bool_eq(inputstring)
+
+    def bool_eq(self, inputstring, place=16, bools="<>=!?"):
         """Evaluates The Equation Part Of A Boolean Expression."""
-        if not islist(inputlist):
-            return self.calc_eval(inputlist)
-        elif len(inputlist) == 0:
+        inputlist = switchsplit(inputstring, bools)
+        if len(inputlist) == 0:
             return matrix(0)
         elif len(inputlist) == 1:
             return self.calc_eval(inputlist[0])
-        elif len(inputlist) == 2 and islist(inputlist[1]):
-            if inputlist[0] == "!":
-                return not self.bool_eq(inputlist[1])
-            elif inputlist[0] == "?":
-                return bool(self.bool_eq(inputlist[1]))
-        elif inputlist[0] == ">=":
-            value = self.calc_round(inputlist[1])
-            for x in xrange(2, len(inputlist)):
-                value = value >= self.calc_round(inputlist[x])
-            return value
-        elif inputlist[0] == "<=":
-            value = self.calc_round(inputlist[1])
-            for x in xrange(2, len(inputlist)):
-                value = value <= self.calc_round(inputlist[x])
-            return value
-        elif inputlist[0] == ">":
-            value = self.calc_round(inputlist[1])
-            for x in xrange(2, len(inputlist)):
-                value = value > self.calc_round(inputlist[x])
-            return value
-        elif inputlist[0] == "<":
-            value = self.calc_round(inputlist[1])
-            for x in xrange(2, len(inputlist)):
-                value = value < self.calc_round(inputlist[x])
-            return value
-        elif inputlist[0] in ["!=", "<>", "!"]:
-            value = self.calc_round(inputlist[1])
-            for x in xrange(2, len(inputlist)):
-                value = value != self.calc_round(inputlist[x])
-            return value
-        elif inputlist[0] in ["?=", "=", "?"]:
-            value = self.calc_round(inputlist[1])
-            for x in xrange(2, len(inputlist)):
-                value = value == self.calc_round(inputlist[x])
-            return value
         else:
-            raise IndexError
-
-    def calc_round(self, expression, place=16):
-        """Performs Full Evaluation On An Expression And Rounds It."""
-        return round(self.calc_eval(expression), place)
+            for x in xrange(0, len(inputlist)):
+                if madeof(inputlist[x], bools):
+                    args = []
+                    if x == 0:
+                        args.append(matrix(0))
+                    else:
+                        args.append(self.calc_eval(inputlist[x-1]))
+                    if x == len(inputlist)-1:
+                        args.append(matrix(0))
+                    else:
+                        args.append(self.calc_eval(inputlist[x+1]))
+                    out = False
+                    rev = False
+                    for i in inputlist[x]:
+                        if i == "!":
+                            rev = not rev
+                        elif i == "=" or i == "?":
+                            out = out or args[0] == args[1]
+                        elif i == "<":
+                            out = out or args[0] < args[1]
+                        elif i == ">":
+                            out = out or args[0] > args[1]
+                        else:
+                            raise ValueError
+                    if rev:
+                        out = not out
+                    if not out:
+                        return False
+            return True
 
     def calc_eval(self, expression):
         """Evaluates An Expression."""
@@ -1520,8 +1497,14 @@ class evalfuncs(object):
             return matrix(0)
         elif len(variables) == 0:
             return 0.0
+        elif len(variables) == 1:
+            if ismatrix(variables[0]):
+                variables[0].code(lambda x: getnum(x))
+                return variables[0]
+            else:
+                return getnum(variables[0])
         else:
-            return getnum(variables[0])
+            return self.numcall([diagmatrixlist(variables)])
 
     def splitcall(self, variables):
         """Performs split."""
