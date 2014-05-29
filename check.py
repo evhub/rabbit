@@ -48,7 +48,7 @@ def isfunc(inputobject):
     check = getcheck(inputobject)
     return (check > 0 and hascall(inputobject)) or check == -2
 
-def ismatrix(inputobject):
+def hasmatrix(inputobject):
     """Determines If An Object Could Be A Matrix."""
     return getcheck(inputobject) == 2
 

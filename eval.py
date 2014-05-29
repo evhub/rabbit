@@ -1365,7 +1365,7 @@ class evalfuncs(object):
         elif len(variables) == 1:
             if isinstance(variables[0], matrix):
                 return variables[0]
-            elif ismatrix(variables[0]):
+            elif hasmatrix(variables[0]):
                 return variables[0].tomatrix()
             else:
                 return matrix(1,1, variables[0], fake=True)
@@ -1518,7 +1518,9 @@ class evalfuncs(object):
             items = []
             for x in xrange(1, len(variables)):
                 items.append(collapse(variables[x]))
-            if ismatrix(variables[0]):
+            if isinstance(variables[0], strcalc):
+                return self.strcall([self.splitcall([variables[0].tomatrix]+items)])
+            elif hasmatrix(variables[0]):
                 out = [[]]
                 for x in getmatrix(variables[0]).getitems():
                     if x in items:
@@ -1840,7 +1842,7 @@ class evalfuncs(object):
                 self.e.overflow = variables[3:]
             else:
                 start = None
-            if ismatrix(item):
+            if hasmatrix(item):
                 item = getmatrix(item)
                 if len(item) == 0:
                     return matrix(0)

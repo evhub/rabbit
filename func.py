@@ -31,12 +31,16 @@ def collapse(item):
     else:
         return item
 
+def ismatrix(inputobject):
+    """Checks Whether An Object Is A Matrix."""
+    return hasmatrix(inputobject) and not isinstance(strcalc)
+
 def getmatrix(inputobject, func=diagmatrixlist):
     """Converts The Object To A Matrix."""
     inputobject = collapse(inputobject)
     if isinstance(inputobject, matrix):
         return inputobject
-    elif ismatrix(inputobject):
+    elif hasmatrix(inputobject):
         return inputobject.tomatrix()
     elif islist(inputobject):
         return func(inputobject)
@@ -318,6 +322,7 @@ class strfloat(strfunc):
 
 class strcalc(numobject):
     """Allows Strings Inside Evaluation."""
+    check = 2
     def __init__(self, calcstr, e):
         """Initializes The Evaluator String."""
         self.calcstr = ""
