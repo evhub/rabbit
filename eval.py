@@ -995,7 +995,17 @@ Global Operator Precedence List:
         """Performs Colon Function Calls."""
         self.overflow = []
         docalc = False
-        if isinstance(item, matrix):
+        if isinstance(item, strcalc):
+            item = item.calcstr
+            if len(params) == 0:
+                value = strcalc(item[-1], self)
+            elif len(params) == 1:
+                value = strcalc(item[int(params[0])], self)
+            else:
+                value = strcalc(item[int(params[0]):int(params[1])], self)
+                self.overflow = params[2:]
+        elif hasmatrix(item):
+            item = getmatrix(item)
             if len(params) == 0:
                 value = item.retreive(0)
             elif len(params) == 1:
@@ -1056,15 +1066,6 @@ Global Operator Precedence List:
                     out.reverse()
                     value = diagmatrixlist(out)
             self.overflow = params[2:]
-        elif isinstance(item, strcalc):
-            item = item.calcstr
-            if len(params) == 0:
-                value = strcalc(item[-1], self)
-            elif len(params) == 1:
-                value = strcalc(item[int(params[0])], self)
-            else:
-                value = strcalc(item[int(params[0]):int(params[1])], self)
-                self.overflow = params[2:]
         elif isfunc(item):
             value = getcall(item)(params)
         else:
