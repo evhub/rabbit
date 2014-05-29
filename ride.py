@@ -162,8 +162,7 @@ Import Commands:
                         if x == "-":
                             instring = True
                             space -= 1
-                        else:
-                            start = False
+                        start = False
                     elif x in string.whitespace:
                         space += 1
                     elif x == "\\":
