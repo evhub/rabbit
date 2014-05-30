@@ -34,7 +34,6 @@ Expressions:
     <item>, [<item>, <item>...]
     <function> [:](<variables>)[:(<variables>):(<variables>)...]
     <expression> [@<condition>[; <expression>@<condition>; <expression>@<condition>;... <expression>]]
-    [<variable>~]<list>~<expression>
     "string"
 Console Commands:
     show <expression>

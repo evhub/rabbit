@@ -33,7 +33,6 @@ Expressions:
     <item>, [<item>, <item>...]
     <function> [:](<variables>)[:(<variables>):(<variables>)...]
     <expression> [@<condition>[; <expression>@<condition>; <expression>@<condition>;... <expression>]]
-    [<variable>~]<list>~<expression>
     "string"
 Console Commands:
     show <expression>
@@ -47,7 +46,7 @@ Control Commands:
 Import Commands:
     <name> = import <file>
     run <file>
-        save <file>"""
+    save <file>"""
 
     def __init__(self, name="RIDE", width=100, height=40, helpstring=None, refresh=600, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
