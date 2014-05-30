@@ -395,6 +395,18 @@ class strcalc(numobject):
         if isinstance(other, strcalc):
             other = other.calcstr
         return self.calcstr == other
+    def __cmp__(self, other):
+        """Performs comparison."""
+        if ismatrix(other):
+            other = getmatrix(other).retreive(0)
+        if isinstance(other, strcalc):
+            other = other.calcstr
+        if self.calcstr == other:
+            return 0
+        elif self.calcstr > other:
+            return -1
+        else:
+            return 1
     def __len__(self):
         """Performs len."""
         return len(self.calcstr)

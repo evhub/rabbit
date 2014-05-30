@@ -112,7 +112,8 @@ After that are Rabbit's equality and inequality operators. These are dynamic and
 ```
 1 ?= 1		# The preferred way to do equality, in practice, both of those operators work the same and if either one of them (? and =) was exempted it would still work (result = 1)
 1 >=< 2		# Obviously this homemade operator is nonsensical because it would always return 1, but it would still work (result = 1)
-1 < 2 < 3	# This will do what it should, and check to see whether 1<2 & 2<3 (result = 1)
+1 < 2 <= 2	# This will do what it should, and check to see whether 1<2 & 2<=3 (result = 1)
+2 !< 1		# Will check whether 2 isn't less than 1, in other words, this will do >= (result = 1)
 ```
 
 #### Rabbits Use Matrices
