@@ -292,6 +292,7 @@ Import Commands:
                         elif test in string.whitespace:
                             if statement in ["debug", "errors", "clean", "get", "run", "save", "assert", "do", "show", "del", "import"]:
                                 self.box.placetag("statement", point+"-"+str(len(statement)+1)+"c", point+"-1c")
+                                last = ("", point+"-1c")
                             statement = False
                         else:
                             statement += test

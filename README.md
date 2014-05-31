@@ -341,7 +341,7 @@ x			# result = 5
 
 Sixth is the all arguments variable (\_\_). When \_\_ is passed as an argument to a function it sets it to a list of all the arguments passed. The basic syntax is:
 ```
-applycos(__) = __~cos
+applyplus(__) = __~\x\(x+1)
 ```
 
 #### Rabbits Come With Functions

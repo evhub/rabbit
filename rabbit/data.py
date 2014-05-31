@@ -281,7 +281,7 @@ class data(mctobject):
             point = len(self)/2.0
         else:
             point = float(point)
-        return (self.units[int(math.floor(point)-1)]+self.units[int(math.ceil(point)-1)])/2.0
+        return (self.units[int(math.floor(point))]+self.units[int(math.ceil(point)-1)])/2.0
 
     def quantiles(self, num=3):
         """Finds The Quantiles."""
@@ -989,7 +989,7 @@ class rollfunc(strfunc):
         self.e = e
     def copy(self):
         """Copies The Random Number Generator."""
-        return rollfunc(self.stop, self.e, self.gen.key, self.name)
+        return rollfunc(self.stop, self.e, self.gen.key, self.variables[0], self.name)
     def calc(self, m=1.0):
         """Generates A Random Number."""
         stop = self.stop*m

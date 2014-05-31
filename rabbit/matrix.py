@@ -272,7 +272,9 @@ class matrix(mctobject):
     def __abs__(self):
         """Performs abs."""
         out = self**2.0
-        return sum(out.items())**0.5
+        if isinstance(out, matrix):
+            out = sum(out.items())
+        return out**0.5
 
     def entries(self):
         """Returns A List Of Items With Coordinates."""
@@ -685,13 +687,13 @@ def rangematrix(start, stop, step=1.0, fake=True):
     stop = float(stop)
     step = float(step)
     if stop < start:
-        amount = int((start-stop)/step)
+        amount = int((1+start-stop)/step)
         out = matrix(amount, fake=fake)
         for x in xrange(0, amount):
             out.store(x, x, start)
             start -= step
     else:
-        amount = int((stop-start)/step)
+        amount = int((1+stop-start)/step)
         out = matrix(amount, fake=fake)
         for x in xrange(0, amount):
             out.store(x, x, start)

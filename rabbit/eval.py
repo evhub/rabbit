@@ -57,7 +57,6 @@ Global Operator Precedence List:
     ^       Performs exponentiation.
     \       Creates a lambda.
     :       Performs function calls.
-    d       Performs dice rolls.
     `       Denotes parentheses.
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
@@ -1350,18 +1349,16 @@ class evalfuncs(object):
             return matrix(0)
         elif len(variables) == 1:
             if isinstance(variables[0], matrix):
-                return variables[0]
+                if variables[0].onlyrow():
+                    return diagmatrixlist(variables[0].items())
+                else:
+                    return variables[0]
             elif hasmatrix(variables[0]):
                 return getmatrix(variables[0])
             else:
                 return matrix(1,1, variables[0], fake=True)
-        elif len(variables) == 2:
-            return rangematrix(collapse(variables[0]), collapse(variables[1])+1.0)
         else:
-            variables[0] = collapse(variables[0])
-            variables[1] = collapse(variables[1])-variables[0]
-            variables[2] = collapse(variables[2])+variables[1]
-            return rangematrix(variables[0], variables[2], variables[1])
+            return diagmatrixlist(variables)
 
     def sumcall(self, variables):
         """Finds A Sum."""
@@ -1511,7 +1508,20 @@ class evalfuncs(object):
             for x in xrange(1, len(variables)):
                 items.append(collapse(variables[x]))
             if isinstance(variables[0], strcalc):
-                return self.strcall([self.splitcall([getmatrix(variables[0])]+items)])
+                out = self.splitcall([getmatrix(variables[0])]+items)
+                if isinstance(out, matrix) and out.onlydiag():
+                    new = []
+                    for x in out.getitems():
+                        if isinstance(x, matrix) and x.onlydiag():
+                            temp = ""
+                            for y in x.getitems():
+                                temp += self.e.prepare(y, True, False)
+                            new.append(strcalc(temp, self))
+                        else:
+                            new.append(x)
+                    return new
+                else:
+                    return out
             elif hasmatrix(variables[0]):
                 out = [[]]
                 for x in getmatrix(variables[0]).getitems():
@@ -1537,18 +1547,36 @@ class evalfuncs(object):
                     temp = collapse(variables[x])
                 else:
                     pairs[temp] = variables[x]
-            if ismatrix(variables[0]):
+            if isinstance(variables[0], strcalc):
+                items = [getmatrix(variables[0])]
+                for k,v in pairs.items():
+                    items.append(k)
+                    items.append(v)
+                out = self.replacecall(items)
+                if isinstance(out, matrix) and out.onlydiag():
+                    new = ""
+                    for x in out.getitems():
+                        new += self.e.prepare(x, True, False)
+                    return strcalc(new, self)
+                else:
+                    return out
+            elif ismatrix(variables[0]):
                 variables[0] = getmatrix(variables[0])
+                keys = []
+                values = []
+                for k,v in pairs.items():
+                    keys.append(k)
+                    values.append(v)
                 if variables[0].onlydiag():
                     for x in xrange(0, variables[0].lendiag()):
                         temp = variables[0].retrieve(x)
-                        if temp in pairs:
-                            variables[0].store(x,x, pairs[temp])
+                        if temp in keys:
+                            variables[0].store(x,x, values[keys.index(temp)])
                 else:
                     for y,x in variables[0].coords():
                         temp = variables[0].retrieve(y,x)
-                        if temp in pairs:
-                            variables[0].store(y,x, pairs[temp])
+                        if temp in keys:
+                            variables[0].store(y,x, values[keys.index(temp)])
             else:
                 while variables[0] in pairs:
                     variables[0] = pairs[variables[0]]
@@ -1581,7 +1609,7 @@ class evalfuncs(object):
                 out.sort()
                 return matrixitems(out)
         else:
-            return self.sortcall([mergecall(variables)])
+            return self.sortcall([self.mergecall(variables)])
 
     def reversecall(self, variables):
         """Performs reverse."""
@@ -1598,7 +1626,7 @@ class evalfuncs(object):
                 out.reverse()
                 return matrixitems(out, variables[0].y)
         else:
-            return self.reversecall([joincall(variables)])
+            return self.reversecall([self.joincall(variables)])
 
     def containscall(self, variables):
         """Performs contains."""
