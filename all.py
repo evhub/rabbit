@@ -18,4 +18,4 @@
 
 from __future__ import absolute_import, print_function
 
-from .rabbit import *
+from .rabbit.all import *
