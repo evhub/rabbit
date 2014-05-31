@@ -149,8 +149,8 @@ Additionally, there are a couple of other, special operations that can be done o
 ```
 [1,2] .. [3,4]		# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
 (1,2) ** 2			# Repeat (result = (1,2,1,2))
-[1,2,3,4]:1			# Item indexes (result = 2) (left to right, lowest precedence, same as colon for function calls)
-(1,2,3):2			# These work for lists as well (result = 3)
+(1,2,3):2			# Item indexes (result = 3) (left to right, lowest precedence, same as colon for function calls)
+[1,2,3,4]:1			# These work for rows as well (result = 2)
 (1,2,3):0:2			# And can also be used to perform item indices (result = 1,2)
 ```
 
@@ -190,7 +190,7 @@ add(a)				# result = 6
 # Will call add with the three variables 1, 2, and 3, instead of with the one variable (1,2,3) as its argument. This can often be useful, as is shown in the example.
 
 # Parentheses syntax also supports catch-all calling. If a function is called with too many arguments, the extra ones will be grouped in a list and put in the last argument.
-plusone(l) = l~\x\(x+1)
+plusone(l) = l+1
 plusone(1,2,3)		# result = (2,3,4)
 
 # Colon syntax, on the other hand, will never do that. Whatever is after the first colon is the first argument, a second argument requires a second colon.
@@ -265,8 +265,8 @@ a = {
 When a function is defined inside of a class this turns it into a method. Methods are the same as any old function, except that the class they are in will always be passed to them as the variable "self". Here's an example of a method:
 ```
 a = {
- fact(x, n) =						# Since this function is being defined inside of a class it becomes a method
-  x*self.fact(x-1, n-1) @ n>0;		# Here we use the self variable to allow the function to call itself
+ fact(x) =						# Since this function is being defined inside of a class it becomes a method
+  x*self.fact(x-1) @ x>0;		# Here we use the self variable to allow the function to call itself
   1
  }
 ```
