@@ -54,17 +54,14 @@ def hasmatrix(inputobject):
 
 def isreal(value, start=float("-inf"), end=float("inf"), mid=0.0):
     """Tests To See If A Value Is A Real."""
-    try:
-        value = float(value)
-    except ValueError:
-        return None
-    except TypeError:
-        return None
-    else:
+    value = hasreal(value)
+    if value != None:
         if start < value and value < end and (value <= mid or value >= mid):
             return value
         else:
             return None
+    else:
+        return None
 
 def getnum(inputobject):
     """Always Returns A Number."""

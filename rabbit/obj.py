@@ -60,6 +60,17 @@ def istext(inputobject):
     """Determines If An Object Is A String."""
     return isinstance(inputobject, (str, unicode))
 
+def hasreal(value):
+    """Tests To See If A Value Is A Number."""
+    try:
+        value = float(value)
+    except ValueError:
+        return None
+    except TypeError:
+        return None
+    else:
+        return value
+
 def isnum(inputobject):
     """Determines If An Object Is A Number."""
     return isinstance(inputobject, (float, int, long, complex))

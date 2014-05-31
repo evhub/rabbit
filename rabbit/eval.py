@@ -854,8 +854,8 @@ Global Operator Precedence List:
                     return float(value)
                 else:
                     return matrix(0)
-            elif isreal(value) != None:
-                return float(value)
+            elif hasreal(value):
+                return self.eval_check(float(value))
             else:
                 self.processor.adderror("VariableError", "Unable to process "+str(value))
                 return matrix(0)
