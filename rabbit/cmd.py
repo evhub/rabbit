@@ -484,36 +484,36 @@ Import Commands:
             useclass = None
             classlist = []
             if "." in sides[0]:
-                if self.e.isreserved(classlist[0], allowed="`"):
-                    return False
+                classlist += sides[0].split(".")
+                for x in xrange(0, len(classlist)-1):
+                    if self.e.isreserved(classlist[x]):
+                        return False
+                sides[0] = classlist.pop()
+                useclass = self.e.find(classlist[0], True, False)
+                if isinstance(useclass, classcalc):
+                    for x in xrange(1, len(classlist)):
+                        last = useclass
+                        useclass = useclass.retrieve(classlist[x])
+                        if not isinstance(useclass, classcalc):
+                            if istext(useclass) and len(classlist) == x+1:
+                                sides[1] = "( "+useclass+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
+                                sides[0] = classlist[x]
+                                useclass = last
+                                classlist = classlist[:x]
+                                docalc = False
+                                break
+                            else:
+                                self.adderror("ClassError", "Could not set "+classlist[x]+" in "+self.e.prepare(last, False, True, True))
+                                return True
+                elif classlist[0] in self.e.variables and istext(self.e.variables[classlist[0]]) and len(classlist) == 1:
+                    sides[1] = "( "+self.e.variables[classlist[0]]+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
+                    sides[0] = classlist[0]
+                    useclass = None
+                    classlist = []
+                    docalc = False
                 else:
-                    classlist += sides[0].split(".")
-                    sides[0] = classlist.pop()
-                    useclass = self.e.find(classlist[0], True, False)
-                    if isinstance(useclass, classcalc):
-                        for x in xrange(1, len(classlist)):
-                            last = useclass
-                            useclass = useclass.retrieve(classlist[x])
-                            if not isinstance(useclass, classcalc):
-                                if istext(useclass) and len(classlist) == x+1:
-                                    sides[1] = "( "+useclass+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
-                                    sides[0] = classlist[x]
-                                    useclass = last
-                                    classlist = classlist[:x]
-                                    docalc = False
-                                    break
-                                else:
-                                    self.adderror("ClassError", "Could not set "+classlist[x]+" in "+self.e.prepare(last, False, True, True))
-                                    return True
-                    elif classlist[0] in self.e.variables and istext(self.e.variables[classlist[0]]) and len(classlist) == 1:
-                        sides[1] = "( "+self.e.variables[classlist[0]]+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
-                        sides[0] = classlist[0]
-                        useclass = None
-                        classlist = []
-                        docalc = False
-                    else:
-                        self.adderror("VariableError", "Could not find class "+classlist[0])
-                        return True
+                    self.adderror("VariableError", "Could not find class "+classlist[0])
+                    return True
             sides[1] = basicformat(sides[1])
             for func in self.set_cmds:
                 value = func(sides)

@@ -541,11 +541,11 @@ Global Operator Precedence List:
                         args.append(matrix(0))
                     else:
                         args.append(self.calc_eval(inputlist[x+1]))
-                    if madeof(inputlist[x], "!"):
+                    if madeof(inputlist[x], "!") or madeof(inputlist[x], "?"):
                         out = args[0] == args[1]
                     else:
                         out = False
-                        if "=" in inputlist[x] or "?" in inputlist[x]:
+                        if "=" in inputlist[x]:
                             out = out or args[0] == args[1]
                         if ">" in inputlist[x]:
                             out = out or args[0] > args[1]

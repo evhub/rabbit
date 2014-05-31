@@ -18,15 +18,4 @@
 
 from __future__ import absolute_import, print_function
 
-from rabbit.all import *
-
-#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
-#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    main = mathbase()
-    print("Running Tests...")
-    main.evalfile("Tests.txt")
-    print("Tests Complete.")
-    main.start()
+from .rabbit import *

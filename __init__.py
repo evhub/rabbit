@@ -18,15 +18,17 @@
 
 from __future__ import absolute_import, print_function
 
-from rabbit.all import *
+import sys
+
+__all__ = ["rabbit"]
+
+__doc__ = """This __init__.py is simply a wrapper for the base Rabbit module.
+Go down one level if that's what you're looking for."""
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-if __name__ == "__main__":
-    main = mathbase()
-    print("Running Tests...")
-    main.evalfile("Tests.txt")
-    print("Tests Complete.")
-    main.start()
+rootdir = os.path.join(os.getcwd(), 'rabbit')
+if rootdir not in sys.path:
+    sys.path.append(rootdir)

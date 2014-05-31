@@ -124,6 +124,33 @@ assert applycos(0,pi) ?= 1,-1					$ applycos(__) = __~cos
 assert (x $ x = 1) ?= 1
 
 # Complex Tests:
+assert mod:3:2 ?= 1
+ $ mod(x,y) = (xy+-1*floor:(xy))*y $ xy = x/y
+assert slope:(\x\x):1:2 ?= 1
+ $ slope(f, a,b) = (f:b+-f:a)/(b+-a)
+assert parts:(1,2,3,4) ?= 1,(2,3,4)
+ $ parts(l) = (
+  a,as
+  $ a,as = l
+ )
+assert max(1,0,9,6,8,3) ?= 9
+ $ max(l) = (
+  (
+   a @ a > maxtail;
+   maxtail
+   $ maxtail = max:as
+   ) @ as;
+  a
+  $ a,as = l
+ )
+assert zip:(1,2):(10,20) ?= (1,10),(2,20)
+ $ zip(la, lb) =
+  (
+   (a,b), .. zip:as:bs
+   $ a,as = la
+   $ b,bs = lb
+   )
+  @ la & lb
 assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
  $ qsort(l) = (
    qsort:(as~\x\(x@x<=a)) .. a, .. qsort:(as~\x\(x@x>a))
