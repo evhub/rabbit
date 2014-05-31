@@ -55,13 +55,13 @@ class matrix(mctobject):
         """Creates A Copy Of The Matrix."""
         out = self.new()
         for y,x in self.coords():
-            out.store(y,x, self.Retrieve(y,x))
+            out.store(y,x, self.retreive(y,x))
         return out
 
     def code(self, func):
         """Codes A Function Over The Matrix."""
         for y,x in self.coords():
-            self.store(y,x, func(self.Retrieve(y,x)))
+            self.store(y,x, func(self.retreive(y,x)))
 
     def prepare(self, v):
         """Prepares A Value."""
@@ -83,7 +83,7 @@ class matrix(mctobject):
         """Stores A Value."""
         self.a[int(y)][int(x)] = self.prepare(v)
 
-    def Retrieve(self, y=0, x=None):
+    def retreive(self, y=0, x=None):
         """Retrieves A Value."""
         if x == None:
             x = y
@@ -93,7 +93,7 @@ class matrix(mctobject):
         """Returns A List Of All Items In A Matrix."""
         out = []
         for y,x in self.coords():
-            out.append(self.Retrieve(y, x))
+            out.append(self.retreive(y, x))
         return out
 
     def trans(self):
@@ -139,17 +139,17 @@ class matrix(mctobject):
                 for y,x in out.coords():
                     v = 0
                     for z in xrange(0, self.x):
-                        v += self.Retrieve(y, z)*other.Retrieve(z, x)
+                        v += self.retreive(y, z)*other.retreive(z, x)
                     out.store(y, x, v)
             elif self.onlyrow() and other.onlyrow() and self.x == other.x:
                 out = self*other.trans()
-                out = out.Retrieve(0, 0)
+                out = out.retreive(0, 0)
             else:
                 raise IndexError("Matrix multiplication invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
         else:
             out = self.new()
             for y,x in self.coords():
-                out.store(y, x, self.Retrieve(y, x)*other)
+                out.store(y, x, self.retreive(y, x)*other)
         return out
 
     def __imul__(self, other):
@@ -158,7 +158,7 @@ class matrix(mctobject):
             self = self*other
         else:
             for y,x in self.coords():
-                self.store(y, x, self.Retrieve(y, x)*other)
+                self.store(y, x, self.retreive(y, x)*other)
         return self
 
     def __add__(self, other):
@@ -167,7 +167,7 @@ class matrix(mctobject):
             if self.y == other.y and self.x == other.x:
                 out = self.new()
                 for y,x in self.coords():
-                    out.store(y, x, self.Retrieve(y, x)+other.Retrieve(y, x))
+                    out.store(y, x, self.retreive(y, x)+other.retreive(y, x))
             else:
                 raise IndexError("Matrix addition invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
         elif other == 0:
@@ -176,12 +176,12 @@ class matrix(mctobject):
             length = self.lendiag()
             out = self.new(length, length)
             for x in xrange(0, length):
-                out.store(x, x, self.Retrieve(x)+other)
+                out.store(x, x, self.retreive(x)+other)
         else:
             out = self.new()
             for y in xrange(0, self.y):
                 for x in xrange(0, self.x):
-                    out.store(y, x, self.Retrieve(y, x)+other)
+                    out.store(y, x, self.retreive(y, x)+other)
         return out
 
     def __iadd__(self, other):
@@ -189,15 +189,15 @@ class matrix(mctobject):
         if isinstance(other, matrix):
             if self.y == other.y and self.x == other.x:
                 for y,x in self.coords():
-                    self.store(y, x, self.Retrieve(y, x)+other.Retrieve(y, x))
+                    self.store(y, x, self.retreive(y, x)+other.retreive(y, x))
             else:
                 raise IndexError("Matrix addition invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
         elif other != 0 and self.onlydiag():
             for x in xrange(0, self.lendiag()):
-                self.store(x, x, self.Retrieve(x)+other)
+                self.store(x, x, self.retreive(x)+other)
         elif other != 0:
             for y,x in self.coords():
-                self.store(y, x, self.Retrieve(y, x)+other)
+                self.store(y, x, self.retreive(y, x)+other)
         return self
 
     def __pow__(self, other):
@@ -237,7 +237,7 @@ class matrix(mctobject):
         if hasnum(other):
             out = self.new()
             for y,x in self.coords():
-                out.store(y, x, self.Retrieve(y, x)/other)
+                out.store(y, x, self.retreive(y, x)/other)
             return out
         else:
             raise TypeError("Matrix division invalid with "+repr(other))
@@ -246,7 +246,7 @@ class matrix(mctobject):
         """Performs Division In-Place."""
         if hasnum(other):
             for y,x in self.coords():
-                self.store(y, x, self.Retrieve(y, x)/other)
+                self.store(y, x, self.retreive(y, x)/other)
             return self
         else:
             raise TypeError("Matrix division invalid with "+repr(other))
@@ -266,7 +266,7 @@ class matrix(mctobject):
         else:
             out = self.new()
             for y,x in self.coords():
-                out.store(y, x, self.Retrieve(y, x)%other)
+                out.store(y, x, self.retreive(y, x)%other)
         return out
 
     def __abs__(self):
@@ -278,7 +278,7 @@ class matrix(mctobject):
         """Returns A List Of Items With Coordinates."""
         out = []
         for y,x in self.coords():
-            out.append((y,x,self.Retrieve(y,x)))
+            out.append((y,x,self.retreive(y,x)))
         return out
 
     def coords(self):
@@ -299,12 +299,12 @@ class matrix(mctobject):
     def scalerow(self, y, scaler=1.0):
         """Scales A Row."""
         for x in xrange(0, self.x):
-            self.store(y,x, self.Retrieve(y,x)*scaler)
+            self.store(y,x, self.retreive(y,x)*scaler)
 
     def addrow(self, y, addlist):
         """Adds A Row With A List."""
         for x in xrange(0, self.x):
-            self.store(y,x, self.Retrieve(y,x)+addlist[x])
+            self.store(y,x, self.retreive(y,x)+addlist[x])
 
     def addedrow(self, y, addlist):
         """Retrieves A Row Added With A List."""
@@ -372,11 +372,11 @@ class matrix(mctobject):
         if self.x == 0 or self.y == 0:
             return None
         elif self.x == 1 or self.y == 1:
-            return self.Retrieve(0,0)
+            return self.retreive(0,0)
         else:
             out = 0.0
             for x in xrange(0, self.x):
-                out += self.Retrieve(1,x)*self.C(1,x)
+                out += self.retreive(1,x)*self.C(1,x)
             return out
 
     def inv(self, check=True, maxtries=float("inf"), debug=False):
@@ -384,7 +384,7 @@ class matrix(mctobject):
         if self.x == 0 or self.y == 0:
             return matrix(0)
         elif self.x == 1 or self.y == 1:
-            return self*self.Retrieve(0,0)**-1.0
+            return self*self.retreive(0,0)**-1.0
         elif not (check and self.det() == 0.0):
             size = self.y
             out = self.copy()
@@ -417,14 +417,14 @@ class matrix(mctobject):
         for y,x in self.coords():
             if x == y:
                 if debug:
-                    print("Scale Row "+str(y)+" By 1/"+str(self.Retrieve(y,x)))
-                self.scalerow(y, 1.0/self.Retrieve(y,x))
+                    print("Scale Row "+str(y)+" By 1/"+str(self.retreive(y,x)))
+                self.scalerow(y, 1.0/self.retreive(y,x))
                 if debug > 1:
                     print(self)
             elif x < y:
                 if debug:
-                    print("Add To Row "+str(y)+" Row "+str(x)+" Scaled By "+str(-1.0*self.Retrieve(y,x)))
-                self.addrow(y, self.scaledrow(x, -1.0*self.Retrieve(y,x)))
+                    print("Add To Row "+str(y)+" Row "+str(x)+" Scaled By "+str(-1.0*self.retreive(y,x)))
+                self.addrow(y, self.scaledrow(x, -1.0*self.retreive(y,x)))
                 if debug > 1:
                     print(self)
 
@@ -433,14 +433,14 @@ class matrix(mctobject):
         for y,x in reversed(self.coords()):
             if x == y:
                 if debug:
-                    print("Scale Row "+str(y)+" By 1/"+str(self.Retrieve(y,x)))
-                self.scalerow(y, 1.0/self.Retrieve(y,x))
+                    print("Scale Row "+str(y)+" By 1/"+str(self.retreive(y,x)))
+                self.scalerow(y, 1.0/self.retreive(y,x))
                 if debug > 1:
                     print(self)
             elif x < self.y and x > y:
                 if debug:
-                    print("Add To Row "+str(y)+" Row "+str(x)+" Scaled By "+str(-1.0*self.Retrieve(y,x)))
-                self.addrow(y, self.scaledrow(x, -1.0*self.Retrieve(y,x)))
+                    print("Add To Row "+str(y)+" Row "+str(x)+" Scaled By "+str(-1.0*self.retreive(y,x)))
+                self.addrow(y, self.scaledrow(x, -1.0*self.retreive(y,x)))
                 if debug > 1:
                     print(self)
 
@@ -499,10 +499,10 @@ class matrix(mctobject):
         """Retrieves The Solutions For A Solved Augmented Matrix."""
         answers = []
         for y in reversed(xrange(0, self.y)):
-            answer = self.Retrieve(y,self.y)
+            answer = self.retreive(y,self.y)
             i = 0
             for x in reversed(xrange(y+1, self.y)):
-                answer -= self.Retrieve(y,x)*answers[i]
+                answer -= self.retreive(y,x)*answers[i]
                 i += 1
             answers.append(answer)
         answers.reverse()
@@ -512,10 +512,10 @@ class matrix(mctobject):
         """Retrieves The Solutions For A Top Solved Augmented Matrix."""
         answers = []
         for y in xrange(0, self.y):
-            answer = self.Retrieve(y,self.y)
+            answer = self.retreive(y,self.y)
             i = 0
             for x in xrange(0,y):
-                answer -= self.Retrieve(y,x)*answers[i]
+                answer -= self.retreive(y,x)*answers[i]
                 i += 1
             answers.append(answer)
         return answers
@@ -535,7 +535,7 @@ class matrix(mctobject):
         """Returns The Main Diagonal."""
         out = []
         for x in xrange(0, self.lendiag()):
-            out.append(self.Retrieve(x))
+            out.append(self.retreive(x))
         return out
 
     def onlydiag(self):
@@ -567,7 +567,7 @@ class matrix(mctobject):
         """Performs round."""
         out = self.copy()
         for y,x in out.coords():
-            out.store(y,x, round(out.Retrieve(y,x), n))
+            out.store(y,x, round(out.retreive(y,x), n))
         return out
 
     def df(self):
@@ -603,7 +603,7 @@ class matrix(mctobject):
         if self.y == expected.y and self.x == expected.x:
             tot = 0.0
             for y,x in self.coords():
-                tot += float(self.Retrieve(y,x)-expected.Retrieve(y,x))**2.0/float(expected.Retrieve(y,x))
+                tot += float(self.retreive(y,x)-expected.retreive(y,x))**2.0/float(expected.retreive(y,x))
             return tot
         else:
             raise IndexError("Matrix Chi Squared invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))

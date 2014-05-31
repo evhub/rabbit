@@ -154,12 +154,12 @@ class funcfloat(numobject):
             return strfloat("("+self.e.prepare(other, False, True)+")*("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
     def __eq__(self, other):
         """Performs ==."""
-        try:
-            other.funcstr
-        except AttributeError:
-            return self.funcstr == other
-        else:
+        if isinstance(other, strfunc):
             return self.funcstr == other.funcstr
+        elif isinstance(other, funcfloat):
+            return self.func == other.func
+        else:
+            return False
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
@@ -282,6 +282,14 @@ class strfunc(funcfloat):
         if classcalc.selfarg in out:
             out[classcalc.selfarg] = classcalc.selfarg
         return out
+    def __eq__(self, other):
+        """Performs ==."""
+        if isinstance(other, strfunc):
+            return self.funcstr == other.funcstr and self.variables == other.variables and self.personals == other.personals and self.overflow == other.overflow
+        elif isinstance(other, funcfloat):
+            return self.funcstr == other.funcstr
+        else:
+            return False
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
@@ -639,7 +647,7 @@ class classcalc(cotobject):
             if self.e.isreserved(v):
                 oldvars[v] = self.e.variables[v]
             elif not v in oldvars or not self.e.variables[v] is oldvars[v]:
-                self.variables[v] = self.e.variables[v]
+                self.store(v, self.e.variables[v], True)
         self.e.variables = oldvars
     def copy(self):
         """Copies The Dictionary."""
@@ -653,7 +661,7 @@ class classcalc(cotobject):
         return out
     def items(self):
         """Returns The Variables."""
-        return self.variables.copy()
+        return self.variables.items()
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = self.e.prepare(key, False, False)

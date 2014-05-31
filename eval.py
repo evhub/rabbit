@@ -948,11 +948,6 @@ Global Operator Precedence List:
                             out[1] = str(self.variables[out[1]])
                     return strfloat(out[1], self, params, personals)
 
-    def call(self, inputstring):
-        """Evaluates !."""
-        if inputstring.endswith("!"):
-            return factorial(self.eval_call(inputstring[:-1]))
-
     def call_colon(self, inputstring):
         """Evaluates Colons."""
         if ":" in inputstring:
