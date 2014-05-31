@@ -707,7 +707,7 @@ class classcalc(cotobject):
         elif other == 0:
             return self
         else:
-            raise TypeError
+            raise TypeError("Could not extend fake list with "+repr(other))
     def add(self, other):
         """Adds Variables."""
         for k,v in other.items():

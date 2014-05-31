@@ -114,6 +114,7 @@ Import Commands:
             self.cmd_get,
             self.cmd_run,
             self.cmd_save,
+            self.cmd_assert,
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,

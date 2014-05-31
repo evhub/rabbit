@@ -157,6 +157,7 @@ Import Commands:
             self.cmd_get,
             self.cmd_run,
             self.cmd_save,
+            self.cmd_assert,
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,
@@ -366,6 +367,14 @@ Import Commands:
         """Performs save."""
         if superformat(original).startswith("save "):
             writefile(getfile(original[5:], "wb"), strlist(self.box.commands[:-2], "\n"))
+            return True
+
+    def cmd_assert(self, original):
+        """Checks For Errors By Asserting That Something Is True."""
+        if superformat(original).startswith("assert "):
+            original = original[7:]
+            if not self.e.test(original):
+                raise AssertionError("Assertion failed that "+original)
             return True
 
     def cmd_do(self, original):

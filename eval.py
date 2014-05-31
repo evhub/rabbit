@@ -742,7 +742,7 @@ Global Operator Precedence List:
                         out.append(x)
                 return data(out)
             else:
-                raise TypeError
+                raise TypeError("Could not concatenate items "+repr(items))
 
     def eval_repeat(self, inputlist):
         """Evaluates Repeats."""
@@ -1087,7 +1087,7 @@ Global Operator Precedence List:
                 if x%2 == 1:
                     inputlist[x] = self.eval_call(inputlist[x])
                     if inputlist[x] == None:
-                        raise ValueError
+                        raise ValueError("Nothing was returned as a result of evaluating "+inputlist[x])
                     elif islist(values[-1]):
                         funcs = [values[-1][0]]
                         for x in xrange(1, len(values[-1])):
@@ -1679,7 +1679,7 @@ class evalfuncs(object):
                     out = out[:-1]
                 return strfloat(out, self.e, args)
             else:
-                raise ValueError
+                raise ValueError("Unable to create a converter for "+repr(variables[0]))
         else:
             return self.tocall([diagmatrixlist(variables)])
 

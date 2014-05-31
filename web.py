@@ -59,7 +59,7 @@ class server(object):
                 if x.startswith("~"):
                     self.items.append(x[1:])
             if counter > limit:
-                raise IOError
+                raise IOError("Counter exceeds limit of "+str(limit))
             elif refresh != None and len(self.items) == 0:
                 refresh()
         return self.items.pop(0)
@@ -144,7 +144,7 @@ class multiserver(server):
                 if x.startswith("~"):
                     self.items[a].append(x[1:])
             if counter > limit:
-                raise IOError
+                raise IOError("Counter exceeds limit of "+str(limit))
             elif refresh != None and len(self.items) == 0:
                 refresh()
         return self.items[a].pop(0)

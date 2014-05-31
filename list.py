@@ -112,7 +112,7 @@ class fakelist(cotobject):
         if -1*len(self) < x and x < len(self):
             self.store(x, item)
         else:
-            raise IndexError
+            raise IndexError("Fake list could not set to invalid index "+repr(x))
 
     def store(self, x, item):
         """Sets An Index To A Value."""
@@ -134,7 +134,7 @@ class fakelist(cotobject):
         elif x < len(self):
             return self.default
         else:
-            raise IndexError
+            raise IndexError("Fake list could not retreive invalid index "+repr(x))
 
     def __getslice__(self, start, stop, step=1):
         """Gets A Fake Slice."""
@@ -149,14 +149,14 @@ class fakelist(cotobject):
             if start < 0:
                 start += len(self)
             elif start > len(self):
-                raise IndexError
+                return self.new(0)
             stop = int(stop)
             if stop < 0:
                 stop += len(self)
             elif stop > len(self):
                 stop = len(self)
             if start > stop:
-                raise IndexError
+                raise IndexError("Fake list could not process invalid indice from "+repr(start)+" to "+repr(stop))
             out = self.new((stop-start)/step)
             for x in self.a:
                 if start <= x and x < stop and x%step == 0:
@@ -185,7 +185,7 @@ class fakelist(cotobject):
         if x in self.a:
             del self.a[x]
         elif self[x] != self.default:
-            raise IndexError
+            raise IndexError("Fake list could not delete invalid index "+repr(x))
         for y in xrange(x+1, len(self)):
             if y in self.a:
                 self.a[y-1] = self.a[y]
@@ -208,7 +208,7 @@ class fakelist(cotobject):
                 out.append(x)
                 break
         if len(out) == 0:
-            raise IndexError
+            raise IndexError("Fake list could not find index for item "+repr(item))
         elif len(out) == 1:
             return out[0]
         else:

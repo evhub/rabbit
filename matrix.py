@@ -145,7 +145,7 @@ class matrix(mctobject):
                 out = self*other.trans()
                 out = out.retreive(0, 0)
             else:
-                raise IndexError
+                raise IndexError("Matrix multiplication invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
         else:
             out = self.new()
             for y,x in self.coords():
@@ -169,7 +169,7 @@ class matrix(mctobject):
                 for y,x in self.coords():
                     out.store(y, x, self.retreive(y, x)+other.retreive(y, x))
             else:
-                raise IndexError
+                raise IndexError("Matrix addition invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
         elif other == 0:
             out = self.copy()
         elif self.onlydiag():
@@ -191,7 +191,7 @@ class matrix(mctobject):
                 for y,x in self.coords():
                     self.store(y, x, self.retreive(y, x)+other.retreive(y, x))
             else:
-                raise IndexError
+                raise IndexError("Matrix addition invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
         elif other != 0 and self.onlydiag():
             for x in xrange(0, self.lendiag()):
                 self.store(x, x, self.retreive(x)+other)
@@ -211,12 +211,10 @@ class matrix(mctobject):
                 return out
             elif other == 0:
                 return diagmatrix(self.x, converter=self.converter)
-            elif self.det() != 0.0:
-                return self.inv(False)**(-1.0*other)
             else:
-                raise IndexError
+                return self.inv()**(-other)
         else:
-            raise TypeError
+            raise TypeError("Matrix exponentiation invalid with "+repr(other))
 
     def __ipow__(self, other):
         """Performs Exponentiation In-Place."""
@@ -229,10 +227,10 @@ class matrix(mctobject):
                 self = diagmatrix(self.x, converter=self.converter)
             else:
                 self = self.inv()
-                self **= -1.0*other
+                self **= -other
             return self
         else:
-            raise TypeError
+            raise TypeError("Matrix exponentiation invalid with "+repr(other))
 
     def __div__(self, other):
         """Performs Division."""
@@ -242,7 +240,7 @@ class matrix(mctobject):
                 out.store(y, x, self.retreive(y, x)/other)
             return out
         else:
-            raise TypeError
+            raise TypeError("Matrix division invalid with "+repr(other))
 
     def __idiv__(self, other):
         """Performs Division In-Place."""
@@ -251,7 +249,7 @@ class matrix(mctobject):
                 self.store(y, x, self.retreive(y, x)/other)
             return self
         else:
-            raise TypeError
+            raise TypeError("Matrix division invalid with "+repr(other))
 
     def __imod__(self, other):
         """Performs Modulus In-Place."""
@@ -331,7 +329,7 @@ class matrix(mctobject):
             self.a.append(rowlist)
             self.y += 1
         else:
-            raise IndexError
+            raise IndexError("Unequal matrix row lengths for newrow of "+str(self.x)+" and "+str(len(rowlist)))
 
     def delrow(self, y):
         """Deletes A Row."""
@@ -363,7 +361,7 @@ class matrix(mctobject):
                 out.store(0,x, cross.minor(cross.y-1, x).det())
             return out
         else:
-            raise IndexError
+            raise IndexError("Matrix cross product invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
 
     def C(self, y, x):
         """Finds The Cofactor For The Given Row And Column."""
@@ -393,6 +391,8 @@ class matrix(mctobject):
             out.augment(diagmatrix(size))
             out.keepsolvingfull(False, maxtries, debug)
             return matrixlist(out.getaugment(size), self.converter).trans()
+        else:
+            raise IndexError("Matrix inverse does not exist because of 0 determinant")
 
     def augment(self, aug):
         """Augments The Matrix."""
@@ -456,7 +456,7 @@ class matrix(mctobject):
     def keepsolving(self, check=True, maxtries=float("inf"), debug=False):
         """Recursively Solves The Matrix As An Augmented Matrix."""
         if check and self.det() == 0.0:
-            raise ValueError
+            raise ValueError("Matrix cannot be solved on bottom because of 0 determinant")
         elif maxtries > 0:
             try:
                 self.solve(debug)
@@ -470,7 +470,7 @@ class matrix(mctobject):
     def keepsolvingtop(self, check=True, maxtries=float("inf"), debug=False):
         """Recursively Solves The Top Of The Matrix As An Augmented Matrix."""
         if check and self.det() == 0.0:
-            raise ValueError
+            raise ValueError("Matrix cannot be solved on top because of 0 determinant")
         elif maxtries > 0:
             try:
                 self.solvetop(debug)
@@ -484,7 +484,7 @@ class matrix(mctobject):
     def keepsolvingfull(self, check=True, maxtries=float("inf"), debug=False):
         """Recursively Fully Solves The Matrix As An Augmented Matrix."""
         if check and self.det() == 0.0:
-            raise ValueError
+            raise ValueError("Matrix cannot be solved because of 0 determinant")
         elif maxtries > 0:
             try:
                 self.solvefull(debug)
@@ -606,7 +606,7 @@ class matrix(mctobject):
                 tot += float(self.retreive(y,x)-expected.retreive(y,x))**2.0/float(expected.retreive(y,x))
             return tot
         else:
-            raise IndexError
+            raise IndexError("Matrix Chi Squared invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
 
 def diagmatrix(size=2, full=1.0, empty=0.0, converter=float, fake=True):
     """Constructs Matrix I."""
@@ -673,7 +673,7 @@ def matrixlist(inputlist, converter=float, fake=False):
     xlen = len(inputlist[0])
     for x in xrange(1,len(inputlist)):
         if len(inputlist[x]) != xlen:
-            raise IndexError
+            raise IndexError("Unequal matrix row lengths for matrixlist of "+str(xlen)+" and "+str(len(inputlist[x])))
     out = matrix(len(inputlist), xlen, converter=converter, fake=bool(fake))
     out.a = inputlist[:]
     out.convert()
