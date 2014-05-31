@@ -85,6 +85,7 @@ Import Commands:
         self.box.colortag("digit", "darkgrey")
         self.box.colortag("builtin", "purple")
         self.box.colortag("stringmod", "green")
+        self.box.colortag("statement", "magenta")
         self.box.colortag("search", highlight="yellow")
         self.errorlog = {}
         self.ans = [matrix(0)]
@@ -202,6 +203,7 @@ Import Commands:
         self.box.remtag("digit", start, end)
         self.box.remtag("builtin", start, end)
         self.box.remtag("stringmod", start, end)
+        self.box.remtag("statement", start, end)
 
     def endsearch(self):
         """Clears Search Highlighting."""
@@ -215,6 +217,7 @@ Import Commands:
         incomment = False
         decimal = False
         strmod = False
+        statement = True
         last = ("", "1.0")
         for l in xrange(0, len(linelist)):
             for c in xrange(0, len(linelist[l])+1):
@@ -241,6 +244,7 @@ Import Commands:
                     instring = False
                     decimal = False
                     strmod = False
+                    statement = True
                     last = ("", point+"-1c")
                 normal = False
                 if incomment:
@@ -280,6 +284,21 @@ Import Commands:
                         decimal = False
                 elif not self.e.isreserved(test):
                     normal = True
+                    if statement:
+                        if not istext(statement):
+                            test = delspace(test)
+                            if test:
+                                statement = test
+                        elif test in string.whitespace:
+                            if statement in ["debug", "errors", "clean", "get", "run", "save", "assert", "do", "show", "del", "import"]:
+                                self.box.placetag("statement", point+"-"+str(len(statement)+1)+"c", point+"-1c")
+                            statement = False
+                        else:
+                            statement += test
+                elif test == "=":
+                    statement = True
+                else:
+                    statement = False
                 if normal:
                     last = (last[0]+delspace(test), last[1])
                 else:
