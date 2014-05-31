@@ -300,7 +300,10 @@ Import Commands:
                 else:
                     statement = False
                 if normal:
-                    last = (last[0]+delspace(test), last[1])
+                    if last[0] == "":
+                        last = (delspace(test), point+"-1c")
+                    else:
+                        last = (last[0]+delspace(test), last[1])
                 else:
                     if last[0] in [funcfloat.allargs, classcalc.selfarg, self.e.lastname]:
                         self.box.placetag("builtin", last[1], point+"-1c")

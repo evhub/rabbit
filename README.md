@@ -102,7 +102,15 @@ x ; 0			# The 'else' operator will check to see whether the item to the left is 
 x @ x>0; 0		# Together, these two operators allow the formation of if-else clauses
 ```
 
-After conditionals next in the precedence order are the unary operators. There are two, the syntax for which is:
+After conditionals next in the precedence order are the logic operators. The syntax for these is:
+```
+1 & 2 > 1		# Logical and (result = 1) (right to left)
+				# Like python, once a false is found evaluation will stop
+1 <= 0 | 1		# Logical or (result = 1) (right to left)
+				# Like python, once a true is found evaluation will stop
+```
+
+After logic operators next in the precedence order are the unary operators. There are two, the syntax for which is:
 ```
 ? 5			# Gets a boolean (result = 1)
 ! 5			# Gets the opposite boolean (result = 0)
@@ -303,7 +311,7 @@ a,b = (1,2,3)	# Sets a to 1 and b to (2,3)
 a,b = 1			# Sets a to 1 and b to none
 smoosh(a) =
  x .. smoosh(xs) @ xs;
- (x,)
+ x
  $ x,xs = a		# This syntax can be used in with clauses to great effect
 ```
 

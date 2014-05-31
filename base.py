@@ -115,6 +115,14 @@ class numobject(evalobject):
         """Implements Reverse Division."""
         return other*self**-1.0
 
+    def __float__(self):
+        """Retrieves A Float."""
+        return float(self.calc())
+
+    def __int__(self):
+        """Retrieves An Integer."""
+        return int(self.calc())
+
     def __floordiv__(self, other):
         """Implements Floor Division."""
         return self.__div__(int(other))
@@ -172,6 +180,27 @@ class numobject(evalobject):
     def __rmod__(self, other):
         """Implements Reverse Modulus."""
         return other % float(self)
+
+    def __iadd__(self, other):
+        """Performs Addition In-Place."""
+        return float(self)+other
+
+    def __idiv__(self, other):
+        """Performs Division In-Place."""
+        return float(self)/other
+
+    def __rdiv__(self, other):
+        """Performs Division In-Place."""
+        return other/float(self)
+
+    def __imul__(self, other):
+        """Performs Multiplication In-Place."""
+        return float(self)*other
+
+    def __ipow__(self, other):
+        """Performs Exponentiation In-Place."""
+        self.code(lambda x: x**other)
+        return self
 
     def __cmp__(self, other):
         """Performs Comparison."""

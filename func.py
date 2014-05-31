@@ -637,17 +637,18 @@ class classcalc(cotobject):
         self.e = e
         if variables != None:
             self.add(variables)
-    def process(self, command):
+    def process(self, command, methods=True):
         """Processes A Command And Puts The Result In The Variables."""
         oldvars = self.e.variables.copy()
         returned = self.e.processor.returned
+        self.e.setvars(self.variables)
         self.e.processor.process(str(command))
         self.e.processor.returned = returned
         for v in self.e.variables:
             if self.e.isreserved(v):
                 oldvars[v] = self.e.variables[v]
             elif not v in oldvars or not self.e.variables[v] is oldvars[v]:
-                self.store(v, self.e.variables[v], True)
+                self.store(v, self.e.variables[v], True, methods)
         self.e.variables = oldvars
     def copy(self):
         """Copies The Dictionary."""
@@ -662,11 +663,11 @@ class classcalc(cotobject):
     def items(self):
         """Returns The Variables."""
         return self.variables.items()
-    def store(self, key, value, bypass=False):
+    def store(self, key, value, bypass=False, methods=True):
         """Stores An Item."""
         test = self.e.prepare(key, False, False)
         if bypass or not self.e.isreserved(test):
-            if isinstance(value, strfunc):
+            if methods and isinstance(value, strfunc):
                 value.personals[self.selfarg] = self
             self.variables[delspace(test)] = value
         else:

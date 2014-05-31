@@ -263,7 +263,7 @@ Global Operator Precedence List:
                         out += self.prepare(x, False, bottom)+","
                     out = out[:-1]+"]:["
                 out = out[:-2]
-        elif isinstance(item, fraction):
+        elif isinstance(item, (fraction, reciprocal)):
             out = ""
             a = self.prepare(item.n, False, bottom)
             if not bottom or madeof(a, string.digits) or not self.isreserved(test):
@@ -451,7 +451,7 @@ Global Operator Precedence List:
             item = inputlist.pop()
             withclass = classcalc(self)
             for x in inputlist:
-                withclass.process(x)
+                withclass.process(x, methods=False)
             return withclass.calc(item)
 
     def calc_pieces(self, expression):
@@ -577,7 +577,7 @@ Global Operator Precedence List:
             value = reassemble(top, ["~", "..", "**", ",", "+", "%", "*"])
             print(self.recursion*"  "+"=> "+value)
         self.recursion += 1
-        out = self.eval_check(self.eval_comp(top))
+        out = self.eval_check(self.eval_comp(top), True)
         if self.debug:
             print(self.recursion*"  "+self.prepare(out, False, True, True)+" <= "+value)
         self.recursion -= 1
@@ -833,10 +833,12 @@ Global Operator Precedence List:
         self.recursion -= 1
         return out
 
-    def eval_check(self, value):
+    def eval_check(self, value, top=False):
         """Checks A Value."""
         if value == None:
             return matrix(0)
+        elif top and isinstance(value, reciprocal):
+            return value.calc()
         elif islist(value):
             return domatrixlist(value)
         else:
@@ -898,7 +900,7 @@ Global Operator Precedence List:
             if isnull(item):
                 return item
             else:
-                return 1.0/item
+                return reciprocal(item)
 
     def call_exp(self, inputstring):
         """Evaluates The Exponential Part Of An Expression."""
