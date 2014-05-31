@@ -148,7 +148,7 @@ Import Commands:
 
     def endline(self):
         """Checks The Last Line."""
-        last = self.box.output("insert-1l", "insert-1c")
+        last = carefulsplit(self.box.output("insert-1l", "insert-1c"), "#", '"')[0]
         space = 0
         start = True
         instring = False
@@ -220,6 +220,7 @@ Import Commands:
         statement = True
         last = ("", "1.0")
         for l in xrange(0, len(linelist)):
+            incomment = False
             for c in xrange(0, len(linelist[l])+1):
                 point = str(l+1)+"."+str(c)
                 test = self.endchar(point)
@@ -240,7 +241,6 @@ Import Commands:
                             self.box.placetag("variable", last[1], point+"-2c")
                     elif last[0] in ["inf", "nan"]:
                         self.box.placetag("digit", last[1], point+"-2c")
-                    incomment = False
                     instring = False
                     decimal = False
                     strmod = False
