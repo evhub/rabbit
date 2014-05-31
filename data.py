@@ -954,7 +954,7 @@ class multidata(mctobject):
             return len(self.y)
 
     def __getitem__(self, index):
-        """Retreives A Data Point."""
+        """Retrieves A Data Point."""
         return (self.x.units[index], self.y.units[index])
 
     def __eq__(self, other):
@@ -971,8 +971,8 @@ def datamatrix(inputmatrix):
         datax = []
         datay = []
         for y in xrange(0, inputmatrix.y):
-            datax.append(inputmatrix.retreive(y,0))
-            datay.append(inputmatrix.retreive(y,1))
+            datax.append(inputmatrix.retrieve(y,0))
+            datay.append(inputmatrix.retrieve(y,1))
         return multidata(datax, datay)
     else:
         return data(inputmatrix.getitems())
@@ -1016,10 +1016,10 @@ class rollfunc(strfunc):
                 out += self.calc(variables[0]-int(variables[0]))
         return out
     def __float__(self):
-        """Retreives A Float."""
+        """Retrieves A Float."""
         return float(self.calc())
     def __int__(self):
-        """Retreives An Integer."""
+        """Retrieves An Integer."""
         return int(self.calc())
     def __imul__(self, other):
         """Performs Multiplication."""

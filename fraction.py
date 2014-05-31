@@ -82,15 +82,15 @@ class fraction(numobject):
         return self.n/self.d
 
     def __float__(self):
-        """Retreives A Float."""
+        """Retrieves A Float."""
         return float(self.n)/float(self.d)
 
     def __int__(self):
-        """Retreives An Integer."""
+        """Retrieves An Integer."""
         return int(self.n//self.d)
 
     def __repr__(self):
-        """Retreives A String."""
+        """Retrieves A String."""
         return str(self.n)+"/"+str(self.d)
 
     def __idiv__(self, other):

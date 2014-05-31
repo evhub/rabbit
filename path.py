@@ -135,5 +135,5 @@ class pathfinder(cotobject):
         return str(self.paths)
 
     def __getitem__(self, key):
-        """Retreives Paths For A Node."""
+        """Retrieves Paths For A Node."""
         return self.connections(key)

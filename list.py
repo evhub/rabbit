@@ -134,7 +134,7 @@ class fakelist(cotobject):
         elif x < len(self):
             return self.default
         else:
-            raise IndexError("Fake list could not retreive invalid index "+repr(x))
+            raise IndexError("Fake list could not retrieve invalid index "+repr(x))
 
     def __getslice__(self, start, stop, step=1):
         """Gets A Fake Slice."""

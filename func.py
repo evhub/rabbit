@@ -96,13 +96,13 @@ class funcfloat(numobject):
         """Returns A String Representation."""
         return "("+self.funcstr+")"
     def __str__(self):
-        """Retreives The Function String."""
+        """Retrieves The Function String."""
         return self.funcstr
     def __float__(self):
-        """Retreives A Float."""
+        """Retrieves A Float."""
         return float(self.calc())
     def __int__(self):
-        """Retreives An Integer."""
+        """Retrieves An Integer."""
         return int(self.calc())
     def __iadd__(self, other):
         """Performs Addition."""
@@ -210,12 +210,12 @@ class strfunc(funcfloat):
             self.e.setvars(oldvars)
             return out
     def __float__(self):
-        """Retreives A Float."""
+        """Retrieves A Float."""
         if self.e.debug:
             self.e.info = " | float"
         return float(self.calc())
     def __int__(self):
-        """Retreives An Integer."""
+        """Retrieves An Integer."""
         if self.e.debug:
             self.e.info = " | int"
         return int(self.calc())
@@ -356,10 +356,10 @@ class strcalc(numobject):
         """Performs round."""
         return self
     def __repr__(self):
-        """Retreives A Representation."""
+        """Retrieves A Representation."""
         return '"'+self.calcstr.replace("\\","\\\\").replace('"',"\\'").replace("\n","\\n")+'"'
     def __str__(self):
-        """Retreives The Evaluator String."""
+        """Retrieves The Evaluator String."""
         return self.calcstr
     def __iadd__(self, other):
         """Performs Addition."""
@@ -398,7 +398,7 @@ class strcalc(numobject):
     def __cmp__(self, other):
         """Performs comparison."""
         if ismatrix(other):
-            other = getmatrix(other).retreive(0)
+            other = getmatrix(other).retrieve(0)
         if isinstance(other, strcalc):
             other = other.calcstr
         if self.calcstr == other:
@@ -663,8 +663,8 @@ class classcalc(cotobject):
             self.variables[delspace(test)] = value
         else:
             self.e.processor.adderror("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
-    def retreive(self, key):
-        """Retreives An Item."""
+    def retrieve(self, key):
+        """Retrieves An Item."""
         test = self.e.prepare(key, False, False)
         if not self.e.isreserved(test) and test in self.variables:
             if istext(self.variables[test]):

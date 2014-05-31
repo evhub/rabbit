@@ -111,11 +111,11 @@ class console(object):
             self.up()
 
     def get(self):
-        """Retreives The Currently Displayed String."""
+        """Retrieves The Currently Displayed String."""
         return self.message.get()
 
     def getlines(self):
-        """Retreives All The Lines."""
+        """Retrieves All The Lines."""
         return self.message.get().split("\n") + self.history
 
     def dobind(self):

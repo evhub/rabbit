@@ -404,7 +404,7 @@ Import Commands:
                 if isinstance(useclass, classcalc):
                     last = useclass
                     for x in xrange(1, len(test)):
-                        useclass = useclass.retreive(test[x])
+                        useclass = useclass.retrieve(test[x])
                         if not isinstance(useclass, classcalc):
                             self.adderror("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
                             return True
@@ -490,7 +490,7 @@ Import Commands:
                 if isinstance(useclass, classcalc):
                     for x in xrange(1, len(classlist)):
                         last = useclass
-                        useclass = useclass.retreive(classlist[x])
+                        useclass = useclass.retrieve(classlist[x])
                         if not isinstance(useclass, classcalc):
                             if istext(useclass) and len(classlist) == x+1:
                                 sides[1] = "( "+useclass+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"

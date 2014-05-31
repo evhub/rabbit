@@ -234,7 +234,7 @@ class cotobject(evalobject):
         return str(self.items())
 
     def __getitem__(self, key):
-        """Retreives An Item."""
+        """Retrieves An Item."""
         return self.items()[key]
 
     def __delitem__(self, key):

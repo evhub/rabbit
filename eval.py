@@ -208,8 +208,8 @@ Global Operator Precedence List:
         else:
             return False
 
-    def retreive(self, name):
-        """Retreives A Variable."""
+    def retrieve(self, name):
+        """Retrieves A Variable."""
         return self.variables[basicformat(name)]
 
     def prepare(self, item, top=False, bottom=True, indebug=False):
@@ -989,46 +989,46 @@ Global Operator Precedence List:
         elif hasmatrix(item):
             item = getmatrix(item)
             if len(params) == 0:
-                value = item.retreive(0)
+                value = item.retrieve(0)
             elif len(params) == 1:
                 if isinstance(params[0], matrix):
-                    value = item.retreive(int(params[0].retreive(0)), int(params[0].retreive(1)))
+                    value = item.retrieve(int(params[0].retrieve(0)), int(params[0].retrieve(1)))
                 elif item.onlyrow():
-                    value = item.retreive(0, int(params[0]))
+                    value = item.retrieve(0, int(params[0]))
                 else:
-                    value = item.retreive(int(params[0]))
+                    value = item.retrieve(int(params[0]))
             elif isinstance(params[0], matrix) and isinstance(params[1], matrix):
-                if params[0].retreive(0) < 0:
-                    params[0].store(0,0, params[0].retreive(0)+item.y+1.0)
-                if params[0].retreive(1) < 0:
-                    params[0].store(1,1, params[0].retreive(1)+item.x+1.0)
-                if params[1].retreive(0) < 0:
-                    params[1].store(0,0, params[1].retreive(0)+item.y+1.0)
-                if params[1].retreive(1) < 0:
-                    params[1].store(1,1, params[1].retreive(1)+item.x+1.0)
+                if params[0].retrieve(0) < 0:
+                    params[0].store(0,0, params[0].retrieve(0)+item.y+1.0)
+                if params[0].retrieve(1) < 0:
+                    params[0].store(1,1, params[0].retrieve(1)+item.x+1.0)
+                if params[1].retrieve(0) < 0:
+                    params[1].store(0,0, params[1].retrieve(0)+item.y+1.0)
+                if params[1].retrieve(1) < 0:
+                    params[1].store(1,1, params[1].retrieve(1)+item.x+1.0)
                 if params[0].getdiag() == params[1].getdiag():
-                    value = matrix(1,1, item.retreive(int(params[0].retreive(0)), int(params[0].retreive(1))), fake=True)
-                elif params[0].retreive(0) == params[1].retreive(0):
-                    out = item[int(params[0].retreive(0))][int(params[0].retreive(1)):int(params[1].retreive(1))+1]
+                    value = matrix(1,1, item.retrieve(int(params[0].retrieve(0)), int(params[0].retrieve(1))), fake=True)
+                elif params[0].retrieve(0) == params[1].retrieve(0):
+                    out = item[int(params[0].retrieve(0))][int(params[0].retrieve(1)):int(params[1].retrieve(1))+1]
                     value = diagmatrixlist(out)
-                elif params[0].retreive(1) == params[1].retreive(1):
+                elif params[0].retrieve(1) == params[1].retrieve(1):
                     item.flip()
-                    out = item[int(params[0].retreive(1))][int(params[0].retreive(0)):int(params[1].retreive(0))+1]
+                    out = item[int(params[0].retrieve(1))][int(params[0].retrieve(0)):int(params[1].retrieve(0))+1]
                     value = diagmatrixlist(out)
                 else:
                     out = []
-                    if params[0].retreive(0) <= params[1].retreive(0):
-                        ymin, ymax = int(params[0].retreive(0)), int(params[1].retreive(0))
+                    if params[0].retrieve(0) <= params[1].retrieve(0):
+                        ymin, ymax = int(params[0].retrieve(0)), int(params[1].retrieve(0))
                     else:
-                        ymin, ymax = int(params[1].retreive(0)), int(params[0].retreive(0))
-                    if params[0].retreive(1) <= params[1].retreive(1):
-                        xmin, xmax = int(params[0].retreive(1)), int(params[1].retreive(1))
+                        ymin, ymax = int(params[1].retrieve(0)), int(params[0].retrieve(0))
+                    if params[0].retrieve(1) <= params[1].retrieve(1):
+                        xmin, xmax = int(params[0].retrieve(1)), int(params[1].retrieve(1))
                     else:
-                        xmin, xmax = int(params[1].retreive(1)), int(params[0].retreive(1))
+                        xmin, xmax = int(params[1].retrieve(1)), int(params[0].retrieve(1))
                     for y in xrange(ymin, ymax+1):
                         out.append([])
                         for x in xrange(xmin, xmax+1):
-                            out[-1].append(item.retreive(y,x))
+                            out[-1].append(item.retrieve(y,x))
                     value = matrixlist(out, float)
             else:
                 length = item.lendiag()
@@ -1039,7 +1039,7 @@ Global Operator Precedence List:
                 if params[1] < 0:
                     params[1] += length+1.0
                 if params[0] == params[1]:
-                    value = matrix(1,1, item.retreive(int(params[1])), fake=True)
+                    value = matrix(1,1, item.retrieve(int(params[1])), fake=True)
                 elif params[0] < params[1]:
                     out = item.getdiag()[int(params[0]):int(params[1])]
                     value = diagmatrixlist(out)
@@ -1143,9 +1143,9 @@ Global Operator Precedence List:
                         if not isinstance(itemlist[0], classcalc):
                             values.append(itemlist)
                         elif len(itemlist) == 2:
-                            values.append(itemlist[0].retreive(itemlist[1]))
+                            values.append(itemlist[0].retrieve(itemlist[1]))
                         else:
-                            values.append(strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retreive(itemlist[1])]))
+                            values.append(strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retrieve(itemlist[1])]))
                     else:
                         values.append(self.find(inputlist[x], True, False))
                 else:
@@ -1188,9 +1188,9 @@ Global Operator Precedence List:
                 itemlist[0] = self.funcfind(itemlist[0])
                 if isinstance(itemlist[0], classcalc):
                     if len(itemlist) == 2:
-                        return itemlist[0].retreive(itemlist[1])
+                        return itemlist[0].retrieve(itemlist[1])
                     else:
-                        return strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retreive(itemlist[1])])
+                        return strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retrieve(itemlist[1])])
                 elif not isnull(itemlist[0]):
                     return strfunc("firstfunc."+strlist(itemlist[1:], ".")+"("+funcfloat.allargs+")", self, [funcfloat.allargs], {"firstfunc":itemlist[0]})
 
@@ -1430,11 +1430,11 @@ class evalfuncs(object):
             variables[1] = getmatrix(variables[1])
             if variables[1].onlydiag():
                 for x in xrange(0, variables[1].lendiag()):
-                    if variables[1].retreive(x) == variables[0]:
+                    if variables[1].retrieve(x) == variables[0]:
                         return float(x)
             else:
                 for x,y in variables[1].coords():
-                    if variables[1].retreive(x,y) == variables[0]:
+                    if variables[1].retrieve(x,y) == variables[0]:
                             return diagmatrixlist([float(x),float(y)])
         return matrix(0)
 
@@ -1544,12 +1544,12 @@ class evalfuncs(object):
                 variables[0] = getmatrix(variables[0])
                 if variables[0].onlydiag():
                     for x in xrange(0, variables[0].lendiag()):
-                        temp = variables[0].retreive(x)
+                        temp = variables[0].retrieve(x)
                         if temp in pairs:
                             variables[0].store(x,x, pairs[temp])
                 else:
                     for y,x in variables[0].coords():
-                        temp = variables[0].retreive(y,x)
+                        temp = variables[0].retrieve(y,x)
                         if temp in pairs:
                             variables[0].store(y,x, pairs[temp])
             else:

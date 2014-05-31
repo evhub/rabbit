@@ -49,8 +49,8 @@ class server(object):
     def receive(self, amount=1024):
         """Receives A Message."""
         return self.c.recv(amount)
-    def retreive(self, refresh=None, limit=100):
-        """Retreives Formatted Messages."""
+    def retrieve(self, refresh=None, limit=100):
+        """Retrieves Formatted Messages."""
         counter = 0
         while len(self.items) == 0:
             counter += 1
@@ -134,8 +134,8 @@ class multiserver(server):
     def receive(self, address, amount=1024):
         """Receives A Message From A Certain Client."""
         return self.c[address].recv(amount)
-    def retreive(self, a, refresh=None, limit=100):
-        """Retreives Formatted Messages."""
+    def retrieve(self, a, refresh=None, limit=100):
+        """Retrieves Formatted Messages."""
         counter = 0
         while len(self.items[a]) == 0:
             counter += 1
