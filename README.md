@@ -447,15 +447,16 @@ The second stage is interpreter command resolution. This stage can vary based on
 
 This stage mostly works in command-line syntax (spaces as argument separators), but certain symbol operators are also evaluated at this stage. The most common and important commands and operators evaluated are:
 ```
-f(x) # a comment	# The # operator will tell the interpreter to ignore everything after it
-x+1					# A plain expression will simply print the result to the console
-x = 1             	# Sets the variable x to the yet-to-be-evaluated value 1
-x := x            	# Sets the variable x to the result of evaluating x
-f(x) = x          	# The preferable notation for creating functions
-a = 1 ;; b = 2    	# The ;; operator is used to separate top-level commands
-del x             	# Deletes the variable x
-debug             	# Toggles debug mode
-get               	# Shows all set variables
+f(x) # a comment		# The # operator will tell the interpreter to ignore everything after it
+x+1						# A plain expression will simply print the result to the console
+x = 1             		# Sets the variable x to the yet-to-be-evaluated value 1
+x := x            		# Sets the variable x to the result of evaluating x
+f(x) = x          		# The preferable notation for creating functions
+a = 1 ;; b = 2    		# The ;; operator is used to separate top-level commands
+del x             		# Deletes the variable x
+debug             		# Toggles debug mode
+get               		# Shows all set variables
+lib = import Lib.py		# Imports a properly-configured Rabbit add-on
 ```
 
 ##### Debug Output
