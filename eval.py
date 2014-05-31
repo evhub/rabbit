@@ -541,21 +541,19 @@ Global Operator Precedence List:
                         args.append(matrix(0))
                     else:
                         args.append(self.calc_eval(inputlist[x+1]))
-                    out = False
-                    rev = False
+                    if madeof(inputlist[x], "!"):
+                        out = args[0] == args[1]
+                    else:
+                        out = False
+                        if "=" in inputlist[x] or "?" in inputlist[x]:
+                            out = out or args[0] == args[1]
+                        if ">" in inputlist[x]:
+                            out = out or args[0] > args[1]
+                        if "<" in inputlist[x]:
+                            out = out or args[0] < args[1]
                     for i in inputlist[x]:
                         if i == "!":
-                            rev = not rev
-                        elif i == "=" or i == "?":
-                            out = out or args[0] == args[1]
-                        elif i == "<":
-                            out = out or args[0] < args[1]
-                        elif i == ">":
-                            out = out or args[0] > args[1]
-                        else:
-                            raise ValueError
-                    if rev:
-                        out = not out
+                            out = not out
                     if not out:
                         return False
             return True
