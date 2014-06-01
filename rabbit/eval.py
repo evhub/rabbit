@@ -1261,19 +1261,17 @@ Global Operator Precedence List:
         if varname == None:
             varname = self.varname
         if istext(item):
-            old = self.variables[varname]
-            self.variables[varname] = value
+            oldvars = self.setvars({varname: value})
             out = self.calc(item)
-            self.variables[varname] = old
+            self.setvars(oldvars)
         elif isfunc(item):
             out = getcall(item)(varproc(value))
         elif hasnum(item):
             return item
         else:
-            old = self.variables[varname]
-            self.variables[varname] = value
+            oldvars = self.setvars({varname: value})
             out = getcall(item)(None)
-            self.variables[varname] = old
+            self.setvars(oldvars)
         return self.call(out, value, varname)
 
 class evalfuncs(object):

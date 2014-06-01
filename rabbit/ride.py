@@ -89,6 +89,7 @@ Import Commands:
         self.box.colortag("search", highlight="yellow")
         self.errorlog = {}
         self.ans = [matrix(0)]
+        self.returned = 1
         self.populator()
         if helpstring != None:
             self.helpstring = str(helpstring)

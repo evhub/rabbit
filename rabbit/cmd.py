@@ -50,7 +50,7 @@ Import Commands:
     run <file>
     save <file>"""
 
-    def __init__(self, name="PythonPlus Evaluator", message="Enter A Calculator Command:", height=None, helpstring=None, debug=False, *initializers):
+    def __init__(self, name="Evaluator", message="Enter A Calculator Command:", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
         self.messages = [str(message)]
@@ -60,6 +60,7 @@ Import Commands:
             self.root, self.app, self.box = startconsole(self.handler, self.messages[0], str(name), int(height))
         self.errorlog = {}
         self.ans = [matrix(0)]
+        self.returned = 1
         self.populator()
         if helpstring != None:
             self.helpstring = str(helpstring)
