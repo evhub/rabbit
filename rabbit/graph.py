@@ -84,7 +84,11 @@ Import Commands:
         self.box = entry(self.root)
         rootbind(self.root)
         self.box.dobind(self.handler)
-        self.pixel = openphoto("Pixel.gif")
+        try:
+            self.pixel = openphoto("Pixel.gif")
+        except:
+            popup("Error", "Unable to find Pixel.gif. This file is necessary for rendering anything.")
+            raise IOError("Unable to find Pixel.gif")
         try:
             self.graph = openphoto("Graph.gif")
         except:
@@ -94,9 +98,9 @@ Import Commands:
         try:
             self.gridline = openphoto("Grid.gif")
         except:
-            self.sepgrid = 0
+            self.sepgrid = False
         else:
-            self.sepgrid = 1
+            self.sepgrid = True
         self.ysize = self.pixel.height()
         self.xsize = self.pixel.width()
         self.identifiers = []
@@ -203,7 +207,7 @@ Import Commands:
         point = self.convert(x, y)
         if point:
             xpoint, ypoint = point
-            if self.sepgrid == 1:
+            if self.sepgrid:
                 self.grid.append(self.app.new(self.gridline, xpoint, ypoint))
             else:
                 self.grid.append(self.app.new(self.pixel, xpoint, ypoint))
@@ -211,7 +215,7 @@ Import Commands:
             while points != []:
                 a,b = points.pop()
                 if ypoint+b <= self.height/self.ysize and ypoint+b >= 0 and 0 <= xpoint+a and xpoint+a <= self.width/self.xsize:
-                    if self.sepgrid == 1:
+                    if self.sepgrid:
                         self.grid.append(self.app.new(self.gridline, xpoint+a, ypoint+b))
                     else:
                         self.grid.append(self.app.new(self.pixel, xpoint+a, ypoint+b))
@@ -258,7 +262,7 @@ Import Commands:
         for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch())):
             test += xgrid
             for y in xrange(0, self.height+1):
-                if self.sepgrid == 1:
+                if self.sepgrid:
                     self.grid.append(self.app.new(self.gridline, test, y))
                 else:
                     self.grid.append(self.app.new(self.pixel, test, y))
@@ -266,7 +270,7 @@ Import Commands:
         for y in xrange(0, int(float(self.height+ygrid-1)/float(ygrid+1)+(self.height/2.0)*self.ystretch())):
             test += ygrid
             for x in xrange(0, self.width+1):
-                if self.sepgrid == 1:
+                if self.sepgrid:
                     self.grid.append(self.app.new(self.gridline, x, test))
                 else:
                     self.grid.append(self.app.new(self.pixel, x, test))
@@ -279,7 +283,7 @@ Import Commands:
         for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch())):
             test += xgrid
             for y in xrange(-2, 3):
-                if self.sepgrid == 1:
+                if self.sepgrid:
                     self.grid.append(self.app.new(self.gridline, test, y+ystart))
                 else:
                     self.grid.append(self.app.new(self.pixel, test, y+ystart))
@@ -287,7 +291,7 @@ Import Commands:
         for y in xrange(0, int(float(self.height+ygrid-1)/float(ygrid+1)+(self.height/2.0)*self.ystretch())):
             test += ygrid
             for x in xrange(-2, 3):
-                if self.sepgrid == 1:
+                if self.sepgrid:
                     self.grid.append(self.app.new(self.gridline, x+xstart, test))
                 else:
                     self.grid.append(self.app.new(self.pixel, x+xstart, test))
@@ -297,12 +301,12 @@ Import Commands:
         xgrid, ygrid = self.xsize/self.xstretch(), self.ysize/self.ystretch()
         xstart, ystart = self.xup()*xgrid, self.height-(self.yup()*ygrid)
         for x in xrange(0, self.width+1):
-            if self.sepgrid == 1:
+            if self.sepgrid:
                 self.grid.append(self.app.new(self.gridline, x, ystart))
             else:
                 self.grid.append(self.app.new(self.pixel, x, ystart))
         for x in xrange(0, self.height+1):
-            if self.sepgrid == 1:
+            if self.sepgrid:
                 self.grid.append(self.app.new(self.gridline, xstart, x))
             else:
                 self.grid.append(self.app.new(self.pixel, xstart, x))
@@ -353,7 +357,7 @@ Import Commands:
             "display":"center;;render", "stretch":1.0,
             "'xstretch":"stretch",
             "'ystretch":"stretch",
-            "up":1.0,
+            "'up":1.0,
             "'xup":"up",
             "'yup":"up",
             "'scroller":"xstretch",
