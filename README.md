@@ -17,6 +17,7 @@ Some very common Python one-liners for initiating basic Rabbit features are:
 ```
 mathbase().start()  # Starts up the RabbitLang interpreter
 editor().start()    # Starts up the RabbitLang editor
+grapher().start()	# Starts up the RabbitLang grapher
 ```
 
 ## RabbitLang

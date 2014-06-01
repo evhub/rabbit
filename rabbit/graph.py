@@ -554,6 +554,3 @@ Import Commands:
         if x > 0:
             self.temp += self.call(func, x)
             return self.temp
-
-if __name__ == "__main__":
-    main().start()
