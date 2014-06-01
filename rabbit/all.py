@@ -18,7 +18,8 @@
 
 from __future__ import absolute_import, print_function
 
-from .ride import *
-from .crypto import *
-from .path import *
 from .web import *
+from .path import *
+from .crypto import *
+from .ride import *
+from .graph import *
