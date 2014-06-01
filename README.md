@@ -11,7 +11,7 @@ from rabbit.all import *
 import rabbit.all as rabbit
 ```
 
-From there, what you want to do depends on what you're using Rabbit for. If you're not sure what Rabbit can do, use the \_\_doc\_\_ string in \_\_init\_\_.py to find a module that looks interesting and then look over the functions that are in it.
+From there, what you want to do depends on what you're using Rabbit for. If you're not sure what Rabbit can do, use the \_\_doc\_\_ string in rabbit/\_\_init\_\_.py to find a module that looks interesting and then look over the functions that are in it.
 
 Some very common Python one-liners for initiating basic Rabbit features are:
 ```
@@ -24,11 +24,11 @@ editor().start()    # Starts up the RabbitLang editor
 RabbitLang, or more commonly just Rabbit, is one of the Rabbit library's core features. RabbitLang is a functional, dynamically typed, interpreted language written in Python. RabbitLang borrows heavily from both Python and Haskel, but is very different from both languages. The tutorial below should give you a basic idea of how to write code in RabbitLang using the provided tools.
 
 #### Core Features
+* Best of functional and imperative
+* Object-oriented
 * Dynamic typing
 * Dynamic scoping
-* Object-oriented
 * Interpreted
-* Functional
 * Not whitespace sensitive
 * Good for complex math
 * Extendable with Python
