@@ -73,7 +73,7 @@ Import Commands:
     run <file>
     save <file>"""
 
-    def __init__(self, name="Grapher", width=800, height=600, helpstring=None, debug=False, *initializers):
+    def __init__(self, name="Grapher", directory="rabbit/", width=800, height=600, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Grapher."""
         self.debug = bool(debug)
         self.root = Tkinter.Tk()
@@ -84,19 +84,20 @@ Import Commands:
         self.box = entry(self.root)
         rootbind(self.root)
         self.box.dobind(self.handler)
+        directory = str(directory)
         try:
-            self.pixel = openphoto("Pixel.gif")
+            self.pixel = openphoto(directory+"Pixel.gif")
         except:
             popup("Error", "Unable to find Pixel.gif. This file is necessary for rendering anything.")
             raise IOError("Unable to find Pixel.gif")
         try:
-            self.graph = openphoto("Graph.gif")
+            self.graph = openphoto(directory+"Graph.gif")
         except:
             pass
         else:
             self.app.new(self.graph)
         try:
-            self.gridline = openphoto("Grid.gif")
+            self.gridline = openphoto(directory+"Grid.gif")
         except:
             self.sepgrid = False
         else:
@@ -532,10 +533,9 @@ Import Commands:
                 for x,y in test.items():
                     self.pointrender(x,y)
             elif isinstance(test, matrix):
-                if not self.matrixrender(test):
-                    self.render(lambda x: self.call(original, x))
+                self.matrixrender(test)
             else:
-                self.render(lambda x: self.call(original, x))
+                self.render(lambda x: self.call(test, x))
             self.returned = 1
         return True
 

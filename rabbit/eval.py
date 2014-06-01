@@ -1256,11 +1256,11 @@ Global Operator Precedence List:
 
     def call(self, item, value, varname=None):
         """Evaluates An Item With A Value."""
-        if isnull(item):
-            return None
         if varname == None:
             varname = self.varname
-        if istext(item):
+        if isnull(item):
+            return None
+        elif istext(item):
             oldvars = self.setvars({varname: value})
             out = self.calc(item)
             self.setvars(oldvars)
