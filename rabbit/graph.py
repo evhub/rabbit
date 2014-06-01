@@ -73,7 +73,7 @@ Import Commands:
     run <file>
     save <file>"""
 
-    def __init__(self, name="Grapher", directory="rabbit/", width=800, height=600, helpstring=None, debug=False, *initializers):
+    def __init__(self, directory="rabbit/", name="Grapher", width=800, height=600, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Grapher."""
         self.debug = bool(debug)
         self.root = Tkinter.Tk()
@@ -522,20 +522,20 @@ Import Commands:
     def cmd_normal(self, original):
         """Graphs Normal Entries."""
         self.returned = 0
-        test = self.calc(original)
+        item = self.calc(original)
         if self.returned == 0:
-            if isinstance(test, strcalc):
-                self.show(self.e.prepare(test, True, True))
-            elif isinstance(test, data):
-                for x in test.items():
+            if isinstance(item, strcalc):
+                self.show(self.e.prepare(item, True, True))
+            elif isinstance(item, data):
+                for x in item.items():
                     self.pointrender(x,self.base())
-            elif isinstance(test, multidata):
-                for x,y in test.items():
+            elif isinstance(item, multidata):
+                for x,y in item.items():
                     self.pointrender(x,y)
-            elif isinstance(test, matrix):
-                self.matrixrender(test)
+            elif isinstance(item, matrix):
+                self.matrixrender(item)
             else:
-                self.render(lambda x: self.call(test, x))
+                self.render(lambda x: self.call(item, x))
             self.returned = 1
         return True
 
