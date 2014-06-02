@@ -135,6 +135,20 @@ Import Commands:
         else:
             return False
 
+    def dorender(newx, newy, grid=False):
+        """Renders A Converted Point."""
+        if grid and self.sepgrid:
+            self.grid.append(self.app.new(self.gridline, newx, newy))
+        else:
+            self.grid.append(self.app.new(self.pixel, newx, newy))
+
+    def singlerender(self, x=0, y=0):
+        """Renders A Single Point."""
+        new = self.convert(x, y)
+        if new:
+            newx, newy = new
+            self.dorender(newx, newy)
+
     def clear(self):
         """Clears The Graph."""
         for x in self.identifiers:
@@ -156,10 +170,7 @@ Import Commands:
             if self.returned == 1:
                 break
             elif testy != None and testy != matrix(0):
-                new = self.convert(testx, testy)
-                if new:
-                    newx, newy = new
-                    self.identifiers.append(self.app.new(self.pixel, newx, newy))
+                self.singlerender(testx, testy)
             testx += self.xstretch()
         self.returned = 1
 
@@ -172,10 +183,7 @@ Import Commands:
             if self.returned == 1:
                 break
             elif testx != None and testx != matrix(0):
-                new = self.convert(testx, testy)
-                if new:
-                    newx, newy = new
-                    self.identifiers.append(self.app.new(self.pixel, newx, newy))
+                self.singlerender(testx, testy)
             testy += self.xstretch()
         self.returned = 1
 
@@ -195,7 +203,7 @@ Import Commands:
             while points != []:
                 a,b = points.pop()
                 if ypoint+b <= self.height/self.ysize and ypoint+b >= 0 and 0 <= xpoint+a and xpoint+a <= self.width/self.xsize:
-                    self.identifiers.append(self.app.new(self.pixel, xpoint+a, ypoint+b))
+                    self.dorender(xpoint+a, ypoint+b)
 
     def atswaprender(self, y, function):
         """Renders The Inverse Of A Function At A Point."""
@@ -216,17 +224,7 @@ Import Commands:
             while points != []:
                 a,b = points.pop()
                 if ypoint+b <= self.height/self.ysize and ypoint+b >= 0 and 0 <= xpoint+a and xpoint+a <= self.width/self.xsize:
-                    if self.sepgrid:
-                        self.grid.append(self.app.new(self.gridline, xpoint+a, ypoint+b))
-                    else:
-                        self.grid.append(self.app.new(self.pixel, xpoint+a, ypoint+b))
-
-    def singlerender(self, x=0, y=0):
-        """Renders A Single Point."""
-        new = self.convert(x, y)
-        if new:
-            newx, newy = new
-            self.identifiers.append(self.app.new(self.pixel, newx, newy))
+                    self.dorender(xpoint+a, ypoint+b, True)
 
     def intersectrender(self, f, g):
         """Renders The Intersection Of Two Functions."""
@@ -245,14 +243,14 @@ Import Commands:
                 if fnewy == gnewy:
                     self.atrender(testx, lambda x: fy)
                 else:
-                    self.identifiers.append(self.app.new(self.pixel, newx, fnewy))
-                    self.identifiers.append(self.app.new(self.pixel, newx, gnewy))
+                    self.dorender(newx, fnewy)
+                    self.dorender(newx, gnewy)
             elif fnew:
                 newx, newy = fnew
-                self.identifiers.append(self.app.new(self.pixel, newx, newy))
+                self.dorender(newx, newy)
             elif gnew:
                 newx, newy = gnew
-                self.identifiers.append(self.app.new(self.pixel, newx, newy))
+                self.dorender(newx, newy)
             testx += self.xstretch()
         self.returned = 1
 
@@ -263,18 +261,12 @@ Import Commands:
         for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch())):
             test += xgrid
             for y in xrange(0, self.height+1):
-                if self.sepgrid:
-                    self.grid.append(self.app.new(self.gridline, test, y))
-                else:
-                    self.grid.append(self.app.new(self.pixel, test, y))
+                self.dorender(test, y, True)
         test = 0
         for y in xrange(0, int(float(self.height+ygrid-1)/float(ygrid+1)+(self.height/2.0)*self.ystretch())):
             test += ygrid
             for x in xrange(0, self.width+1):
-                if self.sepgrid:
-                    self.grid.append(self.app.new(self.gridline, x, test))
-                else:
-                    self.grid.append(self.app.new(self.pixel, x, test))
+                self.dorender(x, test, True)
 
     def tickrender(self):
         """Renders Axis Ticks."""
@@ -284,33 +276,21 @@ Import Commands:
         for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch())):
             test += xgrid
             for y in xrange(-2, 3):
-                if self.sepgrid:
-                    self.grid.append(self.app.new(self.gridline, test, y+ystart))
-                else:
-                    self.grid.append(self.app.new(self.pixel, test, y+ystart))
+                self.dorender(test, y+ystart, True)
         test = 0
         for y in xrange(0, int(float(self.height+ygrid-1)/float(ygrid+1)+(self.height/2.0)*self.ystretch())):
             test += ygrid
             for x in xrange(-2, 3):
-                if self.sepgrid:
-                    self.grid.append(self.app.new(self.gridline, x+xstart, test))
-                else:
-                    self.grid.append(self.app.new(self.pixel, x+xstart, test))
+                self.dorender(x+xstart, test, True)
 
     def axisrender(self):
         """Renders The Axis."""
         xgrid, ygrid = self.xsize/self.xstretch(), self.ysize/self.ystretch()
         xstart, ystart = self.xup()*xgrid, self.height-(self.yup()*ygrid)
         for x in xrange(0, self.width+1):
-            if self.sepgrid:
-                self.grid.append(self.app.new(self.gridline, x, ystart))
-            else:
-                self.grid.append(self.app.new(self.pixel, x, ystart))
-        for x in xrange(0, self.height+1):
-            if self.sepgrid:
-                self.grid.append(self.app.new(self.gridline, xstart, x))
-            else:
-                self.grid.append(self.app.new(self.pixel, xstart, x))
+            self.dorender(x, ystart, True)
+        for y in xrange(0, self.height+1):
+            self.dorender(xstart, y, True)
 
     def scroll(self):
         """Advances The Scroll."""
@@ -427,8 +407,12 @@ Import Commands:
         """Processes Graphing Commands."""
         if superformat(original).startswith("sum "):
             original = original[4:]
-            self.temp = 0
-            self.render(lambda x: self.sumcall(original, x))
+            item = self.calc(original)
+            if isnull(item):
+                self.adderror("NoneError", "Nothing to sum")
+            else:
+                self.temp = 0
+                self.render(lambda x: self.sumcall(item, x))
             return True
         if superformat(original) == "center":
             self.e.variables["xup"] = str((self.width/2.0)*self.xstretch())
@@ -451,58 +435,87 @@ Import Commands:
             return True
         if superformat(original).startswith("inv "):
             original = original[4:]
-            self.swaprender(lambda x: self.call(original, x))
+            item = self.calc(original)
+            if isnull(item):
+                self.adderror("NoneError", "Nothing to inverse")
+            else:
+                self.swaprender(lambda x: self.call(item, x))
             return True
         if superformat(original).startswith("invsum "):
             original = original[7:]
-            self.temp = 0
-            self.swaprender(lambda x: self.sumcall(original, x))
+            item = self.calc(original)
+            if isnull(item):
+                self.adderror("NoneError", "Nothing to inverse sum")
+            else:
+                self.temp = 0
+                self.swaprender(lambda x: self.sumcall(original, x))
             return True
         if superformat(original).startswith("at "):
-            original = original[3:]
+            original = self.e.find(original[3:])
             atlist = original.split(" do ", 1)
-            atlist[0] = self.calc(atlist[0])
-            if not isinstance(atlist[0], matrix):
-                self.atrender(atlist[0], lambda x: self.call(atlist[1], x))
+            atlist[1] = self.calc(atlist[1])
+            if isnull(atlist[1]):
+                self.adderror("NoneError", "Nothing to at")
             else:
-                for x in atlist[0].getitems():
-                    self.atrender(x, lambda x: self.call(atlist[1], x))
+                atlist[0] = self.calc(atlist[0])
+                if not isinstance(atlist[0], matrix):
+                    self.atrender(atlist[0], lambda x: self.call(atlist[1], x))
+                else:
+                    for x in atlist[0].getitems():
+                        self.atrender(x, lambda x: self.call(atlist[1], x))
             return True
         if superformat(original).startswith("atinv "):
-            original = original[6:]
+            original = self.e.find(original[6:])
             atlist = original.split(" do ", 1)
-            atlist[0] = self.calc(atlist[0])
-            if not isinstance(atlist[0], matrix):
-                self.atswaprender(atlist[0], lambda x: self.call(atlist[1], x))
+            atlist[1] = self.calc(atlist[1])
+            if isnull(atlist[1]):
+                self.adderror("NoneError", "Nothing to at inverse")
             else:
-                for x in atlist[0].getitems():
-                    self.atswaprender(x, lambda x: self.call(atlist[1], x))
+                atlist[0] = self.calc(atlist[0])
+                if not isinstance(atlist[0], matrix):
+                    self.atswaprender(atlist[0], lambda x: self.call(atlist[1], x))
+                else:
+                    for x in atlist[0].getitems():
+                        self.atswaprender(x, lambda x: self.call(atlist[1], x))
             return True
         if superformat(original).startswith("intersect "):
-            original = original[10:]
+            original = self.e.find(original[10:])
             interlist = original.split(" and ", 1)
-            self.intersectrender(lambda x: self.call(interlist[0], x), lambda x: self.call(interlist[1], x))
+            interlist[0] = self.calc(interlist[0])
+            interlist[1] = self.calc(interlist[1])
+            if isnull(interlist[0]) or isnull(interlist[1]):
+                self.adderror("NoneError", "Nothing to intersect")
+            else:
+                self.intersectrender(lambda x: self.call(interlist[0], x), lambda x: self.call(interlist[1], x))
             return True
         if superformat(original).startswith("parametric "):
             original = self.e.find(original[11:])
             paralist = original.split(" and ", 1)
-            stop = self.final()
-            x = self.initial()
-            inter = self.interval()
-            while x <= stop:
-                self.singlerender(self.call(paralist[0], x), self.call(paralist[1], x))
-                x += inter
+            paralist[0] = self.calc(paralist[0])
+            paralist[1] = self.calc(paralist[1])
+            if isnull(paralist[0]) or isnull(paralist[1]):
+                self.adderror("NoneError", "Nothing to parametrically graph")
+            else:
+                stop = self.final()
+                x = self.initial()
+                inter = self.interval()
+                while x <= stop:
+                    self.singlerender(self.call(paralist[0], x), self.call(paralist[1], x))
+                    x += inter
             return True
         if superformat(original).startswith("polar "):
-            original = self.e.find(original[6:])
-            angle = self.initial()
-            inter = self.interval()
-            stop = self.final()
-            while angle < stop:
-                r = self.call(original, angle)
-                if r != None:
-                    self.singlerender(math.cos(angle)*r, math.sin(angle)*r)
-                angle += inter
+            item = self.calc(original)
+            if isnull(item):
+                self.adderror("NoneError", "Nothing to polar graph")
+            else:
+                angle = self.initial()
+                inter = self.interval()
+                stop = self.final()
+                while angle < stop:
+                    r = self.call(item, angle)
+                    if r != None:
+                        self.singlerender(math.cos(angle)*r, math.sin(angle)*r)
+                    angle += inter
             return True
         if superformat(original).startswith("scroll "):
             original = original[7:]
@@ -524,7 +537,9 @@ Import Commands:
         self.returned = 0
         item = self.calc(original)
         if self.returned == 0:
-            if isinstance(item, strcalc):
+            if isnull(item):
+                self.adderror("NoneError", "Nothing to graph")
+            elif isinstance(item, strcalc):
                 self.show(self.e.prepare(item, True, True))
             elif isinstance(item, data):
                 for x in item.items():
