@@ -72,7 +72,7 @@ assert a.x ?= 1					$ a = { x = 1 }
 assert a.x ?= 1					$ a := { x = 1 }
 assert a.f(2) ?= a.f:2 ?= 3					$ a = { f(x) = x+1 }
 assert a:"x+1" ?= 2					$ a = { x = 1 }
-assert a:"z":5 ?= 5 ?= a.z					$ a = {}
+assert a:"z":5 ?= { z = 5 } ?= a				$ a = {}
 assert a.f() ?= a					$ a = { f() = self }
 
 # Multi-Line Tests:
