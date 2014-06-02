@@ -254,7 +254,7 @@ a := { x = 1 ;; x := x+1 }	# Remember, any valid top-level command is valid insi
 a.x + 1						# This will retrieve x from the class and add 1 to it (result = 3)
 a:"x+1"						# Same as above--this will evaluate "x+1" in the namespace of the class (result = 3)
 a.z = 5						# Sets z to 5 inside the class
-a:"z":5						# Same as above--this will set "z" in the class to 5 (result = 5)
+a:"z":5						# Same as above--this will set "z" in the class to 5 (result = { x = 2 ;; z = 5 })
 ```
 
 Since class definitions can often get very long, it is reccomended that line continuations be used. Since we haven't introduced those yet, we'll do so here. Line continuations follow a very simple rule: any line that starts with whitespace will be added onto the previous line. It should be noted that this only works when running code from a file, not from the command line. Some common uses of this syntax are:

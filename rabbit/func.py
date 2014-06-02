@@ -695,7 +695,7 @@ class classcalc(cotobject):
         else:
             self.store(variables[0], variables[1])
             self.e.overflow = variables[2:]
-            return variables[1]
+            return self
     def __delitem__(self, key):
         """Wraps remove."""
         self.remove(key)
