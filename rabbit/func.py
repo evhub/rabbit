@@ -721,3 +721,9 @@ class classcalc(cotobject):
         """Adds Variables."""
         for k,v in other.items():
             self.store(k, v, True)
+    def __eq__(self, other):
+        """Performs ==."""
+        if isinstance(other, classcalc):
+            return self.variables == other.variables
+        else:
+            return False
