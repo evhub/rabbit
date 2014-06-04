@@ -105,6 +105,12 @@ def hypgeostdev(n, K, N):
     n = float(n)
     return binomstdev(n, K/N) * ((N-n)/(N-1.0))**0.5
 
+def birthdayP(n, x):
+    """Determines The Probability Of An Overlap With N Possible States And X Being Used."""
+    n = float(n)
+    x = float(x)
+    return perm(n, x)/n**x
+
 def normdist(x, mean=0.0, stdev=1.0):
     """Implements The Normal Distribution."""
     x = float(x)
