@@ -637,6 +637,9 @@ class classcalc(cotobject):
         self.e = e
         if variables != None:
             self.add(variables)
+    def copy(self):
+        """Copies The Dictionary."""
+        return classcalc(self.e, self.variables)
     def process(self, command, methods=True):
         """Processes A Command And Puts The Result In The Variables."""
         oldvars = self.e.variables.copy()
@@ -650,9 +653,6 @@ class classcalc(cotobject):
             elif not v in oldvars or not self.e.variables[v] is oldvars[v]:
                 self.store(v, self.e.variables[v], True, methods)
         self.e.variables = oldvars
-    def copy(self):
-        """Copies The Dictionary."""
-        return classcalc(self.variables, self.e)
     def calc(self, inputstring):
         """Calculates A String In The Environment Of The Dictionary."""
         oldvars = self.e.setvars(self.variables)
