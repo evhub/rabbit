@@ -348,7 +348,7 @@ Import Commands:
     def save(self, name, load=True, tempfile=None):
         """Saves To A File."""
         try:
-            tempfile = tempfile or openfile(name, "r+b")
+            tempfile = tempfile or getfile(name, "r+b")
         except IOError:
             return None
         else:
