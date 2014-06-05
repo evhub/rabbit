@@ -142,9 +142,12 @@ def startconsole(handler=None, message=None, name="PythonPlus", height=None, roo
     else:
         return root, app
 
-def rootbind(root):
+def rootbind(root, handler=None):
     """Makes The Conventional Root Bindings."""
-    root.bind("<Escape>", lambda event: root.destroy())
+    if handler == None:
+        handler = lambda event=None: root.destroy()
+    root.bind("<Escape>", handler)
+    root.protocol("WM_DELETE_WINDOW", handler)
 
 def popup(which, message, title=None):
     """Displays A Pop-Up Message."""
