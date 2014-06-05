@@ -18,7 +18,7 @@
 
 from __future__ import absolute_import, print_function
 
-from rabbit.ride import *
+from .rabbit.cmd import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)

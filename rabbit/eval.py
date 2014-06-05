@@ -265,13 +265,13 @@ Global Operator Precedence List:
         elif isinstance(item, (fraction, reciprocal)):
             out = ""
             a = self.prepare(item.n, False, bottom)
-            if not bottom or madeof(a, string.digits) or not self.isreserved(test):
+            if not bottom or madeof(a, string.digits) or not self.isreserved(a):
                 out += a
             else:
                 out += "("+a+")"
             out += "/"
             b = self.prepare(item.d, False, bottom)
-            if not bottom or madeof(b, string.digits) or not self.isreserved(test):
+            if not bottom or madeof(b, string.digits) or not self.isreserved(b):
                 out += b
             else:
                 out += "("+b+")"
