@@ -618,11 +618,11 @@ def diagmatrix(size=2, full=1.0, empty=0.0, converter=float, fake=True):
         I.store(x, x, full)
     return I
 
-def matrixitems(inputitems, y, x=None):
+def matrixitems(inputitems, y, x=None, converter=float, fake=False):
     """Constructs A Matrix From Items."""
     if x == None:
         x = len(inputitems)/y
-    out = matrix(y, x)
+    out = matrix(y, x, converter=converter, fake=fake)
     z = 0
     for y,x in out.coords():
         out.store(y,x, inputitems[z])
@@ -681,24 +681,30 @@ def matrixlist(inputlist, converter=float, fake=False):
     out.convert()
     return out
 
-def rangematrix(start, stop, step=1.0, fake=True):
+def rangematrix(start, stop, step=1.0, fake=True, converter=float):
     """Constructs A Matrix On A Range."""
     start = float(start)
     stop = float(stop)
     step = float(step)
-    if stop < start:
-        amount = int((1+start-stop)/step)
-        out = matrix(amount, fake=fake)
-        for x in xrange(0, amount):
-            out.store(x, x, start)
-            start -= step
+    if step == 0:
+        return matrix(0)
     else:
-        amount = int((1+stop-start)/step)
-        out = matrix(amount, fake=fake)
-        for x in xrange(0, amount):
-            out.store(x, x, start)
-            start += step
-    return out
+        rev = False
+        if step < 0:
+            step = -step
+            rev = True
+        out = []
+        if stop < start:
+            while start > stop:
+                out.append(start)
+                start -= step
+        else:
+            while start < stop:
+                out.append(start)
+                start += step
+        if rev:
+            out.reverse()
+        return diagmatrixlist(out, converter=converter, fake=fake)
 
 def totlen(inputlist):
     """Returns The Total Length Of An Object."""
