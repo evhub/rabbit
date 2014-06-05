@@ -135,7 +135,7 @@ Import Commands:
         else:
             return False
 
-    def dorender(newx, newy, grid=False):
+    def dorender(self, newx, newy, grid=False):
         """Renders A Converted Point."""
         if grid and self.sepgrid:
             self.grid.append(self.app.new(self.gridline, newx, newy))
