@@ -547,6 +547,15 @@ class matrix(mctobject):
                 return False
         return True
 
+    def rows(self):
+        """Returns The Rows As Matrices."""
+        out = []
+        for row in self.a:
+            new = self.new(1, len(row), fake=False)
+            new.a[0] = row
+            out.append(new)
+        return out
+
     def onlyrow(self):
         """Determines If The Matrix Is A Row List."""
         return self.y <= 1

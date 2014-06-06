@@ -47,6 +47,14 @@ def getmatrix(inputobject, func=diagmatrixlist):
     else:
         return matrix(1,1, inputobject, fake=(func==diagmatrixlist))
 
+def getitems(inputobject):
+    """Gets A List Of Items From A Possible Matrix."""
+    item = getmatrix(inputobject)
+    if item.onlydiag():
+        return item.getdiag()
+    else:
+        return item.rows()
+
 def merge(inputlist):
     """Merges Items."""
     out = []

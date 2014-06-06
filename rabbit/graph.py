@@ -347,12 +347,12 @@ Import Commands:
             "'stop":2.0*math.pi,
             "'base":1.0,
             "'points":"points_box",
-            "points_fill":"matrix:(1,0):(0,1):(0,-1):(-1,0):(1,1):(-1,1):(1,-1):(-1,-1):(-2,-2):(-2,-1):(-2,0):(-2,1):(-2,2):(2,-2):(2,-1):(2,0):(2,1):(2,2):(-1,2):(0,2):(1,2):(-1,-2):(0,-2):(1,-2)",
-            "points_box":"matrix:(-2,-2):(-2,-1):(-2,0):(-2,1):(-2,2):(2,-2):(2,-1):(2,0):(2,1):(2,2):(-1,2):(0,2):(1,2):(-1,-2):(0,-2):(1,-2)",
-            "points_cross":"matrix:(1,0):(0,1):(0,-1):(-1,0):(2,0):(0,2):(0,-2):(-2,0)",
-            "points_bold":"matrix:(1,0):(0,1):(0,-1):(-1,0):(1,1):(-1,1):(1,-1):(-1,-1)",
-            "points_plus":"matrix:(1,0):(0,1):(0,-1):(-1,0)",
-            "points_dot":"()",
+            "points_fill":"matrix:[1,0]:[0,1]:[0,-1]:[-1,0]:[1,1]:[-1,1]:[1,-1]:[-1,-1]:[-2,-2]:[-2,-1]:[-2,0]:[-2,1]:[-2,2]:[2,-2]:[2,-1]:[2,0]:[2,1]:[2,2]:[-1,2]:[0,2]:[1,2]:[-1,-2]:[0,-2]:[1,-2]",
+            "points_box":"matrix:[-2,-2]:[-2,-1]:[-2,0]:[-2,1]:[-2,2]:[2,-2]:[2,-1]:[2,0]:[2,1]:[2,2]:[-1,2]:[0,2]:[1,2]:[-1,-2]:[0,-2]:[1,-2]",
+            "points_cross":"matrix:[1,0]:[0,1]:[0,-1]:[-1,0]:[2,0]:[0,2]:[0,-2]:[-2,0]",
+            "points_bold":"matrix:[1,0]:[0,1]:[0,-1]:[-1,0]:[1,1]:[-1,1]:[1,-1]:[-1,-1]",
+            "points_plus":"matrix:[1,0]:[0,1]:[0,-1]:[-1,0]",
+            "points_dot":"[]",
             "width":self.width/100.0,
             "height":self.height/100.0
             })
@@ -543,7 +543,8 @@ Import Commands:
                 self.show(self.e.prepare(item, True, True))
             elif isinstance(item, data):
                 for x in item.items():
-                    self.pointrender(x,self.base())
+                    base = self.base()
+                    self.pointrender(self.call(x, base), base)
             elif isinstance(item, multidata):
                 for x,y in item.items():
                     self.pointrender(x,y)
@@ -558,13 +559,16 @@ Import Commands:
         """Renders A Matrix."""
         temp = inputmatrix.getitems()
         if len(temp) == 2 and not (isinstance(temp[0], matrix) or isinstance(temp[1], matrix)):
-            self.pointrender(self.calc(temp[0]), self.calc(temp[1]))
+            self.pointrender(temp[0], self.call(temp[1], temp[0]))
             return True
         elif len(temp) > 0:
             out = False
             for x in temp:
                 if isinstance(x, matrix):
                     out = self.matrixrender(x) or out
+                else:
+                    base = self.base()
+                    self.pointrender(self.call(x, base), base)
             return out
         return False
 
