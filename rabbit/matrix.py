@@ -723,7 +723,7 @@ def totlen(inputlist):
 
 def isnull(inputobject):
     """Determines If The Object Is An Empty Matrix."""
-    return isinstance(inputobject, matrix) and len(inputobject) == 0
+    return isinstance(inputobject, matrix) and inputobject.y == 0
 
 def nonull(inputlist):
     """Cleans The Input Of Empty Matrices."""
