@@ -234,7 +234,7 @@ Global Operator Precedence List:
             else:
                 out = self.prepare(getmatrix(item), top, bottom)
         elif isinstance(item, matrix):
-            if len(item) == 0:
+            if item.y == 0:
                 out = "()"
             elif item.onlydiag():
                 out = "("
@@ -253,7 +253,9 @@ Global Operator Precedence List:
                     out += "["
                     for x in y:
                         out += self.prepare(x, False, bottom)+","
-                    out = out[:-1]+"]:\n"
+                    if len(y) > 0:
+                        out = out[:-1]
+                    out += "]:\n"
                 out = out[:-2]
             else:
                 out = "matrix:["
