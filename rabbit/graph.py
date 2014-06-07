@@ -88,12 +88,22 @@ Import Commands:
         try:
             self.pixel = openphoto(directory+"Pixel.gif")
         except:
-            popup("Error", "Unable to find Pixel.gif. This file is necessary for rendering anything.")
-            raise IOError("Unable to find Pixel.gif")
+            go = False
+            while not go:
+                inputstring = popup("Info", "Unable to find Pixel.gif. This file is necessary for rendering anything. Please enter the location where the file can be found:")
+                if inputstring:
+                    try:
+                        self.pixel = openphoto(sanitize(inputstring)+"/Pixel.gif")
+                    except:
+                        go = False
+                    else:
+                        go = True
+                else:
+                    raise IOError("Unable to find Pixel.gif.")
         try:
             self.graph = openphoto(directory+"Graph.gif")
         except:
-            pass
+            self.graph = None
         else:
             self.app.new(self.graph)
         try:
