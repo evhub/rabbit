@@ -435,16 +435,6 @@ Import Commands:
                 sides[0] = sides[0][:-1*len(test)]
                 sides[1] = "("+sides[0]+")"+test+"("+sides[1]+")"
                 docalc = True
-            if sides[0].endswith("<") and sides[1].startswith(">"):
-                sides[0] = sides[0][:-1]
-                sides[1] = sides[1][1:]
-                if (delspace(sides[0]) in self.e.variables or not self.readytofunc(sides[0], allowed=".")) and not delspace(sides[1]) in self.e.variables and self.readytofunc(sides[1], allowed="."):
-                    sides.reverse()
-            elif sides[1].startswith(">"):
-                sides[1] = sides[1][1:]
-                sides.reverse()
-            elif sides[0].endswith("<"):
-                sides[0] = sides[0][:-1]
             sides[0] = carefulsplit(sides[0], ",", openstr="(", closestr=")")
             if len(sides[0]) > 1:
                 test = True
