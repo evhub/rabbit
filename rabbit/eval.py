@@ -1114,10 +1114,12 @@ Global Operator Precedence List:
                     else:
                         item = getcall(item)([arg])
                 values.append(item)
-            values = clean(values)
-            value = (len(values) != 0 and values[0]) or matrix(0)
-            for x in xrange(1, len(values)):
-                value *= values[x]
+            if len(values) == 0:
+                value = matrix(0)
+            else:
+                value = values[0]
+                for x in xrange(1, len(values)):
+                    value *= values[x]
             if self.debug:
                 print(self.recursion*"  "+self.prepare(value)+" (<) "+temp)
                 self.recursion -= 1
