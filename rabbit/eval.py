@@ -1059,12 +1059,14 @@ Global Operator Precedence List:
 
     def call_paren(self, inputstring):
         """Evaluates Parentheses."""
-        inputstring = strlist(switchsplit(inputstring, string.digits, [x for x in string.printable if not self.isreserved(x)]), "``")
+        inputstring = strlist(switchsplit(inputstring, string.digits, [x for x in string.printable if not self.isreserved(x)]), "``")        
         if "`" in inputstring:
             if self.debug:
                 print(self.recursion*"  "+"(|) "+inputstring) 
             templist = inputstring.split("`")
-            inputlist = []
+            inputlist = [[]]
+            feed = inputlist[0]
+            last = False
             for x in xrange(0, len(templist)):
                 if x%2 == 1:
                     if templist[x]:
@@ -1075,101 +1077,47 @@ Global Operator Precedence List:
                                 num += self.count
                             name = "`"+str(num)+"`"
                         if name in self.variables:
-                            inputlist.append(name)
+                            feed.append(name)
                         else:
                             self.processor.adderror("VariableError", "Could not find parentheses "+name)
-                else:
-                    inputlist.append(templist[x])
-            values = []
-            for x in xrange(0, len(inputlist)):
-                if x%2 == 1:
-                    inputlist[x] = self.eval_call(inputlist[x])
-                    if inputlist[x] == None:
-                        raise ValueError("Nothing was returned as a result of evaluating "+inputlist[x])
-                    elif islist(values[-1]):
-                        funcs = [values[-1][0]]
-                        for x in xrange(1, len(values[-1])):
-                            try:
-                                funcs[-1].__dict__
-                            except AttributeError:
-                                funcs[-1] = self.eval_check(funcs[-1])
-                            if values[-1][x] in vars(funcs[-1]):
-                                funcs[-1] = vars(funcs[-1])[values[-1][x]]
-                            elif values[-1][x] in vars(type(funcs[-1])):
-                                arg = funcs[-1]
-                                func = vars(type(arg))[values[-1][x]]
-                                funcs[-1] = lambda *args: func(arg, *args)
-                            else:
-                                funcs.append(self.funcfind(values[-1][x]))
-                        if istext(funcs[-1]):
-                            values[-1] = strcalc(funcs[-1], self)
-                            if not isnull(inputlist[x]):
-                                values[-1] *= inputlist[x]
-                        elif isnum(funcs[-1]) or isinstance(funcs[-1], strcalc):
-                            values[-1] = funcs[-1]
-                            if not isnull(inputlist[x]):
-                                values[-1] *= inputlist[x]
-                        elif islist(funcs[-1]):
-                            values[-1] = diagmatrixlist(funcs[-1])
-                            if not isnull(inputlist[x]):
-                                values[-1] *= inputlist[x]
-                        else:
-                            if isinstance(inputlist[x], matrix):
-                                args = inputlist[x].getitems()
-                            else:
-                                args = [inputlist[x]]
-                            if self.debug:
-                                print(self.recursion*"  "+"||> ("+strlist(args,",",converter=lambda x: self.prepare(x, False, True, True))+") > "+strlist(funcs," > ",converter=lambda x: self.prepare(x, False, True, True)))
-                                self.recursion += 1
-                            values[-1] = callfuncs(funcs, *args)
-                            if self.debug:
-                                print(self.recursion*"  "+self.prepare(values[-1])+" <||")
-                                self.recursion -= 1
-                            if istext(values[-1]):
-                                values[-1] = strcalc(values[-1], self)
+                        last = True
                     else:
-                        values.append(inputlist[x])
-                elif inputlist[x] == "-":
-                    values.append(-1.0)
-                elif "." in inputlist[x]:
-                    itemlist = inputlist[x].split(".")
-                    isfloat = len(itemlist) < 3
-                    for item in itemlist:
-                        isfloat = isfloat and (not item or madeof(item, string.digits))
-                    if not isfloat:
-                        itemlist[0] = self.funcfind(itemlist[0] or values.pop())
-                        if not isinstance(itemlist[0], classcalc):
-                            values.append(itemlist)
-                        elif len(itemlist) == 2:
-                            values.append(itemlist[0].retrieve(itemlist[1]))
-                        else:
-                            values.append(strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retrieve(itemlist[1])]))
-                    else:
-                        values.append(self.find(inputlist[x], True, False))
-                else:
-                    values.append(self.find(inputlist[x], True, False))
-            values = clean(values)
-            for x in xrange(0, len(values)):
-                if istext(values[x]):
-                    if self.debug:
-                        self.info = " (<)"
-                    values[x] = self.calc(values[x])
+                        last = False
+                elif templist[x]:
+                    if last:
+                        inputlist.append([])
+                        feed = inputlist[-1]
+                    feed.append(templist[x])
             if self.debug:
-                temp = strlist(values," < ",converter=lambda x: self.prepare(x, False, True, True))
+                temp = "("+strlist(inputlist, ") * (", lambda l: strlist(l, " : "))+")"
                 print(self.recursion*"  "+"(>) "+temp)
                 self.recursion += 1
+            values = []
+            for l in inputlist:
+                if l[0].startswith("."):
+                    if len(values) > 0:
+                        item = strfunc("inputclass"+l[0], self, ["inputclass"]).call([values.pop()])
+                    else:
+                        self.processor.adderror("NoneError", "Nothing does not have methods.")
+                        item = matrix(0)
+                else:
+                    item = self.eval_call(l[0])
+                for x in xrange(1, len(l)):
+                    arg = self.eval_call(l[x])
+                    if not isfunc(item):
+                        item *= arg
+                    elif isinstance(arg, matrix) and arg.onlydiag():
+                        args = arg.getdiag()
+                        if isinstance(item, (strfunc, usefunc)) and item.overflow and len(args) > len(item.variables):
+                            args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
+                        item = getcall(item)(args)
+                    else:
+                        item = getcall(item)([arg])
+                values.append(item)
+            values = clean(values)
             value = (len(values) != 0 and values[0]) or matrix(0)
             for x in xrange(1, len(values)):
-                values[x] = values[x]
-                if not isfunc(value):
-                    value *= values[x]
-                elif isinstance(values[x], matrix) and values[x].onlydiag():
-                    args = values[x].getdiag()
-                    if isinstance(value, (strfunc, usefunc)) and value.overflow and len(args) > len(value.variables):
-                        args = args[:len(value.variables)-1] + [diagmatrixlist(args[len(value.variables)-1:])]
-                    value = getcall(value)(args)
-                else:
-                    value = getcall(value)([values[x]])
+                value *= values[x]
             if self.debug:
                 print(self.recursion*"  "+self.prepare(value)+" (<) "+temp)
                 self.recursion -= 1
@@ -1190,7 +1138,7 @@ Global Operator Precedence List:
                     else:
                         return strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retrieve(itemlist[1])])
                 elif not isnull(itemlist[0]):
-                    return strfunc("firstfunc."+strlist(itemlist[1:], ".")+"("+funcfloat.allargs+")", self, [funcfloat.allargs], {"firstfunc":itemlist[0]})
+                    return strfunc("firstfunc("+strlist(itemlist[1:], ".")+"("+funcfloat.allargs+"))", self, [funcfloat.allargs], {"firstfunc":itemlist[0]})
 
     def call_normal(self, inputstring):
         """Returns Argument."""
