@@ -173,6 +173,43 @@ def defint(func, start, stop, accuracy=0.0001, strict=False):
         start += step
     return out
 
+def Bnum(n):
+    """Calculates The nth Second Bernouli Number."""
+    n = int(n)
+    a = {}
+    for m in xrange(0, n+1):
+        a[m] = 1.0/(m+1.0)
+        for j in reversed(xrange(1, m+1)):
+            a[j-1] = j*(a[j-1] - a[j])
+    return a[0]
+
+def Bpoly(n, x):
+    """Calculates The nth Second Bernouli Polynomial."""
+    n = int(n)
+    x = float(x)
+    out = 0.0
+    for k in xrange(0, n+1):
+        out += comb(n,k)*Bnum(n-k)*x**float(k)
+    return out
+
+def PBpoly(n, x):
+    """Calculates The nth Second Periodic Bernouli Polynomial."""
+    n = int(n)
+    x = float(x)
+    return Bpoly(n, x-math.floor(x))
+
+def eulermaclaurin(func, start, stop, p=2, R=True, accuracy=0.0001, scaledown=1.25):
+    """Calculates The Error Of The Strict Definite Integral Approximation With An Accuracy Of 1."""
+    start = float(start)
+    stop = float(stop)
+    p = int(p)
+    out = 0.0
+    for k in xrange(2, p+1):
+        out -= (deriv(func, start, k-1, accuracy, scaledown) - deriv(func, start, k-1, accuracy, scaledown))*Bnum(k)/math.factorial(k)
+    if R:
+        out -= defint(lambda x: deriv(func, x, 2*p, accuracy, scaledown)*PBpoly(2*p, x)*x/math.factorial(2*p+1), start, stop, accuracy)
+    return out
+
 def factorial(x):
     """Implements The Factorial Function Over 0, The Positive Integers, And The Half-Integers."""
     if x == -0.5:
