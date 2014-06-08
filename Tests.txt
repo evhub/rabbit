@@ -193,7 +193,6 @@ assert len:(0,0,(0,0)) ?= 3
 assert size:(0,(0,0),0) ?= 4
 assert abs([3,4]) ?= 5
 assert cont:(data:(1,2,3)) ?= 1,2,3
-assert a.med() ?= 2				$ a = data:(1,2,3)
 assert frac:1:2 ?= 0.5
 assert simp:2:4 ?= frac:1:2
 assert 2 <= 2d6: <= 12
