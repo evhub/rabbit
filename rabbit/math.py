@@ -152,27 +152,25 @@ def deriv(func, x, n=1, accuracy=0.0001, scaledown=1.25):
         scaledown = float(scaledown)
         return (deriv(func, x+accuracy, n-1, accuracy/scaledown, scaledown) - deriv(func, x, n-1, accuracy/scaledown, scaledown))/accuracy
 
-def defint(func, start, stop, accuracy=0.0001):
+def defint(func, start, stop, accuracy=0.0001, strict=False):
     """Finds The Definite Integral Of A Function From start To stop."""
     start = float(start)
+    stop = float(stop)
     accuracy = float(accuracy)
-    step = (float(stop)-start)*accuracy
+    if strict:
+        step = accuracy
+        endpoint = int((stop-start)/accuracy)+1
+    else:
+        start += accuracy
+        step = (stop-start)*accuracy
+        endpoint = int(1.0/accuracy)
     out = 0.0
-    try:
-        last = func(start)
-    except:
-        last = None
-    for x in xrange(0, int(1.0/accuracy)):
+    for x in xrange(0, endpoint):
+        point = func(start)
+        if x == 0 or x == endpoint:
+            point /= 2.0
+        out += step*point
         start += step
-        try:
-            new = func(start)
-        except:
-            new = last
-        if last == None:
-            out += step*new
-        else:
-            out += step*(last+new)/2.0
-        last = new
     return out
 
 def factorial(x):
