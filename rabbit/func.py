@@ -171,10 +171,15 @@ class funcfloat(numobject):
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
-    def __init__(self, funcstr, e, variables=[], personals=None, name="func", overflow=None):
+    autoarg = "auto"
+
+    def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None):
         """Creates A Callable String Function."""
         self.funcstr = str(funcstr)
-        self.name = str(name)
+        if name:
+            self.name = str(name)
+        else:
+            self.name = self.autoarg
         self.variables = variables[:]
         if self.allargs in self.variables:
             self.variables.remove(self.allargs)
@@ -301,9 +306,12 @@ class strfunc(funcfloat):
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
-    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name="func", overflow=None):
+    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name=None, overflow=None):
         """Initializes The String Float."""
-        self.name = str(name)
+        if name:
+            self.name = str(name)
+        else:
+            self.name = self.autoarg
         self.variables = variables[:]
         if self.allargs in self.variables:
             self.variables.remove(self.allargs)
@@ -473,9 +481,12 @@ class usefunc(funcfloat):
 
 class unifunc(funcfloat):
     """Universalizes Function Calls."""
-    def __init__(self, precall, e, funcstr="func"):
+    def __init__(self, precall, e, funcstr=None):
         """Constructs The Universalizer."""
-        self.funcstr = str(funcstr)
+        if funcstr:
+            self.funcstr = str(funcstr)
+        else:
+            self.funcstr = self.autoarg
         self.store = []
         self.precall = precall
         self.e = e
@@ -503,9 +514,12 @@ class unifunc(funcfloat):
 
 class makefunc(funcfloat):
     """Creates A Normal Single-Variable Evaluator Function."""
-    def __init__(self, func, e, funcstr="func"):
+    def __init__(self, func, e, funcstr=None):
         """Initializes The Evaluator Function."""
-        self.funcstr = str(funcstr)
+        if funcstr:
+            self.funcstr = str(funcstr)
+        else:
+            self.funcstr = self.autoarg
         self.func = func
         self.e = e
     def copy(self):
@@ -566,9 +580,12 @@ class integbase(derivbase):
 
 class derivfunc(derivbase, strfunc):
     """Implements A Derivative Function."""
-    def __init__(self, funcstr, n, accuracy, scaledown, e, varname="x", personals=None, name="derivfunc"):
+    def __init__(self, funcstr, n, accuracy, scaledown, e, varname="x", personals=None, name=None):
         """Creates The Derivative Function."""
-        self.name = str(name)
+        if name:
+            self.name = str(name)
+        else:
+            self.name = self.autoarg
         self.funcstr = str(funcstr)
         self.n = int(n)
         self.accuracy = float(accuracy)
@@ -586,9 +603,12 @@ class derivfunc(derivbase, strfunc):
 
 class integfunc(integbase, strfunc):
     """Implements An Integral Function."""
-    def __init__(self, funcstr, accuracy, e, varname="x", personals=None, name="integfunc"):
+    def __init__(self, funcstr, accuracy, e, varname="x", personals=None, name=None):
         """Creates The Integral Function."""
-        self.name = str(name)
+        if name:
+            self.name = str(name)
+        else:
+            self.name = self.autoarg
         self.funcstr = str(funcstr)
         self.accuracy = float(accuracy)
         self.variables = [str(varname)]
@@ -604,12 +624,15 @@ class integfunc(integbase, strfunc):
 
 class derivfuncfloat(derivbase, funcfloat):
     """Implements A Derivative Function Of A Fake Function."""
-    def __init__(self, func, n, accuracy, scaledown, e, funcstr="derivfunc"):
+    def __init__(self, func, n, accuracy, scaledown, e, funcstr=None):
         """Creates The Derivative Function."""
         self.n = int(n)
         self.accuracy = float(accuracy)
         self.scaledown = float(scaledown)
-        self.funcstr = str(funcstr)
+        if funcstr:
+            self.funcstr = str(funcstr)
+        else:
+            self.funcstr = self.autoarg
         self.func = func
         self.e = e
     def copy(self):
@@ -624,10 +647,13 @@ class derivfuncfloat(derivbase, funcfloat):
 
 class integfuncfloat(integbase, funcfloat):
     """Implements An Integral Function Of A Fake Function."""
-    def __init__(self, func, accuracy, e, funcstr="integfunc"):
+    def __init__(self, func, accuracy, e, funcstr=None):
         """Creates The Integral Float Function."""
         self.accuracy = float(accuracy)
-        self.funcstr = str(funcstr)
+        if funcstr:
+            self.funcstr = str(funcstr)
+        else:
+            self.funcstr = self.autoarg
         self.func = func
         self.e = e
     def copy(self):

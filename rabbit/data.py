@@ -979,13 +979,16 @@ def datamatrix(inputmatrix):
 
 class rollfunc(strfunc):
     """Implements A Random Number Generator Object."""
-    def __init__(self, stop, e, key=None, varname="times", name="rollfunc"):
+    def __init__(self, stop, e, key=None, varname="times", name=None):
         """Creates The Random Number Generator."""
         self.gen = random(key)
         self.stop = float(stop)
         self.funcstr = str(self.stop)
         self.variables = [str(varname)]
-        self.name = str(name)
+        if name:
+            self.name = str(name)
+        else:
+            self.name = self.autoarg
         self.e = e
     def copy(self):
         """Copies The Random Number Generator."""

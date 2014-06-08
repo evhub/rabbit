@@ -1096,7 +1096,7 @@ Global Operator Precedence List:
             for l in inputlist:
                 if l[0].startswith("."):
                     if len(values) > 0:
-                        item = strfunc("inputclass"+l[0], self, ["inputclass"]).call([values.pop()])
+                        item = strfunc(strfunc.autoarg+l[0], self, [strfunc.autoarg]).call([values.pop()])
                     else:
                         self.processor.adderror("NoneError", "Nothing does not have methods.")
                         item = matrix(0)
@@ -1138,9 +1138,9 @@ Global Operator Precedence List:
                     if len(itemlist) == 2:
                         return itemlist[0].retrieve(itemlist[1])
                     else:
-                        return strfunc("inputclass."+strlist(itemlist[2:], "."), self, ["inputclass"]).call([itemlist[0].retrieve(itemlist[1])])
+                        return strfunc(strfunc.autoarg+"."+strlist(itemlist[2:], "."), self, [strfunc.autoarg]).call([itemlist[0].retrieve(itemlist[1])])
                 elif not isnull(itemlist[0]):
-                    return strfunc("firstfunc("+strlist(itemlist[1:], ".")+"("+funcfloat.allargs+"))", self, [funcfloat.allargs], {"firstfunc":itemlist[0]})
+                    return strfunc(strfunc.autoarg+"("+strlist(itemlist[1:], ".")+"("+funcfloat.allargs+"))", self, [funcfloat.allargs], {strfunc.autoarg:itemlist[0]})
 
     def call_normal(self, inputstring):
         """Returns Argument."""
