@@ -22,7 +22,7 @@ from __future__ import absolute_import, print_function
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-__all__ = ["web", "path", "crypto", "ride", "graph"]
+__all__ = ["web", "proc", "path", "crypto", "ride", "graph"]
 
 __doc__ = """Overview:
     Rabbit (PythonPlus) is a compilation of functions, classes, and variables that extend basic Python functionality.
@@ -39,6 +39,7 @@ File List:
     sys (obj) : Functions for interfacing with the operating system.
     math (obj) : Advanced mathematical functions.
     web (obj) : Utilities for interfacing with the web.
+    proc (obj) : Utilities for managing multiple processes.
 
     check (base) : Functions for analyzing objects for basic properties.
     path (sys) : Utilities for implementing pathfinding.
@@ -68,4 +69,4 @@ File List:
     ride (cmd) : The Rabbit Integrated Development Environment.
     graph (cmd) : A Graphing Module For Rabbit Functions.
 
-    all (graph, ride, crypto, path, web) : All Rabbit functions in one place."""
+    all (graph, ride, crypto, path, proc, web) : All Rabbit functions in one place."""

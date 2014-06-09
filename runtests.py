@@ -25,6 +25,7 @@ from rabbit.all import *
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     main = mathbase()
     print("Running Tests...")
     main.evalfile("Tests.txt")
