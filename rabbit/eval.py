@@ -168,6 +168,7 @@ Global Operator Precedence List:
             self.call_neg,
             self.call_reciproc,
             self.call_exp,
+            self.call_lambda,
             self.call_colon,
             self.call_paren,
             self.call_method,
@@ -988,6 +989,11 @@ Global Operator Precedence List:
             for x in reversed(xrange(0, len(inputlist))):
                 value = self.eval_call(inputlist[x])**value
             return value
+
+    def call_lambda(self, inputstring):
+        """Wraps Lambda Evaluation."""
+        if inputstring.startswith("\\"):
+            return self.eval_lambda([inputstring])
 
     def call_colon(self, inputstring):
         """Evaluates Colons."""

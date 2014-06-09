@@ -218,7 +218,7 @@ class strfunc(funcfloat):
                 items, trash = useparams(variables, self.variables)
             items[self.allargs] = allvars
             for k in self.personals:
-                if not k in items or items[k] == None or (k == self.allargs and isnull(allvars)):
+                if not k in items or items[k] == None or isnull(items[k]):
                     items[k] = self.personals[k]
             oldvars = self.e.setvars(items)
             self.e.info = " \\>"

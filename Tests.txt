@@ -213,3 +213,7 @@ assert gcd:8:6 ?= 2
 assert lcm:4:6 ?= 12
 assert perm:5:2 ?= 20
 assert comb:4:2 ?= 6
+
+# New Feature Tests:
+assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
+assert f() ?= 5, & f(1) ?= 1,					$ f(*l:(5,)) = l
