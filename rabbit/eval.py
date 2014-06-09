@@ -678,21 +678,55 @@ Global Operator Precedence List:
                 temp = self.namefind(out[0]).split(",")
                 params = []
                 personals = {}
+                allargs = None
                 for x in temp:
-                    if ":" in x:
-                        x = x.split(":", 1)
-                        personals[x[0]] = self.find(x[1], True, False)
-                    elif x != "":
-                        params.append(x)
+                    if x:
+                        doparam = True
+                        if x.startswith("*"):
+                            x = x[1:]
+                            doallargs = True
+                        else:
+                            doallargs = False
+                        if ":" in x:
+                            if x.startswith("+"):
+                                x = x[1:]
+                                doparam = True
+                            elif not doallargs:
+                                doparam = False
+                            x = x.split(":", 1)
+                            if not x[0] or self.isreserved(x[0]):
+                                self.processor.adderror("VariableError", "Could not set to invalid personal "+x[0])
+                                doparam = False
+                            else:
+                                self.info = " <\\"
+                                personals[x[0]] = self.calc(x[1])
+                            x = x[0]
+                        if doallargs:
+                            if not x or self.isreserved(x):
+                                self.processor.adderror("VariableError", "Could not set to invalid allargs "+x)
+                                doparam = False
+                            else:
+                                allargs = x
+                        if doparam:
+                            if not x or self.isreserved(x):
+                                self.processor.adderror("VariableError", "Could not set to invalid variable "+x)
+                            else:
+                                params.append(x)
                 if out[1].startswith("\\"):
-                    return strfloat(out[1][1:], self, params, personals, check=False)
+                    if allargs:
+                        return strfloat(out[1][1:], self, params, personals, check=False, allargs=allargs)
+                    else:
+                        return strfloat(out[1][1:], self, params, personals, check=False)
                 else:
                     while out[1].startswith("`") and out[1].endswith("`") and out[1] in self.variables and (istext(self.variables[out[1]]) or isinstance(self.variables[out[1]], strcalc)):
                         if isinstance(self.variables[out[1]], strcalc):
                             out[1] = repr(self.variables[out[1]])
                         else:
                             out[1] = str(self.variables[out[1]])
-                    return strfloat(out[1], self, params, personals)
+                    if allargs:
+                        return strfloat(out[1], self, params, personals, allargs=allargs)
+                    else:
+                        return strfloat(out[1], self, params, personals)
 
     def eval_join(self, inputlist):
         """Performs Concatenation."""

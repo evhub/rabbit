@@ -173,9 +173,10 @@ class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
     autoarg = "auto"
 
-    def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None):
+    def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=funcfloat.allargs):
         """Creates A Callable String Function."""
         self.funcstr = str(funcstr)
+        self.allargs = str(allargs)
         if name:
             self.name = str(name)
         else:
@@ -195,12 +196,14 @@ class strfunc(funcfloat):
         self.e = e
     def copy(self):
         """Copies The String Function."""
-        return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow)
-    def calc(self):
+        return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow, self.allargs)
+    def calc(self, personals=True):
         """Calculates The String."""
-        oldvars = self.e.setvars(self.personals)
+        if personals:
+            oldvars = self.e.setvars(self.personals)
         out = self.e.calc(self.funcstr)
-        self.e.setvars(oldvars)
+        if personals:
+            self.e.setvars(oldvars)
         return out
     def call(self, variables):
         """Calls The String Function."""
@@ -215,11 +218,11 @@ class strfunc(funcfloat):
                 items, trash = useparams(variables, self.variables)
             items[self.allargs] = allvars
             for k in self.personals:
-                if (not k in items) or items[k] == None:
+                if not k in items or items[k] == None or (k == self.allargs and isnull(allvars)):
                     items[k] = self.personals[k]
             oldvars = self.e.setvars(items)
             self.e.info = " \\>"
-            out = self.calc()
+            out = self.calc(False)
             self.e.setvars(oldvars)
             return out
     def __float__(self):
@@ -287,7 +290,10 @@ class strfunc(funcfloat):
         """Returns The Original Variable List."""
         out = self.variables[:]
         if not self.overflow:
-            out.append(self.allargs)
+            if self.allargs == funcfloat.allargs:
+                out.append(self.allargs)
+            else:
+                out.append("*"+self.allargs)
         return out
     def getpers(self):
         """Returns The Modified Personals List."""
@@ -306,12 +312,13 @@ class strfunc(funcfloat):
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
-    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name=None, overflow=None):
+    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name=None, overflow=None, allargs=funcfloat.allargs):
         """Initializes The String Float."""
         if name:
             self.name = str(name)
         else:
             self.name = self.autoarg
+        self.allargs = str(allargs)
         self.variables = variables[:]
         if self.allargs in self.variables:
             self.variables.remove(self.allargs)

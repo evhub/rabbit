@@ -586,13 +586,47 @@ Import Commands:
                 sides[0][1] = self.e.namefind("`"+sides[0][1])
             params = []
             personals = {}
+            allargs = None
             for x in sides[0][1].split(","):
-                if ":" in x:
-                    x = x.split(":", 1)
-                    personals[delspace(x[0])] = self.e.find(x[1], True, False)
-                elif x != "":
-                    params.append(delspace(x))
-            return (sides[0][0], strfunc(sides[1], self.e, params, personals))
+                if x:
+                    doparam = True
+                    if x.startswith("*"):
+                        x = x[1:]
+                        doallargs = True
+                    else:
+                        doallargs = False
+                    if ":" in x:
+                        if x.startswith("+"):
+                            x = x[1:]
+                            doparam = True
+                        elif not doallargs:
+                            doparam = False
+                        x = x.split(":", 1)
+                        x[0] = delspace(x[0])
+                        if not x[0] or self.e.isreserved(x[0]):
+                            self.adderror("VariableError", "Could not set to invalid personal "+x[0])
+                            doparam = False
+                        else:
+                            self.e.info = " <\\"
+                            personals[x[0]] = self.e.calc(x[1])
+                        x = x[0]
+                    else:
+                        x = delspace(x)
+                    if doallargs:
+                        if not x or self.e.isreserved(x):
+                            self.adderror("VariableError", "Could not set to invalid allargs "+x)
+                            doparam = False
+                        else:
+                            allargs = x
+                    if doparam:
+                        if not x or self.e.isreserved(x):
+                            self.adderror("VariableError", "Could not set to invalid variable "+x)
+                        else:
+                            params.append(x)
+            if allargs:
+                return (sides[0][0], strfunc(sides[1], self.e, params, personals, allargs=allargs))
+            else:
+                return (sides[0][0], strfunc(sides[1], self.e, params, personals))
 
     def set_normal(self, sides):
         """Performs =."""
