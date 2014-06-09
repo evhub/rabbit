@@ -73,7 +73,7 @@ class pool(queue):
         proc = multiprocessing.Process(target=func, args=args, kwargs=kwargs)
         self.procs.append(proc)
     def get(self):
-        """Gets The Results Of The Functions In The Queue."""
+        """Gets The Results Of The Functions In The Pool."""
         out = []
         for x in xrange(0, len(self.procs)):
             out.append(self.queue.get())
