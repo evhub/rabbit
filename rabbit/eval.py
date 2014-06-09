@@ -43,6 +43,7 @@ Global Operator Precedence List:
     >?!=<   Performs equality or inequality checks.
 
     ~       Applies a list to a function for looping.
+    \       Creates a lambda.
     ..      Performs concatenation.
     **      Performs repeat.
     ,       Seperates list elements.
@@ -55,7 +56,6 @@ Global Operator Precedence List:
     -       Denotes negatives.
     /       Denotes reciprocals.
     ^       Performs exponentiation.
-    \       Creates a lambda.
     :       Performs function calls.
     `       Denotes parentheses.
     .       Denotes methods and functions of functions.
@@ -168,7 +168,6 @@ Global Operator Precedence List:
             self.call_neg,
             self.call_reciproc,
             self.call_exp,
-            self.call_lambda,
             self.call_colon,
             self.call_paren,
             self.call_method,
@@ -563,19 +562,21 @@ Global Operator Precedence List:
         """Evaluates An Expression."""
         top = expression.split("~")
         for a in xrange(0, len(top)):
-            top[a] = top[a].split("..")
-            for b in xrange(0, len(top[a])):
-                top[a][b] = top[a][b].split("**")
-                for c in xrange(0, len(top[a][b])):
-                    top[a][b][c] = top[a][b][c].split(",")
-                    for d in xrange(0, len(top[a][b][c])):
-                        top[a][b][c][d] = splitinplace(top[a][b][c][d].split("+"), "-", "%/*^:", 2)
-                        for e in xrange(0, len(top[a][b][c][d])):
-                            top[a][b][c][d][e] = top[a][b][c][d][e].split("%")
-                            for f in xrange(0, len(top[a][b][c][d][e])):
-                                top[a][b][c][d][e][f] = splitinplace(top[a][b][c][d][e][f].split("*"), "/")
+            top[a] = [top[a]]
+            if not top[a][0].startswith("\\"):
+                top[a][0] = top[a][0].split("..")
+                for c in xrange(0, len(top[a][0])):
+                    top[a][0][c] = top[a][0][c].split("**")
+                    for d in xrange(0, len(top[a][0][c])):
+                        top[a][0][c][d] = top[a][0][c][d].split(",")
+                        for e in xrange(0, len(top[a][0][c][d])):
+                            top[a][0][c][d][e] = splitinplace(top[a][0][c][d][e].split("+"), "-", "%/*^:", 2)
+                            for f in xrange(0, len(top[a][0][c][d][e])):
+                                top[a][0][c][d][e][f] = top[a][0][c][d][e][f].split("%")
+                                for g in xrange(0, len(top[a][0][c][d][e][f])):
+                                    top[a][0][c][d][e][f][g] = splitinplace(top[a][0][c][d][e][f][g].split("*"), "/")
         if self.debug:
-            value = reassemble(top, ["~", "..", "**", ",", "+", "%", "*"])
+            value = reassemble(top, ["~", "\\", "..", "**", ",", "+", "%", "*"])
             print(self.recursion*"  "+"=> "+value)
         self.recursion += 1
         out = self.eval_check(self.eval_comp(top), True)
@@ -587,9 +588,9 @@ Global Operator Precedence List:
     def eval_comp(self, complist):
         """Performs List Comprehension."""
         if len(complist) == 1:
-            return self.eval_join(complist[0])
+            return self.eval_lambda(complist[0])
         else:
-            item = self.eval_join(complist.pop())
+            item = self.eval_lambda(complist.pop())
             if isinstance(item, strfunc):
                 item.personals[self.lastname] = matrix(0)
             lists = []
@@ -598,7 +599,7 @@ Global Operator Precedence List:
                 if not delist(complist[x]):
                     argnum += 1
                 else:
-                    lists.append((self.eval_join(complist[x]), argnum))
+                    lists.append((self.eval_lambda(complist[x]), argnum))
                     argnum = 1
             return self.eval_comp_set(lists, [], item)
 
@@ -650,6 +651,48 @@ Global Operator Precedence List:
             if isinstance(func, strfunc) and not isnull(out):
                 func.personals[self.lastname] = out
             return out
+
+    def eval_lambda(self, inputlist):
+        """Evaluates Lambdas."""
+        if islist(inputlist[0]):
+            return self.eval_join(inputlist[0])
+        else:
+            inputstring = inputlist[0]
+            out = inputstring[1:].split("\\", 1)
+            if len(out) == 1:
+                test = self.find(out[0], True, False)
+                if isinstance(test, funcfloat):
+                    return test
+                elif hascall(test):
+                    return test.call(None)
+                else:
+                    while out[0].startswith("`") and out[0].endswith("`") and out[0] in self.variables and (istext(self.variables[out[0]]) or isinstance(self.variables[out[0]], strcalc)):
+                        if isinstance(self.variables[out[0]], strcalc):
+                            out[0] = repr(self.variables[out[0]])
+                        else:
+                            out[0] = str(self.variables[out[0]])
+                return strfloat(out[0], self, check=False)
+            elif out[0] == "":
+                return strfloat(out[1], self, check=False)
+            else:
+                temp = self.namefind(out[0]).split(",")
+                params = []
+                personals = {}
+                for x in temp:
+                    if ":" in x:
+                        x = x.split(":", 1)
+                        personals[x[0]] = self.find(x[1], True, False)
+                    elif x != "":
+                        params.append(x)
+                if out[1].startswith("\\"):
+                    return strfloat(out[1][1:], self, params, personals, check=False)
+                else:
+                    while out[1].startswith("`") and out[1].endswith("`") and out[1] in self.variables and (istext(self.variables[out[1]]) or isinstance(self.variables[out[1]], strcalc)):
+                        if isinstance(self.variables[out[1]], strcalc):
+                            out[1] = repr(self.variables[out[1]])
+                        else:
+                            out[1] = str(self.variables[out[1]])
+                    return strfloat(out[1], self, params, personals)
 
     def eval_join(self, inputlist):
         """Performs Concatenation."""
@@ -911,45 +954,6 @@ Global Operator Precedence List:
             for x in reversed(xrange(0, len(inputlist))):
                 value = self.eval_call(inputlist[x])**value
             return value
-
-    def call_lambda(self, inputstring):
-        """Evaluates Lambdas."""
-        if inputstring.startswith("\\"):
-            out = inputstring[1:].split("\\", 1)
-            if len(out) == 1:
-                test = self.find(out[0], True, False)
-                if isinstance(test, funcfloat):
-                    return test
-                elif hascall(test):
-                    return test.call(None)
-                else:
-                    while out[0].startswith("`") and out[0].endswith("`") and out[0] in self.variables and (istext(self.variables[out[0]]) or isinstance(self.variables[out[0]], strcalc)):
-                        if isinstance(self.variables[out[0]], strcalc):
-                            out[0] = repr(self.variables[out[0]])
-                        else:
-                            out[0] = str(self.variables[out[0]])
-                return strfloat(out[0], self, check=False)
-            elif out[0] == "":
-                return strfloat(out[1], self, check=False)
-            else:
-                temp = self.namefind(out[0]).split(",")
-                params = []
-                personals = {}
-                for x in temp:
-                    if ":" in x:
-                        x = x.split(":", 1)
-                        personals[x[0]] = self.find(x[1], True, False)
-                    elif x != "":
-                        params.append(x)
-                if out[1].startswith("\\"):
-                    return strfloat(out[1][1:], self, params, personals, check=False)
-                else:
-                    while out[1].startswith("`") and out[1].endswith("`") and out[1] in self.variables and (istext(self.variables[out[1]]) or isinstance(self.variables[out[1]], strcalc)):
-                        if isinstance(self.variables[out[1]], strcalc):
-                            out[1] = repr(self.variables[out[1]])
-                        else:
-                            out[1] = str(self.variables[out[1]])
-                    return strfloat(out[1], self, params, personals)
 
     def call_colon(self, inputstring):
         """Evaluates Colons."""
