@@ -26,6 +26,38 @@ import tkSimpleDialog
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+class terminal(object):
+    """Wraps Base Terminal Commands To Create A Fake Console."""
+    def __init__(display=None, doshow=True):
+        """Base Constructure For The Terminal Wrapper."""
+        if display != None:
+            print(str(display))
+        self.clear()
+        self.doshow = bool(doshow)
+    def silence(self, state=False):
+        """Turns On And Off Printing."""
+        self.doshow = bool(state)
+        return self.doshow
+    def clear(self):
+        """Clears The History."""
+        self.history = []
+    def display(self, message=None, *messages):
+        """Prints A Message."""
+        if self.doshow:
+            newmessage = "\n"
+            if message != None:
+                newmessage += str(message)
+            for x in messages:
+                newmessage += " " + str(x)
+            self.history.append(newmessage)
+            print(self.history[-1])
+    def getlines(self):
+        """Retreives All Lines In The History."""
+        return self.history[:]
+    def get(self):
+        """Retreives A String Of The History."""
+        return strlist(self.history, "\n")
+
 class console(object):
     """A Graphical Class Used For Creating A Fake Console."""
     def __init__(self, root, display=None, height=35, width=100, side="bottom", doshow=True, **kwargs):
