@@ -106,7 +106,7 @@ def table(freqs, delimiter=",", seperator=" | "):
 
 def basicformat(inputstring, leading=True, tailing=True):
     """Performs Basic Formatting On A String."""
-    out = str(inputstring).strip()
+    out = str(inputstring)
     if leading:
         while len(out) != 0 and out[0] in string.whitespace:
             out = out[1:]

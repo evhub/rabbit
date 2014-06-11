@@ -276,6 +276,10 @@ class cotobject(evalobject):
         self.extend(other)
         return self
 
+    def __radd__(self, other):
+        """Performs Reverse Extension."""
+        return other + self.items()
+
     def __isub__(self, other):
         """Wraps remove."""
         self.remove(other)
