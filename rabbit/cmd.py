@@ -442,8 +442,16 @@ Import Commands:
                     test = test and self.readytofunc(x)
                 if test:
                     sides[1] = self.calc(sides[1])
-                    if isinstance(sides[1], matrix) and sides[1].onlydiag():
-                        sides[1] = sides[1].getitems()
+                    func = diagmatrixlist
+                    if isinstance(sides[1], matrix):
+                        if sides[1].onlydiag():
+                            sides[1] = sides[1].getitems()
+                        else:
+                            sides[1] = sides[1].items()
+                            func = rowmatrixlist
+                    elif isinstance(sides[1], strcalc):
+                        sides[1] = sides[1].tomatrix().getitems()
+                        func = None
                     else:
                         sides[1] = [sides[1]]
                     out = False
@@ -456,8 +464,13 @@ Import Commands:
                             toset = matrix(0)
                         elif len(toset) == 1:
                             toset = toset[0]
+                        elif func != None:
+                            toset = func(toset)
                         else:
-                            toset = diagmatrixlist(toset)
+                            itemlist = toset
+                            toset = itemlist.pop(0)
+                            for item in itemlist:
+                                toset += item
                         out = self.cmd_set_do([sides[0][x], self.e.wrap(toset)], docalc) or out
                     return out
             else:
