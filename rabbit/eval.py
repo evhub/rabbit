@@ -115,6 +115,7 @@ Global Operator Precedence List:
             "frac":funcfloat(funcs.fractcall, self, "frac"),
             "simp":funcfloat(funcs.simpcall, self, "simp"),
             "d":funcfloat(funcs.randcall, self, "d"),
+            "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "floor":usefunc(math.floor, self, "floor", ["x"]),
             "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
             "log":usefunc(math.log10, self, "log", ["x"]),
