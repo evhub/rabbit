@@ -117,7 +117,7 @@ After logic operators next in the precedence order are the unary operators. Ther
 ! 5			# Gets the opposite boolean (result = 0)
 ```
 
-After that are Rabbit's equality and inequality operators. These are dynamic and follow make-your-own-operator syntax, using =/?, <, <, ! as the different components. Essentially, if any operators are found Rabbit will look at the thing to their right and the thing to their left. It will then compare them, returning 1 if any of the operators finds a match, and 0 if none of the operators finds a match. Every not operator included will invert the result. The whole result will then only be 1 if all the groups of operators return 1. This syntax allows for a lot of very powerful, dynamic expressions. Some examples of these are:
+After that are Rabbit's equality and inequality operators. These are dynamic and follow make-your-own-operator syntax, using ?, =, <, <, ! as the different components. Essentially, if any operators are found Rabbit will look at the thing to their right and the thing to their left. It will then compare them, returning 1 if any of the operators finds a match, and 0 if none of the operators finds a match. Every not operator included will invert the result. The whole result will then only be 1 if all the groups of operators return 1. This syntax allows for a lot of very powerful, dynamic expressions. Some examples of these are:
 ```
 1 ?= 1		# The preferred way to do equality, the question mark is optional but insures that there is no confusion that this is an equality operator (result = 1)
 1 >=< 2		# Obviously this homemade operator is nonsensical because it would always return 1, but it would still work (result = 1)
