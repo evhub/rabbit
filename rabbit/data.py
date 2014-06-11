@@ -915,7 +915,7 @@ class multidata(mctobject):
             out.store(y,1, self.y[y])
         return out
 
-    def regtest(self, expected=0.0, e, observed=None, mefunc=None, regeq=None):
+    def regtest(self, e, expected=0.0, observed=None, mefunc=None, regeq=None):
         """Finds The t Value For The Slope Of The Regression Line."""
         expected = float(expected)
         if observed == None:
