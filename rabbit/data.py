@@ -25,40 +25,34 @@ from .stats import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def teq(df, e=None):
+def teq(df, e):
     """Finds The t Distribution For The Given Degrees Of Freedom."""
-    if e == None:
-        e = evaluator()
     v = float(df)
     n = v+1.0
     return strfunc(e.prepare(gamma(n/2.0) / ((math.pi*v)**0.5 * gamma(v/2.0))) + "/" + "(1+x^2/" + e.prepare(v) + ")^" + e.prepare(n/2.0), e, ["x"])
 
-def tP(start, stop, df, e=None):
+def tP(start, stop, df, e):
     """Finds The Cumulative Probability Between Two t Values."""
     eq = teq(df, e)
     return defint(lambda x: eq.call([x]), start, stop)
 
-def chisqeq(df, e=None):
+def chisqeq(df, e):
     """Finds The Chi Squared Distribution For The Given Degrees Of Freedom."""
-    if e == None:
-        e = evaluator()
     v = float(df)
     return strfunc("x^"+e.prepare((v-2.0)/2.0)+"*e^(-x/2)/"+e.prepare(2.0**(v/2.0)*gamma(v/2.0)), e, ["x"])
 
-def chisqP(stop, df, e=None):
+def chisqP(stop, df, e):
     """Finds The Probability Beyond A Chi Squared Value."""
     eq = chisqeq(df, e)
     return 1.0-defint(lambda x: eq.call([x]), 0.0, stop)
 
-def Feq(dfT, dfE, e=None):
+def Feq(dfT, dfE, e):
     """Finds The F Distribution For The Given Degrees Of Freedom."""
-    if e == None:
-        e = evaluator()
     v = float(dfT)
     w = float(dfE)
     return strfunc(e.prepare((v/w)**(v/2)*gamma((v+w)/2.0)/(gamma(v/2.0)*gamma(w/2.0)))+"*x^"+e.prepare((v-2.0)/2.0)+"/(1+"+e.prepare(v/w)+"x)^"+e.prepare((v+w)/2.0), e, ["x"])
 
-def FP(stop, dfT, dfE, e=None):
+def FP(stop, dfT, dfE, e):
     """Finds The Probability Beyond An F Value."""
     eq = Feq(dfT, dfE, e)
     return 1.0-defint(lambda x: eq.call([x]), 0.0, stop)
@@ -796,13 +790,11 @@ class multidata(mctobject):
         """Swaps x And y."""
         self.x, self.y = self.y, self.x
 
-    def linreg(self, e=None):
+    def linreg(self, e):
         """Finds The Linear Regression Line."""
-        if e == None:
-            e = evaluator()
         return strfunc(e.prepare(self.b(), False, True)+"*x+"+e.prepare(self.a(), False, True), e, ["x"])
 
-    def medmed(self, e=None):
+    def medmed(self, e):
         """Finds The Median-Median Regression Line."""
         first = multidata(self.items()[0:int(math.floor(len(self)/3.0))])
         mid = multidata(self.items()[int(math.ceil(len(self)/3.0)):int(math.floor(2.0*len(self)/3.0))])
@@ -816,8 +808,6 @@ class multidata(mctobject):
         b = (ylast-yfirst)/(xlast-xfirst)
         yhat = b*(xmid-xfirst)+yfirst
         a = yhat + (ymid-yhat)/3.0 - b*xmid
-        if e == None:
-            e = evaluator()
         return strfunc(e.prepare(b, False, True)+"*x+"+e.prepare(a, False, True), e, ["x"])
 
     def copy(self):
@@ -837,27 +827,23 @@ class multidata(mctobject):
         new.x.code(math.log)
         return new
 
-    def poweq(self, e=None):
+    def poweq(self, e):
         """Finds The Power Regression Line Given That This Is powdata."""
-        if e == None:
-            e = evaluator()
         return strfunc(e.prepare(math.e**self.a(), False, True)+"*x^"+e.prepare(self.b(), False, True), e, ["x"])
 
-    def expeq(self, e=None):
+    def expeq(self, e):
         """Finds The Exponential Regression Line Given That This Is expdata."""
-        if e == None:
-            e = evaluator()
         return strfunc(e.prepare(math.e**self.a(), False, True)+"*"+e.prepare(math.e**self.b(), False, True)+"^x", e, ["x"])
 
-    def powreg(self, e=None):
+    def powreg(self, e):
         """Performs Power Regression."""
         return self.powdata().poweq(e)
 
-    def expreg(self, e=None):
+    def expreg(self, e):
         """Performs Exponential Regression."""
         return self.expdata().expeq(e)
 
-    def regs(self, e=None):
+    def regs(self, e):
         """Finds Regression Lines."""
         eqs = {}
         eqs[self.r()] = self.linreg(e)
@@ -867,7 +853,7 @@ class multidata(mctobject):
         eqs[test.r()] = test.expeq(e)
         return eqs
 
-    def bestfit(self, e=None):
+    def bestfit(self, e):
         """Finds The Best Fit Regression Equation."""
         eqs = self.regs(e)
         test = eqs.keys()
@@ -929,7 +915,7 @@ class multidata(mctobject):
             out.store(y,1, self.y[y])
         return out
 
-    def regtest(self, expected=0.0, observed=None, mefunc=None, regeq=None, e=None):
+    def regtest(self, expected=0.0, e, observed=None, mefunc=None, regeq=None):
         """Finds The t Value For The Slope Of The Regression Line."""
         expected = float(expected)
         if observed == None:
@@ -942,8 +928,6 @@ class multidata(mctobject):
             regeq = str(regeq)
         if mefunc == None:
             mefunc = self.sb
-        if e == None:
-            e = evaluator()
         return (observed-expected)/float(mefunc(func=lambda x: regeq.call([x])))
 
     def __len__(self):
