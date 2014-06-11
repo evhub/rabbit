@@ -156,7 +156,7 @@ assert zip:(1,2):(10,20) ?= (1,10),(2,20)
   @ la & lb
 assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
  $ qsort(l) = (
-   qsort:(as~\x\(x@x<=a)) .. a, .. qsort:(as~\x\(x@x>a))
+   qsort:(as~\x\(x@x<=a)) .. a .. qsort:(as~\x\(x@x>a))
    $ a,as = l
    ) @ l
 
@@ -217,3 +217,5 @@ assert comb:4:2 ?= 6
 # New Feature Tests:
 assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
 assert f() ?= 5, & f(1) ?= 1,					$ f(*l:(5,)) = l
+assert a ?= 1 & b ?= [2,3]					$ a,b = [1,2,3]
+assert a ?= "a" & b ?= "bc"					$ a,b = "abc"
