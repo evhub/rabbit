@@ -49,8 +49,9 @@ class terminal(object):
                 newmessage += str(message)
             for x in messages:
                 newmessage += " " + str(x)
-            self.history.append(newmessage)
-            print(self.history[-1])
+            print(newmessage)
+            for line in newmessage.split("\n"):
+                self.history.append(line)
     def getlines(self):
         """Retreives All Lines In The History."""
         return self.history[:]

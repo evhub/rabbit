@@ -89,9 +89,9 @@ Import Commands:
         else:
             arg = str(arg)
         if message:
+            self.app.display(arg)
             for line in arg.split("\n"):
                 self.messages.append(line)
-            self.app.display(arg)
         elif arg == "()":
             self.adderror("NoneError", "Nothing to display")
         else:
