@@ -26,13 +26,16 @@ from .cmd import *
 
 class commandline(mathbase):
     """The Rabbit Command Line Interface."""
-    def __init__(self, message=addcolor("Enter A Rabbit Command:", "purple"), prompt=addcolor(">>>", "pink")+" ", helpstring=None, debug=False, *initializers):
+    def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", helpstring=None, debug=False, *initializers):
         """Initializes The Command Line Interface."""
         self.on = True
         self.debug = bool(debug)
-        self.messages = [str(message)]
+        self.messages = []
+        if message:
+            message = str(message)
+            self.messages.append(message)
         self.prompt = str(prompt)
-        self.app = terminal(self.messages[0])
+        self.app = terminal(message)
         self.errorlog = {}
         self.ans = [matrix(0)]
         self.commands = []

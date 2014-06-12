@@ -53,11 +53,14 @@ Import Commands:
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
-        self.messages = [str(message)]
+        self.messages = []
+        if message:
+            message = str(message)
+            self.messages.append(message)
         if height == None:
-            self.root, self.app, self.box = startconsole(self.handler, self.messages[0], str(name))
+            self.root, self.app, self.box = startconsole(self.handler, message, str(name))
         else:
-            self.root, self.app, self.box = startconsole(self.handler, self.messages[0], str(name), int(height))
+            self.root, self.app, self.box = startconsole(self.handler, message, str(name), int(height))
         self.errorlog = {}
         self.ans = [matrix(0)]
         self.returned = 1
