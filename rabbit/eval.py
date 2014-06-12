@@ -367,9 +367,10 @@ Global Operator Precedence List:
         """Performs Full Evaluation On An Expression."""
         inputstring = self.prepare(expression, False, True)
         if self.debug:
-            if self.info == "*":
+            if self.info == 1:
                 self.info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
-            print(self.recursion*"  "+">>> "+inputstring+self.info)
+            if self.info != -1:
+                print(self.recursion*"  "+">>> "+inputstring+self.info)
             self.info = ""
         self.recursion += 1
         out = self.calc_top(inputstring)

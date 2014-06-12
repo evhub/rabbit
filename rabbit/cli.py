@@ -26,7 +26,7 @@ from .cmd import *
 
 class commandline(mathbase):
     """The Rabbit Command Line Interface."""
-    def __init__(self, message="Enter A Calculator Command:", prompt=">>> ", helpstring=None, debug=False, *initializers):
+    def __init__(self, message="Enter A Rabbit Command:", prompt=">>> ", helpstring=None, debug=False, *initializers):
         """Initializes The Command Line Interface."""
         self.on = True
         self.debug = bool(debug)
@@ -35,7 +35,9 @@ class commandline(mathbase):
         self.app = terminal(self.messages[0])
         self.errorlog = {}
         self.ans = [matrix(0)]
+        self.commands = []
         self.returned = 1
+        self.top = False
         self.populator()
         if helpstring != None:
             self.helpstring = str(helpstring)
@@ -61,6 +63,7 @@ class commandline(mathbase):
             self.cmd_clean,
             self.cmd_get,
             self.cmd_run,
+            self.cmd_save,
             self.cmd_assert,
             self.cmd_do,
             self.cmd_show,
@@ -86,6 +89,18 @@ class commandline(mathbase):
             self.on = False
             return True
 
+    def cmd_show(self, original):
+        """Shows A Popup."""
+        if superformat(original).startswith("show "):
+            self.app.display(self.e.prepare(self.calc(original[5:]), True, False))
+            return True
+
+    def cmd_save(self, original):
+        """Performs save."""
+        if superformat(original).startswith("save "):
+            writefile(getfile(original[5:], "wb"), strlist(self.commands[:-1], "\n"))
+            return True
+
     def start(self):
         """Starts The Command Line Main Loop."""
         while self.on:
@@ -94,8 +109,19 @@ class commandline(mathbase):
     def handler(self, original):
         """Handles Raw Input."""
         self.e.recursion = 0
+        self.commands.append(original)
         cmd = carefulsplit(original, "#", '"')[0]
         if delspace(cmd) == "":
             self.adderror("NoneError", "Nothing cannot be executed.")
         else:
+            self.top = True
             self.process(cmd)
+
+    def calc(self, expression):
+        """Safely Evaluates An Expression."""
+        if self.top:
+            self.e.info = -1
+            self.top = False
+        else:
+            self.e.info = " <<"
+        return self.saferun(self.e.calc, expression)

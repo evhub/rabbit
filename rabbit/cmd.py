@@ -50,7 +50,7 @@ Import Commands:
     run <file>
     save <file>"""
 
-    def __init__(self, name="Evaluator", message="Enter A Calculator Command:", height=None, helpstring=None, debug=False, *initializers):
+    def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
         self.messages = [str(message)]
@@ -98,7 +98,7 @@ Import Commands:
 
     def calc(self, expression):
         """Safely Evaluates An Expression."""
-        self.e.info = "*"
+        self.e.info = 1
         return self.saferun(self.e.calc, expression)
 
     def test(self, expression):
