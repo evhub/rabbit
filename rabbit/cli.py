@@ -26,7 +26,7 @@ from .cmd import *
 
 class commandline(mathbase):
     """The Rabbit Command Line Interface."""
-    def __init__(self, message="Enter A Rabbit Command:", prompt=">>> ", helpstring=None, debug=False, *initializers):
+    def __init__(self, message=addcolor("Enter A Rabbit Command:", "purple"), prompt=addcolor(">>>", "pink")+" ", helpstring=None, debug=False, *initializers):
         """Initializes The Command Line Interface."""
         self.on = True
         self.debug = bool(debug)
