@@ -90,7 +90,7 @@ class commandline(mathbase):
             return True
 
     def cmd_show(self, original):
-        """Shows A Popup."""
+        """Shows A Message."""
         if superformat(original).startswith("show "):
             self.app.display(self.e.prepare(self.calc(original[5:]), True, False))
             return True
@@ -100,6 +100,13 @@ class commandline(mathbase):
         if superformat(original).startswith("save "):
             writefile(getfile(original[5:], "wb"), strlist(self.commands[:-1], "\n"))
             return True
+
+    def showerrors(self):
+        """Shows Logged Errors."""
+        errorstring = self.geterrors()
+        if errorstring == "":
+            errorstring = "No Errors."
+        self.show(errorstring, True)
 
     def start(self):
         """Starts The Command Line Main Loop."""

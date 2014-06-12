@@ -89,8 +89,9 @@ Import Commands:
         else:
             arg = str(arg)
         if message:
-            self.messages.append(arg)
-            self.app.display(self.messages[-1])
+            for line in arg.split("\n"):
+                self.messages.append(line)
+            self.app.display(arg)
         elif arg == "()":
             self.adderror("NoneError", "Nothing to display")
         else:
@@ -249,7 +250,7 @@ Import Commands:
         if superformat(inputstring).startswith("help"):
             inputstring = inputstring[4:]
             if delspace(inputstring) == "":
-                popup("Info", self.helpstring, "Help")
+                self.show(self.helpstring, True)
             else:
                 self.show(self.findhelp(basicformat(inputstring)))
             return True
@@ -335,7 +336,7 @@ Import Commands:
     def cmd_get(self, original):
         """Performs get."""
         if superformat(original).startswith("get ") or superformat(original) == "get":
-            original = original[3:]
+            original = basicformat(original[3:])
             if delspace(original) == "":
                 showbuiltins = []
                 showfuncs = {}
@@ -351,9 +352,11 @@ Import Commands:
                     else:
                         showbuiltins.append(x)
                 showbuiltins.sort()
-                popup("Info", "Built-Ins: "+str(showbuiltins)+"\n\nVariables: "+dictdisplay(showvars)+"\n\nFunctions: "+dictdisplay(showfuncs)+"\n\nParentheses: "+dictdisplay(showparens))
+                self.show("Built-Ins: "+str(showbuiltins)+"\n\nVariables: "+dictdisplay(showvars)+"\n\nFunctions: "+dictdisplay(showfuncs)+"\n\nParentheses: "+dictdisplay(showparens), True)
+            elif original in self.e.variables:
+                self.show(self.e.prepare(self.e.variables[original], True, True))
             else:
-                self.show(self.e.prepare(self.e.variables[basicformat(original)], True, True))
+                self.adderror("VariableError", "Could not get variable "+original)
             return True
 
     def cmd_run(self, original):

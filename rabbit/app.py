@@ -137,13 +137,18 @@ class safebase(base):
         """Completes A Command Using The Helpstring."""
         self.box.insert(self.findhelp(self.box.output()))
 
-    def showerrors(self):
-        """Shows Logged Errors."""
+    def geterrors(self):
+        """Gets A String Of Errors."""
         errorstring = ""
         for x in self.errorlog:
             errorstring += x+": "+strlist(self.errorlog[x], "; ")+"\n"
+        self.errorlog = {}
+        return errorstring[:-1]
+
+    def showerrors(self):
+        """Shows Logged Errors."""
+        errorstring = self.geterrors()
         if errorstring == "":
             popup("Info", "No Errors.", "Error Log")
         else:
             popup("Info", errorstring[:-1], "Error Log")
-        self.errorlog = {}
