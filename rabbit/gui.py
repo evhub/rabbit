@@ -28,7 +28,7 @@ import tkSimpleDialog
 
 class terminal(object):
     """Wraps Base Terminal Commands To Create A Fake Console."""
-    def __init__(display=None, doshow=True):
+    def __init__(self, display=None, doshow=True):
         """Base Constructure For The Terminal Wrapper."""
         if display != None:
             print(str(display))
@@ -44,7 +44,7 @@ class terminal(object):
     def display(self, message=None, *messages):
         """Prints A Message."""
         if self.doshow:
-            newmessage = "\n"
+            newmessage = ""
             if message != None:
                 newmessage += str(message)
             for x in messages:

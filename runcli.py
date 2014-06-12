@@ -18,10 +18,12 @@
 
 from __future__ import absolute_import, print_function
 
-from .web import *
-from .proc import *
-from .path import *
-from .crypto import *
-from .cli import *
-from .ride import *
-from .graph import *
+from rabbit.all import *
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    multiprocessing.freeze_support()
+    commandline().start()

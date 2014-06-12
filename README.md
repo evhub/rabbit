@@ -15,9 +15,10 @@ From there, what you want to do depends on what you're using Rabbit for. If you'
 
 Some very common Python one-liners for initiating basic Rabbit features are:
 ```
-mathbase().start()  # Starts up the RabbitLang interpreter
-editor().start()    # Starts up the RabbitLang editor
-grapher().start()	# Starts up the RabbitLang grapher
+commandline().start()	# Starts up the RabbitLang command line interface
+mathbase().start()  	# Starts up the RabbitLang graphical interpreter
+editor().start()    	# Starts up the RabbitLang integrated development environment
+grapher().start()		# Starts up the RabbitLang automatic graphing interface
 ```
 
 ## RabbitLang
