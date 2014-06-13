@@ -53,6 +53,7 @@ Import Commands:
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
+        self.printdebug(": ON")
         self.messages = []
         if message:
             message = str(message)
@@ -67,19 +68,32 @@ Import Commands:
         self.populator()
         if helpstring != None:
             self.helpstring = str(helpstring)
-        if self.debug:
-            print(self.e.recursion*"  "+": ON")
         if initializers == ():
             self.initialize()
         else:
             self.initialize(args=initializers)
+
+    def setdebug(self, state):
+        """Sets The Debugging State."""
+        self.e.debug = True
+        if self.debug:
+            self.e.printdebug(": OFF")
+        else:
+            self.e.printdebug(": ON")
+        self.debug = bool(state)
+        self.e.debug = self.debug
+
+    def printdebug(self, message):
+        """Prints Debug Output."""
+        if self.debug:
+            self.e.printdebug(str(message))
 
     def adderror(self, error, detail):
         """Adds An Error To The Log."""
         error = str(error)
         detail = str(detail)
         if self.debug:
-            print(self.e.recursion*"  "+"<!> "+error+": "+detail)
+            self.printdebug("<!> "+error+": "+detail)
         elif error not in self.errorlog:
             self.errorlog[error] = [detail]
         elif detail not in self.errorlog[error]:
@@ -271,12 +285,7 @@ Import Commands:
     def cmd_debug(self, original):
         """Controls Debugging."""
         if superformat(original) == "debug":
-            if self.debug:
-                print(self.e.recursion*"  "+": OFF")
-            else:
-                print(self.e.recursion*"  "+": ON")
-            self.debug = not self.debug
-            self.e.debug = self.debug
+            self.setdebug(not self.debug)
             return True
 
     def cmd_errors(self, original):
@@ -300,8 +309,7 @@ Import Commands:
                     todel.append(x)
             for x in todel:
                 del self.e.variables[x]
-                if self.debug:
-                    print(self.e.recursion*"  "+"< "+x+" >")
+                self.printdebug("< "+x+" >")
             self.e.count = 0
 
     def cmd_while(self, original):
@@ -422,8 +430,7 @@ Import Commands:
             else:
                 self.adderror("VariableError", "Could not find "+original)
                 return True
-            if self.debug:
-                print(self.e.recursion*"  "+"< "+original+" >")
+            self.printdebug("< "+original+" >")
             return True
 
     def cmd_set(self, original):
@@ -538,8 +545,7 @@ Import Commands:
                     if check >= 2:
                         if docalc:
                             value[1] = self.trycalc(value[1])
-                        if self.debug:
-                            print(self.e.recursion*"  "+": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" = "+self.e.prepare(value[1], False, True, True))
+                        self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" = "+self.e.prepare(value[1], False, True, True))
                         if useclass == None:
                             self.e.variables[value[0]] = value[1]
                         else:
@@ -547,8 +553,7 @@ Import Commands:
                     else:
                         if docalc:
                             value = self.trycalc(value)
-                        if self.debug:
-                            print(self.e.recursion*"  "+": "+strlist(classlist, ".")+"."*bool(classlist)+sides[0]+" = "+self.e.prepare(value, False, True, True))
+                        self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+sides[0]+" = "+self.e.prepare(value, False, True, True))
                         if useclass == None:
                             self.e.variables[sides[0]] = value
                         else:

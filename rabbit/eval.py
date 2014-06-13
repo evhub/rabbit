@@ -65,7 +65,7 @@ Global Operator Precedence List:
     defprefix = "'"
     lastname = "last"
 
-    def __init__(self, variables=None, processor=None):
+    def __init__(self, variables=None, processor=None, color=None):
         """Initializes The Evaluator."""
         self.processor = processor
         try:
@@ -74,10 +74,11 @@ Global Operator Precedence List:
             self.debug = False
         else:
             self.debug = self.processor.debug
-        if self.debug:
-            self.info = ""
+        self.info = ""
+        self.color = color
         self.recursion = 0
         self.overflow = []
+        self.count = 0
         funcs = evalfuncs(self)
         self.variables = {
             "copy":funcfloat(funcs.copycall, self, "copy"),
@@ -175,7 +176,14 @@ Global Operator Precedence List:
             self.call_method,
             self.call_normal
             ]
-        self.count = 0
+
+    def printdebug(self, message):
+        """Prints Debug Output."""
+        if self.debug:
+            message = str(message)
+            if self.color in colors:
+                message = addcolor(message, self.color)
+            print(self.recursion*"  "+message)
 
     def makevars(self, variables):
         """Forcibly Stores Variables."""
@@ -192,12 +200,10 @@ Global Operator Precedence List:
                 if v == None:
                     if k in self.variables:
                         del self.variables[k]
-                        if self.debug:
-                            print(self.recursion*"  "+": < "+self.prepare(k, False, True, True)+" >")
+                        self.printdebug(": < "+self.prepare(k, False, True, True)+" >")
                 else:
                     self.variables[k] = v
-                    if self.debug:
-                        print(self.recursion*"  "+": "+self.prepare(k, False, True, True)+" = "+self.prepare(v, False, True, True))
+                    self.printdebug(": "+self.prepare(k, False, True, True)+" = "+self.prepare(v, False, True, True))
         return oldvars
 
     def store(self, name, value):
@@ -370,12 +376,11 @@ Global Operator Precedence List:
             if self.info == 1:
                 self.info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
             if self.info != -1:
-                print(self.recursion*"  "+">>> "+inputstring+self.info)
+                self.printdebug(">>> "+inputstring+self.info)
             self.info = ""
         self.recursion += 1
         out = self.calc_top(inputstring)
-        if self.debug:
-            print(self.recursion*"  "+self.prepare(out, False, True, True)+" <<< "+inputstring)
+        self.printdebug(self.prepare(out, False, True, True)+" <<< "+inputstring)
         self.recursion -= 1
         return out
 
@@ -388,8 +393,7 @@ Global Operator Precedence List:
                         "{", "}", 1)),
                     "[", "]")),
                 "(", ")"))
-        if self.debug:
-            print(self.recursion*"  "+"| "+self.prepare(value, False, True, True))
+        self.printdebug("| "+self.prepare(value, False, True, True))
         return self.calc_with(value)
 
     def wrap(self, item):
@@ -490,11 +494,11 @@ Global Operator Precedence List:
             top[a] = top[a].split("&")
         if self.debug:
             value = reassemble(top, ["|", "&"])
-            print(self.recursion*"  "+"=>> "+value)
+            self.printdebug("=>> "+value)
         self.recursion += 1
         out = self.bool_or(top)
         if self.debug:
-            print(self.recursion*"  "+self.prepare(out, False, True, True)+" <<= "+value)
+            self.printdebug(self.prepare(out, False, True, True)+" <<= "+value)
         self.recursion -= 1
         return out
 
@@ -580,11 +584,11 @@ Global Operator Precedence List:
                                     top[a][0][c][d][e][f][g] = splitinplace(top[a][0][c][d][e][f][g].split("*"), "/")
         if self.debug:
             value = reassemble(top, ["~", "\\", "..", "**", ",", "+", "%", "*"])
-            print(self.recursion*"  "+"=> "+value)
+            self.printdebug("=> "+value)
         self.recursion += 1
         out = self.eval_check(self.eval_comp(top), True)
         if self.debug:
-            print(self.recursion*"  "+self.prepare(out, False, True, True)+" <= "+value)
+            self.printdebug(self.prepare(out, False, True, True)+" <= "+value)
         self.recursion -= 1
         return out
 
@@ -901,16 +905,14 @@ Global Operator Precedence List:
 
     def eval_call(self, inputstring):
         """Evaluates A Variable."""
-        if self.debug:
-            print(self.recursion*"  "+"-> "+inputstring)
+        self.printdebug("-> "+inputstring)
         self.recursion += 1
         for func in self.calls:
             value = func(inputstring)
             if value != None:
                 break
         out = self.eval_check(value)
-        if self.debug:
-            print(self.recursion*"  "+self.prepare(out, False, True, True)+" <- "+inputstring+" | "+namestr(func).split("_")[-1])
+        self.printdebug(self.prepare(out, False, True, True)+" <- "+inputstring+" | "+namestr(func).split("_")[-1])
         self.recursion -= 1
         return out
 
@@ -1107,8 +1109,7 @@ Global Operator Precedence List:
         """Evaluates Parentheses."""
         inputstring = strlist(switchsplit(inputstring, string.digits, [x for x in string.printable if not self.isreserved(x)]), "``")        
         if "`" in inputstring:
-            if self.debug:
-                print(self.recursion*"  "+"(|) "+inputstring) 
+            self.printdebug("(|) "+inputstring) 
             templist = inputstring.split("`")
             inputlist = [[]]
             feed = inputlist[0]
@@ -1136,8 +1137,8 @@ Global Operator Precedence List:
                     feed.append(templist[x])
             if self.debug:
                 temp = "("+strlist(inputlist, ") * (", lambda l: strlist(l, " : "))+")"
-                print(self.recursion*"  "+"(>) "+temp)
-                self.recursion += 1
+                self.printdebug("(>) "+temp)
+            self.recursion += 1
             values = []
             for l in inputlist:
                 if l[0].startswith("."):
@@ -1167,8 +1168,8 @@ Global Operator Precedence List:
                 for x in xrange(1, len(values)):
                     value *= values[x]
             if self.debug:
-                print(self.recursion*"  "+self.prepare(value)+" (<) "+temp)
-                self.recursion -= 1
+                self.printdebug(self.prepare(value)+" (<) "+temp)
+            self.recursion -= 1
             return value
 
     def call_method(self, inputstring):
@@ -1205,8 +1206,7 @@ Global Operator Precedence List:
         """Finds A Value."""
         while istext(item):
             original = item
-            if self.debug:
-                print(self.recursion*"  "+"> "+self.prepare(original, False, True, True))
+            self.printdebug(self.recursion*"  "+"> "+self.prepare(original, False, True, True))
             self.recursion += 1
             if item in self.variables:
                 item = self.variables[item]
@@ -1214,8 +1214,7 @@ Global Operator Precedence List:
                 if self.debug:
                     self.info = " >"
                 item = self.calc(item)
-            if self.debug:
-                print(self.recursion*"  "+self.prepare(item, False, True, True)+" < "+self.prepare(original, False, True, True))
+            self.printdebug(self.prepare(item, False, True, True)+" < "+self.prepare(original, False, True, True))
             self.recursion -= 1
         return item
 

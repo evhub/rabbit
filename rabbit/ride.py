@@ -52,6 +52,7 @@ Import Commands:
         """Initializes A PythonPlus Evaluator"""
         self.doshow = True
         self.debug = bool(debug)
+        self.printdebug(": ON")
         self.debug_old = self.debug
         self.root = Tkinter.Tk()
         self.root.title(str(name))
@@ -92,8 +93,6 @@ Import Commands:
         self.populator()
         if helpstring != None:
             self.helpstring = str(helpstring)
-        if self.debug:
-            print(self.e.recursion*"  "+": ON")
         if initializers == ():
             self.initialize()
         else:
@@ -361,7 +360,7 @@ Import Commands:
 
     def run(self):
         """Runs The Module."""
-        self.debug = self.debug_old
+        self.setdebug(self.debug_old)
         self.errorlog = {}
         self.returned = 0
         self.ans = [matrix(0)]

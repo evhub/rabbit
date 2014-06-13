@@ -76,6 +76,7 @@ Import Commands:
     def __init__(self, directory="rabbit/", name="Grapher", width=800, height=600, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Grapher."""
         self.debug = bool(debug)
+        self.printdebug(": ON")
         self.root = Tkinter.Tk()
         self.root.title(str(name))
         self.width = width
@@ -90,7 +91,7 @@ Import Commands:
         except:
             go = False
             while not go:
-                inputstring = popup("Info", "Unable to find Pixel.gif. This file is necessary for rendering anything. Please enter the location where the file can be found:")
+                inputstring = popup("Entry", "Unable to find Pixel.gif. This file is necessary for rendering anything. Please enter the location where the file can be found:")
                 if inputstring:
                     try:
                         self.pixel = openphoto(sanitize(inputstring)+"/Pixel.gif")

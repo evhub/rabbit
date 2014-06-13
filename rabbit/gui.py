@@ -28,12 +28,13 @@ import tkSimpleDialog
 
 class terminal(object):
     """Wraps Base Terminal Commands To Create A Fake Console."""
-    def __init__(self, display=None, doshow=True):
+    def __init__(self, display=None, doshow=True, color=None):
         """Base Constructure For The Terminal Wrapper."""
         if display != None:
             print(str(display))
         self.clear()
         self.doshow = bool(doshow)
+        self.color = color
     def silence(self, state=False):
         """Turns On And Off Printing."""
         self.doshow = bool(state)
@@ -41,6 +42,12 @@ class terminal(object):
     def clear(self):
         """Clears The History."""
         self.history = []
+    def colorwrap(self, message):
+        """Wraps A Message In The Color."""
+        message = str(message)
+        if self.color in colors:
+            message = addcolor(message, self.color)
+        return message
     def display(self, message=None, *messages):
         """Prints A Message."""
         if self.doshow:
@@ -49,7 +56,7 @@ class terminal(object):
                 newmessage += str(message)
             for x in messages:
                 newmessage += " " + str(x)
-            print(newmessage)
+            print(self.colorwrap(newmessage))
             for line in newmessage.split("\n"):
                 self.history.append(line)
     def getlines(self):
