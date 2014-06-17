@@ -99,8 +99,7 @@ class shortserver(server):
         self.items = []
     def start(self, backlog=5):
         """Opens Up The Server For Connections."""
-        backlog = int(backlog)
-        self.s.listen(backlog)
+        self.s.listen(int(backlog))
         printdebug("=>")
         while self.up == 1:
             self.c, self.a = self.s.accept()
@@ -126,8 +125,7 @@ class multiserver(server):
     def start(self, connections=5, backlog=0):
         """Begins Letting Connections In."""
         connections = int(connections)
-        backlog = int(backlog)
-        self.s.listen(backlog)
+        self.s.listen(int(backlog))
         printdebug("-"*connections+">")
         self.add(connections)
     def add(self, connections=1):
