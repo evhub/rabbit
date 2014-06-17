@@ -18,6 +18,7 @@
 
 from __future__ import absolute_import, print_function
 
+from .web import *
 from .gui import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -25,11 +26,11 @@ from .gui import *
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class base(object):
-    """Base Class For A PythonPlus Application"""
+    """Base Class For A PythonPlus Application."""
     returned = 0
 
     def __init__(self, name="PythonPlus Application", message="Welcome!", height=None, *initializers):
-        """Initializes A PythonPlus Application"""
+        """Initializes A PythonPlus Application."""
         if height == None:
             self.root, self.app, self.box = startconsole(self.handler, str(message), str(name))
         else:
@@ -152,3 +153,204 @@ class safebase(base):
             popup("Info", "No Errors.", "Error Log")
         else:
             popup("Info", errorstring[:-1], "Error Log")
+
+class serverbase(base):
+    """A Universal Server And Client Application."""
+
+    def __init__(self, name="Web Client", message="Loading...", height=None, speed=400, debug=False):
+        """Creates The Server Or Client."""
+        self.debug = bool(debug)
+        if height == None:
+            self.root, self.app, self.box = startconsole(self.handler, str(message), str(name))
+        else:
+            self.root, self.app, self.box = startconsole(self.handler, str(message), str(name), int(height))
+        rootbind(self.root, self.disconnect)
+        self.show = self.app.display
+        self.speed = int(speed)
+        self.server = isno(popup("Question", "Client(Y) or Server(n)?"))
+        if not self.server:
+            self.host = popup("Entry", "Host?")
+        self.port = popup("Integer", "Port?")
+        if self.server:
+            self.number = popup("Integer", "Number of clients?")
+            self.app.display("Waiting For A Connection...")
+        else:
+            self.app.display("Connecting...")
+        self.register(self.connect, 200)
+
+    def connect(self):
+        """Connects To The Server Or Clients."""
+        if self.server:
+            self.c = multiserver(self.port, debug=self.debug)
+            self.c.start(self.number)
+        else:
+            self.c = client(debug=self.debug)
+            if self.host == "":
+                self.c.connect(self.port)
+            else:
+                self.c.connect(self.port, self.host)
+        self.app.display("Connected.")
+        if self.server:
+            self.queue = {}
+            for a in self.c.c:
+                self.queue[a] = []
+            self.sent = []
+            self.register(self.namer, self.speed+200)
+        else:
+            self.queue = [popup("Entry", "Name?")]
+            self.sent = ""
+            self.register(self.clientstart, self.speed+400)
+        self.register(self.refresh, self.speed)
+
+    def namer(self):
+        """Retreives Names."""
+        for n,a in self.sent:
+            self.names[a] = n
+        self.sent = []
+        self.register(self.serverstart, 200)
+
+    def serverstart(self):
+        """Begins Server-Side Processing."""
+        while server != None:
+            self.textmsg(self.get())
+
+    def clientstart(self):
+        """Begins Client-Side Processing."""
+        self.serverstart()
+
+    def refresh(self):
+        """Sends Items In The Que, Adds Items To Sent."""
+        if self.server:
+            for a in self.c.c:
+                if len(self.queue[a]) > 0:
+                    self.queue[a].reverse()
+                    self.c.fsend(a, self.queue[a].pop())
+                    self.queue[a].reverse()
+                else:
+                    self.c.fsend(a, "#")
+            self.root.update()
+            for a in self.c.c:
+                temp[a] = None
+                test = self.retreive(a)
+                if test != "#":
+                    if test.startswith("#"):
+                        temp[a] = test.strip("#")
+                    else:
+                        self.addsent((test,a))
+        elif self.server != None:
+            test = self.retreive().strip("#")
+            if test != "":
+                self.addsent(test)
+            self.root.update()
+            if len(self.queue) > 0:
+                self.queue.reverse()
+                self.c.fsend(self.queue.pop())
+                self.queue.reverse()
+            else:
+                self.c.fsend("#")
+        else:
+            return False
+        return True
+
+    def send(self, item):
+        """Sends A Message."""
+        item = str(item)
+        if self.server:
+            for a in self.c.c:
+                self.queue[a].append(item)
+        elif self.server != None:
+            self.queue.append(item)
+        else:
+            return False
+        return True
+
+    def receive(self):
+        """Receives A Message At A High Level."""
+        if self.server:
+            while len(self.sent) < self.number:
+                self.root.update()
+            temp = self.sent
+            self.sent = []
+            return temp
+        elif self.server != None:
+            while self.sent == None:
+                self.root.update()
+            temp = self.sent
+            self.sent = None
+            return temp
+        else:
+            return None
+
+    def chat(self, msg):
+        """Displays A Chat Message."""
+        self.app.display("> "+str(msg))
+
+    def textmsg(self, item):
+        """Sends A Chat Message."""
+        item = str(item)
+        if self.server == 0:
+            self.send("+:"+item)
+        elif self.server == 1:
+            output = self.names[None]+item
+            self.chat(output)
+            self.send("+:"+output)
+        else:
+            return False
+        return True
+
+    def addsent(self, item):
+        """Adds A Received Message To The Sent."""
+        if self.server:
+            i,a = item
+            if i.startswith("+:"):
+                i = i[2:]
+                output = self.names[a]+i
+                self.send("+:"+output)
+                self.chat(output)
+            else:
+                self.sent.append((i,a))
+        elif self.server != None:
+            if item.startswith("+:"):
+                self.chat(item[2:])
+            else:
+                self.sent = item
+        else:
+            return False
+        return True
+
+    def sync(self, test="$"):
+        """Insures The Server And The Clients Are Synced Up."""
+        test = str(test)
+        if self.server:
+            out = self.receive()
+            self.send(test)
+        elif self.server != None:
+            self.send(test)
+            out = self.receive()
+        else:
+            return False
+        return test == out
+
+    def disconnect(self):
+        """Disconnects From The Server Or Clients."""
+        if self.server:
+            for a in dict(self.c.c):
+                self.c.close(a)
+        elif self.server != None:
+            self.c.close()
+        self.server = None
+        self.app.display("Disconnected.")
+        self.register(200, self.root.destroy)
+
+    def retreive(self, a=None):
+        """Retreives A Message At A Base Level."""
+        try:
+            if a == None:
+                out = self.c.retreive(self.root.update)
+            else:
+                out = self.c.retreive(a, self.root.update)
+        except IOError:
+            self.disconnect()
+            raise RuntimeError
+        else:
+            return out

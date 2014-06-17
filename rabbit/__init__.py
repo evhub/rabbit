@@ -22,7 +22,7 @@ from __future__ import absolute_import, print_function
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-__all__ = ["web", "proc", "path", "crypto", "cli", "ride", "graph"]
+__all__ = ["proc", "path", "crypto", "cli", "ride", "graph"]
 
 __doc__ = """Overview:
     Rabbit (PythonPlus) is a compilation of functions, classes, and variables that extend basic Python functionality.
@@ -58,7 +58,7 @@ File List:
     gui (file) : Utilities for creating and managing basic windows.
     func (matrix) : Utilities for managing functions as mathematical objects.
 
-    app (gui) : Utilities for creating graphical applications.
+    app (gui, web) : Utilities for creating graphical applications.
     data (func, stats) : Utilities for managing statistical data.
 
     test (app) : A Python interpreter for testing purposes.

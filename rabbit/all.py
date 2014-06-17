@@ -18,7 +18,6 @@
 
 from __future__ import absolute_import, print_function
 
-from .web import *
 from .proc import *
 from .path import *
 from .crypto import *
