@@ -265,6 +265,7 @@ class serverbase(base):
                 self.c.fsend(test)
         else:
             return False
+        self.register(self.refresh, self.speed)
         return True
 
     def send(self, item):
