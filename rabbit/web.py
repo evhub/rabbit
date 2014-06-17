@@ -147,7 +147,7 @@ class multiserver(server):
     def receive(self, address, amount=1024):
         """Receives A Message From A Certain Client."""
         out = str(self.c[address].recv(amount))
-        printdebug("< "+out)
+        self.printdebug("< "+out)
         return out
     def retrieve(self, a, refresh=None, limit=100):
         """Retrieves Formatted Messages."""
