@@ -177,7 +177,7 @@ class serverbase(base):
         self.show = self.app.display
         self.speed = int(speed)
         self.chatstring = str(chatstring)
-        self.server = isno(popup("Question", "Client(Y) or Server(n)?"))
+        self.server = bool(isno(popup("Question", "Client(Y) or Server(n)?")))
         if not self.server:
             self.host = popup("Entry", "Host?")
             if not self.host:
