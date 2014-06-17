@@ -45,12 +45,15 @@ coverage.xml
 # Rope
 .ropeproject
 
-# Django stuff:
+# Django stuff
 *.log
 *.pot
 
 # Sphinx documentation
 docs/_build/
 
-# Macintosh Desktop Services Store files.
+# Macintosh Desktop Services Store files
 .DS_Store
+
+# Windows thumbs database file
+Thumbs.db
