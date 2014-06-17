@@ -340,7 +340,7 @@ class serverbase(base):
             self.c.close()
         self.server = None
         self.app.display("Disconnected.")
-        self.register(200, self.root.destroy)
+        self.register(self.root.destroy, 200)
 
     def retreive(self, a=None):
         """Retreives A Message At A Base Level."""
