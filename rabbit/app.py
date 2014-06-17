@@ -356,7 +356,8 @@ class serverbase(base):
             self.c.close()
         self.server = None
         self.app.display("Disconnected.")
-        self.register(self.root.destroy, 200)
+        self.root.update()
+        self.root.destroy()
 
     def retrieve(self, a=None):
         """Retrieves A Message At A Base Level."""
@@ -367,6 +368,5 @@ class serverbase(base):
                 out = self.c.retrieve(a, self.root.update)
         except IOError:
             self.disconnect()
-            self.die(IOError("Unable to retrieve data, partner most likely disconnected."))
         else:
             return out
