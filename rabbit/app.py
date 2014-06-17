@@ -230,7 +230,7 @@ class serverbase(base):
         self.app.display("Ready. Enter A Command:")
         self.ready = True
 
-    def handler(self):
+    def handler(self, event=None):
         """Handles input."""
         if self.ready:
             self.textmsg(self.box.output())
