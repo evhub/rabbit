@@ -363,6 +363,6 @@ class serverbase(base):
                 out = self.c.retrieve(a, self.root.update)
         except IOError:
             self.disconnect()
-            raise RuntimeError
+            self.die(IOError("Unable to retrieve data, partner most likely disconnected."))
         else:
             return out
