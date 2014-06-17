@@ -209,15 +209,16 @@ class serverbase(base):
             for a in self.c.c:
                 self.queue[a] = []
             self.sent = []
+            self.names[None] = popup("Entry", "Name?") or "Host"
             self.register(self.namer, self.speed+200)
         else:
-            self.queue = [popup("Entry", "Name?")]
+            self.queue = [popup("Entry", "Name?") or "Guest"]
             self.sent = ""
             self.register(self.clientstart, self.speed+400)
         self.register(self.refresh, self.speed)
 
     def namer(self):
-        """Retreives Names."""
+        """Retrieves Names."""
         for n,a in self.sent:
             self.names[a] = n
         self.sent = []
@@ -245,14 +246,14 @@ class serverbase(base):
             self.root.update()
             for a in self.c.c:
                 temp[a] = None
-                test = self.retreive(a)
+                test = self.retrieve(a)
                 if test != "#":
                     if test.startswith("#"):
                         temp[a] = test.strip("#")
                     else:
                         self.addsent((test,a))
         elif self.server != None:
-            test = self.retreive().strip("#")
+            test = self.retrieve().strip("#")
             if test != "":
                 self.addsent(test)
             self.root.update()
@@ -302,12 +303,12 @@ class serverbase(base):
     def textmsg(self, item):
         """Sends A Chat Message."""
         item = str(item)
-        if self.server == 0:
-            self.send("+:"+item)
-        elif self.server == 1:
+        if self.server:
             output = self.names[None]+item
             self.chat(output)
             self.send("+:"+output)
+        elif self.server != None:
+            self.send("+:"+item)
         else:
             return False
         return True
@@ -356,13 +357,13 @@ class serverbase(base):
         self.app.display("Disconnected.")
         self.register(self.root.destroy, 200)
 
-    def retreive(self, a=None):
-        """Retreives A Message At A Base Level."""
+    def retrieve(self, a=None):
+        """Retrieves A Message At A Base Level."""
         try:
             if a == None:
-                out = self.c.retreive(self.root.update)
+                out = self.c.retrieve(self.root.update)
             else:
-                out = self.c.retreive(a, self.root.update)
+                out = self.c.retrieve(a, self.root.update)
         except IOError:
             self.disconnect()
             raise RuntimeError
