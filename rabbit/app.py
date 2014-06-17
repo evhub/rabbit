@@ -170,9 +170,15 @@ class serverbase(base):
         self.server = isno(popup("Question", "Client(Y) or Server(n)?"))
         if not self.server:
             self.host = popup("Entry", "Host?")
+            if not self.host:
+                raise ValueError("No host was given.")
         self.port = popup("Integer", "Port?")
+        if not self.port:
+            raise ValueError("No port was given.")
         if self.server:
             self.number = popup("Integer", "Number of clients?")
+            if not self.number:
+                raise ValueError("No client number was given.")
             self.app.display("Waiting For A Connection...")
         else:
             self.app.display("Connecting...")
