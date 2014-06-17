@@ -167,6 +167,7 @@ class serverbase(base):
 
     def __init__(self, name="Web Client", message="Loading...", height=None, speed=400, debug=False):
         """Creates The Server Or Client."""
+        self.ready = False
         self.debug = bool(debug)
         if height == None:
             self.root, self.app, self.box = startconsole(self.handler, str(message), str(name))
@@ -214,7 +215,7 @@ class serverbase(base):
         else:
             self.queue = [popup("Entry", "Name?") or "Guest"]
             self.sent = ""
-            self.register(self.clientstart, self.speed+400)
+            self.register(self.begin, self.speed+400)
         self.register(self.refresh, self.speed)
 
     def namer(self):
@@ -222,16 +223,17 @@ class serverbase(base):
         for n,a in self.sent:
             self.names[a] = n
         self.sent = []
-        self.register(self.serverstart, 200)
+        self.register(self.begin, 200)
 
-    def serverstart(self):
-        """Begins Server-Side Processing."""
-        while server != None:
-            self.textmsg(self.get())
+    def begin(self):
+        """Begins the main process."""
+        self.app.display("Ready. Enter A Command:")
+        self.ready = True
 
-    def clientstart(self):
-        """Begins Client-Side Processing."""
-        self.serverstart()
+    def handler(self):
+        """Handles input."""
+        if self.ready:
+            self.textmsg(self.box.output())
 
     def refresh(self, test="#"):
         """Sends Items In The Que, Adds Items To Sent."""
