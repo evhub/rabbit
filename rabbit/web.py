@@ -146,7 +146,9 @@ class multiserver(server):
         self.c[address].send(message)
     def receive(self, address, amount=1024):
         """Receives A Message From A Certain Client."""
-        return self.c[address].recv(amount)
+        out = str(self.c[address].recv(amount))
+        printdebug("< "+out)
+        return out
     def retrieve(self, a, refresh=None, limit=100):
         """Retrieves Formatted Messages."""
         counter = 0
@@ -182,7 +184,9 @@ class client(server):
         self.s.send(message)
     def receive(self, amount=1024):
         """Receives A Message."""
-        return self.s.recv(amount)
+        out = str(self.s.recv(amount))
+        self.printdebug("< "+out)
+        return out
     def close(self):
         """Disconnects From A Server."""
         self.s.close()
