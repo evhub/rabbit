@@ -297,17 +297,18 @@ class serverbase(base):
         else:
             return None
 
-    def chat(self, msg):
+    def chat(self, msg, name=""):
         """Displays A Chat Message."""
-        self.app.display("> "+str(msg))
+        out = str(name)+": "*bool(name)+str(msg)
+        self.app.display(out)
+        return out
 
     def textmsg(self, item):
         """Sends A Chat Message."""
         item = str(item)
         if self.server:
-            output = self.names[None]+": "+item
-            self.chat(output)
-            self.send(self.chatstring+output)
+            out = self.chat(item, self.names[None])
+            self.send(self.chatstring+out)
         elif self.server != None:
             self.send(self.chatstring+item)
         else:
@@ -320,9 +321,8 @@ class serverbase(base):
             i,a = item
             if i.startswith(self.chatstring):
                 i = i[2:]
-                output = self.names[a]+i
-                self.send(self.chatstring+output)
-                self.chat(output)
+                out = self.chat(i, self.names[a])
+                self.send(self.chatstring+out)
             else:
                 self.sent.append((i,a))
         elif self.server != None:
