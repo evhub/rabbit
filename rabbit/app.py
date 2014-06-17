@@ -236,9 +236,9 @@ class serverbase(base):
         if self.ready:
             self.textmsg(self.box.output())
 
-    def refresh(self, test="#"):
+    def refresh(self, empty="#"):
         """Sends Items In The Que, Adds Items To Sent."""
-        test = str(test)
+        empty = str(empty)
         if self.server:
             for a in self.c.c:
                 if len(self.queue[a]) > 0:
@@ -246,14 +246,14 @@ class serverbase(base):
                     self.c.fsend(a, self.queue[a].pop())
                     self.queue[a].reverse()
                 else:
-                    self.c.fsend(a, test)
+                    self.c.fsend(a, empty)
             self.root.update()
             for a in self.c.c:
                 test = self.retrieve(a)
-                if test != test:
+                if test != empty:
                     self.addsent((test,a))
         elif self.server != None:
-            test = self.retrieve().strip(test)
+            test = self.retrieve().strip(empty)
             if test != "":
                 self.addsent(test)
             self.root.update()
@@ -262,7 +262,7 @@ class serverbase(base):
                 self.c.fsend(self.queue.pop())
                 self.queue.reverse()
             else:
-                self.c.fsend(test)
+                self.c.fsend(empty)
         else:
             return False
         self.register(self.refresh, self.speed)
