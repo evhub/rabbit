@@ -165,7 +165,7 @@ class safebase(base):
 class serverbase(base):
     """A Universal Server And Client Application."""
 
-    def __init__(self, name="Web Client", message="Loading...", height=None, speed=400, debug=False):
+    def __init__(self, name="Web Client", message="Loading...", height=None, speed=400, chatstring="+:", debug=False):
         """Creates The Server Or Client."""
         self.ready = False
         self.debug = bool(debug)
@@ -176,6 +176,7 @@ class serverbase(base):
         rootbind(self.root, self.disconnect)
         self.show = self.app.display
         self.speed = int(speed)
+        self.chatstring = str(chatstring)
         self.server = isno(popup("Question", "Client(Y) or Server(n)?"))
         if not self.server:
             self.host = popup("Entry", "Host?")
@@ -303,11 +304,11 @@ class serverbase(base):
         """Sends A Chat Message."""
         item = str(item)
         if self.server:
-            output = self.names[None]+item
+            output = self.names[None]+": "+item
             self.chat(output)
-            self.send("+:"+output)
+            self.send(self.chatstring+output)
         elif self.server != None:
-            self.send("+:"+item)
+            self.send(self.chatstring+item)
         else:
             return False
         return True
@@ -316,15 +317,15 @@ class serverbase(base):
         """Adds A Received Message To The Sent."""
         if self.server:
             i,a = item
-            if i.startswith("+:"):
+            if i.startswith(self.chatstring):
                 i = i[2:]
                 output = self.names[a]+i
-                self.send("+:"+output)
+                self.send(self.chatstring+output)
                 self.chat(output)
             else:
                 self.sent.append((i,a))
         elif self.server != None:
-            if item.startswith("+:"):
+            if item.startswith(self.chatstring):
                 self.chat(item[2:])
             else:
                 self.sent = item
