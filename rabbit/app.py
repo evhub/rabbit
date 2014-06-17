@@ -69,6 +69,14 @@ class base(object):
         """Returns A New Window Root Object."""
         return Tkinter.Toplevel()
 
+    def die(self, error=None):
+        """Kills The App With An Error."""
+        self.root.destroy()
+        if error != None:
+            raise error
+        else:
+            raise IOError("Application was killed.")
+
 class safebase(base):
     """Base Class For An Error-Handling Application."""
     helpstring = "<Return>"
@@ -171,14 +179,14 @@ class serverbase(base):
         if not self.server:
             self.host = popup("Entry", "Host?")
             if not self.host:
-                raise ValueError("No host was given.")
+                self.die(ValueError("No host was given."))
         self.port = popup("Integer", "Port?")
         if not self.port:
-            raise ValueError("No port was given.")
+            self.die(ValueError("No port was given."))
         if self.server:
             self.number = popup("Integer", "Number of clients?")
             if not self.number:
-                raise ValueError("No client number was given.")
+                self.die(ValueError("No client number was given."))
             self.app.display("Waiting For A Connection...")
         else:
             self.app.display("Connecting...")
