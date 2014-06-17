@@ -179,16 +179,22 @@ class serverbase(base):
         self.chatstring = str(chatstring)
         self.server = bool(isno(popup("Question", "Client(Y) or Server(n)?")))
         if not self.server:
-            self.host = popup("Entry", "Host?")
-            if not self.host:
-                self.die(ValueError("No host was given."))
-        self.port = popup("Integer", "Port?")
-        if not self.port:
-            self.die(ValueError("No port was given."))
+            self.host = None
+            while not self.host:
+                self.host = popup("Entry", "Host?")
+                if "." not in self.host:
+                    self.host = ""
+        self.port = None
+        while not self.port:
+            self.port = popup("Integer", "Port?")
+            if self.port < 0:
+                self.port = 0
         if self.server:
-            self.number = popup("Integer", "Number of clients?")
-            if not self.number:
-                self.die(ValueError("No client number was given."))
+            self.number = None
+            while not self.number:
+                self.number = popup("Integer", "Number of clients?")
+                if self.number < 0:
+                    self.number = 0
             self.app.display("Waiting For A Connection...")
         else:
             self.app.display("Connecting...")
