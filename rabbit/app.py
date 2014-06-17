@@ -209,7 +209,7 @@ class serverbase(base):
             for a in self.c.c:
                 self.queue[a] = []
             self.sent = []
-            self.names[None] = popup("Entry", "Name?") or "Host"
+            self.names = {None: popup("Entry", "Name?") or "Host"}
             self.register(self.namer, self.speed+200)
         else:
             self.queue = [popup("Entry", "Name?") or "Guest"]
