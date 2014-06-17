@@ -233,8 +233,9 @@ class serverbase(base):
         """Begins Client-Side Processing."""
         self.serverstart()
 
-    def refresh(self):
+    def refresh(self, test="#"):
         """Sends Items In The Que, Adds Items To Sent."""
+        test = str(test)
         if self.server:
             for a in self.c.c:
                 if len(self.queue[a]) > 0:
@@ -242,18 +243,14 @@ class serverbase(base):
                     self.c.fsend(a, self.queue[a].pop())
                     self.queue[a].reverse()
                 else:
-                    self.c.fsend(a, "#")
+                    self.c.fsend(a, test)
             self.root.update()
             for a in self.c.c:
-                temp[a] = None
                 test = self.retrieve(a)
-                if test != "#":
-                    if test.startswith("#"):
-                        temp[a] = test.strip("#")
-                    else:
-                        self.addsent((test,a))
+                if test != test:
+                    self.addsent((test,a))
         elif self.server != None:
-            test = self.retrieve().strip("#")
+            test = self.retrieve().strip(test)
             if test != "":
                 self.addsent(test)
             self.root.update()
@@ -262,7 +259,7 @@ class serverbase(base):
                 self.c.fsend(self.queue.pop())
                 self.queue.reverse()
             else:
-                self.c.fsend("#")
+                self.c.fsend(test)
         else:
             return False
         return True
