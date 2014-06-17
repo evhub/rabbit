@@ -41,14 +41,20 @@ class server(object):
         self.s = socket.socket()
         self.s.bind((host, port))
         self.items = []
+    def printdebug(self, message):
+        """Prints A Debug Message."""
+        if self.debug:
+            print(str(message))
     def send(self, message):
         """Sends A Message."""
-        if self.debug:
-            print("> "+message)
+        message = str(message)
+        printdebug("> "+message)
         self.c.send(message)
     def receive(self, amount=1024):
         """Receives A Message."""
-        return self.c.recv(amount)
+        out = str(self.c.recv(amount))
+        printdebug("< "+out)
+        return out
     def retrieve(self, refresh=None, limit=100):
         """Retrieves Formatted Messages."""
         counter = 0
@@ -75,7 +81,9 @@ class longserver(server):
     def start(self):
         """Opens Up The Server For A Connection."""
         self.s.listen(0)
+        printdebug("->")
         self.c, self.a = self.s.accept()
+        printdebug("<-")
     def close(self):
         """Ends The Connection."""
         self.c.close()
@@ -91,9 +99,12 @@ class shortserver(server):
         self.items = []
     def start(self, backlog=5):
         """Opens Up The Server For Connections."""
+        backlog = int(backlog)
         self.s.listen(backlog)
+        printdebug("=>")
         while self.up == 1:
             self.c, self.a = self.s.accept()
+            printdebug("<-")
             self.handle()
             self.c.close()
     def handle(self):
@@ -114,12 +125,16 @@ class multiserver(server):
         self.items = {}
     def start(self, connections=5, backlog=0):
         """Begins Letting Connections In."""
+        connections = int(connections)
+        backlog = int(backlog)
         self.s.listen(backlog)
+        printdebug("-"*connections+">")
         self.add(connections)
     def add(self, connections=1):
         """Add Connections."""
         for x in xrange(0, connections):
             connection, address = self.s.accept()
+            printdebug("<-")
             self.c[address] = connection
             self.items[address] = []
     def close(self, address):
