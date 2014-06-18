@@ -220,7 +220,8 @@ class serverbase(base):
             self.names = {None: popup("Entry", "Name?") or "Host"}
             self.register(self.namer, self.speed+200)
         else:
-            self.queue = [popup("Entry", "Name?") or "Guest"]
+            self.name = popup("Entry", "Name?") or "Guest"
+            self.queue = [self.name]
             self.sent = ""
             self.register(self.begin, self.speed+400)
         self.register(self.refresh, self.speed)
@@ -274,12 +275,13 @@ class serverbase(base):
         self.register(self.refresh, self.speed)
         return True
 
-    def send(self, item):
+    def send(self, item, to=None, exempt=None):
         """Sends A Message."""
         item = str(item)
         if self.server:
             for a in self.c.c:
-                self.queue[a].append(item)
+                if (not to or a == to) and (not exempt or a != exempt):
+                    self.queue[a].append(item)
         elif self.server != None:
             self.queue.append(item)
         else:
@@ -314,11 +316,11 @@ class serverbase(base):
         item = str(item)
         if self.server:
             out = self.chat(item, self.names[None])
-            self.send(self.chatstring+out)
         elif self.server != None:
-            self.send(self.chatstring+item)
+            out = self.chat(item, self.name)
         else:
             return False
+        self.send(self.chatstring+out)
         return True
 
     def addsent(self, item):
@@ -328,7 +330,7 @@ class serverbase(base):
             if i.startswith(self.chatstring):
                 i = i[2:]
                 out = self.chat(i, self.names[a])
-                self.send(self.chatstring+out)
+                self.send(self.chatstring+out, exempt=a)
             else:
                 self.sent.append((i,a))
         elif self.server != None:
