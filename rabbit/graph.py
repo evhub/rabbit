@@ -148,10 +148,13 @@ Import Commands:
 
     def dorender(self, newx, newy, grid=False):
         """Renders A Converted Point."""
-        if grid and self.sepgrid:
-            self.grid.append(self.app.new(self.gridline, newx, newy))
+        if grid:
+            if self.sepgrid:
+                self.grid.append(self.app.new(self.gridline, newx, newy))
+            else:
+                self.grid.append(self.app.new(self.pixel, newx, newy))
         else:
-            self.grid.append(self.app.new(self.pixel, newx, newy))
+            self.identifiers.append(self.app.new(self.pixel, newx, newy))
 
     def singlerender(self, x=0, y=0):
         """Renders A Single Point."""
