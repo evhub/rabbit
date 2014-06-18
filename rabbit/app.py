@@ -195,7 +195,7 @@ class serverbase(base):
                 self.number = popup("Integer", "Number of clients?")
                 if self.number < 0:
                     self.number = 0
-            self.app.display("Waiting For A Connection...")
+            self.app.display("Waiting For Connections...")
         else:
             self.app.display("Connecting...")
         self.register(self.connect, 200)
@@ -212,6 +212,7 @@ class serverbase(base):
             else:
                 self.c.connect(self.port, self.host)
         self.app.display("Connected.")
+        self.app.display("Retreiving Names...")
         if self.server:
             self.queue = {}
             for a in self.c.c:
@@ -235,7 +236,7 @@ class serverbase(base):
 
     def begin(self):
         """Begins the main process."""
-        self.app.display("Ready. Enter A Command:")
+        self.app.display("Done.")
         self.ready = True
 
     def handler(self, event=None):
