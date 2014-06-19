@@ -165,7 +165,7 @@ class safebase(base):
 class serverbase(base):
     """A Universal Server And Client Application."""
 
-    def __init__(self, name="Web Client", message="Loading...", height=None, speed=400, chatstring="+:", debug=False):
+    def __init__(self, name="Web Client", message="Loading...", height=None, speed=400, debug=False):
         """Creates The Server Or Client."""
         self.ready = False
         self.debug = bool(debug)
@@ -176,7 +176,6 @@ class serverbase(base):
         rootbind(self.root, self.disconnect)
         self.show = self.app.display
         self.speed = int(speed)
-        self.chatstring = str(chatstring)
         self.server = bool(isno(popup("Question", "Client(Y) or Server(n)?")))
         if not self.server:
             self.host = None
@@ -184,17 +183,13 @@ class serverbase(base):
                 self.host = popup("Entry", "Host?")
                 if "." not in self.host:
                     self.host = ""
-        self.port = None
-        while not self.port:
+        self.port = 0
+        while self.port <= 0
             self.port = popup("Integer", "Port?")
-            if self.port < 0:
-                self.port = 0
         if self.server:
-            self.number = None
-            while not self.number:
+            self.number = 0
+            while self.number <= 0:
                 self.number = popup("Integer", "Number of clients?")
-                if self.number < 0:
-                    self.number = 0
             self.app.display("Waiting For Connections...")
         else:
             self.app.display("Connecting...")
@@ -215,23 +210,23 @@ class serverbase(base):
         self.app.display("Retreiving Names...")
         if self.server:
             self.queue = {}
+            self.sent = {}
             for a in self.c.c:
                 self.queue[a] = []
-            self.sent = []
+                self.sent[a] = []
             self.names = {None: popup("Entry", "Name?") or "Host"}
             self.register(self.namer, self.speed+200)
         else:
             self.name = popup("Entry", "Name?") or "Guest"
             self.queue = [self.name]
-            self.sent = ""
+            self.sent = []
             self.register(self.begin, self.speed+400)
         self.register(self.refresh, self.speed)
 
     def namer(self):
         """Retrieves Names."""
-        for n,a in self.sent:
+        for n,a in self.getsent():
             self.names[a] = n
-        self.sent = []
         self.register(self.begin, 200)
 
     def begin(self):
@@ -257,13 +252,15 @@ class serverbase(base):
                     self.c.fsend(a, empty)
             self.root.update()
             for a in self.c.c:
-                test = self.retrieve(a)
-                if test != empty:
-                    self.addsent((test,a))
+                for test in self.cget(a):
+                    test = test.strip(empty)
+                    if test:
+                        self.addsent((test,a))
         elif self.server != None:
-            test = self.retrieve().strip(empty)
-            if test != "":
-                self.addsent(test)
+            for test in self.cget():
+                test = test.strip(empty)
+                if test:
+                    self.addsent(test)
             self.root.update()
             if len(self.queue) > 0:
                 self.queue.reverse()
@@ -289,20 +286,45 @@ class serverbase(base):
             return False
         return True
 
+    def getsent(self):
+        """Gets The Next Sent Item."""
+        out = None
+        if self.server:
+            out = []
+            for a in self.c.c:
+                if len(self.sent[a]) == 0:
+                    out.append(("", a))
+                else:
+                    out.append((self.sent[a].pop(0), a))
+        elif self.server != None:
+            if len(self.sent) == 0:
+                out = ""
+            else:
+                out = self.sent.pop(0)
+        return out
+
+    def responded(self):
+        """Determines Whether There Has Been A Response."""
+        if self.server:
+            for a in self.c.c:
+                if len(self.sent[a]) == 0:
+                    return False
+            return True
+        elif self.server != None:
+            return len(self.sent) > 0
+        else:
+            return None
+
     def receive(self):
         """Receives A Message At A High Level."""
         if self.server:
-            while len(self.sent) < self.number:
+            while not self.responded():
                 self.root.update()
-            temp = self.sent
-            self.sent = []
-            return temp
+            return self.getsent()
         elif self.server != None:
-            while self.sent == None:
+            while not self.responded():
                 self.root.update()
-            temp = self.sent
-            self.sent = None
-            return temp
+            return self.getsent()
         else:
             return None
 
@@ -321,30 +343,42 @@ class serverbase(base):
             out = self.chat(item, self.name)
         else:
             return False
-        self.send(self.chatstring+out)
+        self.send("':"+out)
         return True
+
+    def broadcast(self, item):
+        """Broadcasts A Message."""
+        if self.server == None:
+            return False
+        else:
+            self.send("+:"+str(item))
+            return True
 
     def addsent(self, item):
         """Adds A Received Message To The Sent."""
         if self.server:
             i,a = item
-            if i.startswith(self.chatstring):
+            if i.startswith("':"):
                 i = i[2:]
                 out = self.chat(i, self.names[a])
-                self.send(self.chatstring+out, exempt=a)
+                self.send("':"+out, exempt=a)
+            elif i.startswith("+:"):
+                self.app.display(i[2:])
             else:
-                self.sent.append((i,a))
+                self.sent[a].append(i)
         elif self.server != None:
-            if item.startswith(self.chatstring):
+            if item.startswith("':"):
                 self.chat(item[2:])
+            elif i.startswith("+:"):
+                self.app.display(i[2:])
             else:
-                self.sent = item
+                self.sent.append(item)
         else:
             return False
         return True
 
     def sync(self, test="$"):
-        """Insures The Server And The Clients Are Synced Up."""
+        """Insures The Server And Clients Are Synced Up."""
         test = str(test)
         if self.server:
             out = self.receive()
@@ -368,13 +402,13 @@ class serverbase(base):
         self.root.update()
         self.root.destroy()
 
-    def retrieve(self, a=None):
-        """Retrieves A Message At A Base Level."""
+    def cget(self, a=None):
+        """Retrieves Messages At A Base Level."""
         try:
             if a == None:
-                out = self.c.retrieve(self.root.update)
+                out = self.c.getitems(self.root.update)
             else:
-                out = self.c.retrieve(a, self.root.update)
+                out = self.c.getitems(a, self.root.update)
         except IOError:
             self.disconnect()
         else:

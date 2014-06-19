@@ -69,6 +69,12 @@ class server(object):
             elif refresh != None and len(self.items) == 0:
                 refresh()
         return self.items.pop(0)
+    def getitems(self, refresh=None, limit=100):
+        """Gets All Sent Messages."""
+        out = [self.retrieve(refresh, limit)] + self.items[:]
+        out.reverse()
+        self.items = []
+        return out
     def block(self, flag):
         """Sets The Blocking Value."""
         self.s.setblocking(flag)
@@ -163,6 +169,12 @@ class multiserver(server):
             elif refresh != None and len(self.items) == 0:
                 refresh()
         return self.items[a].pop(0)
+    def getitems(self, a, refresh=None, limit=100):
+        """Gets All Sent Messages."""
+        out = [self.retrieve(a, refresh, limit)] + self.items[a][:]
+        out.reverse()
+        self.items[a] = []
+        return out
     def fsend(self, a, item):
         """Sends A Formatted Message."""
         self.send(a, "\\~"+str(item)+"\\")

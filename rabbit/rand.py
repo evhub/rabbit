@@ -172,6 +172,7 @@ class random(object):
 
     def split(self, inputlist, groups=2):
         """Randomly Splits A List Into Groups."""
+        groups = int(groups)
         outputlist = []
         for x in xrange(0, groups):
             outputlist.append([])
@@ -194,13 +195,14 @@ class random(object):
 
     def take(self, inputlist, amount=1):
         """Randomly Take A Certain Amount Of Elements From A List."""
+        amount = int(amount)
         newlist = inputlist[:]
         outputlist = []
         for x in xrange(0, amount):
             choice = self.choose(newlist)
             outputlist.append(choice)
             newlist.remove(choice)
-        return outputlist
+        return newlist, outputlist
 
     def scramble(self, inputlist):
         """Randomizes The Order Of A List."""
