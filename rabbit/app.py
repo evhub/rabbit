@@ -185,7 +185,7 @@ class serverbase(base):
                     popup("Error", "That isn't a valid host name. Please try again.")
                     self.host = ""
         self.port = 0
-        while self.port <= 0
+        while self.port <= 0:
             self.port = popup("Integer", "Port?")
         if self.server:
             self.number = 0
