@@ -358,16 +358,16 @@ class serverbase(base):
     def addsent(self, item):
         """Adds A Received Message To The Sent."""
         if self.server:
-            i,a = item
-            if i.startswith("+:"):
-                i = i[2:]
-                self.app.display(i)
-                self.broadcast(i, exempt=a)
+            item, a = item
+            if item.startswith("+:"):
+                item = item[2:]
+                self.app.display(item)
+                self.broadcast(item, exempt=a)
             else:
-                self.sent[a].append(i)
+                self.sent[a].append(item)
         elif self.server != None:
             if item.startswith("+:"):
-                self.app.display(i[2:])
+                self.app.display(item[2:])
             else:
                 self.sent.append(item)
         else:
