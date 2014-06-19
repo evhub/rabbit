@@ -344,33 +344,29 @@ class serverbase(base):
             out = self.chat(item, self.name)
         else:
             return False
-        self.send("':"+out)
+        self.broadcast(out)
         return True
 
-    def broadcast(self, item):
+    def broadcast(self, item, to=None, exempt=None):
         """Broadcasts A Message."""
         if self.server == None:
             return False
         else:
-            self.send("+:"+str(item))
+            self.send("+:"+str(item), to, exempt)
             return True
 
     def addsent(self, item):
         """Adds A Received Message To The Sent."""
         if self.server:
             i,a = item
-            if i.startswith("':"):
+            if i.startswith("+:"):
                 i = i[2:]
-                out = self.chat(i, self.names[a])
-                self.send("':"+out, exempt=a)
-            elif i.startswith("+:"):
-                self.app.display(i[2:])
+                self.app.display(i)
+                self.broadcast(i, exempt=a)
             else:
                 self.sent[a].append(i)
         elif self.server != None:
-            if item.startswith("':"):
-                self.chat(item[2:])
-            elif i.startswith("+:"):
+            if item.startswith("+:"):
                 self.app.display(i[2:])
             else:
                 self.sent.append(item)
