@@ -331,7 +331,7 @@ class serverbase(base):
 
     def chat(self, msg, name=""):
         """Displays A Chat Message."""
-        out = str(name) + ":"*bool(name) + " "*(bool(name) and bool(msg) + str(msg)
+        out = str(name) + ":"*bool(name) + " "*(bool(name) and bool(msg)) + str(msg)
         self.app.display(out)
         return out
 
