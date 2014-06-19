@@ -331,7 +331,7 @@ class serverbase(base):
 
     def chat(self, msg, name=""):
         """Displays A Chat Message."""
-        out = str(name)+": "*bool(name)+str(msg)
+        out = str(name) + ":"*bool(name) + " "*(bool(name) and bool(msg) + str(msg)
         self.app.display(out)
         return out
 
@@ -397,7 +397,7 @@ class serverbase(base):
         self.server = None
         self.app.display("Disconnected.")
         self.root.update()
-        self.root.destroy()
+        self.die(IOError("The connection was terminated."))
 
     def cget(self, a=None):
         """Retrieves Messages At A Base Level."""
