@@ -182,6 +182,7 @@ class serverbase(base):
             while not self.host:
                 self.host = popup("Entry", "Host?")
                 if "." not in self.host:
+                    popup("Error", "That isn't a valid host name. Please try again.")
                     self.host = ""
         self.port = 0
         while self.port <= 0
@@ -240,7 +241,7 @@ class serverbase(base):
             self.textmsg(self.box.output())
 
     def refresh(self, empty="#"):
-        """Sends Items In The Que, Adds Items To Sent."""
+        """Sends Items In The Queue, Adds Items To Sent."""
         empty = str(empty)
         if self.server:
             for a in self.c.c:
