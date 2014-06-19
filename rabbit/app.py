@@ -208,7 +208,7 @@ class serverbase(base):
             else:
                 self.c.connect(self.port, self.host)
         self.app.display("Connected.")
-        self.app.display("Retreiving Names...")
+        self.app.display("Retrieving Names...")
         if self.server:
             self.queue = {}
             self.sent = {}
