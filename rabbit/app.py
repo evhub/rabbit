@@ -384,18 +384,29 @@ class serverbase(base):
             return False
         return True
 
-    def sync(self, test="$"):
+    def sync(self, test="`"):
         """Insures The Server And Clients Are Synced Up."""
         test = str(test)
         if self.server:
-            out = self.receive()
             self.send(test)
+            out = False
+            while not out:
+                self.root.update()
+                out = True
+                for a in self.sent:
+                    if not test in self.sent[a]:
+                        out = False
+                        break
+            for a in self.sent:
+                self.sent[a].remove(test)
         elif self.server != None:
             self.send(test)
-            out = self.receive()
+            while not test in self.sent:
+                self.root.update()
+            self.sent.remove(test)
         else:
             return False
-        return test == out
+        return True
 
     def disconnect(self):
         """Disconnects From The Server Or Clients."""
