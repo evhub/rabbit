@@ -144,7 +144,7 @@ class multiserver(server):
     def close(self, address=None):
         """Disconnects A Certain Client."""
         if address == None:
-            for a in self.c.c:
+            for a in self.c:
                 self.close(a)
         else:
             self.c[address].close()
