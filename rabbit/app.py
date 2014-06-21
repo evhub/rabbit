@@ -98,6 +98,11 @@ class safebase(base):
         else:
             self.initialize(args=initializers)
 
+    def printdebug(self, *args, **kwargs):
+        """Prints Debug Output."""
+        if self.debug:
+            print(*args, **kwargs)
+
     def saferun(self, function, *args):
         """Safely Runs A Function."""
         if self.debug:
