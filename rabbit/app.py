@@ -29,8 +29,9 @@ class base(object):
     """Base Class For A PythonPlus Application."""
     returned = 0
 
-    def __init__(self, name="PythonPlus Application", message="Welcome!", height=None, *initializers):
+    def __init__(self, name="PythonPlus Application", message="Welcome!", height=None, debug=False, *initializers):
         """Initializes A PythonPlus Application."""
+        self.debug = bool(debug)
         if height == None:
             self.root, self.app, self.box = startconsole(self.handler, str(message), str(name))
         else:
@@ -40,6 +41,11 @@ class base(object):
             self.initialize()
         else:
             self.initialize(args=initializers)
+
+    def printdebug(self, *args, **kwargs):
+        """Prints Debug Output."""
+        if self.debug:
+            print(*args, **kwargs)
 
     def initialize(self, *args):
         """Runs Any Initializers Fed To The Constructor."""
@@ -97,11 +103,6 @@ class safebase(base):
             self.initialize()
         else:
             self.initialize(args=initializers)
-
-    def printdebug(self, *args, **kwargs):
-        """Prints Debug Output."""
-        if self.debug:
-            print(*args, **kwargs)
 
     def saferun(self, function, *args):
         """Safely Runs A Function."""
