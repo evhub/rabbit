@@ -233,7 +233,7 @@ class serverbase(base):
 
     def namer(self):
         """Retrieves Names."""
-        for n,a in self.getsent():
+        for n,a in self.receive():
             self.names[a] = n
         self.app.display("Names Retreived.\nLoading...")
         self.register(self.begin, 200)
