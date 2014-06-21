@@ -390,11 +390,7 @@ class serverbase(base):
 
     def disconnect(self):
         """Disconnects From The Server Or Clients."""
-        if self.server:
-            for a in dict(self.c.c):
-                self.c.close(a)
-        elif self.server != None:
-            self.c.close()
+        self.c.close()
         self.server = None
         self.app.display("Disconnected.")
         self.root.update()

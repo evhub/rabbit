@@ -141,10 +141,14 @@ class multiserver(server):
             self.printdebug("<-")
             self.c[address] = connection
             self.items[address] = []
-    def close(self, address):
+    def close(self, address=None):
         """Disconnects A Certain Client."""
-        self.c[address].close()
-        del self.c[address]
+        if address == None:
+            for a in self.c.c:
+                self.close(a)
+        else:
+            self.c[address].close()
+            del self.c[address]
     def send(self, address, message):
         """Sends A Message To A Certain Client."""
         if self.debug:
