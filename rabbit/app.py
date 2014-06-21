@@ -165,7 +165,7 @@ class safebase(base):
 class serverbase(base):
     """A Universal Server And Client Application."""
 
-    def __init__(self, name="Web Client", message="Loading...", height=None, speed=400, debug=False):
+    def __init__(self, name="Web Client", message="Initializing...", height=None, speed=400, debug=False):
         """Creates The Server Or Client."""
         self.ready = False
         self.debug = bool(debug)
@@ -221,6 +221,7 @@ class serverbase(base):
             self.name = popup("Entry", "Name?") or "Guest"
             self.queue = [self.name]
             self.sent = []
+            self.app.display("Names Retreived.\nLoading...")
             self.register(self.begin, self.speed+400)
         self.register(self.refresh, self.speed)
 
@@ -228,7 +229,7 @@ class serverbase(base):
         """Retrieves Names."""
         for n,a in self.getsent():
             self.names[a] = n
-        self.app.display("Names Retreived.\nStarting...")
+        self.app.display("Names Retreived.\nLoading...")
         self.register(self.begin, 200)
 
     def begin(self):
