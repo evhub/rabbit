@@ -361,7 +361,9 @@ class serverbase(base):
         if self.server == None:
             return False
         else:
-            self.send("+:"+str(item), to, exempt)
+            item = str(item)
+            self.app.display(item)
+            self.send("+:"+item, to, exempt)
             return True
 
     def addsent(self, item):
