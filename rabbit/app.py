@@ -222,9 +222,11 @@ class serverbase(base):
                 self.queue[a] = []
                 self.sent[a] = []
             self.names = {None: popup("Entry", "Name?") or "Host"}
+            self.sync()
             self.register(self.namer, self.speed+200)
         else:
             self.name = popup("Entry", "Name?") or "Guest"
+            self.sync()
             self.queue = [self.name]
             self.sent = []
             self.app.display("Names Retreived.\nLoading...")
