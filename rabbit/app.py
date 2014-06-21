@@ -228,6 +228,7 @@ class serverbase(base):
         """Retrieves Names."""
         for n,a in self.getsent():
             self.names[a] = n
+        self.app.display("Names Retreived.\nStarting...")
         self.register(self.begin, 200)
 
     def begin(self):
