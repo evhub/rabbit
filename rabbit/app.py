@@ -197,8 +197,10 @@ class serverbase(base):
             self.number = 0
             while self.number <= 0:
                 self.number = popup("Integer", "Number of clients?")
+            self.names = {None: popup("Entry", "Name?") or "Host"}
             self.app.display("Waiting For Connections...")
         else:
+            self.name = popup("Entry", "Name?") or "Guest"
             self.app.display("Connecting...")
         self.register(self.connect, 200)
 
@@ -214,20 +216,19 @@ class serverbase(base):
             else:
                 self.c.connect(self.port, self.host)
         self.app.display("Connected.")
-        self.app.display("Retrieving Names...")
         if self.server:
+            self.app.display("Retrieving Names...")
             self.queue = {}
             self.sent = {}
             for a in self.c.c:
                 self.queue[a] = []
                 self.sent[a] = []
-            self.names = {None: popup("Entry", "Name?") or "Host"}
             self.register(self.namer, self.speed+200)
         else:
-            self.name = popup("Entry", "Name?") or "Guest"
+            self.app.display("Sending Name...")
             self.queue = [self.name]
             self.sent = []
-            self.app.display("Names Retreived.\nLoading...")
+            self.app.display("Name Sent.\nLoading...")
             self.register(self.begin, self.speed+400)
         self.register(self.refresh, self.speed)
 
