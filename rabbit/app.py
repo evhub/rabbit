@@ -236,7 +236,7 @@ class serverbase(base):
             else:
                 self.c.connect(self.port, self.host)
         self.app.display("Connected.")
-        self.registry = {None: self.nokey, ">": self.passon, "x": lambda *args: self.disconnect(*args, first=False)}
+        self.registry = {None: self.nokey, ">": self.passon, "x": self.disconnect)}
         self.agenda = []
         if self.server:
             self.queue = {}
@@ -261,7 +261,7 @@ class serverbase(base):
         self.register(self.begin, 200)
 
     def begin(self):
-        """Begins the main process."""
+        """Begins The Main Process."""
         self.app.display("Loaded.")
         self.ready = True
 
@@ -269,6 +269,22 @@ class serverbase(base):
         """Handles input."""
         if self.ready:
             self.textmsg(self.box.output())
+
+    def update(self):
+        """Updates The Server."""
+        self.root.update()
+        if self.server:
+            extra = True
+            for a in self.c.c:
+                if len(self.c.items[a]) == 0:
+                    extra = False
+                    break
+        elif self.server != None:
+            extra = len(self.c.items) > 0
+        else:
+            extra = False
+        if extra:
+            self.refresh()
 
     def refresh(self, empty="#"):
         """Sends Items In The Queue, Adds Items To Sent."""
@@ -463,16 +479,15 @@ class serverbase(base):
             return False
         return True
 
-    def disconnect(self, arg=None, a=None, first=True):
+    def disconnect(self, arg=None, a=None):
         """Disconnects From The Server Or Clients."""
         self.app.display("Disconnecting...")
         self.trigger("x")
-        if not first:
-            self.c.close()
-            self.server = None
-            self.app.display("Disconnected.")
-            self.root.update()
-            self.root.destroy()
+        self.server = None
+        self.app.display("Disconnected.")
+        self.root.update()
+        self.c.close()
+        self.root.destroy()
 
     def cget(self, a=None):
         """Retrieves Messages At A Base Level."""
