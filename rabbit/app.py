@@ -396,6 +396,7 @@ class serverbase(base):
             self.send("::"+str(key)+":"+str(arg))
         else:
             self.send("::>:"+str(key)+":"+str(arg))
+        self.update()
 
     def addsent(self, item):
         """Adds A Received Message To The Sent."""
@@ -454,7 +455,6 @@ class serverbase(base):
         """Disconnects From The Server Or Clients."""
         self.app.display("Disconnecting...")
         self.trigger("x")
-        self.update()
         self.c.close()
         self.server = None
         self.app.display("Disconnected.")
