@@ -237,7 +237,7 @@ class serverbase(base):
                 self.c.connect(self.port, self.host)
         self.app.display("Connected.")
         self.registry = {None: self.nokey, ">": self.passon, "x": lambda *args: self.disconnect(*args, first=False)}
-        self.agenday = []
+        self.agenda = []
         if self.server:
             self.queue = {}
             self.sent = {}
