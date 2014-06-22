@@ -208,6 +208,21 @@ class serverbase(base):
             self.app.display("Connecting...")
         self.register(self.connect, 200)
 
+    def nokey(self, key, arg, a=None):
+        item = ":"+str(key)+":"+str(arg)
+        if a:
+            self.sent[a].append(item)
+        else:
+            self.sent.append(item)
+
+    def passon(self, arg, a=None):
+        key, arg = str(arg).split(":", 1)
+        if a and key in self.registry:
+            self.registry[key](arg, a)
+            self.send("::"+key+":"+arg, exempt=a)
+        else:
+            self.nokey(">", "::"+arg, a)
+
     def connect(self):
         """Connects To The Server Or Clients."""
         if self.server:
@@ -220,7 +235,7 @@ class serverbase(base):
             else:
                 self.c.connect(self.port, self.host)
         self.app.display("Connected.")
-        self.registry = {}
+        self.registry = {None: self.nokey, ">": self.passon}
         if self.server:
             self.queue = {}
             self.sent = {}
@@ -376,7 +391,10 @@ class serverbase(base):
 
     def trigger(self, key, arg=""):
         """Triggers A Registered Function."""
-        self.send("::"+str(key)+":"+str(arg))
+        if self.server:
+            self.send("::"+str(key)+":"+str(arg))
+        else:
+            self.send("::>:"+str(key)+":"+str(arg))
 
     def addsent(self, item):
         """Adds A Received Message To The Sent."""
