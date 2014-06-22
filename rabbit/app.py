@@ -218,8 +218,8 @@ class serverbase(base):
     def passon(self, arg, a=None):
         key, arg = str(arg).split(":", 1)
         if a and key in self.registry:
-            self.registry[key](arg, a)
-            self.send("::"+key+":"+arg, exempt=a)
+            self.send("::"+key+":"+arg)
+            self.schedule(lambda: self.register(lambda: self.registry[key](arg, a), self.speed*(len(self.queue[a])-1)))
         else:
             self.nokey(">", "::"+arg, a)
 
@@ -235,7 +235,8 @@ class serverbase(base):
             else:
                 self.c.connect(self.port, self.host)
         self.app.display("Connected.")
-        self.registry = {None: self.nokey, ">": self.passon, "x": self.disconnect}
+        self.registry = {None: self.nokey, ">": self.passon, "x": lambda *args: self.disconnect(*args, first=False)}
+        self.agenday = []
         if self.server:
             self.queue = {}
             self.sent = {}
@@ -280,6 +281,8 @@ class serverbase(base):
                 else:
                     self.c.fsend(a, empty)
             self.root.update()
+            for func in self.agenda:
+                func()
             for a in self.c.c:
                 for test in self.cget(a):
                     test = test.strip(empty)
@@ -290,6 +293,9 @@ class serverbase(base):
                 test = test.strip(empty)
                 if test:
                     self.addsent(test)
+            for func in self.agenda:
+                func()
+            self.agenda = []
             self.root.update()
             if len(self.queue) > 0:
                 self.queue.reverse()
@@ -301,6 +307,10 @@ class serverbase(base):
             return False
         self.register(self.refresh, self.speed)
         return True
+
+    def schedule(self, func):
+        """Schedules A Function To Be Called On The Next Refresh."""
+        self.agenda.append(func)
 
     def send(self, item, to=None, exempt=None):
         """Sends A Message."""
@@ -394,6 +404,7 @@ class serverbase(base):
         """Triggers A Registered Function."""
         if self.server:
             self.send("::"+str(key)+":"+str(arg))
+            self.schedule(lambda: self.register(lambda: self.registry[key](arg, True), self.speed*(len(self.queue[self.c.c[0]])-1))))
         else:
             self.send("::>:"+str(key)+":"+str(arg))
         self.update()
@@ -451,15 +462,16 @@ class serverbase(base):
             return False
         return True
 
-    def disconnect(self, arg=None, a=None):
+    def disconnect(self, arg=None, a=None, first=True):
         """Disconnects From The Server Or Clients."""
         self.app.display("Disconnecting...")
         self.trigger("x")
-        self.c.close()
-        self.server = None
-        self.app.display("Disconnected.")
-        self.root.update()
-        self.root.destroy()
+        if not first:
+            self.c.close()
+            self.server = None
+            self.app.display("Disconnected.")
+            self.root.update()
+            self.root.destroy()
 
     def cget(self, a=None):
         """Retrieves Messages At A Base Level."""
