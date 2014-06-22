@@ -197,6 +197,7 @@ class serverbase(base):
         self.port = 0
         while self.port <= 0:
             self.port = popup("Integer", "Port?")
+        self.app.display("Initialized.")
         if self.server:
             self.number = 0
             while self.number <= 0:
@@ -261,7 +262,7 @@ class serverbase(base):
 
     def begin(self):
         """Begins the main process."""
-        self.app.display("Done.")
+        self.app.display("Loaded.")
         self.ready = True
 
     def handler(self, event=None):
