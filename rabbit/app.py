@@ -220,19 +220,19 @@ class serverbase(base):
             else:
                 self.c.connect(self.port, self.host)
         self.app.display("Connected.")
+        self.registry = {}
         if self.server:
-            self.app.display("Retrieving Names...")
             self.queue = {}
             self.sent = {}
             for a in self.c.c:
                 self.queue[a] = []
                 self.sent[a] = []
+            self.app.display("Retrieving Names...")
             self.register(self.namer, self.speed+200)
         else:
-            self.app.display("Sending Name...")
             self.queue = [self.name]
             self.sent = []
-            self.app.display("Name Sent.\nLoading...")
+            self.app.display("Loading...")
             self.register(self.begin, self.speed+400)
         self.register(self.refresh, self.speed)
 
@@ -252,12 +252,6 @@ class serverbase(base):
         """Handles input."""
         if self.ready:
             self.textmsg(self.box.output())
-
-    def update(self):
-        """Forces A Refresh."""
-        self.root.update()
-        self.refresh()
-        self.root.update()
 
     def refresh(self, empty="#"):
         """Sends Items In The Queue, Adds Items To Sent."""
@@ -376,17 +370,37 @@ class serverbase(base):
             self.send("+:"+item, to, exempt)
             return True
 
+    def onsent(self, key, func):
+        """Registers A Function To A Sent Item."""
+        self.registry[str(key)] = func
+
+    def trigger(self, key, arg=""):
+        """Triggers A Registered Function."""
+        self.send("::"+str(key)+":"+str(arg))
+
     def addsent(self, item):
         """Adds A Received Message To The Sent."""
         if self.server:
             item, a = item
             if item.startswith("+:"):
                 self.broadcast(item[2:], exempt=a)
+            elif item.startswith("::") and ":" in item[2:]:
+                key, item = item[2:].split(":", 1)
+                if key in self.registry:
+                    self.registry[key](item, a)
+                elif None in self.registry:
+                    self.registry[None](key, item, a)
             else:
                 self.sent[a].append(item)
         elif self.server != None:
             if item.startswith("+:"):
                 self.app.display(item[2:])
+            elif item.startswith("::") and ":" in item[2:]:
+                key, item = item[2:].split(":", 1)
+                if key in self.registry:
+                    self.registry[key](item)
+                elif None in self.registry:
+                    self.registry[None](key, item)
             else:
                 self.sent.append(item)
         else:
