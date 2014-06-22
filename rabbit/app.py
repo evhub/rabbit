@@ -235,7 +235,7 @@ class serverbase(base):
             else:
                 self.c.connect(self.port, self.host)
         self.app.display("Connected.")
-        self.registry = {None: self.nokey, ">": self.passon}
+        self.registry = {None: self.nokey, ">": self.passon, "x": self.disconnect}
         if self.server:
             self.queue = {}
             self.sent = {}
@@ -450,13 +450,16 @@ class serverbase(base):
             return False
         return True
 
-    def disconnect(self):
+    def disconnect(self, arg=None, a=None):
         """Disconnects From The Server Or Clients."""
+        self.app.display("Disconnecting...")
+        self.trigger("x")
+        self.update()
         self.c.close()
         self.server = None
         self.app.display("Disconnected.")
-        self.update()
-        self.die(IOError("The connection was terminated."))
+        self.root.update()
+        self.root.destroy()
 
     def cget(self, a=None):
         """Retrieves Messages At A Base Level."""
