@@ -372,16 +372,17 @@ class serverbase(base):
             out = self.chat(item, self.name)
         else:
             return False
-        self.broadcast(out)
+        self.broadcast(out, display=False)
         return True
 
-    def broadcast(self, item, to=None, exempt=None):
+    def broadcast(self, item, to=None, exempt=None, display=True):
         """Broadcasts A Message."""
         if self.server == None:
             return False
         else:
             item = str(item)
-            self.app.display(item)
+            if display:
+                self.app.display(item)
             self.send("+:"+item, to, exempt)
             return True
 
