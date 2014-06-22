@@ -149,14 +149,17 @@ class multiserver(server):
         else:
             self.c[address].close()
             del self.c[address]
+    def getnum(self, address):
+        """Returns A Unique Identifier Number For An Address."""
+        return self.c.keys().index(address)
     def send(self, address, message):
         """Sends A Message To A Certain Client."""
-        self.printdebug(str(self.c.keys().index(address))+" < "+message)
+        self.printdebug(str(self.getnum(address))+" < "+message)
         self.c[address].send(message)
     def receive(self, address, amount=1024):
         """Receives A Message From A Certain Client."""
         out = str(self.c[address].recv(amount))
-        self.printdebug(str(self.c.keys().index(address))+" > "+out)
+        self.printdebug(str(self.getnum(address))+" > "+out)
         return out
     def retrieve(self, a, refresh=None, limit=100):
         """Retrieves Formatted Messages."""
