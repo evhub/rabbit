@@ -236,7 +236,7 @@ class serverbase(base):
             else:
                 self.c.connect(self.port, self.host)
         self.app.display("Connected.")
-        self.registry = {None: self.nokey, ">": self.passon, "x": self.disconnect)}
+        self.registry = {None: self.nokey, ">": self.passon, "x": self.disconnect}
         self.agenda = []
         if self.server:
             self.queue = {}
