@@ -297,9 +297,6 @@ class serverbase(base):
                     self.queue[a].reverse()
                 else:
                     self.c.fsend(a, empty)
-            self.root.update()
-            for func in self.agenda:
-                func()
             for a in self.c.c:
                 for test in self.cget(a):
                     test = test.strip(empty)
@@ -310,10 +307,6 @@ class serverbase(base):
                 test = test.strip(empty)
                 if test:
                     self.addsent(test)
-            for func in self.agenda:
-                func()
-            self.agenda = []
-            self.root.update()
             if len(self.queue) > 0:
                 self.queue.reverse()
                 self.c.fsend(self.queue.pop())
@@ -322,6 +315,9 @@ class serverbase(base):
                 self.c.fsend(empty)
         else:
             return False
+        for func in self.agenda:
+            func()
+        self.agenda = []
         self.register(self.refresh, self.speed)
         return True
 
@@ -435,9 +431,9 @@ class serverbase(base):
             elif item.startswith("::") and ":" in item[2:]:
                 key, item = item[2:].split(":", 1)
                 if key in self.registry:
-                    self.registry[key](item, a)
+                    self.schedule(lambda: self.registry[key](item, a))
                 elif None in self.registry:
-                    self.registry[None](key, item, a)
+                    self.schedule(lambda: self.registry[None](key, item, a))
             else:
                 self.sent[a].append(item)
         elif self.server != None:
@@ -446,9 +442,9 @@ class serverbase(base):
             elif item.startswith("::") and ":" in item[2:]:
                 key, item = item[2:].split(":", 1)
                 if key in self.registry:
-                    self.registry[key](item)
+                    self.schedule(lambda: self.registry[key](item))
                 elif None in self.registry:
-                    self.registry[None](key, item)
+                    self.schedule(lambda: self.registry[None](key, item))
             else:
                 self.sent.append(item)
         else:
