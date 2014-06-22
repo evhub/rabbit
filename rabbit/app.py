@@ -60,10 +60,14 @@ class base(object):
         """Handles A Return Event."""
         self.returned = 1
 
+    def update(self):
+        """Updates The Window."""
+        self.root.update()
+
     def get(self):
         """Pauses Code Until Data Entry And Returns The Data."""
         while self.returned == 0:
-            self.root.update()
+            self.update()
         self.returned = 0
         return self.box.output()
 
@@ -249,6 +253,12 @@ class serverbase(base):
         if self.ready:
             self.textmsg(self.box.output())
 
+    def update(self):
+        """Forces A Refresh."""
+        self.root.update()
+        self.refresh()
+        self.root.update()
+
     def refresh(self, empty="#"):
         """Sends Items In The Queue, Adds Items To Sent."""
         empty = str(empty)
@@ -329,11 +339,11 @@ class serverbase(base):
         """Receives A Message At A High Level."""
         if self.server:
             while not self.responded():
-                self.root.update()
+                self.update()
             return self.getsent()
         elif self.server != None:
             while not self.responded():
-                self.root.update()
+                self.update()
             return self.getsent()
         else:
             return None
@@ -390,7 +400,7 @@ class serverbase(base):
             self.send(test)
             out = False
             while not out:
-                self.root.update()
+                self.update()
                 out = True
                 for a in self.sent:
                     if not test in self.sent[a]:
@@ -401,7 +411,7 @@ class serverbase(base):
         elif self.server != None:
             self.send(test)
             while not test in self.sent:
-                self.root.update()
+                self.update()
             self.sent.remove(test)
         else:
             return False
@@ -412,16 +422,16 @@ class serverbase(base):
         self.c.close()
         self.server = None
         self.app.display("Disconnected.")
-        self.root.update()
+        self.update()
         self.die(IOError("The connection was terminated."))
 
     def cget(self, a=None):
         """Retrieves Messages At A Base Level."""
         try:
             if a == None:
-                out = self.c.getitems(self.root.update)
+                out = self.c.getitems(self.update)
             else:
-                out = self.c.getitems(a, self.root.update)
+                out = self.c.getitems(a, self.update)
         except IOError:
             self.disconnect()
         else:
