@@ -404,7 +404,7 @@ class serverbase(base):
         """Triggers A Registered Function."""
         if self.server:
             self.send("::"+str(key)+":"+str(arg))
-            self.schedule(lambda: self.register(lambda: self.registry[key](arg, True), self.speed*(len(self.queue[self.c.c[0]])-1))))
+            self.schedule(lambda: self.register(lambda: self.registry[key](arg, True), self.speed*(len(self.queue[self.c.c[0]])-1)))
         else:
             self.send("::>:"+str(key)+":"+str(arg))
         self.update()
