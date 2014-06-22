@@ -371,9 +371,7 @@ class serverbase(base):
         if self.server:
             item, a = item
             if item.startswith("+:"):
-                item = item[2:]
-                self.app.display(item)
-                self.broadcast(item, exempt=a)
+                self.broadcast(item[2:], exempt=a)
             else:
                 self.sent[a].append(item)
         elif self.server != None:
