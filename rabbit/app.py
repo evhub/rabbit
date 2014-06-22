@@ -429,9 +429,9 @@ class serverbase(base):
         """Retrieves Messages At A Base Level."""
         try:
             if a == None:
-                out = self.c.getitems(self.update)
+                out = self.c.getitems(self.root.update)
             else:
-                out = self.c.getitems(a, self.update)
+                out = self.c.getitems(a, self.root.update)
         except IOError:
             self.disconnect()
         else:
