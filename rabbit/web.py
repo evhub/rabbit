@@ -194,12 +194,12 @@ class client(server):
         self.s.connect((host, port))
     def send(self, message):
         """Sends A Message."""
-        self.printdebug("> "+message)
+        self.printdebug("s < "+message)
         self.s.send(message)
     def receive(self, amount=1024):
         """Receives A Message."""
         out = str(self.s.recv(amount))
-        self.printdebug("< "+out)
+        self.printdebug("s > "+out)
         return out
     def close(self):
         """Disconnects From A Server."""
