@@ -191,7 +191,7 @@ class serverbase(base):
             self.host = None
             while not self.host:
                 self.host = popup("Entry", "Host?")
-                if "." not in self.host:
+                if "." not in self.host and self.host != "local":
                     popup("Error", "That isn't a valid host name. Please try again.")
                     self.host = ""
         self.port = 0
@@ -231,7 +231,7 @@ class serverbase(base):
             self.c.start(self.number)
         else:
             self.c = client(debug=self.debug)
-            if self.host == "":
+            if self.host == "local":
                 self.c.connect(self.port)
             else:
                 self.c.connect(self.port, self.host)
@@ -244,11 +244,16 @@ class serverbase(base):
             for a in self.c.c:
                 self.queue[a] = []
                 self.sent[a] = []
-            self.app.display("Retrieving Names...")
-            self.register(self.namer, self.speed+200)
         else:
             self.queue = [self.name]
             self.sent = []
+        self.app.display("Waiting...")
+        self.sync()
+        self.app.display("Waited.")
+        if self.server:
+            self.app.display("Retrieving Names...")
+            self.register(self.namer, self.speed+200)
+        else:
             self.app.display("Loading...")
             self.register(self.begin, self.speed+400)
         self.register(self.refresh, self.speed)
