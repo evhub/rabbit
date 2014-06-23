@@ -248,7 +248,10 @@ class serverbase(base):
             self.queue = [self.name]
             self.sent = []
         self.app.display("Waiting...")
-        self.sync()
+        self.register(self.staging, 1000)
+
+    def staging(self):
+        """Delays To Allow All Connections In."""
         self.app.display("Waited.")
         if self.server:
             self.app.display("Retrieving Names...")
