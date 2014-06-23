@@ -166,7 +166,7 @@ class multiserver(server):
         counter = 0
         while len(self.items[a]) == 0:
             counter += 1
-            test = self.receive(a).split("\\")
+            test = self.receive(a).split("|")
             for x in test:
                 if x.startswith("~"):
                     self.items[a].append(x[1:])
@@ -183,7 +183,7 @@ class multiserver(server):
         return out
     def fsend(self, a, item):
         """Sends A Formatted Message."""
-        self.send(a, "\\~"+str(item)+"\\")
+        self.send(a, "|~"+str(item)+"|")
 
 class client(server):
     """A Client Class For Communicating To Servers."""
