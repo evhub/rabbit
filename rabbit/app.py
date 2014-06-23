@@ -206,6 +206,7 @@ class serverbase(base):
             self.app.display("Waiting For Connections...")
         else:
             self.name = popup("Entry", "Name?") or "Guest"
+            popup("Warning", "DO NOT PROCEED UNTIL TOLD!\nTo prevent server/client desynchronization, you should not click OK on this popup until your host tells you to.")
             self.app.display("Connecting...")
         self.register(self.connect, 200)
 
@@ -260,7 +261,6 @@ class serverbase(base):
             self.queue = [self.name]
             self.sent = []
         self.app.display("Waiting...")
-        self.popup("Warning", "DO NOT PROCEED UNTIL TOLD!\nTo prevent server/client desynchronization, you should not click OK on this popup until your host tells you to.")
         self.register(self.staging, 1000)
 
     def staging(self):
