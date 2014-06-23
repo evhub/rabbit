@@ -175,7 +175,7 @@ class safebase(base):
 class serverbase(base):
     """A Universal Server And Client Application."""
 
-    def __init__(self, name="Web Client", message="Initializing...", height=None, speed=400, debug=False):
+    def __init__(self, name="Web Client", message="Initializing...", height=None, speed=400, port=6775, debug=False):
         """Creates The Server Or Client."""
         self.ready = False
         self.debug = bool(debug)
@@ -194,9 +194,9 @@ class serverbase(base):
                 if "." not in self.host and self.host != "local":
                     popup("Error", "That isn't a valid host name. Please try again.")
                     self.host = ""
-        self.port = 0
-        while self.port <= 0:
-            self.port = popup("Integer", "Port?")
+            if ":" in self.host:
+                self.host, port = self.host.rsplit(":", 1)
+        self.port = int(port)
         self.app.display("Initialized.")
         if self.server:
             self.number = 0

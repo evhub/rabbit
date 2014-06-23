@@ -35,7 +35,7 @@ def download(url, filename=None):
 
 class server(object):
     """A Base Class For Servers."""
-    def __init__(self, port, host=socket.gethostname(), debug=False):
+    def __init__(self, port=0, host=socket.gethostname(), debug=False):
         """Binds The Server To The Host And Port."""
         self.debug = debug
         self.s = socket.socket()
@@ -96,7 +96,7 @@ class longserver(server):
 
 class shortserver(server):
     """A Server Class For Creating A Multi-Single-Client Server."""
-    def __init__(self, port, host=socket.gethostname(), debug=False):
+    def __init__(self, port=0, host=socket.gethostname(), debug=False):
         """Binds The Server To The Host And Port."""
         self.debug = debug
         self.s = socket.socket()
@@ -121,7 +121,7 @@ class shortserver(server):
 
 class multiserver(server):
     """A Server Class For Creating A Multi-Client Server."""
-    def __init__(self, port, host=socket.gethostname(), debug=False):
+    def __init__(self, port=0, host=socket.gethostname(), debug=False):
         """Binds The Server To The Host And Port."""
         self.debug = debug
         self.s = socket.socket()
@@ -192,7 +192,7 @@ class client(server):
         self.debug = debug
         self.s = socket.socket()
         self.items = []
-    def connect(self, port, host=socket.gethostname()):
+    def connect(self, port=0, host=socket.gethostname()):
         """Connects To A Server."""
         self.s.connect((host, port))
     def send(self, message):
