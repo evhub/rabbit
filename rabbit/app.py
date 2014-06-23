@@ -220,7 +220,7 @@ class serverbase(base):
         key, arg = str(arg).split(":", 1)
         if a and key in self.registry:
             self.send("::"+key+":"+arg)
-            self.schedule(lambda: self.registry[key](arg, True), len(self.queue[a])))
+            self.schedule(lambda: self.registry[key](arg, True), len(self.queue[a]))
         else:
             self.nokey(">", "::"+arg, a)
 
@@ -427,7 +427,7 @@ class serverbase(base):
         if self.server or not toall:
             self.send("::"+str(key)+":"+str(arg))
             if toall:
-                self.schedule(lambda: self.registry[key](arg, True), len(self.queue[self.c.c.keys()[0]])))
+                self.schedule(lambda: self.registry[key](arg, True), len(self.queue[self.c.c.keys()[0]]))
         else:
             self.send("::>:"+str(key)+":"+str(arg))
         self.update()
