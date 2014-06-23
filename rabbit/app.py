@@ -260,6 +260,7 @@ class serverbase(base):
             self.queue = [self.name]
             self.sent = []
         self.app.display("Waiting...")
+        self.popup("Warning", "DO NOT PROCEED UNTIL TOLD!\nTo prevent server/client desynchronization, you should not click OK on this popup until your host tells you to.")
         self.register(self.staging, 1000)
 
     def staging(self):
@@ -511,6 +512,18 @@ class serverbase(base):
         self.server = None
         self.c.close()
         self.root.destroy()
+
+    def retrieve(self, a=None):
+        """Retrieves A Message At A Base Level."""
+        try:
+            if a == None:
+                out = self.c.retrieve(self.root.update)
+            else:
+                out = self.c.retrieve(a, self.root.update)
+        except IOError:
+            self.disconnect()
+        else:
+            return out
 
     def cget(self, a=None):
         """Retrieves Messages At A Base Level."""
