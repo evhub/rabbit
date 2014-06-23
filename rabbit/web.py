@@ -60,7 +60,7 @@ class server(object):
         counter = 0
         while len(self.items) == 0:
             counter += 1
-            test = self.receive().split("\\")
+            test = self.receive().split("|")
             for x in test:
                 if x.startswith("~"):
                     self.items.append(x[1:])
@@ -80,7 +80,7 @@ class server(object):
         self.s.setblocking(flag)
     def fsend(self, item):
         """Sends A Formatted Message."""
-        self.send("\\~"+str(item)+"\\")
+        self.send("|~"+str(item)+"|")
 
 class longserver(server):
     """A Server Class For Creating A Single-Client Server."""

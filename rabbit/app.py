@@ -429,6 +429,7 @@ class serverbase(base):
         """Adds A Received Message To The Sent."""
         if self.server:
             item, a = item
+            item = str(item)
             if item.startswith("+:"):
                 self.broadcast(item[2:], exempt=a)
             elif item.startswith("::") and ":" in item[2:]:
@@ -443,6 +444,7 @@ class serverbase(base):
             else:
                 self.sent[a].append(item)
         elif self.server != None:
+            item = str(item)
             if item.startswith("+:"):
                 self.app.display(item[2:])
             elif item.startswith("::") and ":" in item[2:]:
