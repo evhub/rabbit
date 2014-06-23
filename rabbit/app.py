@@ -220,7 +220,7 @@ class serverbase(base):
         key, arg = str(arg).split(":", 1)
         if a and key in self.registry:
             self.send("::"+key+":"+arg)
-            self.schedule(lambda: self.register(lambda: self.registry[key](arg, a), self.speed*len(self.queue[a])))
+            self.schedule(lambda: self.registry[key](arg, True), len(self.queue[a])))
         else:
             self.nokey(">", "::"+arg, a)
 
@@ -319,15 +319,19 @@ class serverbase(base):
         self.printdebug(":: "+str(len(self.agenda)))
         todo = self.agenda
         self.agenda = []
-        for func in todo:
-            func()
+        for wait, func in todo:
+            wait -= 1
+            if wait <= 0:
+                func()
+            else:
+                self.agenda.append((wait, func))
         self.register(self.refresh, self.speed)
         self.printdebug("}")
         return True
 
-    def schedule(self, func):
+    def schedule(self, func, wait=1):
         """Schedules A Function To Be Called On The Next Refresh."""
-        self.agenda.append(func)
+        self.agenda.append((int(wait), func))
 
     def send(self, item, to=None, exempt=None):
         """Sends A Message."""
@@ -423,7 +427,7 @@ class serverbase(base):
         if self.server or not toall:
             self.send("::"+str(key)+":"+str(arg))
             if toall:
-                self.schedule(lambda: self.register(lambda: self.registry[key](arg, True), self.speed*len(self.queue[self.c.c.keys()[0]])))
+                self.schedule(lambda: self.registry[key](arg, True), len(self.queue[self.c.c.keys()[0]])))
         else:
             self.send("::>:"+str(key)+":"+str(arg))
         self.update()
