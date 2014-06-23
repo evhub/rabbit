@@ -210,6 +210,7 @@ class serverbase(base):
         self.register(self.connect, 200)
 
     def nokey(self, key, arg, a=None):
+        """Handles A Missing Trigger."""
         item = ":"+str(key)+":"+str(arg)
         if a:
             self.sent[a].append(item)
@@ -217,12 +218,23 @@ class serverbase(base):
             self.sent.append(item)
 
     def passon(self, arg, a=None):
+        """Handles the > Trigger."""
         key, arg = str(arg).split(":", 1)
         if a and key in self.registry:
             self.send("::"+key+":"+arg)
             self.schedule(lambda: self.registry[key](arg, a), len(self.queue[a]))
         else:
-            self.nokey(">", "::"+arg, a)
+            self.printdebug("ERROR: Bad trigger key '"+key+"'")
+
+    def trigger(self, key, arg="", toall=True):
+        """Triggers A Registered Function."""
+        if self.server or not toall:
+            self.send("::"+str(key)+":"+str(arg))
+            if toall:
+                self.schedule(lambda: self.registry[key](arg, True), len(self.queue[self.c.c.keys()[0]]))
+        else:
+            self.send("::>:"+str(key)+":"+str(arg))
+        self.update()
 
     def connect(self):
         """Connects To The Server Or Clients."""
@@ -429,16 +441,6 @@ class serverbase(base):
     def onsent(self, key, func):
         """Registers A Function To A Sent Item."""
         self.registry[str(key)] = func
-
-    def trigger(self, key, arg="", toall=True):
-        """Triggers A Registered Function."""
-        if self.server or not toall:
-            self.send("::"+str(key)+":"+str(arg))
-            if toall:
-                self.schedule(lambda: self.registry[key](arg, True), len(self.queue[self.c.c.keys()[0]]))
-        else:
-            self.send("::>:"+str(key)+":"+str(arg))
-        self.update()
 
     def addsent(self, item):
         """Adds A Received Message To The Sent."""
