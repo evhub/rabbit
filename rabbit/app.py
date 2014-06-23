@@ -504,6 +504,8 @@ class serverbase(base):
     def disconnect(self, arg=None, a=None):
         """Disconnects From The Server Or Clients."""
         self.app.display("Disconnecting...")
+        if self.server:
+            self.trigger("x")
         self.server = None
         self.c.close()
         self.root.destroy()
