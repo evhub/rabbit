@@ -317,9 +317,10 @@ class serverbase(base):
         else:
             return False
         self.printdebug(":: "+str(len(self.agenda)))
-        for func in self.agenda:
-            func()
+        todo = self.agenda
         self.agenda = []
+        for func in todo:
+            func()
         self.register(self.refresh, self.speed)
         self.printdebug("}")
         return True
