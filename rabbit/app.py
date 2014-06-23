@@ -421,7 +421,7 @@ class serverbase(base):
         if self.server or not toall:
             self.send("::"+str(key)+":"+str(arg))
             if toall:
-                self.schedule(lambda: self.register(lambda: self.registry[key](arg, True), self.speed*(len(self.queue[self.c.c[0]])-1)))
+                self.schedule(lambda: self.register(lambda: self.registry[key](arg, True), self.speed*(len(self.queue[self.c.c[self.c.c.keys()[0]]])-1)))
         else:
             self.send("::>:"+str(key)+":"+str(arg))
         self.update()
