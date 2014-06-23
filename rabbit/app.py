@@ -416,11 +416,12 @@ class serverbase(base):
         """Registers A Function To A Sent Item."""
         self.registry[str(key)] = func
 
-    def trigger(self, key, arg=""):
+    def trigger(self, key, arg="", toall=True):
         """Triggers A Registered Function."""
-        if self.server:
+        if self.server or not toall:
             self.send("::"+str(key)+":"+str(arg))
-            self.schedule(lambda: self.register(lambda: self.registry[key](arg, True), self.speed*(len(self.queue[self.c.c[0]])-1)))
+            if toall:
+                self.schedule(lambda: self.register(lambda: self.registry[key](arg, True), self.speed*(len(self.queue[self.c.c[0]])-1)))
         else:
             self.send("::>:"+str(key)+":"+str(arg))
         self.update()
