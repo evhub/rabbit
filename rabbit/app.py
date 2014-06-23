@@ -220,7 +220,7 @@ class serverbase(base):
         key, arg = str(arg).split(":", 1)
         if a and key in self.registry:
             self.send("::"+key+":"+arg)
-            self.schedule(lambda: self.registry[key](arg, True), len(self.queue[a]))
+            self.schedule(lambda: self.registry[key](arg, a), len(self.queue[a]))
         else:
             self.nokey(">", "::"+arg, a)
 
