@@ -340,6 +340,7 @@ class serverbase(base):
             self.queue.append(item)
         else:
             return False
+        self.root.update()
         return True
 
     def getsent(self):
