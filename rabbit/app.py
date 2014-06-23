@@ -322,7 +322,7 @@ class serverbase(base):
         for wait, func in todo:
             wait -= 1
             if wait <= 0:
-                func()
+                self.register(func, 200)
             else:
                 self.agenda.append((wait, func))
         self.register(self.refresh, self.speed)
