@@ -186,7 +186,7 @@ class serverbase(base):
         rootbind(self.root, self.disconnect)
         self.show = self.app.display
         self.speed = int(speed)
-        self.server = bool(isno(popup("Question", "Client(Y) or Server(n)?")))
+        self.server = bool(formatisno(popup("Question", "Client(Y) or Server(n)?")))
         if not self.server:
             self.host = None
             while not self.host:
