@@ -186,6 +186,10 @@ class serverbase(base):
         rootbind(self.root, self.disconnect)
         self.show = self.app.display
         self.speed = int(speed)
+        self.boot(port)
+
+    def boot(self, port=6775):
+        """Performs The Basic Boot-Up."""
         self.server = bool(formatisno(popup("Question", "Client(Y) or Server(n)?")))
         if not self.server:
             self.host = None
@@ -197,7 +201,10 @@ class serverbase(base):
             if ":" in self.host:
                 self.host, port = self.host.rsplit(":", 1)
         self.port = int(port)
-        self.app.display("Initialized.")
+        if self.server:
+            self.app.display("Initialized for port "+str(self.port)+".")
+        else:
+            self.app.display("Initialized for host "+str(self.host)+" and port "+str(self.port)+".")
         if self.server:
             self.number = 0
             while self.number <= 0:
@@ -248,7 +255,10 @@ class serverbase(base):
                 self.c.connect(self.port)
             else:
                 self.c.connect(self.port, self.host)
-        self.app.display("Connected.")
+        if self.server:
+            self.app.display("Connected on port "+str(self.port)+".")
+        else:
+            self.app.display("Connected to host "+str(self.host)+" on port "+str(self.port)+".")
         self.registry = {None: self.nokey, ">": self.passon, "x": self.disconnect}
         self.agenda = []
         if self.server:
