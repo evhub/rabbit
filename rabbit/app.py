@@ -190,7 +190,7 @@ class serverbase(base):
         if not self.server:
             self.host = None
             while not self.host:
-                self.host = popup("Entry", "Host?")
+                self.host = popup("Entry", "Host?") or "local"
                 if "." not in self.host and self.host != "local":
                     popup("Error", "That isn't a valid host name. Please try again.")
                     self.host = ""
@@ -289,7 +289,9 @@ class serverbase(base):
     def handler(self, event=None):
         """Handles input."""
         if self.ready:
-            self.textmsg(self.box.output())
+            original = self.box.output()
+            self.box.add(original)
+            self.textmsg(original)
 
     def update(self):
         """Updates The Server."""
@@ -506,12 +508,15 @@ class serverbase(base):
 
     def disconnect(self, arg=None, a=None):
         """Disconnects From The Server Or Clients."""
-        self.app.display("Disconnecting...")
-        if self.server:
-            self.trigger("x")
-        self.server = None
-        self.c.close()
-        self.root.destroy()
+        if self.server != None:
+            self.app.display("Disconnecting...")
+            if self.server:
+                self.trigger("x")
+            self.server = None
+            self.app.display("Disconnected.")
+        else:
+            self.c.close()
+            self.root.destroy()
 
     def retrieve(self, a=None):
         """Retrieves A Message At A Base Level."""
