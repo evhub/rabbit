@@ -158,11 +158,13 @@ class console(object):
         """Retrieves All The Lines."""
         return self.message.get().split("\n") + self.history
 
-    def dobind(self):
+    def dobind(self, tobind=None):
         """Makes The Conventional Bindings."""
-        self.text.bind("<MouseWheel>", self.scroll)
-        self.text.bind("<Tab>", lambda event: self.drop())
-        self.text.bind("<Shift-Tab>", lambda event: self.top())
+        if tobind == None:
+            tobind = self.text
+        tobind.bind("<MouseWheel>", self.scroll)
+        tobind.bind("<Tab>", lambda event: self.drop())
+        tobind.bind("<Shift-Tab>", lambda event: self.top())
 
 def startconsole(handler=None, message=None, name="PythonPlus", height=None, root=None):
     """Initializes An Instance Of The Fake Console."""
@@ -294,14 +296,16 @@ class entry(object):
             self.commands.append("")
         self.position = len(self.commands)-1
 
-    def dobind(self, handler=None):
+    def dobind(self, handler=None, tobind=None):
         """Makes The Conventional Bindings."""
-        self.main.bind("<Up>", lambda event: self.back())
-        self.main.bind("<Down>", lambda event: self.forth())
-        self.main.bind("<Control-z>", lambda event: self.main.delete(0, "end"))
-        self.main.bind("<Control-f>", lambda event: self.clean())
+        if tobind == None:
+            tobind = self.main
+        tobind.bind("<Up>", lambda event: self.back())
+        tobind.bind("<Down>", lambda event: self.forth())
+        tobind.bind("<Control-z>", lambda event: self.main.delete(0, "end"))
+        tobind.bind("<Control-f>", lambda event: self.clean())
         if handler != None:
-            self.main.bind("<Return>", handler)
+            tobind.bind("<Return>", handler)
 
 class texter(object):
     """A Graphical Class That Allows The Use Of A Text Entry Area."""
