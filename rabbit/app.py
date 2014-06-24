@@ -190,8 +190,8 @@ class serverbase(base):
         if not self.server:
             self.host = None
             while not self.host:
-                self.host = popup("Entry", "Host?") or "local"
-                if not (self.host == "local" or ("." in self.host and not madeof(self.host, "."))):
+                self.host = popup("Entry", "Host?") or "localhost"
+                if not (self.host == "localhost" or ("." in self.host and not madeof(self.host, "."))):
                     popup("Error", "That isn't a valid host name. Please try again.")
                     self.host = None
             if ":" in self.host:
@@ -244,7 +244,7 @@ class serverbase(base):
             self.c.start(self.number)
         else:
             self.c = client(debug=self.debug)
-            if self.host == "local":
+            if self.host == "localhost":
                 self.c.connect(self.port)
             else:
                 self.c.connect(self.port, self.host)
