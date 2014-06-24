@@ -191,9 +191,9 @@ class serverbase(base):
             self.host = None
             while not self.host:
                 self.host = popup("Entry", "Host?") or "local"
-                if "." not in self.host and self.host != "local":
+                if not (self.host == "local" or ("." in self.host and not madeof(self.host, "."))):
                     popup("Error", "That isn't a valid host name. Please try again.")
-                    self.host = ""
+                    self.host = None
             if ":" in self.host:
                 self.host, port = self.host.rsplit(":", 1)
         self.port = int(port)
