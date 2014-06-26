@@ -232,7 +232,7 @@ Import Commands:
             if x == len(cmdlist):
                 break
             cmdlist[x] = carefulsplit(cmdlist[x], "#", '"`')[0]
-            while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or cmdlist[x+1][0] in string.whitespace):
+            while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or iswhite(cmdlist[x+1][0])):
                 cmdlist[x] += "\n"+carefulsplit(cmdlist.pop(x+1), "#", '"`')[0]
             self.process(cmdlist[x])
             x += 1

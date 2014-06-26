@@ -19,6 +19,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 from .list import *
 import string
+import re
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
@@ -107,11 +108,9 @@ def basicformat(inputstring, leading=True, tailing=True):
     """Performs Basic Formatting On A String."""
     out = str(inputstring)
     if leading:
-        while len(out) != 0 and out[0] in string.whitespace:
-            out = out[1:]
+        out = out.lstrip()
     if tailing:
-        while len(out) != 0 and out[-1] in string.whitespace:
-            out = out[:-1]
+        out = out.rstrip()
     return out
 
 def superformat(inputstring):
@@ -154,12 +153,26 @@ def listsuperformat(inputlist):
         newlist.append(superformat(y))
     return newlist
 
-def delspace(inputstring, wipestring=string.whitespace):
+def delspace(inputstring, wipestring=None):
     """Removes All Whitespace From A String."""
-    outstring = basicformat(inputstring)
-    for x in wipestring:
-        outstring = outstring.replace(x,"")
-    return outstring
+    out = ""
+    inputstring = str(inputstring)
+    if not wipestring:
+        regex = re.compile("\s")
+    else:
+        wipestring = str(wipestring)
+    for x in inputstring:
+        if wipestring:
+            if not out in wipestring:
+                out += x
+        else:
+            if not regex.match(x):
+                out += x
+    return out
+
+def iswhite(inputstring):
+    """Determines Whether A String Is Made Of Whitespace."""
+    return re.compile("\s+").match(str(inputstring))
 
 def repeating(inputstring):
     """Generates A Repeating Representation Of A String."""

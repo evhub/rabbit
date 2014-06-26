@@ -157,7 +157,7 @@ Import Commands:
                         instring = True
                         space -= 1
                     start = False
-                elif x in string.whitespace:
+                elif iswhite(x):
                     space += 1
                 elif x == "\\":
                     start = 2
@@ -225,7 +225,7 @@ Import Commands:
             for c in xrange(0, len(linelist[l])+1):
                 point = str(l+1)+"."+str(c)
                 test = self.endchar(point)
-                if c == 1 and not test in string.whitespace:
+                if c == 1 and not iswhite(test):
                     if last[0] in [funcfloat.allargs, classcalc.selfarg, self.e.lastname, strfunc.autoarg]:
                         self.box.placetag("builtin", last[1], point+"-2c")
                     elif last[0].startswith(self.e.defprefix):
@@ -264,7 +264,7 @@ Import Commands:
                             else:
                                 self.box.placetag("string", point+"-1c", point)
                             strmod = False
-                        elif test == "\\":
+                        elif instring == '"' and test == "\\":
                             self.box.placetag("stringmod", point+"-1c", point)
                             strmod = True
                         else:
@@ -286,7 +286,7 @@ Import Commands:
                         self.box.placetag("digit", decimal+"-1c", point+"-1c")
                     elif not self.e.isreserved(test):
                         normal = True
-                    if not test in string.whitespace:
+                    if not iswhite(test):
                         decimal = False
                 elif not self.e.isreserved(test):
                     normal = True
@@ -295,7 +295,7 @@ Import Commands:
                             test = delspace(test)
                             if test:
                                 statement = test
-                        elif test in string.whitespace:
+                        elif iswhite(test):
                             if statement in ["debug", "errors", "clean", "get", "run", "save", "assert", "do", "show", "del", "import"]:
                                 self.box.placetag("statement", point+"-"+str(len(statement)+1)+"c", point+"-1c")
                                 last = ("", point+"-1c")
