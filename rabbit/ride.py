@@ -146,7 +146,7 @@ Import Commands:
 
     def endline(self):
         """Checks The Last Line."""
-        last = carefulsplit(self.box.output("insert-1l", "insert-1c"), "#", '"')[0]
+        last = carefulsplit(self.box.output("insert-1l", "insert-1c"), "#", '"`')[0]
         space = 0
         start = True
         instring = False

@@ -307,7 +307,7 @@ def splitinplace(inputlist, findstr, reserved="", domod=None):
                 outlist.append(findstr+test[i])
     return outlist
 
-def carefulsplit(inputstring, splitstring, holdstring='"', openstr="", closestr=""):
+def carefulsplit(inputstring, splitstring, holdstrings='"', openstr="", closestr=""):
     """Splits A String By Something Not Inside Something Else."""
     out = [""]
     hold = False
@@ -323,8 +323,12 @@ def carefulsplit(inputstring, splitstring, holdstring='"', openstr="", closestr=
             if check > 0:
                 out[-1] += splitstring[:check]
                 check = 0
-            if x == holdstring:
-                hold = not hold
+            if hold:
+                if x == hold:
+                    hold = not hold
+            else:
+                if x in holdstrings:
+                    hold = x
             level -= x == openstr
             level += x == closestr
             out[-1] += x

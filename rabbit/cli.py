@@ -119,7 +119,7 @@ class commandline(mathbase):
         """Handles Raw Input."""
         self.e.recursion = 0
         self.commands.append(original)
-        cmd = carefulsplit(original, "#", '"')[0]
+        cmd = carefulsplit(original, "#", '"`')[0]
         if delspace(cmd) == "":
             self.adderror("NoneError", "Nothing cannot be executed.")
         else:

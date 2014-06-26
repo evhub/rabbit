@@ -206,7 +206,7 @@ Import Commands:
         """Handles A Return Event."""
         self.e.recursion = 0
         original = self.box.output()
-        cmd = carefulsplit(original, "#", '"')[0]
+        cmd = carefulsplit(original, "#", '"`')[0]
         if delspace(cmd) == "":
             self.process(self.box.commands[-2])
         else:
@@ -231,9 +231,9 @@ Import Commands:
         while True:
             if x == len(cmdlist):
                 break
-            cmdlist[x] = carefulsplit(cmdlist[x], "#", '"')[0]
+            cmdlist[x] = carefulsplit(cmdlist[x], "#", '"`')[0]
             while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or cmdlist[x+1][0] in string.whitespace):
-                cmdlist[x] += "\n"+carefulsplit(cmdlist.pop(x+1), "#", '"')[0]
+                cmdlist[x] += "\n"+carefulsplit(cmdlist.pop(x+1), "#", '"`')[0]
             self.process(cmdlist[x])
             x += 1
 
@@ -273,7 +273,7 @@ Import Commands:
 
     def pre_cmd(self, inputstring):
         """Evaluates Commands."""
-        for original in carefulsplit(inputstring, ";;", '"', "{", "}"):
+        for original in carefulsplit(inputstring, ";;", '"`', "{", "}"):
             if delspace(original) != "":
                 original = basicformat(original)
                 for func in self.cmds:
@@ -447,7 +447,7 @@ Import Commands:
                 sides[0] = sides[0][:-1*len(test)]
                 sides[1] = "("+sides[0]+")"+test+"("+sides[1]+")"
                 docalc = True
-            sides[0] = carefulsplit(sides[0], ",", openstr="(", closestr=")")
+            sides[0] = carefulsplit(sides[0], ",", '"`', openstr="(", closestr=")")
             if len(sides[0]) > 1:
                 test = True
                 for x in sides[0]:
