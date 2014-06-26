@@ -163,11 +163,14 @@ Import Commands:
                     start = 2
                 else:
                     start = False
-            if x == '"':
-                instring = not instring
-            elif not instring and x in ["(", "[", "{"]:
+            if instring:
+                if x == instring:
+                    instring = not instring
+            elif x in ['"', "`"]:
+                instring = x
+            elif x in ["(", "[", "{"]:
                 space += 1
-            elif not instring and x in [")", "]", "}"]:
+            elif x in [")", "]", "}"]:
                 space -= 1
         space += instring
         if space <= 0 and endswithany(basicformat(last), "=:*+-%/^@~\\|&;<>.,([{$!?"):
@@ -183,7 +186,7 @@ Import Commands:
         test = self.box.output(point+"-1c", point)
         if test == "#":
             self.box.placetag("comment", point+"-1c", point)
-        elif test == '"':
+        elif test in ['"', "`"]:
             self.box.placetag("string", point+"-1c", point)
         elif test in string.digits:
             self.box.placetag("digit", point+"-1c", point)
@@ -248,23 +251,28 @@ Import Commands:
                 if incomment:
                     self.remtags(point+"-1c", point)
                     self.box.placetag("comment", point+"-1c", point)
-                elif test == '"':
-                    instring = not instring
-                    decimal = False
-                    strmod = False
                 elif instring:
-                    self.remtags(point+"-1c", point)
-                    if strmod:
-                        if test in "n'-":
+                    if test == instring:
+                        instring = not instring
+                        decimal = False
+                        strmod = False
+                    else:
+                        self.remtags(point+"-1c", point)
+                        if strmod:
+                            if test in "-'abfnNrtuUvx":
+                                self.box.placetag("stringmod", point+"-1c", point)
+                            else:
+                                self.box.placetag("string", point+"-1c", point)
+                            strmod = False
+                        elif test == "\\":
                             self.box.placetag("stringmod", point+"-1c", point)
+                            strmod = True
                         else:
                             self.box.placetag("string", point+"-1c", point)
-                        strmod = False
-                    elif test == "\\":
-                        self.box.placetag("stringmod", point+"-1c", point)
-                        strmod = True
-                    else:
-                        self.box.placetag("string", point+"-1c", point)
+                elif test in ['"', "`"]:
+                    instring = test
+                    decimal = False
+                    strmod = False
                 elif test == "#":
                     incomment = True
                     decimal = False
