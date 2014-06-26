@@ -698,11 +698,11 @@ class classcalc(cotobject):
         self.e.setvars(self.variables)
         self.e.processor.process(str(command))
         self.e.processor.returned = returned
-        for v in self.e.variables:
-            if self.e.isreserved(v):
-                oldvars[v] = self.e.variables[v]
-            elif not v in oldvars or not self.e.variables[v] is oldvars[v]:
-                self.store(v, self.e.variables[v], True, methods)
+        for k in self.e.variables:
+            if self.e.isreserved(k):
+                oldvars[k] = self.e.variables[k]
+            elif not k in oldvars or not self.e.variables[k] is oldvars[k]:
+                self.store(k, self.e.variables[k], True, methods)
         self.e.variables = oldvars
     def calc(self, inputstring):
         """Calculates A String In The Environment Of The Dictionary."""

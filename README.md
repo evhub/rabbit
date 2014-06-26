@@ -358,21 +358,14 @@ Rabbit comes with a lot of built-in functions. We'll list all of them below, but
 ```
 # Built-In Base Rabbit Functions:
 D				# Derivative
-FP				# F distribution probability integral
-Fdist			# F distribution
-Feq				# F distribution equation
 L				# List to row
 S				# Definite integral
 abs				# Absolute value
 acos			# Arc cosine
 asin			# Arc sine
 atan			# Arc tangent
-binomP			# Discrete binomial distribution
 calc			# Calculate a string of code
 ceil			# Ceiling function
-chisqP			# Chi squared distribution probability integral
-chisqdist		# Chi squared distribution
-chisqeq			# Chi squared distribution equation
 comb			# Combinations
 cont			# Convert to container
 contains		# Equivalent to in
@@ -389,7 +382,6 @@ fold			# Fold a function over a container
 frac			# Convert to fraction
 gamma			# Gamma function
 gcd				# Greatest common denominator
-hypgeoP			# Discrete hypergeometric distribution
 join			# Join containers
 lcm				# Least common multiple
 len				# Length
@@ -398,11 +390,8 @@ ln				# Natural logarithm
 log				# Base 10 logarithm
 matrix			# Convert to or create matrix
 merge			# Merge containers
-normP			# Normal distribution probability integral
-normdis			# Normal distribution
 num				# Convert to number
 perm			# Permutations
-poissonP		# Poisson distribution probability integral
 prod			# Product of items
 rad				# Radians
 range			# Create a range
@@ -418,10 +407,7 @@ split			# Split container
 sqrt			# Complex square root
 str				# Convert to string
 sum				# Sum items
-tP				# t distribution probability integral
 tan				# Tangent
-tdist			# t distribution
-teq				# t distribution equation
 to				# Convert to specified type
 type			# Get type of item
 
@@ -437,6 +423,23 @@ true			# 1
 ans				# Last answer
 grab			# Last line
 print			# Print string
+
+# Built-In Rabbit Modules:
+stats			# Contains statistical functions
+	normP		# Normal distribution probability integral
+	normdist	# Normal distribution
+	chisqP		# Chi squared distribution probability integral
+	chisqdist	# Chi squared distribution
+	chisqeq		# Chi squared distribution equation
+	tP			# t distribution probability integral
+	tdist		# t distribution
+	teq			# t distribution equation
+	binomP		# Discrete binomial distribution
+	poissonP	# Poisson distribution probability integral
+	hypgeoP		# Discrete hypergeometric distribution
+	FP			# F distribution probability integral
+	Fdist		# F distribution
+	Feq			# F distribution equation
 ```
 
 #### More Rabbits?
