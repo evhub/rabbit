@@ -29,6 +29,7 @@ class evaluator(object):
 
 Global Operator Precedence List:
     "       Opens and closes strings.
+    `       Opens and closes raw strings.
     {}      Opens and closes classes.
     []      Opens and closes matrix rows.
     ()      Opens and closes parentheses.
@@ -414,13 +415,15 @@ Global Operator Precedence List:
 
     def calc_string(self, expression):
         """Evaluates The String Part Of An Expression."""
-        strlist = expression.split('"')
+        strlist = eithersplit(expression, '"`')
         command = ""
-        for x in xrange(0, len(strlist)):
-            if x%2 == 0:
-                command += strlist[x]
-            else:
-                command += self.wrap(strcalc(strlist[x], self))
+        for item in strlist:
+            if istext(item):
+                command += item
+            elif item[0] == '"':
+                command += self.wrap(strcalc(item[1], self))
+            elif item[0] == "`":
+                command += self.wrap(rawstrcalc(item[1], self))
         return command
 
     def calc_class(self, curlylist):

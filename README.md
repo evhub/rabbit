@@ -317,14 +317,20 @@ smoosh(a) =
  $ x,xs = a		# This syntax can be used in with clauses to great effect
 ```
 
-Third is the function of a function operator (.). While the syntax is the same as that for methods, since functions don't have methods, function of a function is used like methods for functions. The basic syntax is:
+Third is the raw string quote (\`). When used instead of a normal quote, it will create a raw string, where no parsing is done on the contents.
+```
+`she said "he can't say \n"`	# In raw string syntax
+"she said \'he can't say \\n\'"	# In normal string syntax
+```
+
+Fourth is the function of a function operator (.). While the syntax is the same as that for methods, since functions don't have methods, function of a function is used like methods for functions. The basic syntax is:
 ```
 f(x) = x^2
 g(x) = x+1
 f.g(2)		# Read as f(g(x)) (result = 9)
 ```
 
-Fourth is the default variable operator ('). In most cases, the single quote is reserved for use in variable names--most commonly put at the end of the name--but if put at the very beginning, it functions as the default variable operator. The basic use is:
+Fifth is the default variable operator ('). In most cases, the single quote is reserved for use in variable names--most commonly put at the end of the name--but if put at the very beginning, it functions as the default variable operator. The basic use is:
 ```
 'var = 5	# Works just like a normal function definition
 1+'var		# You can even still call it using its full name (result = 6)
@@ -335,13 +341,13 @@ var = 2
 1+var		# But the normal variable is, now using its new value instead of the default (result = 3)
 ```
 
-Fifth is the execute operator (:). When a colon is placed at before an item with nothing before it, it will execute its argument as a top-level command. The basic syntax is:
+Sixth is the execute operator (:). When a colon is placed at before an item with nothing before it, it will execute its argument as a top-level command. The basic syntax is:
 ```
 :"x = 5"	# This will execute "x = 5" as a top-level command, setting x to 5
 x			# result = 5
 ```
 
-Sixth is the all arguments variable (\_\_). When \_\_ is passed as an argument to a function it sets it to a list of all the arguments passed. The basic syntax is:
+Seventh is the all arguments variable (\_\_). When \_\_ is passed as an argument to a function it sets it to a list of all the arguments passed. The basic syntax is:
 ```
 applyplus(__) = __~\x\(x+1)
 ```

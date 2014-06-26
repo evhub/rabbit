@@ -26,11 +26,7 @@ try:
 except NameError:
     xrange = range
 
-class xunicode(unicode):
-    def __repr__(self, *args, **kwargs):
-        return unicode.__repr__(self, *args, **kwargs)[1:]
-
-str = xunicode
+str = unicode
 
 def typestr(obj):
     """Formats The Type Of Something Into A String."""
@@ -64,6 +60,14 @@ def getcall(func):
 def istext(inputobject):
     """Determines If An Object Is A String."""
     return isinstance(inputobject, (str, unicode))
+
+def urepr(inputobject):
+    """Returns A Pre-Unicode Representation."""
+    out = repr(inputobject)
+    if istext(inputobject):
+        return out[1:]
+    else:
+        return out
 
 def hasreal(value):
     """Tests To See If A Value Is A Number."""

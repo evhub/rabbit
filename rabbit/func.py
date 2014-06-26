@@ -388,7 +388,7 @@ class strcalc(numobject):
         return self
     def __repr__(self):
         """Retrieves A Representation."""
-        return '"'+repr(self.calcstr)[1:-1].replace("\\'", "'").replace('"', "\\'")+'"'
+        return '"'+repr(self.calcstr)[2:-1].replace("\\'", "'").replace('\\"', '"').replace('"', "\\'")+'"'
     def __str__(self):
         """Retrieves The Evaluator String."""
         return self.calcstr

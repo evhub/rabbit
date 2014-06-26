@@ -346,3 +346,22 @@ def switchsplit(inputstring, splitstring, otherstring=None):
         out[-1] += x
         old = new
     return out
+
+def eithersplit(inputstring, holdstrings):
+    """Splists A String By Any Of The Hold Strings."""
+    out = [""]
+    inside = False
+    for x in inputstring:
+        if inside:
+            if x == out[-1][0]:
+                out.append("")
+                inside = False
+            else:
+                out[-1][1] += x
+        else:
+            if x in holdstrings:
+                out.append([x, ""])
+                inside = True
+            else:
+                out[-1] += x
+    return out

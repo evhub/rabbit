@@ -219,3 +219,5 @@ assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
 assert f() ?= 5, & f(1) ?= 1,					$ f(*l:(5,)) = l
 assert a ?= 1 & b ?= [2,3]					$ a,b = [1,2,3]
 assert a ?= "a" & b ?= "bc"					$ a,b = "abc"
+assert "∑" ?= "\u2211"
+assert π ?= pi

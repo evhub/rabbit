@@ -19,6 +19,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 from .format import *
 from .sys import *
+import codecs
 import zipfile
 import Tkinter
 
@@ -28,7 +29,7 @@ import Tkinter
 
 def openfile(filename, opentype="r+b"):
     """Returns An Open File Object."""
-    return open(str(filename), str(opentype))
+    return codecs.open(str(filename), str(opentype), "UTF")
 
 def writefile(openfile, writer):
     """Sets The Contents Of A File."""
@@ -45,8 +46,8 @@ def createfile(filename, opentype="r+b"):
     writelist = ["w", "wb"]
     filename = str(filename)
     if opentype not in writelist:
-        out = open(filename, "wb")
-    out = open(filename, str(opentype))
+        out = openfile(filename, "wb")
+    out = openfile(filename, str(opentype))
     return out
 
 def getfile(filename, opentype="r+b"):
