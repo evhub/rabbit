@@ -16,8 +16,7 @@
 # DATA AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-from __future__ import absolute_import, print_function
-
+from __future__ import absolute_import, print_function, unicode_literals
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -26,6 +25,12 @@ try:
     xrange
 except NameError:
     xrange = range
+
+class xunicode(unicode):
+    def __repr__(self, *args, **kwargs):
+        return unicode.__repr__(self, *args, **kwargs)[1:]
+
+str = xunicode
 
 def typestr(obj):
     """Formats The Type Of Something Into A String."""

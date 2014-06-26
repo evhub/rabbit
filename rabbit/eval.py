@@ -16,8 +16,7 @@
 # DATA AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-from __future__ import absolute_import, print_function
-
+from __future__ import absolute_import, print_function, unicode_literals
 from .data import *
 from .fraction import *
 
@@ -422,7 +421,7 @@ Global Operator Precedence List:
             if istext(x):
                 command += x
             else:
-                indexstr = self.parenchar+str(self.count)+"
+                indexstr = self.parenchar+str(self.count)+self.parenchar
                 self.count += 1
                 command += indexstr
                 self.variables[indexstr] = classcalc(self)
