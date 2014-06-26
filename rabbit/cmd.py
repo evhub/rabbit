@@ -305,7 +305,7 @@ Import Commands:
         if superformat(original) == "clean":
             todel = []
             for x in self.e.variables:
-                if "`" in x:
+                if self.e.parenchar in x:
                     todel.append(x)
             for x in todel:
                 del self.e.variables[x]
@@ -354,7 +354,7 @@ Import Commands:
                 showvars = {}
                 showparens = {}
                 for x in self.e.variables:
-                    if x.startswith("`"):
+                    if x.startswith(self.e.parenchar):
                         showparens[int(x[1:-1])] = self.e.prepare(self.e.variables[x], False, True)
                     elif isinstance(self.e.variables[x], strfunc):
                         showfuncs[x] = self.e.prepare(self.e.variables[x], False, True)
@@ -564,10 +564,10 @@ Import Commands:
         """Determines If An Expression Could Be Turned Into A Function."""
         top = True
         funcparts = expression.split("(", 1)
-        if len(funcparts) == 1 and "`" in funcparts[0]:
-            funcparts = funcparts[0].split("`", 1)
+        if len(funcparts) == 1 and self.e.parenchar in funcparts[0]:
+            funcparts = funcparts[0].split(self.e.parenchar, 1)
             top = False
-        return funcparts[0] != "" and not self.e.isreserved(funcparts[0], extra, allowed) and (len(funcparts) == 1 or funcparts[1].endswith(")"*top or "`"))
+        return funcparts[0] != "" and not self.e.isreserved(funcparts[0], extra, allowed) and (len(funcparts) == 1 or funcparts[1].endswith(")"*top or self.e.parenchar))
 
     def set_import(self, sides):
         """Performs x = import."""
@@ -600,14 +600,14 @@ Import Commands:
         top = None
         if "(" in sides[0] and sides[0].endswith(")"):
             top = True
-        elif "`" in sides[0] and sides[0].endswith("`"):
+        elif self.e.parenchar in sides[0] and sides[0].endswith(self.e.parenchar):
             top = False
         if top != None:
             if top:
                 sides[0] = sides[0][:-1].split("(", 1)
             else:
-                sides[0] = sides[0].split("`", 1)
-                sides[0][1] = self.e.namefind("`"+sides[0][1])
+                sides[0] = sides[0].split(self.e.parenchar, 1)
+                sides[0][1] = self.e.namefind(self.e.parenchar+sides[0][1])
             params = []
             personals = {}
             allargs = None

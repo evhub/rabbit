@@ -60,10 +60,11 @@ Global Operator Precedence List:
     `       Denotes parentheses.
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
-    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?`.$'
+    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`'
     varname = "x"
     defprefix = "'"
     lastname = "last"
+    parenchar = "`"
 
     def __init__(self, variables=None, processor=None, color=None):
         """Initializes The Evaluator."""
@@ -398,7 +399,7 @@ Global Operator Precedence List:
 
     def wrap(self, item):
         """Wraps An Item In Parentheses."""
-        indexstr = "`"+str(self.count)+"`"
+        indexstr = self.parenchar+str(self.count)+self.parenchar
         self.count += 1
         self.variables[indexstr] = item
         return indexstr
@@ -421,7 +422,7 @@ Global Operator Precedence List:
             if istext(x):
                 command += x
             else:
-                indexstr = "`"+str(self.count)+"`"
+                indexstr = self.parenchar+str(self.count)+"
                 self.count += 1
                 command += indexstr
                 self.variables[indexstr] = classcalc(self)
@@ -673,7 +674,7 @@ Global Operator Precedence List:
                 elif hascall(test):
                     return test.call(None)
                 else:
-                    while out[0].startswith("`") and out[0].endswith("`") and out[0] in self.variables and (istext(self.variables[out[0]]) or isinstance(self.variables[out[0]], strcalc)):
+                    while out[0].startswith(self.parenchar) and out[0].endswith(self.parenchar) and out[0] in self.variables and (istext(self.variables[out[0]]) or isinstance(self.variables[out[0]], strcalc)):
                         if isinstance(self.variables[out[0]], strcalc):
                             out[0] = repr(self.variables[out[0]])
                         else:
@@ -725,7 +726,7 @@ Global Operator Precedence List:
                     else:
                         return strfloat(out[1][1:], self, params, personals, check=False)
                 else:
-                    while out[1].startswith("`") and out[1].endswith("`") and out[1] in self.variables and (istext(self.variables[out[1]]) or isinstance(self.variables[out[1]], strcalc)):
+                    while out[1].startswith(self.parenchar) and out[1].endswith(self.parenchar) and out[1] in self.variables and (istext(self.variables[out[1]]) or isinstance(self.variables[out[1]], strcalc)):
                         if isinstance(self.variables[out[1]], strcalc):
                             out[1] = repr(self.variables[out[1]])
                         else:
@@ -1107,22 +1108,22 @@ Global Operator Precedence List:
 
     def call_paren(self, inputstring):
         """Evaluates Parentheses."""
-        inputstring = strlist(switchsplit(inputstring, string.digits, [x for x in string.printable if not self.isreserved(x)]), "``")        
-        if "`" in inputstring:
+        inputstring = strlist(switchsplit(inputstring, string.digits, [x for x in string.printable if not self.isreserved(x)]), self.parenchar*2)        
+        if self.parenchar in inputstring:
             self.printdebug("(|) "+inputstring) 
-            templist = inputstring.split("`")
+            templist = inputstring.split(self.parenchar)
             inputlist = [[]]
             feed = inputlist[0]
             last = False
             for x in xrange(0, len(templist)):
                 if x%2 == 1:
                     if templist[x]:
-                        name = "`"+templist[x]+"`"
+                        name = self.parenchar+templist[x]+self.parenchar
                         if not name in self.variables:
                             num = int(self.eval_call(templist[x]))
                             if num < 0:
                                 num += self.count
-                            name = "`"+str(num)+"`"
+                            name = self.parenchar+str(num)+self.parenchar
                         if name in self.variables:
                             feed.append(name)
                         else:
@@ -1195,11 +1196,11 @@ Global Operator Precedence List:
 
     def namefind(self, varname):
         """Finds A Name."""
-        while varname.startswith("`") and varname.endswith("`"):
+        while varname.startswith(self.parenchar) and varname.endswith(self.parenchar):
             num = int(self.eval_call(varname[1:-1]))
             if num < 0:
                 num += self.count
-            varname = str(self.variables["`"+str(num)+"`"])
+            varname = str(self.variables[self.parenchar+str(num)+self.parenchar])
         return varname
 
     def funcfind(self, item):
