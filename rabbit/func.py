@@ -355,7 +355,7 @@ class strcalc(numobject):
     """Allows Strings Inside Evaluation."""
     check = 2
     def __init__(self, calcstr, e):
-        """Initializes The Evaluator String."""
+        """Initializes An Evaluator String."""
         self.calcstr = ""
         func = False
         for x in str(calcstr):
@@ -363,16 +363,17 @@ class strcalc(numobject):
                 func = False
                 if x == "'":
                     x = '"'
-                elif x == "n":
-                    x = "\n"
                 elif x == "-":
                     if len(self.calcstr) > 0:
                         self.calcstr = self.calcstr[:-1]
                     x = ""
+                else:
+                    self.calcstr += "\\"
             elif x == "\\":
                 func = True
                 x = ""
             self.calcstr += x
+        self.calcstr = str(compute('"'+self.calcstr.replace('"', '\\"')+'"'))
         self.e = e
     def copy(self):
         """Returns A Copy Of The Evaluator String."""
@@ -388,7 +389,7 @@ class strcalc(numobject):
         return self
     def __repr__(self):
         """Retrieves A Representation."""
-        return '"'+self.calcstr.replace("\\","\\\\").replace('"',"\\'").replace("\n","\\n")+'"'
+        return '"'+repr(self.calcstr)[1:-1].replace("\\'", "'").replace('"', "\\'")+'"'
     def __str__(self):
         """Retrieves The Evaluator String."""
         return self.calcstr
@@ -450,6 +451,12 @@ class strcalc(numobject):
         for x in self.calcstr:
             out.append(strcalc(x, self.e))
         return diagmatrixlist(out)
+
+class rawstrcalc(strcalc):
+    def __init__(self, calcstr, e):
+        """Initializes A Raw Evaluator String."""
+        self.calcstr = str(calcstr)
+        self.e = e
 
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""

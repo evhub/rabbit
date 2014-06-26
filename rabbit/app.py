@@ -170,7 +170,7 @@ class safebase(base):
         if errorstring == "":
             popup("Info", "No Errors.", "Error Log")
         else:
-            popup("Info", errorstring[:-1], "Error Log")
+            popup("Info", errorstring, "Error Log")
 
 class serverbase(base):
     """A Universal Server And Client Application."""

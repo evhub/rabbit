@@ -34,7 +34,7 @@ def compute(inputstring, extras=None, builtins=None):
     if extras == None:
         extras = {}
     extras["__builtins__"] = builtins
-    eval(inputstring, extras)
+    return eval(inputstring, extras)
 
 def runcode(code, extras=None):
     """Executes Code With Access Only To Global Variables."""
