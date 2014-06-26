@@ -226,7 +226,7 @@ Import Commands:
                 point = str(l+1)+"."+str(c)
                 test = self.endchar(point)
                 if c == 1 and not iswhite(test):
-                    if last[0] in [funcfloat.allargs, classcalc.selfarg, self.e.lastname, strfunc.autoarg]:
+                    if last[0] in [funcfloat.allargs, strfunc.autoarg]:
                         self.box.placetag("builtin", last[1], point+"-2c")
                     elif last[0].startswith(self.e.defprefix):
                         self.box.placetag("modifier", last[1], last[1]+"+1c")
@@ -312,7 +312,7 @@ Import Commands:
                     else:
                         last = (last[0]+delspace(test), last[1])
                 else:
-                    if last[0] in [funcfloat.allargs, classcalc.selfarg, self.e.lastname, strfunc.autoarg]:
+                    if last[0] in [funcfloat.allargs, strfunc.autoarg]:
                         self.box.placetag("builtin", last[1], point+"-1c")
                     elif last[0].startswith(self.e.defprefix):
                         self.box.placetag("modifier", last[1], last[1]+"+1c")

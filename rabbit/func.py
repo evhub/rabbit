@@ -170,7 +170,7 @@ class funcfloat(numobject):
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
-    autoarg = "auto"
+    autoarg = "__auto__"
 
     def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=funcfloat.allargs):
         """Creates A Callable String Function."""
@@ -296,10 +296,7 @@ class strfunc(funcfloat):
         return out
     def getpers(self):
         """Returns The Modified Personals List."""
-        out = self.personals.copy()
-        if classcalc.selfarg in out:
-            out[classcalc.selfarg] = classcalc.selfarg
-        return out
+        return self.personals.copy()
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, strfunc):
@@ -679,7 +676,6 @@ class integfuncfloat(integbase, funcfloat):
 
 class classcalc(cotobject):
     """Implements An Evaluator Dictionary."""
-    selfarg = "self"
     check = 1
 
     def __init__(self, e, variables=None):
@@ -691,7 +687,7 @@ class classcalc(cotobject):
     def copy(self):
         """Copies The Dictionary."""
         return classcalc(self.e, self.variables)
-    def process(self, command, methods=True):
+    def process(self, command):
         """Processes A Command And Puts The Result In The Variables."""
         oldvars = self.e.variables.copy()
         returned = self.e.processor.returned
@@ -702,7 +698,7 @@ class classcalc(cotobject):
             if self.e.isreserved(k):
                 oldvars[k] = self.e.variables[k]
             elif not k in oldvars or not self.e.variables[k] is oldvars[k]:
-                self.store(k, self.e.variables[k], True, methods)
+                self.store(k, self.e.variables[k], True)
         self.e.variables = oldvars
     def calc(self, inputstring):
         """Calculates A String In The Environment Of The Dictionary."""
@@ -714,12 +710,10 @@ class classcalc(cotobject):
     def items(self):
         """Returns The Variables."""
         return self.variables.items()
-    def store(self, key, value, bypass=False, methods=True):
+    def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = self.e.prepare(key, False, False)
         if bypass or not self.e.isreserved(test):
-            if methods and isinstance(value, strfunc):
-                value.personals[self.selfarg] = self
             self.variables[delspace(test)] = value
         else:
             self.e.processor.adderror("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))

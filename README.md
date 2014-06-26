@@ -272,15 +272,6 @@ a = {
  }
 ```
 
-When a function is defined inside of a class this turns it into a method. Methods are the same as any old function, except that the class they are in will always be passed to them as the variable "self". Here's an example of a method:
-```
-a = {
- fact(x) =						# Since this function is being defined inside of a class it becomes a method
-  x*self.fact(x-1) @ x>0;		# Here we use the self variable to allow the function to call itself
-  1
- }
-```
-
 Since a very common use of classes is to define a temporary variable that is going to be used in multiple places but only in the same expression, with/where clauses were added to facilitate that. The syntax for these statements is:
 ```
 # In with clause syntax:
@@ -302,7 +293,6 @@ First is the loop operator (~). The loop operator allows for the looping of func
 ```
 1,2,3~ \x\x					# Loops over 1,2,3 with \x\x (result = (1,2,3)) (right to left, highest precedence for a mathematical operator)
 1,2,3,4~~ \(x,y)\(x+y)		# Loops over 1,2,3,4, taking every two items for each function call (result = (3,7))
-2,4,6,8~ \x\(last+x)		# Like a method, a loop function will be given a special variable "last" that will be set to the last value returned by the loop function in the loop (result = (2,6,12,20))
 10,20~ 1,2~ \(x,y)\(x+y)	# Loops over 1,2, within a loop over 10,20, feeding each into the function (result = ((11,12),(21,22)))
 ```
 

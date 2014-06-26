@@ -73,7 +73,6 @@ assert a.x ?= 1					$ a := { x = 1 }
 assert a.f(2) ?= a.f:2 ?= 3					$ a = { f(x) = x+1 }
 assert a:"x+1" ?= 2					$ a = { x = 1 }
 assert a ?= b ?= { z := 5 }					$ b = a:"z":5 $ a = {}
-assert a.f() ?= a					$ a = { f() = self }
 
 # Multi-Line Tests:
 assert # A mid-line comment
@@ -87,12 +86,6 @@ assert a.f(1) ?= 1
   f(x) = x ;;
   x = 1
   }
-assert a.fact(3) ?= 6
- $ a = {
-  fact(x) =
-   x*self.fact(x-1) @ x>0;
-   1
-  }
 
 # With Clause Tests:
 assert f(1.5) ?= 5			$ f(x) = (gx*floor(gx) $ gx = g(x)) $ g(x) = x+1
@@ -103,7 +96,6 @@ assert g(4) ?= 6			$ g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
 # Loop Tests:
 assert 1,2,3~ \x\x ?= 1,2,3
 assert 1,2,3,4~~ \(x,y)\(x+y) ?= 3,7
-assert 2,4,6,8~ \x\(last+x) ?= 2,6,12,20
 assert 10,20~ 1,2~ \(x,y)\(x+y) ?= (11,12),(21,22)
 
 # Multi-Set Tests:

@@ -62,7 +62,6 @@ Global Operator Precedence List:
     normal  Evaluates numbers."""
     varname = "x"
     defprefix = "'"
-    lastname = "last"
     parenchar = "\xa7"
     reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`\u2260\u2264\u2265'+parenchar
 
@@ -181,7 +180,6 @@ Global Operator Precedence List:
             self.defprefix*2 : matrix(0),
             self.defprefix+funcfloat.allargs : matrix(0),
             self.defprefix+self.varname : matrix(0),
-            self.defprefix+self.lastname : matrix(0),
             "\xf8" : "none",
             "\u2211" : "sum",
             "\u03c0" : "pi",
@@ -435,11 +433,8 @@ Global Operator Precedence List:
             if istext(x):
                 command += x
             else:
-                indexstr = self.parenchar+str(self.count)+self.parenchar
-                self.count += 1
-                command += indexstr
-                self.variables[indexstr] = classcalc(self)
-                self.variables[indexstr].process(strlist(x))
+                indexstr = self.wrap(classcalc(self))
+                self.variables[indexstr].process(strlist(x, ";;"))
         return command
 
     def calc_brack(self, bracklist):
@@ -472,7 +467,7 @@ Global Operator Precedence List:
             item = inputlist.pop()
             withclass = classcalc(self)
             for x in inputlist:
-                withclass.process(x, methods=False)
+                withclass.process(x)
             return withclass.calc(item)
 
     def calc_pieces(self, expression):
@@ -633,8 +628,6 @@ Global Operator Precedence List:
             return self.eval_lambda(complist[0])
         else:
             item = self.eval_lambda(complist.pop())
-            if isinstance(item, strfunc):
-                item.personals[self.lastname] = matrix(0)
             lists = []
             argnum = 1
             for x in reversed(xrange(0, len(complist))):
@@ -667,8 +660,6 @@ Global Operator Precedence List:
                     args.remove(units[argnum*x+y])
                 if not isnull(item):
                     new.append(item)
-                    if isinstance(func, strfunc):
-                        func.personals[self.lastname] = item
             if fromstring:
                 out = strcalc(strlist(new, "", converter=lambda x: self.prepare(x, True, False)), self)
             elif value.onlydiag():
@@ -690,8 +681,6 @@ Global Operator Precedence List:
             else:
                 out = self.eval_comp_set(lists, args, func)
             args.remove(value)
-            if isinstance(func, strfunc) and not isnull(out):
-                func.personals[self.lastname] = out
             return out
 
     def eval_lambda(self, inputlist):
