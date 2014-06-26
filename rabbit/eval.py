@@ -63,7 +63,7 @@ Global Operator Precedence List:
     varname = "x"
     defprefix = "'"
     lastname = "last"
-    parenchar = "`"
+    parenchar = "\xa7"
 
     def __init__(self, variables=None, processor=None, color=None):
         """Initializes The Evaluator."""
@@ -79,43 +79,61 @@ Global Operator Precedence List:
         self.recursion = 0
         self.overflow = []
         self.count = 0
-        funcs = evalfuncs(self)
+        self.funcs = evalfuncs(self)
+        self.fresh()
+        if variables != None:
+            self.makevars(variables)
+        self.calls = [
+            self.call_var,
+            self.call_none,
+            self.call_neg,
+            self.call_reciproc,
+            self.call_exp,
+            self.call_lambda,
+            self.call_colon,
+            self.call_paren,
+            self.call_method,
+            self.call_normal
+            ]
+
+    def fresh(self):
+        """Resets The Variables To Their Defaults."""
         self.variables = {
-            "copy":funcfloat(funcs.copycall, self, "copy"),
-            "type":funcfloat(funcs.typecall, self, "type"),
-            "to":funcfloat(funcs.tocall, self, "to"),
-            "str":funcfloat(funcs.strcall, self, "str"),
-            "repr":funcfloat(funcs.reprcall, self, "repr"),
-            "calc":funcfloat(funcs.docalc, self, "calc"),
-            "fold":funcfloat(funcs.foldcall, self, "fold"),
-            "D":funcfloat(funcs.derivcall, self, "D"),
-            "S":funcfloat(funcs.integcall, self, "S"),
-            "L":funcfloat(funcs.brackcall, self, "L"),
-            "list":funcfloat(funcs.listcall, self, "list"),
-            "matrix":funcfloat(funcs.matrixcall, self, "matrix"),
-            "cont":funcfloat(funcs.getmatrixcall, self, "cont"),
-            "det":funcfloat(funcs.detcall, self, "det"),
-            "sum":funcfloat(funcs.sumcall, self, "sum"),
-            "prod":funcfloat(funcs.prodcall, self, "prod"),
-            "join":funcfloat(funcs.joincall, self, "join"),
-            "merge":funcfloat(funcs.mergecall, self, "merge"),
-            "sort":funcfloat(funcs.sortcall, self, "sort"),
-            "rev":funcfloat(funcs.reversecall, self, "rev"),
-            "round":funcfloat(funcs.roundcall, self, "round"),
-            "num":funcfloat(funcs.numcall, self, "num"),
-            "eval":funcfloat(funcs.collapsecall, self, "eval"),
-            "find":funcfloat(funcs.findcall, self, "find"),
-            "split":funcfloat(funcs.splitcall, self, "split"),
-            "replace":funcfloat(funcs.replacecall, self, "replace"),
-            "contains":funcfloat(funcs.containscall, self, "contains"),
-            "range":funcfloat(funcs.rangecall, self, "range"),
-            "len":funcfloat(funcs.lencall, self, "len"),
-            "size":funcfloat(funcs.sizecall, self, "size"),
-            "abs":funcfloat(funcs.abscall, self, "abs"),
-            "data":funcfloat(funcs.datacall, self, "data"),
-            "frac":funcfloat(funcs.fractcall, self, "frac"),
-            "simp":funcfloat(funcs.simpcall, self, "simp"),
-            "d":funcfloat(funcs.randcall, self, "d"),
+            "copy":funcfloat(self.funcs.copycall, self, "copy"),
+            "type":funcfloat(self.funcs.typecall, self, "type"),
+            "to":funcfloat(self.funcs.tocall, self, "to"),
+            "str":funcfloat(self.funcs.strcall, self, "str"),
+            "repr":funcfloat(self.funcs.reprcall, self, "repr"),
+            "calc":funcfloat(self.funcs.docalc, self, "calc"),
+            "fold":funcfloat(self.funcs.foldcall, self, "fold"),
+            "D":funcfloat(self.funcs.derivcall, self, "D"),
+            "S":funcfloat(self.funcs.integcall, self, "S"),
+            "L":funcfloat(self.funcs.brackcall, self, "L"),
+            "list":funcfloat(self.funcs.listcall, self, "list"),
+            "matrix":funcfloat(self.funcs.matrixcall, self, "matrix"),
+            "cont":funcfloat(self.funcs.getmatrixcall, self, "cont"),
+            "det":funcfloat(self.funcs.detcall, self, "det"),
+            "sum":funcfloat(self.funcs.sumcall, self, "sum"),
+            "prod":funcfloat(self.funcs.prodcall, self, "prod"),
+            "join":funcfloat(self.funcs.joincall, self, "join"),
+            "merge":funcfloat(self.funcs.mergecall, self, "merge"),
+            "sort":funcfloat(self.funcs.sortcall, self, "sort"),
+            "rev":funcfloat(self.funcs.reversecall, self, "rev"),
+            "round":funcfloat(self.funcs.roundcall, self, "round"),
+            "num":funcfloat(self.funcs.numcall, self, "num"),
+            "eval":funcfloat(self.funcs.collapsecall, self, "eval"),
+            "find":funcfloat(self.funcs.findcall, self, "find"),
+            "split":funcfloat(self.funcs.splitcall, self, "split"),
+            "replace":funcfloat(self.funcs.replacecall, self, "replace"),
+            "contains":funcfloat(self.funcs.containscall, self, "contains"),
+            "range":funcfloat(self.funcs.rangecall, self, "range"),
+            "len":funcfloat(self.funcs.lencall, self, "len"),
+            "size":funcfloat(self.funcs.sizecall, self, "size"),
+            "abs":funcfloat(self.funcs.abscall, self, "abs"),
+            "data":funcfloat(self.funcs.datacall, self, "data"),
+            "frac":funcfloat(self.funcs.fractcall, self, "frac"),
+            "simp":funcfloat(self.funcs.simpcall, self, "simp"),
+            "d":funcfloat(self.funcs.randcall, self, "d"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "floor":usefunc(math.floor, self, "floor", ["x"]),
             "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
@@ -156,26 +174,17 @@ Global Operator Precedence List:
             "none":matrix(0),
             "true":1.0,
             "false":0.0,
-            "D"+self.varname:"D",
-            self.defprefix*2:matrix(0),
-            self.defprefix+funcfloat.allargs:matrix(0),
-            self.defprefix+self.varname:matrix(0),
-            self.defprefix+self.lastname:matrix(0)
+            "D"+self.varname : "D",
+            self.defprefix*2 : matrix(0),
+            self.defprefix+funcfloat.allargs : matrix(0),
+            self.defprefix+self.varname : matrix(0),
+            self.defprefix+self.lastname : matrix(0),
+            "\xf8" : "none",
+            "\u2211" : "sum",
+            "\u03c0" : "pi",
+            "\u221a" : "sqrt",
+            "\u222b" : "S"
             }
-        if variables != None:
-            self.makevars(variables)
-        self.calls = [
-            self.call_var,
-            self.call_none,
-            self.call_neg,
-            self.call_reciproc,
-            self.call_exp,
-            self.call_lambda,
-            self.call_colon,
-            self.call_paren,
-            self.call_method,
-            self.call_normal
-            ]
 
     def printdebug(self, message):
         """Prints Debug Output."""
@@ -529,7 +538,7 @@ Global Operator Precedence List:
         else:
             return self.bool_eq(inputstring)
 
-    def bool_eq(self, inputstring, place=16, bools="<>=!?"):
+    def bool_eq(self, inputstring, place=16, bools="<>=!?\u2260\u2264\u2265"):
         """Evaluates The Equation Part Of A Boolean Expression."""
         inputlist = switchsplit(inputstring, bools)
         if len(inputlist) == 0:
@@ -539,6 +548,7 @@ Global Operator Precedence List:
         else:
             for x in xrange(0, len(inputlist)):
                 if madeof(inputlist[x], bools):
+                    inputlist[x] = inputlist[x].replace("\u2260", "!=").replace("\u2264", "<=").replace("\u2265", ">=")
                     args = []
                     if x == 0:
                         args.append(matrix(0))
@@ -548,19 +558,34 @@ Global Operator Precedence List:
                         args.append(matrix(0))
                     else:
                         args.append(self.calc_eval(inputlist[x+1]))
-                    if madeof(inputlist[x], "!") or madeof(inputlist[x], "?"):
-                        out = args[0] == args[1]
+                    out = False
+                    haseq = False
+                    hasgt = False
+                    haslt = False
+                    inv = False
+                    for c in inputlist[x]:
+                        if c == "=":
+                            haseq = True
+                        elif c == ">":
+                            hasgt = True
+                        elif c == "<":
+                            haslt = True
+                        elif c == "!":
+                            inv = not inv
+                    if hasgt and haslt:
+                        out = args[0] > args[1] or args[0] < args[1]
+                    elif hasgt and haseq:
+                        out = args[0] >= args[1]
+                    elif haslt and haseq:
+                        out = args[0] <= args[1]
+                    elif hasgt:
+                        out = args[0] > args[1]
+                    elif haslt:
+                        out = args[0] < args[1]
                     else:
-                        out = False
-                        if "=" in inputlist[x]:
-                            out = out or args[0] == args[1]
-                        if ">" in inputlist[x]:
-                            out = out or args[0] > args[1]
-                        if "<" in inputlist[x]:
-                            out = out or args[0] < args[1]
-                    for i in inputlist[x]:
-                        if i == "!":
-                            out = not out
+                        out = args[0] == args[1]
+                    if inv:
+                        out = not out
                     if not out:
                         return False
             return True

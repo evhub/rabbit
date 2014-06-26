@@ -125,16 +125,12 @@ def formatisyes(inputstring, info=None):
     else:
         return isyes(superformat(inputstring), info)
 
-fisyes = formatisyes
-
 def formatisno(inputstring, info=None):
     """Determines If A String, When Formatted, Is Negating."""
     if info == None:
         return isno(superformat(inputstring))
     else:
         return isno(superformat(inputstring), info)
-
-fisno = formatisno
 
 def sanitize(inputstring):
     """Insures A String Is Printable."""

@@ -239,13 +239,13 @@ class entry(object):
 
     def output(self):
         """Gets Text Box Output."""
-        contents = sanitize(self.main.get())
+        contents = self.main.get()
         self.clear()
         return contents
 
     def clean(self):
         """Sanitizes The Text Box."""
-        self.insert(self.output())
+        self.insert(sanitize(self.output()))
 
     def insert(self, text):
         """Inserts Text Into The Text Box."""
@@ -336,7 +336,7 @@ class texter(object):
 
     def output(self, start=1.0, stop="end"):
         """Gets Text Box Output."""
-        return sanitize(self.main.get(start, stop))
+        return self.main.get(start, stop)
 
     def display(self, text, point="end"):
         """Sets The Contents Of The Text Entry Area."""

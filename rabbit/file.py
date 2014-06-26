@@ -38,7 +38,7 @@ def writefile(openfile, writer):
 
 def readfile(openfile):
     """Reads The Contents Of A File."""
-    return sanitize(openfile.read())
+    return openfile.read()
 
 def createfile(filename, opentype="r+b"):
     """Creates A File And Returns An Open File Object For It."""
