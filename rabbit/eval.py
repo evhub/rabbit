@@ -60,11 +60,11 @@ Global Operator Precedence List:
     `       Denotes parentheses.
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
-    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`'
     varname = "x"
     defprefix = "'"
     lastname = "last"
     parenchar = "\xa7"
+    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`\u2260\u2264\u2265'+parenchar
 
     def __init__(self, variables=None, processor=None, color=None):
         """Initializes The Evaluator."""
@@ -551,7 +551,7 @@ Global Operator Precedence List:
         else:
             for x in xrange(0, len(inputlist)):
                 if madeof(inputlist[x], bools):
-                    inputlist[x] = inputlist[x].replace("\u2260", "!=").replace("\u2264", "<=").replace("\u2265", ">=")
+                    inputlist[x] = inputlist[x].replace("\u2264", "<=").replace("\u2265", ">=")
                     args = []
                     if x == 0:
                         args.append(matrix(0))
@@ -565,6 +565,7 @@ Global Operator Precedence List:
                     haseq = False
                     hasgt = False
                     haslt = False
+                    hasne = False
                     inv = False
                     for c in inputlist[x]:
                         if c == "=":
@@ -573,10 +574,14 @@ Global Operator Precedence List:
                             hasgt = True
                         elif c == "<":
                             haslt = True
+                        elif c == "\u2260":
+                            hasne = True
                         elif c == "!":
                             inv = not inv
-                    if hasgt and haslt:
-                        out = args[0] > args[1] or args[0] < args[1]
+                    if haseq and ((hasgt and haslt) or hasne):
+                        out = args[0] >= args[1] or args[0] <= args[1]
+                    elif (hasgt and haslt) or hasne:
+                        out = args[0] != args[1]
                     elif hasgt and haseq:
                         out = args[0] >= args[1]
                     elif haslt and haseq:
