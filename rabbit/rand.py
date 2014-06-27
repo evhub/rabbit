@@ -205,4 +205,4 @@ class random(object):
 
     def scramble(self, inputlist):
         """Randomizes The Order Of A List."""
-        return self.take(inputlist, len(inputlist))
+        return self.take(inputlist, len(inputlist))[1]
