@@ -63,6 +63,7 @@ Import Commands:
             self.root, self.app, self.box = startconsole(self.handler, message, str(name))
         else:
             self.root, self.app, self.box = startconsole(self.handler, message, str(name), int(height))
+        self.show = self.appshow
         self.populator()
         self.printdebug(": ON")
         if helpstring != None:
@@ -97,18 +98,19 @@ Import Commands:
             self.show(strlist(self.e.debuglog, "\n"), True)
         self.e.debuglog = []
 
-    def show(self, arg, message=False):
+    def appshow(self, arg, message=False):
         """Displays Something."""
-        if not istext(arg):
-            arg = self.e.prepare(arg, True, True)
-        else:
-            arg = str(arg)
+        arg = self.e.forshow(arg)
         if message:
             self.app.display(arg)
             for line in arg.split("\n"):
                 self.messages.append(line)
         else:
             self.app.display(arg)
+
+    def popshow(self, arg, message=None):
+        """Displays Something In A Popup."""
+        popup("Info", self.e.forshow(arg), "Output")
 
     def calc(self, expression):
         """Safely Evaluates An Expression."""

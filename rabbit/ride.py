@@ -53,6 +53,7 @@ Import Commands:
         self.debug_old = self.debug
         self.root = Tkinter.Tk()
         self.root.title(str(name))
+        self.show = self.popshow
         self.refresh = int(refresh)
         rootbind(self.root, self.destroy)
         self.root.bind("<Control-r>", lambda event: self.run())
@@ -358,14 +359,6 @@ Import Commands:
         self.doshow = False
         self.run()
         self.doshow = True
-        self.showerrors()
-
-    def show(self, arg):
-        """Displays Something."""
-        if self.doshow:
-            if not istext(arg):
-                arg = self.e.prepare(arg)
-            popup("Info", arg, "Output")
 
     def destroy(self):
         """Ends The Editor."""

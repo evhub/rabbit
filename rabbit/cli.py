@@ -98,13 +98,6 @@ class commandline(mathbase):
             writefile(getfile(original[5:], "wb"), strlist(self.commands[:-1], "\n"))
             return True
 
-    def showerrors(self):
-        """Shows Logged Errors."""
-        errorstring = self.geterrors()
-        if errorstring == "":
-            errorstring = "No Errors."
-        self.show(errorstring, True)
-
     def start(self):
         """Starts The Command Line Main Loop."""
         while self.on:

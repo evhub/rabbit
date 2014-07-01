@@ -33,8 +33,9 @@ except NameError:
 else:
     old_input = raw_input
 
-raw_input = lambda *args: old_input(*args).decode("UTF")
+raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode("UTF")
 
+old_str = str
 str = unicode
 
 def typestr(obj):
@@ -73,7 +74,7 @@ def getcall(func):
 
 def istext(inputobject):
     """Determines If An Object Is A String."""
-    return isinstance(inputobject, (str, unicode))
+    return isinstance(inputobject, (str, unicode, old_str))
 
 def urepr(inputobject):
     """Returns A Pre-Unicode Representation."""

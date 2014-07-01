@@ -16,6 +16,7 @@
 # DATA AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+from __future__ import absolute_import, print_function, unicode_literals
 from .cmd import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -45,12 +46,12 @@ Grid Control:
     grid
     cleargrid
 Window Control:
-    stretch = <value>
-        xstretch = <value>
-        ystretch = <value>
-    up = <value>
-        xup = <value>
-        yup = <value>
+    def stretch = <value>
+        def xstretch = <value>
+        def ystretch = <value>
+    def up = <value>
+        def xup = <value>
+        def yup = <value>
     display
         center
 Special Functions:
@@ -77,6 +78,7 @@ Import Commands:
         self.debug = bool(debug)
         self.root = Tkinter.Tk()
         self.root.title(str(name))
+        self.show = self.popshow
         self.width = width
         self.height = height
         self.app = displayer(self.root, self.width, self.height)
@@ -122,19 +124,13 @@ Import Commands:
         else:
             self.initialize(args=initializers)
 
-    def show(self, arg):
-        """Displays Something."""
-        if not istext(arg):
-            arg = self.e.prepare(arg)
-        popup("Info", arg, "Output")
-
     def convert(self, x=0.0, y=0.0):
         """Converts From Mathematical To Canvas Coordinates."""
         x = float(x)
         y = float(y)
         top, side = self.width/self.xsize, self.height/self.ysize
-        xpoint = int((x+self.xup())/self.xstretch())
-        ypoint = side - int((y+self.yup())/self.ystretch())
+        xpoint = int((x+self.xup)/self.xstretch)
+        ypoint = side - int((y+self.yup)/self.ystretch)
         if 0 <= xpoint and xpoint <= top and ypoint <= side and ypoint >= 0:
             xpoint *= self.xsize
             ypoint *= self.ysize
@@ -173,7 +169,7 @@ Import Commands:
 
     def render(self, function):
         """Renders A Function."""
-        testx = -1.0*self.xup()
+        testx = -1.0*self.xup
         self.returned = 0
         for x in xrange(0, self.width/self.xsize+1):
             testy = self.saferun(function, testx)
@@ -181,12 +177,12 @@ Import Commands:
                 break
             elif testy != None and testy != matrix(0):
                 self.singlerender(testx, testy)
-            testx += self.xstretch()
+            testx += self.xstretch
         self.returned = 1
 
     def swaprender(self, function):
         """Renders The Inverse Of A Function."""
-        testy = -1.0*self.yup()
+        testy = -1.0*self.yup
         self.returned = 0
         for y in xrange(0, self.height/self.ysize+1):
             testx = self.saferun(function, testy)
@@ -194,7 +190,7 @@ Import Commands:
                 break
             elif testx != None and testx != matrix(0):
                 self.singlerender(testx, testy)
-            testy += self.xstretch()
+            testy += self.xstretch
         self.returned = 1
 
     def atrender(self, x, function):
@@ -238,7 +234,7 @@ Import Commands:
 
     def intersectrender(self, f, g):
         """Renders The Intersection Of Two Functions."""
-        testx = -1.0*self.xup()
+        testx = -1.0*self.xup
         self.returned = 0
         for x in xrange(0, self.width/self.xsize+1):
             fy = self.saferun(f, testx)
@@ -261,42 +257,42 @@ Import Commands:
             elif gnew:
                 newx, newy = gnew
                 self.dorender(newx, newy)
-            testx += self.xstretch()
+            testx += self.xstretch
         self.returned = 1
 
     def gridrender(self):
         """Renders The Grid."""
-        xgrid, ygrid = self.xsize/self.xstretch(), self.ysize/self.ystretch()
+        xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
         test = 0
-        for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch())):
+        for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch)):
             test += xgrid
             for y in xrange(0, self.height+1):
                 self.dorender(test, y, True)
         test = 0
-        for y in xrange(0, int(float(self.height+ygrid-1)/float(ygrid+1)+(self.height/2.0)*self.ystretch())):
+        for y in xrange(0, int(float(self.height+ygrid-1)/float(ygrid+1)+(self.height/2.0)*self.ystretch)):
             test += ygrid
             for x in xrange(0, self.width+1):
                 self.dorender(x, test, True)
 
     def tickrender(self):
         """Renders Axis Ticks."""
-        xgrid, ygrid = self.xsize/self.xstretch(), self.ysize/self.ystretch()
-        xstart, ystart = self.xup()*xgrid, self.height-(self.yup()*ygrid)
+        xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
+        xstart, ystart = self.xup*xgrid, self.height-(self.yup*ygrid)
         test = 0
-        for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch())):
+        for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch)):
             test += xgrid
             for y in xrange(-2, 3):
                 self.dorender(test, y+ystart, True)
         test = 0
-        for y in xrange(0, int(float(self.height+ygrid-1)/float(ygrid+1)+(self.height/2.0)*self.ystretch())):
+        for y in xrange(0, int(float(self.height+ygrid-1)/float(ygrid+1)+(self.height/2.0)*self.ystretch)):
             test += ygrid
             for x in xrange(-2, 3):
                 self.dorender(x+xstart, test, True)
 
     def axisrender(self):
         """Renders The Axis."""
-        xgrid, ygrid = self.xsize/self.xstretch(), self.ysize/self.ystretch()
-        xstart, ystart = self.xup()*xgrid, self.height-(self.yup()*ygrid)
+        xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
+        xstart, ystart = self.xup*xgrid, self.height-(self.yup*ygrid)
         for x in xrange(0, self.width+1):
             self.dorender(x, ystart, True)
         for y in xrange(0, self.height+1):
@@ -313,7 +309,6 @@ Import Commands:
         """Populates The Grapher."""
         self.pre_cmds = [
             self.do_find,
-            self.pre_question,
             self.pre_help,
             self.pre_cmd
             ]
@@ -344,18 +339,19 @@ Import Commands:
         self.e.makevars({
             "print":funcfloat(self.printcall, self.e, "print"),
             "render":"cleargrid;;axis;;ticks",
-            "display":"center;;render", "stretch":1.0,
-            "'xstretch":"stretch",
-            "'ystretch":"stretch",
-            "'up":1.0,
-            "'xup":"up",
-            "'yup":"up",
-            "'scroller":"xstretch",
-            "'interval":"(xstretch+ystretch)*0.005",
-            "'start":"_stop-stop",
-            "'stop":2.0*math.pi,
-            "'base":1.0,
-            "'points":"points_box",
+            "display":"center;;render",
+            "stretch":1.0,
+            "xstretch":"stretch",
+            "ystretch":"stretch",
+            "up":1.0,
+            "xup":"up",
+            "yup":"up",
+            "scroller":"xstretch",
+            "interval":"(xstretch+ystretch)*0.005",
+            "start":"2*pi-stop",
+            "stop":2.0*math.pi,
+            "base":1.0,
+            "points":"points_box",
             "points_fill":"matrix:[1,0]:[0,1]:[0,-1]:[-1,0]:[1,1]:[-1,1]:[1,-1]:[-1,-1]:[-2,-2]:[-2,-1]:[-2,0]:[-2,1]:[-2,2]:[2,-2]:[2,-1]:[2,0]:[2,1]:[2,2]:[-1,2]:[0,2]:[1,2]:[-1,-2]:[0,-2]:[1,-2]",
             "points_box":"matrix:[-2,-2]:[-2,-1]:[-2,0]:[-2,1]:[-2,2]:[2,-2]:[2,-1]:[2,0]:[2,1]:[2,2]:[-1,2]:[0,2]:[1,2]:[-1,-2]:[0,-2]:[1,-2]",
             "points_cross":"matrix:[1,0]:[0,1]:[0,-1]:[-1,0]:[2,0]:[0,2]:[0,-2]:[-2,0]",
@@ -374,37 +370,15 @@ Import Commands:
             out.append((xs[0],xs[1]))
         return out
 
-    def final(self):
-        """Gets The Value Of The stop Variable."""
-        return self.calc("stop")
-
-    def initial(self):
-        """Gets The Value Of The start Variable."""
-        return self.calc("start")
-
-    def xstretch(self):
-        """Gets The Value Of The xstretch Variable."""
-        return self.calc("xstretch")*0.01
-
-    def ystretch(self):
-        """Gets The Value Of The ystretch Variable."""
-        return self.calc("ystretch")*0.01
-
-    def xup(self):
-        """Gets The Value Of The xup Variable."""
-        return self.calc("xup")
-
-    def yup(self):
-        """Gets The Value Of The yup Variable."""
-        return self.calc("yup")
-
-    def interval(self):
-        """Gets The Value Of The interval Variable."""
-        return self.calc("interval")
-
-    def base(self):
-        """Gets The Value Of The base Variable."""
-        return self.calc("base")
+    def reset(self):
+        """Sets The Rendering Variable."""
+        self.dumpdebug(True)
+        self.e.recursion = 0
+        self.xstretch = self.calc("xstretch")*0.01
+        self.ystretch = self.calc("ystretch")*0.01
+        self.xup = self.calc("xup")
+        self.yup = self.calc("yup")
+        self.dumpdebug(True)
 
     def cmd_clear(self, original):
         """Processes clear."""
@@ -422,8 +396,8 @@ Import Commands:
                 self.render(lambda x: self.sumcall(item, x))
                 return True
         if superformat(original) == "center":
-            self.e.variables["xup"] = str((self.width/2.0)*self.xstretch())
-            self.e.variables["yup"] = str((self.height/2.0)*self.ystretch())
+            self.e.variables["xup"] = str((self.width/2.0)*self.xstretch)
+            self.e.variables["yup"] = str((self.height/2.0)*self.ystretch)
             return True
         if superformat(original) == "grid":
             self.gridrender()
@@ -491,9 +465,9 @@ Import Commands:
             paralist[0] = self.calc(paralist[0])
             paralist[1] = self.calc(paralist[1])
             if not isnull(paralist[0]) or isnull(paralist[1]):
-                stop = self.final()
-                x = self.initial()
-                inter = self.interval()
+                stop = self.calc("stop")
+                x = self.self.calc("start")
+                inter = self.calc("interval")
                 while x <= stop:
                     self.singlerender(self.call(paralist[0], x), self.call(paralist[1], x))
                     x += inter
@@ -501,9 +475,9 @@ Import Commands:
         if superformat(original).startswith("polar "):
             item = self.calc(original)
             if not isnull(item):
-                angle = self.initial()
-                inter = self.interval()
-                stop = self.final()
+                angle = self.calc("start")
+                inter = self.calc("interval")
+                stop = self.calc("stop")
                 while angle < stop:
                     r = self.call(item, angle)
                     if r != None:
@@ -534,7 +508,7 @@ Import Commands:
                 self.show(self.e.prepare(item, True, True))
             elif isinstance(item, data):
                 for x in item.items():
-                    base = self.base()
+                    base = self.calc("base")
                     self.pointrender(self.call(x, base), base)
             elif isinstance(item, multidata):
                 for x,y in item.items():
@@ -558,7 +532,7 @@ Import Commands:
                 if isinstance(x, matrix):
                     out = self.matrixrender(x) or out
                 else:
-                    base = self.base()
+                    base = self.calc("base")
                     self.pointrender(self.call(x, base), base)
             return out
         return False

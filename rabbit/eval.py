@@ -237,6 +237,13 @@ Global Operator Precedence List:
         """Retrieves A Variable."""
         return self.variables[basicformat(name)]
 
+    def forshow(self, arg):
+        """Prepares An Item For Showing."""
+        if not istext(arg):
+            return self.prepare(arg, True, True, 2)
+        else:
+            return str(arg)
+
     def prepare(self, item, top=False, bottom=True, indebug=False):
         """Prepares The Output Of An Evaluation."""
         if isinstance(item, instancecalc):
@@ -381,7 +388,10 @@ Global Operator Precedence List:
         elif istext(item) or isinstance(item, (funcfloat, strcalc)) or getcheck(item) >= 1:
             out = str(item)
         elif indebug:
-            out = repr(item)
+            if indebug > 1:
+                out = str(item)
+            else:
+                out = repr(item)
         else:
             raise ExecutionError("DisplayError", "Unable to display "+repr(item))
         return str(out)
@@ -393,7 +403,7 @@ Global Operator Precedence List:
 
     def calc(self, expression):
         """Performs Full Evaluation On An Expression."""
-        inputstring = self.prepare(expression, False, True)
+        inputstring = self.forshow(expression)
         if self.info == 1:
             self.info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
         if self.info != -1:
