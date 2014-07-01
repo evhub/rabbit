@@ -34,9 +34,9 @@ Global Operator Precedence List:
     []      Opens and closes matrix rows.
     ()      Opens and closes parentheses.
 
-    $       Seperates with clauses (read as 'where').
+    $       Seperates with clauses (read as 'with' or 'where').
     ;       Seperates conditionals (read as 'else').
-    @       Checks a conditional (read as 'if' or 'at').
+    @       Checks a conditional (read as 'at' or 'if').
 
     |       Performs logical 'or'.
     &       Performs logical 'and'.

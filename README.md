@@ -357,13 +357,16 @@ d				# Random number dice
 data			# Create data
 deg				# Degrees
 det				# Determinant
+env				# Get the global environment
 eval			# Evaluate a function
 find			# Find the position of an item in a container
 floor			# Floor function
 fold			# Fold a function over a container
 frac			# Convert to fraction
+from			# Whether instanceof
 gamma			# Gamma function
 gcd				# Greatest common denominator
+iserr			# Whether instanceof error
 join			# Join containers
 lcm				# Least common multiple
 len				# Length
@@ -376,6 +379,7 @@ num				# Convert to number
 perm			# Permutations
 prod			# Product of items
 rad				# Radians
+raise			# Raise an error
 range			# Create a range
 replace			# Replace an item with an item
 repr			# Get representation
@@ -393,9 +397,11 @@ sum				# Sum items
 tan				# Tangent
 to				# Convert to specified type
 type			# Get type of item
+val				# The value of a variable
 
 # Built-In Base Rabbit Variables:
 e				# Euler's number
+error			# Base error class
 false			# 0
 i				# Imaginary unit
 none			# ()
