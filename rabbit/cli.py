@@ -35,6 +35,7 @@ class commandline(mathbase):
         self.prompt = str(prompt)
         self.app = terminal(message, color=outcolor)
         self.commands = []
+        self.show = self.appshow
         self.top = False
         self.populator()
         self.printdebug(": ON")
