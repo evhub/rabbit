@@ -444,21 +444,18 @@ Import Commands:
             sides[0] = delspace(sides[0][0])+"("+sides[0][1]
         else:
             sides[0] = delspace(sides[0][0])
-        useclass = self.useclass
-        if useclass:
-            classlist = [useclass]
-        else:
-            classlist = []
         if self.readytofunc(sides[0], allowed="."):
-            classlist = []
+            useclass = None
+            if self.useclass:
+                classlist = [self.useclass]
+            else:
+                classlist = []
             if "." in sides[0]:
                 classlist += sides[0].split(".")
                 for x in xrange(0, len(classlist)-1):
                     if self.e.isreserved(classlist[x]):
                         return False
                 sides[0] = classlist.pop()
-                if useclass:
-                    classlist = [self.e.wrap(useclass)]+classlist
                 useclass = self.e.find(classlist[0], True, False)
                 if isinstance(useclass, classcalc):
                     for x in xrange(1, len(classlist)):
@@ -482,6 +479,8 @@ Import Commands:
                     docalc = False
                 else:
                     raise ExecutionError("VariableError", "Could not find class "+self.e.prepare(classlist[0], False, True, True))
+            elif self.useclass:
+                useclass = self.e.funcfind(self.useclass)
             sides[1] = basicformat(sides[1])
             for func in self.set_cmds:
                 value = func(sides)

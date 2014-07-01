@@ -138,7 +138,7 @@ class fakelist(cotobject):
             x += len(self)
         if x >= len(self):
             self.length = x+1
-        if item != self.default:
+        if not self.default is item:
             self.a[x] = item
 
     def __getitem__(self, x):

@@ -741,8 +741,8 @@ class classcalc(cotobject):
 
     def __init__(self, e, variables=None):
         """Initializes The Dictionary."""
-        self.variables = {}
         self.e = e
+        self.variables = {"__self__": self}
         if variables != None:
             self.add(variables)
 
@@ -754,7 +754,7 @@ class classcalc(cotobject):
         """Processes A Command And Puts The Result In The Variables."""
         returned = self.e.processor.returned
         oldclass = self.e.processor.useclass
-        self.e.processor.useclass = self
+        self.e.processor.useclass = "__self__"
 
         oldvars = self.e.setvars(self.variables)
         self.e.processor.process(str(command))

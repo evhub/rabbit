@@ -256,7 +256,12 @@ Global Operator Precedence List:
             if top:
                 out += "\n"
             for k,v in item.variables.items():
-                out += " "+k+" = "+self.prepare(v, False, bottom)+" ;;"
+                out += " "+k+" = "
+                if item is v or item == v:
+                    out += "__self__"
+                else:
+                    out += self.prepare(v, False, bottom)
+                out += " ;;"
                 if top:
                     out += "\n"
             if len(item.variables) > 0:
