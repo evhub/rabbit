@@ -789,9 +789,9 @@ class classcalc(cotobject):
 
     def store(self, key, value, bypass=False):
         """Stores An Item."""
-        test = self.e.prepare(key, False, False)
+        test = delspace(self.e.prepare(key, False, False))
         if bypass or not self.e.isreserved(test, allowed=string.digits):
-            self.variables[delspace(test)] = value
+            self.variables[test] = value
         else:
             raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
 
@@ -812,7 +812,7 @@ class classcalc(cotobject):
 
     def retrieve(self, key):
         """Retrieves An Item."""
-        test = self.e.prepare(key, False, False)
+        test = delspace(self.e.prepare(key, False, False))
         if not self.e.isreserved(test, allowed=string.digits):
             if test in self.variables:
                 return self.getitem(test)
@@ -903,13 +903,16 @@ class instancecalc(classcalc):
 
     def domethod(self, func, variables=[]):
         """Calls A Method Function."""
-        if not islist(variables):
-            variables = [variables]
-        return getcall(func)([self]+variables)
+        if isfunc(func):
+            if not islist(variables):
+                variables = [variables]
+            return getcall(func)([self]+variables)
+        else:
+            return func
 
     def retrieve(self, key):
         """Retrieves An Item."""
-        test = self.e.prepare(key, False, False)
+        test = delspace(self.e.prepare(key, False, False))
         if not self.e.isreserved(test, allowed=string.digits):
             if test in self.variables:
                 out = self.getitem(test)
@@ -925,6 +928,20 @@ class instancecalc(classcalc):
             return out
         else:
             raise ExecutionError("ClassError", "Invalid class key of "+test)
+
+    def store(self, key, value, bypass=False):
+        """Stores An Item."""
+        test = delspace(self.e.prepare(key, False, False))
+        if bypass:
+            self.variables[test] = value
+        else:
+            check_set = self.tryget("__set__")
+            if check_set:
+                self = self.domethod(check_set, [self, strcalc(key, self.e), value])
+            elif not self.e.isreserved(test, allowed=string.digits):
+                self.variables[test] = value
+            else:
+                raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
 
     def init(self, params):
         """Initializes The Instance."""
@@ -1069,12 +1086,23 @@ class instancecalc(classcalc):
             return self.domethod(check_rpow, other)
         raise ExecutionError("ClassError", "Insufficient methods defined for reverse exponentiation")
 
-    def calc(self):
+    def calc(self, arg=None):
         """Converts To Float."""
-        check_num = self.tryget("__num__")
-        if check_num:
-            return self.domethod(check_num)
-        raise ExecutionError("ClassError", "Insufficient methods defined for conversion to number")
+        if arg == None:
+            check_num = self.tryget("__num__")
+            if check_num:
+                return self.domethod(check_num)
+            raise ExecutionError("ClassError", "Insufficient methods defined for conversion to number")
+        else:
+            check_calc = self.tryget("__calc__")
+            if check_calc:
+                return self.domethod(check_calc, [strcalc(arg, self.e)])
+            else:
+                oldvars = self.e.setvars(self.variables)
+                self.e.info = " | instance"
+                out = self.e.calc(inputstring)
+                self.e.setvars(oldvars)
+                return out
 
     def __abs__(self):
         """Performs Absolute Value."""
@@ -1194,40 +1222,62 @@ class instancecalc(classcalc):
 
     def __str__(self):
         """Retrieves A String."""
+        out = None
         check_str = self.tryget("__str__")
         if check_str:
-            return self.domethod(check_str, other)
-        check_repr = self.tryget("__repr__")
-        if check_repr:
-            return self.domethod(check_repr, other)
-        return self.e.prepare(self.toclass(), True, False)+" ()"
+            out = self.domethod(check_str, other)
+        else:
+            check_repr = self.tryget("__repr__")
+            if check_repr:
+                out = self.domethod(check_repr, other)
+        if out == None:
+            return self.e.prepare(self.toclass(), True, False)+" ()"
+        else:
+            return self.e.prepare(out, True, False)
 
     def __repr__(self):
         """Retrieves A Representation."""
+        out = None
         check_repr = self.tryget("__repr__")
         if check_repr:
-            return self.domethod(check_repr, other)
-        check_str = self.tryget("__str__")
-        if check_str:
-            return self.domethod(check_str, other)
-        return self.e.prepare(self.toclass(), False, True)+" ()"
+            out = self.domethod(check_repr, other)
+        else:
+            check_str = self.tryget("__str__")
+            if check_str:
+                out = self.domethod(check_str, other)
+        if out == None:
+            return self.e.prepare(self.toclass(), False, True)+" ()"
+        else:
+            return self.e.prepare(out, False, True)
 
     def __len__(self):
         """Retrieves The Length."""
+        out = None
         check_len = self.tryget("__len__")
         if check_len:
-            return self.domethod(check_len)
-        check_cont = self.tryget("__cont__")
-        if check_cont:
-            return len(self.domethod(check_cont))
-        raise ExecutionError("ClassError", "Insufficient methods defined for length")
+            out = self.domethod(check_len)
+        else:
+            check_cont = self.tryget("__cont__")
+            if check_cont:
+                out = len(self.domethod(check_cont))
+        if out == None:
+            raise ExecutionError("ClassError", "Insufficient methods defined for length")
+        else:
+            return int(out)
 
     def __bool__(self):
         """Converts To A Boolean."""
+        out = None
         check_bool = self.tryget("__bool__")
         if check_bool:
-            return self.domethod(check_bool)
-        check_num = self.tryget("__num__")
-        if check_num:
-            return bool(self.domethod(check_num))
-        return len(self) > 0
+            out = self.domethod(check_bool)
+        else:
+            check_num = self.tryget("__num__")
+            if check_num:
+                out = self.domethod(check_num)
+        if out == None:
+            try:
+                out = len(self) > 0
+            except ExecutionError:
+                raise ExecutionError("ClassError", "Insufficient methods defined for bool")
+        return bool(out)

@@ -1077,7 +1077,7 @@ Global Operator Precedence List:
             else:
                 value = rawstrcalc(item[int(params[0]):int(params[1])], self)
                 self.overflow = params[2:]
-        elif isinstance(item, classcalc) and not isinstance(item, instancecalc):
+        elif isinstance(item, classcalc):
             if len(params) == 0:
                 value = item.toinstance()
             elif len(params) == 1:

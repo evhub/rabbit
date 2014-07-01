@@ -124,6 +124,7 @@ After that are Rabbit's equality and inequality operators. These are dynamic and
 1 >=< 2		# Obviously this homemade operator is nonsensical because it would always return 1, but it would still work (result = 1)
 1 < 2 <= 2	# This will do what it should, and check to see whether 1<2 & 2<=2 (result = 1)
 2 !< 1		# Will check whether 2 isn't less than 1, in other words, this will do >= (result = 1)
+1 ≠ 2		# Unicode operators will also work (result = 1)
 ```
 
 #### Rabbits Use Matrices
@@ -284,6 +285,55 @@ g(x) = m(z) $ z = x^2 $ m(z) = z%10		# Multiple dollar signs are used instead of
 g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
 ```
 
+#### Rabbits Take Instances
+
+On their own, classes are very useful container objects. When instantiated, however, they become even more useful tools, capable of acting like any object they want. To instantiate a class, do:
+```
+{} ()		# If called with parentheses, the class will get instantiated
+```
+
+Methods of instantiated classes will always take the instance as the first argument, and are urged to return it as the first argument as well. In addition, instances support a variety of special methods to define their behavior:
+```
+nil = {
+ __init__(self) = self						;;
+ __get__(self, key) = key					;;
+ __set__(self, key, value) = self:key:value	;;
+ __call__(self, *args) = args				;;
+ __cont__(self) = []						;;
+ __add__(self, other) = other				;;
+ __sub__(self, other) = -other				;;
+ __mul__(self, other) = 0					;;
+ __div__(self, other) = 0					;;
+ __mod__(self, other) = 0					;;
+ __pow__(self, other) = 0					;;
+ __rdiv__(self, other) = other/0			;;
+ __rmod__(self, other) = 0					;;
+ __rpow__(self, other) = 1					;;
+ __num__(self) = 0							;;
+ __calc__(self, item) = proc(item)			;;
+ __abs__(self) = 0							;;
+ __cmp__(self, other) = other				;;
+ __eq__(self, other) = !other				;;
+ __ne__(self, other) = ?other				;;
+ __gt__(self, other) = other < 0			;;
+ __lt__(self, other) = other > 0			;;
+ __ge__(self, other) = other <= 0			;;
+ __le__(self, other) = other >= 0			;;
+ __str__(self) = "nil"						;;
+ __repr__(self) = `\nil`					;;
+ __len__(self) = 0							;;
+ __bool__(self) = 0
+ } ()
+```
+
+#### Rabbits Make Errors
+
+Sometimes, errors will occur in your code. Not to fret, Rabbit will show you exactly the chain of evaluation that led to them. But sometimes, these errors are intentional, and you want to stop them from terminating your code. In that case, you should use error handling. The basic syntax for error handling is:
+```
+:(1/0)		# This will catch the error, returning a class with descriptive attributes
+:(1)		# If there is no error, this will just return the result (result = 1)
+```
+
 #### Other Rabbits
 
 Before we move on, there are some remaining, more complex, less-used operators that deserve attention.
@@ -319,18 +369,7 @@ g(x) = x+1
 f.g(2)		# Read as f(g(x)) (result = 9)
 ```
 
-Fifth is the default variable operator ('). In most cases, the single quote is reserved for use in variable names--most commonly put at the end of the name--but if put at the very beginning, it functions as the default variable operator. The basic use is:
-```
-'var = 5	# Works just like a normal function definition
-1+'var		# You can even still call it using its full name (result = 6)
-1+var		# Same as above--this will check for var first, and if it doesn't find it, then it will go to 'var (result = 6)
-
-var = 2
-1+'var		# When the normal variable is redefined, the default isn't affected (result = 6)
-1+var		# But the normal variable is, now using its new value instead of the default (result = 3)
-```
-
-Sixth is the all arguments variable (\_\_). When \_\_ is passed as an argument to a function it sets it to a list of all the arguments passed. The basic syntax is:
+Fifth is the all arguments variable (\_\_). When \_\_ is passed as an argument to a function it sets it to a list of all the arguments passed. The basic syntax is:
 ```
 applyplus(__) = __~\x\(x+1)
 ```
@@ -430,6 +469,13 @@ stats			# Contains statistical functions
 	FP			# F distribution probability integral
 	Fdist		# F distribution
 	Feq			# F distribution equation
+
+# Built-In Rabbit Unicode Aliases:
+ø = none
+∑ = sum
+π = pi
+√ = sqrt
+∫ = S
 ```
 
 #### More Rabbits?
