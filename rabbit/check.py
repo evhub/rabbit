@@ -81,3 +81,32 @@ def getnum(inputobject):
 def getint(inputstring):
     """Formats A String Into An Integer."""
     return int(getnum(inputstring))
+
+def catch(function, *args):
+    """Gets The Errors From A Function."""
+    result = None
+    try:
+        result = function(*args)
+    except ZeroDivisionError as detail:
+        err = ("ZeroDivisionError", detail)
+    except ValueError as detail:
+        err = ("ValueError", detail)
+    except OverflowError as detail:
+        err = ("OverflowError", detail)
+    except TypeError as detail:
+        err = ("TypeError", detail)
+    except KeyError as detail:
+        err = ("KeyError", detail)
+    except AttributeError as detail:
+        err = ("AttributeError", detail)
+    except IndexError as detail:
+        err = ("IndexError", detail)
+    except RuntimeError as detail:
+        err = ("RuntimeError", detail)
+    except AssertionError as detail:
+        err = ("AssertionError", detail)
+    except ExecutionError as detail:
+        err = (detail.name, detail.message)
+    else:
+        err = None
+    return result, err

@@ -410,7 +410,7 @@ Global Operator Precedence List:
         value = self.calc_paren(fullsplit(
                     self.calc_brack(fullsplit(
                         self.calc_class(fullsplit(
-                            delspace(self.calc_string(expression)),
+                            self.calc_string(expression),
                         "{", "}", 1)),
                     "[", "]")),
                 "(", ")"))
@@ -478,14 +478,14 @@ Global Operator Precedence List:
         """Evaluates With Clauses."""
         inputlist = expression.split("$")
         if len(inputlist) == 1:
-            return self.calc_pieces(inputlist[0])
+            return self.calc_pieces(delspace(inputlist[0]))
         else:
             inputlist.reverse()
             item = inputlist.pop()
             withclass = classcalc(self)
             for x in inputlist:
                 withclass.process(x)
-            return withclass.calc(item)
+            return withclass.calc(delspace(item))
 
     def calc_pieces(self, expression):
         """Evaluates Piecewise Expressions."""
@@ -1970,11 +1970,10 @@ class evalfuncs(object):
 
     def cmdcall(self, variables):
         """Performs proc."""
-        if variables == None:
-            return matrix(0)
-        else:
+        if variables != None:
             for item in variables:
                 self.e.processor.process(self.e.prepare(item, False, False))
+        return matrix(0)
 
     def foldcall(self, variables, func=None, overflow=True):
         """Folds A Function Over A Matrix."""

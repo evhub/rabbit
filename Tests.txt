@@ -41,7 +41,7 @@ assert x ?= 1			$ x = 1
 assert x ?= 1			$ x := 1
 assert 2(x) ?= 2			$ x = 1
 assert 2x ?= 2			$ x = 1
-assert x ?= 2			$ x += 1 $ x = 1
+assert x ?= 2			$ def x += 1 $ x = 1
 
 # Function Tests:
 assert t()+1 ?= t:+1 ?= 2					$ t() = 1
@@ -151,7 +151,7 @@ assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
    ) @ l
 
 # Built-Ins Tests:
-assert a != b				$ b.x = 2 $ b := copy(a) $ a := { x = 1 }
+assert a != b				$ def b.x = 2 $ b := copy(a) $ a := { x = 1 }
 assert type:(1,2,3) ?= "list"
 assert num"1" ?= 1
 assert (to:"num"):"1" ?= 1
@@ -161,7 +161,7 @@ assert calc:"1" ?= 1
 assert fold:\(x,y)\(x+y):(1,2,3) ?= 6
 assert (D:\x\x):0 ?= 1
 assert 1.999 < (S:\x\x):0:2 < 2.001
-assert L(1,2,3) ?= [1,2,3]
+assert row(1,2,3) ?= [1,2,3]
 assert list[1,2,3] ?= 1,2,3
 assert matrix:[1,2]:[3,4]+1 ?= matrix:[2,3]:[4,5]
 assert cont:"abc" ?= "a","b","c"
@@ -203,6 +203,11 @@ assert gcd:8:6 ?= 2
 assert lcm:4:6 ?= 12
 assert perm:5:2 ?= 20
 assert comb:4:2 ?= 6
+assert env().a ?= a ?= 2	$ a = 2
+assert iserr(:raise())
+assert from(error, :raise())
+assert val:"a" ?= "b"		$ a = b
+assert a ?= 5				$ proc("a = 5")
 
 # New Feature Tests:
 assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
@@ -212,4 +217,3 @@ assert a ?= "a" & b ?= "bc"					$ a,b = "abc"
 assert "∑" ?= "\u2211"
 assert π ?= pi
 assert "\'\\'\\n#" ?= `"\'\n#`
-assert iserr(:raise())
