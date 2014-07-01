@@ -345,15 +345,12 @@ Global Operator Precedence List:
                 out += "D:"
             variables = item.getvars()
             personals = item.getpers()
-            if len(variables) == 1 and len(personals) == 0:
-                out += "\\"+variables[0]
-            elif len(variables) > 1 or len(personals) > 0:
-                out += "\\("+strlist(variables,",")
-                if len(variables) != 0:
-                    out += ","
-                for x,y in personals.items():
-                    out += str(x)+":("+self.prepare(y, False, bottom)+"),"
-                out = out[:-1]+")"
+            out += "\\("+strlist(variables,",")
+            if len(variables) > 1:
+                out += ","
+            for x,y in personals.items():
+                out += str(x)+":("+self.prepare(y, False, bottom)+"),"
+            out = out[:-1]+")"
             out += "\\"
             test = self.prepare(item.funcstr, False, bottom)
             if madeof(test, string.digits) or not self.isreserved(test):
@@ -734,6 +731,7 @@ Global Operator Precedence List:
                 personals = {}
                 allargs = None
                 for x in temp:
+                    x = basicformat(x)
                     if x:
                         doparam = True
                         if x.startswith("*"):
@@ -1077,7 +1075,7 @@ Global Operator Precedence List:
             else:
                 value = rawstrcalc(item[int(params[0]):int(params[1])], self)
                 self.overflow = params[2:]
-        elif isinstance(item, classcalc):
+        elif isinstance(item, classcalc) and not isinstance(item, instancecalc):
             if len(params) == 0:
                 value = item.toinstance()
             elif len(params) == 1:

@@ -79,8 +79,7 @@ assert b ?= { z := 5 }					$ b = a:"z":5 $ a = {}
 nil := {
  __init__(self) = self								;;
  __get__(self, key) = key							;;
- __set__(self, key, value) = self:key:str(value)	;;
- __call__(self, *args) = args						;;
+ __call__(self, args) = args						;;
  __cont__(self) = []								;;
  __add__(self, other) = other						;;
  __sub__(self, other) = -other						;;
@@ -92,7 +91,6 @@ nil := {
  __rmod__(self, other) = other%0					;;
  __rpow__(self, other) = 1							;;
  __num__(self) = 0									;;
- __calc__(self, item) = proc(item)					;;
  __abs__(self) = 0									;;
  __cmp__(self, other) = other						;;
  __eq__(self, other) = !other						;;
@@ -107,7 +105,6 @@ nil := {
  __bool__(self) = 0
  } ()
 assert nil.thing ?= "thing"
-assert nil.spam ?= "1"				$ def nil.spam = 1
 assert nil(1) ?= 1,
 assert cont(nil) ?= []
 assert nil+1 ?= 1
@@ -120,7 +117,6 @@ assert (:(1/nil)).name ?= "ZeroDivisionError"
 assert (:(1%nil)).name ?= "ZeroDivisionError"
 assert 1^nil ?= 1
 assert num(nil) ?= 0
-assert nil:"1" ?= 1
 assert abs(nil) ?= 0
 assert nil ?= 0
 assert nil != 1

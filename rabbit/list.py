@@ -44,6 +44,24 @@ class fakelist(cotobject):
             out.append(self[x])
         return out
 
+    def move(self, amount):
+        """Shifts The Whole List By An Amount."""
+        amount = int(amount)
+        self.length += amount
+        new = {}
+        for k,v in self.a.items():
+            new[k+amount] = v
+        self.a = new
+
+    def __radd__(self, other):
+        """Adds To The Beginning."""
+        if islist(other):
+            self.move(len(other))
+            for x in xrange(0, len(other)):
+                self.store(x, other[x])
+        else:
+            raise TypeError("Cannot add non-list to fake list")
+
     def append(self, item):
         """Appends An Item."""
         self.store(len(self), item)

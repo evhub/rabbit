@@ -111,14 +111,6 @@ class funcfloat(numobject):
         """Retrieves The Function String."""
         return self.funcstr
 
-    def __float__(self):
-        """Retrieves A Float."""
-        return float(self.calc())
-
-    def __int__(self):
-        """Retrieves An Integer."""
-        return int(self.calc())
-
     def __iadd__(self, other):
         """Performs Addition."""
         if other == 0.0 or isnull(other):
@@ -917,7 +909,7 @@ class instancecalc(classcalc):
             if test in self.variables:
                 out = self.getitem(test)
             elif "__get__" in self.variables:
-                out = getcall(self.getitem("__get__"))([self, strcalc(test, self.e)])
+                out = self.domethod(self.getitem("__get__"), strcalc(test, self.e))
             else:
                 raise ExecutionError("ClassError", "Could not find "+test+" in the class")
             if isinstance(out, strfunc):
@@ -937,7 +929,7 @@ class instancecalc(classcalc):
         else:
             check_set = self.tryget("__set__")
             if check_set:
-                self = self.domethod(check_set, [self, strcalc(key, self.e), value])
+                self = self.domethod(check_set, [strcalc(key, self.e), value])
             elif not self.e.isreserved(test, allowed=string.digits):
                 self.variables[test] = value
             else:
@@ -1094,15 +1086,11 @@ class instancecalc(classcalc):
                 return self.domethod(check_num)
             raise ExecutionError("ClassError", "Insufficient methods defined for conversion to number")
         else:
-            check_calc = self.tryget("__calc__")
-            if check_calc:
-                return self.domethod(check_calc, [strcalc(arg, self.e)])
-            else:
-                oldvars = self.e.setvars(self.variables)
-                self.e.info = " | instance"
-                out = self.e.calc(inputstring)
-                self.e.setvars(oldvars)
-                return out
+            oldvars = self.e.setvars(self.variables)
+            self.e.info = " | instance"
+            out = self.e.calc(arg)
+            self.e.setvars(oldvars)
+            return out
 
     def __abs__(self):
         """Performs Absolute Value."""
@@ -1225,11 +1213,11 @@ class instancecalc(classcalc):
         out = None
         check_str = self.tryget("__str__")
         if check_str:
-            out = self.domethod(check_str, other)
+            out = self.domethod(check_str)
         else:
             check_repr = self.tryget("__repr__")
             if check_repr:
-                out = self.domethod(check_repr, other)
+                out = self.domethod(check_repr)
         if out == None:
             return self.e.prepare(self.toclass(), True, False)+" ()"
         else:
@@ -1240,11 +1228,11 @@ class instancecalc(classcalc):
         out = None
         check_repr = self.tryget("__repr__")
         if check_repr:
-            out = self.domethod(check_repr, other)
+            out = self.domethod(check_repr)
         else:
             check_str = self.tryget("__str__")
             if check_str:
-                out = self.domethod(check_str, other)
+                out = self.domethod(check_str)
         if out == None:
             return self.e.prepare(self.toclass(), False, True)+" ()"
         else:

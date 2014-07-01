@@ -567,6 +567,7 @@ Import Commands:
             personals = {}
             allargs = None
             for x in sides[0][1].split(","):
+                x = basicformat(x)
                 if x:
                     doparam = True
                     if x.startswith("*"):
