@@ -1048,6 +1048,27 @@ class instancecalc(classcalc):
                 pass
         raise ExecutionError("ClassError", "Insufficient methods defined for exponentiation")
 
+    def __rdiv__(self, other):
+        """Performs Reverse Division."""
+        check_rdiv = self.tryget("__rdiv__")
+        if check_rdiv:
+            return self.domethod(check_rdiv, other)
+        raise ExecutionError("ClassError", "Insufficient methods defined for reverse division")
+
+    def __rmod__(self, other):
+        """Performs Reverse Modulo."""
+        check_rmod = self.tryget("__rmod__")
+        if check_rmod:
+            return self.domethod(check_rmod, other)
+        raise ExecutionError("ClassError", "Insufficient methods defined for reverse modulo")
+
+    def __rpow__(self, other):
+        """Performs Reverse Exponentiation."""
+        check_rpow = self.tryget("__rpow__")
+        if check_rpow:
+            return self.domethod(check_rpow, other)
+        raise ExecutionError("ClassError", "Insufficient methods defined for reverse exponentiation")
+
     def calc(self):
         """Converts To Float."""
         check_num = self.tryget("__num__")

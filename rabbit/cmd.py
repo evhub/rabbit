@@ -40,6 +40,7 @@ Console Commands:
     clear
     clean
 Control Commands:
+    def <name> [:]= <expression>
     do <command>
     del <variable>
 Import Commands:
@@ -50,6 +51,7 @@ Import Commands:
     ans = [matrix(0)]
     returned = 1
     useclass = None
+    redef = False
 
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
@@ -114,11 +116,11 @@ Import Commands:
             self.e.info = 1
         else:
             self.e.info = " <<| Traceback"
-        return self.saferun(self.e.calc, expression)
+        return self.e.calc(expression)
 
     def test(self, expression):
         """Safely Tests An Expression."""
-        return self.saferun(self.e.test, expression)
+        return self.e.test(expression)
 
     def printcall(self, variables):
         """Performs print."""
@@ -175,6 +177,7 @@ Import Commands:
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,
+            self.cmd_def,
             self.cmd_set,
             self.cmd_normal
             ]
@@ -239,14 +242,19 @@ Import Commands:
             self.process(cmdlist[x])
             x += 1
 
-    def process(self, inputstring, top=True):
+    def process(self, inputstring):
         """Processes A Command."""
-        if delspace(inputstring) != "":
+        inputstring = basicformat(inputstring)
+        if inputstring != "":
             self.returned = 1
-            inputstring = basicformat(inputstring)
-            for func in self.pre_cmds:
-                if func(inputstring) != None:
-                    return True
+            self.saferun(self.doproc, inputstring)
+
+    def doproc(self, inputstring):
+        """Does The Processing."""
+        inputstring = str(inputstring)
+        for func in self.pre_cmds:
+            if func(inputstring) != None:
+                return True
 
     def do_find(self, item):
         """Unpacks A Variable."""
@@ -359,6 +367,16 @@ Import Commands:
                 raise ExecutionError("VariableError", "Could not find "+original)
             self.printdebug("< "+original+" >")
             return True
+
+    def cmd_def(self, original):
+        if superformat(original).startswith("def "):
+            self.redef = True
+            test = self.cmd_set(original[4:])
+            self.redef = False
+            if test:
+                return test
+            else:
+                raise ExecutionError("RedefinitionError", "No definition was done in the statement "+original)
 
     def cmd_set(self, original):
         """Evaluates Definition Commands."""
@@ -477,18 +495,22 @@ Import Commands:
                         if docalc:
                             value[1] = self.trycalc(value[1])
                         self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" = "+self.e.prepare(value[1], False, True, True))
-                        if useclass == None:
-                            self.e.variables[value[0]] = value[1]
-                        else:
-                            useclass.store(value[0], value[1])
+
                     else:
                         if docalc:
                             value = self.trycalc(value)
                         self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+sides[0]+" = "+self.e.prepare(value, False, True, True))
-                        if useclass == None:
-                            self.e.variables[sides[0]] = value
+                        value = sides[0], value
+                    if useclass == None:
+                        if not self.redef and value[0] in self.e.variables:
+                            raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
                         else:
-                            useclass.store(sides[0], value)
+                            self.e.variables[value[0]] = value[1]
+                    else:
+                        if not self.redef and value[0] in useclass.variables:
+                            raise ExecutionError("RedefinitionError", "The attribute "+value[0]+" already exists")
+                        else:
+                            useclass.store(value[0], value[1])
                     return True
 
     def readytofunc(self, expression, extra="", allowed=""):

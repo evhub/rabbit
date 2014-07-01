@@ -341,7 +341,6 @@ Rabbit comes with a lot of built-in functions. We'll list all of them below, but
 ```
 # Built-In Base Rabbit Functions:
 D				# Derivative
-L				# List to row
 S				# Definite integral
 abs				# Absolute value
 acos			# Arc cosine
@@ -382,6 +381,7 @@ replace			# Replace an item with an item
 repr			# Get representation
 reverse			# Reverse items
 round			# Round item
+row				# List to row
 simp			# Convert to simplest fraction
 sin				# Sine
 size			# Recursive length

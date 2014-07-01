@@ -64,6 +64,7 @@ Special Functions:
     polar <theta_function>
     scroll <times> do <function>
 Control Commands:
+    def <name> [:]= <expression>
     do <command>
     del <variable>
 Import Commands:
@@ -327,6 +328,7 @@ Import Commands:
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,
+            self.cmd_def,
 
             self.cmd_grapher,
 

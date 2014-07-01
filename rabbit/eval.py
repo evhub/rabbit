@@ -110,7 +110,7 @@ Global Operator Precedence List:
             "repr":funcfloat(self.funcs.reprcall, self, "repr"),
             "calc":funcfloat(self.funcs.docalc, self, "calc"),
             "fold":funcfloat(self.funcs.foldcall, self, "fold"),
-            "L":funcfloat(self.funcs.brackcall, self, "L"),
+            "row":funcfloat(self.funcs.brackcall, self, "row"),
             "list":funcfloat(self.funcs.listcall, self, "list"),
             "matrix":funcfloat(self.funcs.matrixcall, self, "matrix"),
             "cont":funcfloat(self.funcs.getmatrixcall, self, "cont"),
@@ -455,7 +455,12 @@ Global Operator Precedence List:
             if istext(x):
                 command += x
             else:
-                command += "(L("+ self.calc_brack(x) +"))"
+                out = self.calc(self.calc_brack(x))
+                if isinstance(out, matrix) and out.onlydiag():
+                    out = out.getdiag()
+                else:
+                    out = [out]
+                command += self.wrap(rowmatrixlist(out))
         return command
 
     def calc_paren(self, parenlist):

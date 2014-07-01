@@ -38,6 +38,7 @@ Console Commands:
     help [string]
     clean
 Control Commands:
+    def <name> [:]= <expression>
     do <command>
     del <variable>
 Import Commands:
@@ -109,6 +110,7 @@ Import Commands:
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,
+            self.cmd_def,
             self.cmd_set,
             self.cmd_normal
             ]
@@ -280,7 +282,7 @@ Import Commands:
                             if test:
                                 statement = test
                         elif iswhite(test):
-                            if statement in ["debug", "errors", "clean", "get", "run", "save", "assert", "do", "show", "del", "import"]:
+                            if statement in ["debug", "clean", "run", "save", "assert", "do", "show", "del", "import", "def"]:
                                 self.box.placetag("statement", point+"-"+str(len(statement)+1)+"c", point+"-1c")
                                 last = ("", point+"-1c")
                             statement = False

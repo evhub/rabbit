@@ -64,6 +64,7 @@ class commandline(mathbase):
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,
+            self.cmd_def,
             self.cmd_set,
             self.cmd_normal
             ]
