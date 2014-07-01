@@ -239,7 +239,7 @@ class entry(object):
 
     def output(self):
         """Gets Text Box Output."""
-        contents = self.main.get()
+        contents = self.main.get().replace("\uf700","").replace("\uf701","")
         self.clear()
         return contents
 

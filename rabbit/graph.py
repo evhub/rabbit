@@ -76,7 +76,6 @@ Import Commands:
     def __init__(self, directory="rabbit/", name="Grapher", width=800, height=600, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Grapher."""
         self.debug = bool(debug)
-        self.printdebug(": ON")
         self.root = Tkinter.Tk()
         self.root.title(str(name))
         self.width = width
@@ -117,9 +116,9 @@ Import Commands:
         self.xsize = self.pixel.width()
         self.identifiers = []
         self.grid = []
-        self.errorlog = {}
         self.returned = 1
         self.populator()
+        self.printdebug(": ON")
         if initializers == ():
             self.initialize()
         else:
@@ -129,8 +128,7 @@ Import Commands:
         """Displays Something."""
         if not istext(arg):
             arg = self.e.prepare(arg)
-        if arg != "()":
-            popup("Info", arg, "Output")
+        popup("Info", arg, "Output")
 
     def convert(self, x=0.0, y=0.0):
         """Converts From Mathematical To Canvas Coordinates."""
@@ -324,10 +322,8 @@ Import Commands:
         self.cmds = [
             self.do_find,
             self.cmd_debug,
-            self.cmd_errors,
             self.cmd_clear,
             self.cmd_clean,
-            self.cmd_get,
             self.cmd_run,
             self.cmd_save,
             self.cmd_assert,
@@ -422,12 +418,10 @@ Import Commands:
         if superformat(original).startswith("sum "):
             original = original[4:]
             item = self.calc(original)
-            if isnull(item):
-                self.adderror("NoneError", "Nothing to sum")
-            else:
+            if not isnull(item):
                 self.temp = 0
                 self.render(lambda x: self.sumcall(item, x))
-            return True
+                return True
         if superformat(original) == "center":
             self.e.variables["xup"] = str((self.width/2.0)*self.xstretch())
             self.e.variables["yup"] = str((self.height/2.0)*self.ystretch())
@@ -450,78 +444,64 @@ Import Commands:
         if superformat(original).startswith("inv "):
             original = original[4:]
             item = self.calc(original)
-            if isnull(item):
-                self.adderror("NoneError", "Nothing to inverse")
-            else:
+            if not isnull(item):
                 self.swaprender(lambda x: self.call(item, x))
-            return True
+                return True
         if superformat(original).startswith("invsum "):
             original = original[7:]
             item = self.calc(original)
-            if isnull(item):
-                self.adderror("NoneError", "Nothing to inverse sum")
-            else:
+            if not isnull(item):
                 self.temp = 0
                 self.swaprender(lambda x: self.sumcall(original, x))
-            return True
+                return True
         if superformat(original).startswith("at "):
             original = self.e.find(original[3:])
             atlist = original.split(" do ", 1)
             atlist[1] = self.calc(atlist[1])
-            if isnull(atlist[1]):
-                self.adderror("NoneError", "Nothing to at")
-            else:
+            if not isnull(atlist[1]):
                 atlist[0] = self.calc(atlist[0])
                 if not isinstance(atlist[0], matrix):
                     self.atrender(atlist[0], lambda x: self.call(atlist[1], x))
                 else:
                     for x in atlist[0].getitems():
                         self.atrender(x, lambda x: self.call(atlist[1], x))
-            return True
+                return True
         if superformat(original).startswith("atinv "):
             original = self.e.find(original[6:])
             atlist = original.split(" do ", 1)
             atlist[1] = self.calc(atlist[1])
-            if isnull(atlist[1]):
-                self.adderror("NoneError", "Nothing to at inverse")
-            else:
+            if not isnull(atlist[1]):
                 atlist[0] = self.calc(atlist[0])
                 if not isinstance(atlist[0], matrix):
                     self.atswaprender(atlist[0], lambda x: self.call(atlist[1], x))
                 else:
                     for x in atlist[0].getitems():
                         self.atswaprender(x, lambda x: self.call(atlist[1], x))
-            return True
+                return True
         if superformat(original).startswith("intersect "):
             original = self.e.find(original[10:])
             interlist = original.split(" and ", 1)
             interlist[0] = self.calc(interlist[0])
             interlist[1] = self.calc(interlist[1])
-            if isnull(interlist[0]) or isnull(interlist[1]):
-                self.adderror("NoneError", "Nothing to intersect")
-            else:
+            if not isnull(interlist[0]) or isnull(interlist[1]):
                 self.intersectrender(lambda x: self.call(interlist[0], x), lambda x: self.call(interlist[1], x))
-            return True
+                return True
         if superformat(original).startswith("parametric "):
             original = self.e.find(original[11:])
             paralist = original.split(" and ", 1)
             paralist[0] = self.calc(paralist[0])
             paralist[1] = self.calc(paralist[1])
-            if isnull(paralist[0]) or isnull(paralist[1]):
-                self.adderror("NoneError", "Nothing to parametrically graph")
-            else:
+            if not isnull(paralist[0]) or isnull(paralist[1]):
                 stop = self.final()
                 x = self.initial()
                 inter = self.interval()
                 while x <= stop:
                     self.singlerender(self.call(paralist[0], x), self.call(paralist[1], x))
                     x += inter
-            return True
+                return True
         if superformat(original).startswith("polar "):
             item = self.calc(original)
-            if isnull(item):
-                self.adderror("NoneError", "Nothing to polar graph")
-            else:
+            if not isnull(item):
                 angle = self.initial()
                 inter = self.interval()
                 stop = self.final()
@@ -530,7 +510,7 @@ Import Commands:
                     if r != None:
                         self.singlerender(math.cos(angle)*r, math.sin(angle)*r)
                     angle += inter
-            return True
+                return True
         if superformat(original).startswith("scroll "):
             original = original[7:]
             forlist = original.split(" do ", 1)
@@ -550,10 +530,8 @@ Import Commands:
         """Graphs Normal Entries."""
         self.returned = 0
         item = self.calc(original)
-        if self.returned == 0:
-            if isnull(item):
-                self.adderror("NoneError", "Nothing to graph")
-            elif isinstance(item, strcalc):
+        if self.returned == 0 and not isnull(item):
+            if isinstance(item, strcalc):
                 self.show(self.e.prepare(item, True, True))
             elif isinstance(item, data):
                 for x in item.items():

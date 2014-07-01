@@ -52,7 +52,6 @@ Import Commands:
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
-        self.printdebug(": ON")
         self.messages = []
         if message:
             message = str(message)
@@ -61,10 +60,10 @@ Import Commands:
             self.root, self.app, self.box = startconsole(self.handler, message, str(name))
         else:
             self.root, self.app, self.box = startconsole(self.handler, message, str(name), int(height))
-        self.errorlog = {}
         self.ans = [matrix(0)]
         self.returned = 1
         self.populator()
+        self.printdebug(": ON")
         if helpstring != None:
             self.helpstring = str(helpstring)
         if initializers == ():
@@ -84,19 +83,18 @@ Import Commands:
 
     def printdebug(self, message):
         """Prints Debug Output."""
-        if self.debug:
-            self.e.printdebug(str(message))
+        self.e.printdebug(str(message))
 
     def adderror(self, error, detail):
         """Adds An Error To The Log."""
-        error = str(error)
-        detail = str(detail)
-        if self.debug:
-            self.printdebug("<!> "+error+": "+detail)
-        elif error not in self.errorlog:
-            self.errorlog[error] = [detail]
-        elif detail not in self.errorlog[error]:
-            self.errorlog[error].append(detail)
+        self.printdebug("<!> "+str(error)+": "+str(detail))
+        self.dumpdebug()
+
+    def dumpdebug(self, top=False):
+        """Dumps Debug Output."""
+        if not top:
+            self.show(strlist(self.e.debuglog, "\n"), True)
+        self.e.debuglog = []
 
     def show(self, arg, message=False):
         """Displays Something."""
@@ -108,14 +106,15 @@ Import Commands:
             self.app.display(arg)
             for line in arg.split("\n"):
                 self.messages.append(line)
-        elif arg == "()":
-            self.adderror("NoneError", "Nothing to display")
         else:
             self.app.display(arg)
 
     def calc(self, expression):
         """Safely Evaluates An Expression."""
-        self.e.info = 1
+        if self.debug:
+            self.e.info = 1
+        else:
+            self.e.info = " <<| Traceback"
         return self.saferun(self.e.calc, expression)
 
     def test(self, expression):
@@ -169,10 +168,8 @@ Import Commands:
         self.cmds = [
             self.do_find,
             self.cmd_debug,
-            self.cmd_errors,
             self.cmd_clear,
             self.cmd_clean,
-            self.cmd_get,
             self.cmd_run,
             self.cmd_save,
             self.cmd_assert,
@@ -237,10 +234,11 @@ Import Commands:
             self.process(cmdlist[x])
             x += 1
 
-    def process(self, inputstring):
+    def process(self, inputstring, top=True):
         """Processes A Command."""
         if delspace(inputstring) != "":
             self.returned = 1
+            self.dumpdebug(top)
             inputstring = basicformat(inputstring)
             for func in self.pre_cmds:
                 if func(inputstring) != None:
@@ -252,14 +250,6 @@ Import Commands:
             if istext(self.e.variables[item]):
                 self.process(self.e.find(item, False, False))
                 return True
-
-    def pre_question(self, inputstring):
-        """Performs ?."""
-        if superformat(inputstring).endswith("?"):
-            self.box.clear()
-            self.box.insert(inputstring[:-1])
-            self.complete()
-            return True
 
     def pre_help(self, inputstring):
         """Performs help."""
@@ -287,12 +277,6 @@ Import Commands:
             self.setdebug(not self.debug)
             return True
 
-    def cmd_errors(self, original):
-        """Performs errors."""
-        if superformat(original) == "errors":
-            self.showerrors()
-            return True
-
     def cmd_clear(self, original):
         """Performs clear."""
         if superformat(original) == "clear":
@@ -311,71 +295,14 @@ Import Commands:
                 self.printdebug("< "+x+" >")
             self.e.count = 0
 
-    def cmd_while(self, original):
-        """Performs while x do y."""
-        if superformat(original).startswith("while "):
-            original = original[6:]
-            whilelist = original.split(" do ", 1)
-            while self.test(whilelist[0]):
-                self.process(whilelist[1])
-            return True
-
-    def cmd_for(self, original, varname="x"):
-        """Performs for x do y."""
-        if superformat(original).startswith("for "):
-            original = original[4:]
-            forlist = original.split(" do ", 1)
-            forlist[0] = self.calc(forlist[0])
-            if not hasmatrix(forlist[0]):
-                self.e.variables[varname] = forlist[0]
-                self.process(forlist[1])
-            else:
-                for x in getmatrix(forlist[0]).getitems():
-                    self.e.variables[varname] = x
-                    self.process(forlist[1])
-            return True
-
-    def cmd_if(self, inputstring):
-        """Performs if x do y."""
-        if superformat(inputstring).startswith("if "):
-            inputstring = basicformat(inputstring[3:]).split(" do ", 1)
-            if self.e.test(delspace(inputstring[0])):
-                self.process(basicformat(inputstring[1]))
-            return True
-
-    def cmd_get(self, original):
-        """Performs get."""
-        if superformat(original).startswith("get ") or superformat(original) == "get":
-            original = basicformat(original[3:])
-            if delspace(original) == "":
-                showbuiltins = []
-                showfuncs = {}
-                showvars = {}
-                showparens = {}
-                for x in self.e.variables:
-                    if x.startswith(self.e.parenchar):
-                        showparens[int(x[1:-1])] = self.e.prepare(self.e.variables[x], False, True)
-                    elif isinstance(self.e.variables[x], strfunc):
-                        showfuncs[x] = self.e.prepare(self.e.variables[x], False, True)
-                    elif istext(self.e.variables[x]) or (hasnum(self.e.variables[x]) and not isinstance(self.e.variables[x], funcfloat)):
-                        showvars[x] = self.e.prepare(self.e.variables[x], False, True)
-                    else:
-                        showbuiltins.append(x)
-                showbuiltins.sort()
-                self.show("Built-Ins: "+str(showbuiltins)+"\n\nVariables: "+dictdisplay(showvars)+"\n\nFunctions: "+dictdisplay(showfuncs)+"\n\nParentheses: "+dictdisplay(showparens), True)
-            elif original in self.e.variables:
-                self.show(self.e.prepare(self.e.variables[original], True, True))
-            else:
-                self.adderror("VariableError", "Could not get variable "+original)
-            return True
-
     def cmd_run(self, original):
         """Performs run."""
         if superformat(original).startswith("run "):
             original = original[4:]
             if not self.evalfile(original):
-                self.adderror("IOError", "Could not find file "+str(original))
-            return True
+                raise ExecutionError("IOError", "Could not find file "+str(original))
+            else:
+                return True
 
     def cmd_save(self, original):
         """Performs save."""
@@ -420,15 +347,12 @@ Import Commands:
                     for x in xrange(1, len(test)):
                         useclass = useclass.retrieve(test[x])
                         if not isinstance(useclass, classcalc):
-                            self.adderror("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
-                            return True
+                            raise ExecutionError("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
                 else:
-                    self.adderror("VariableError", "Could not find class "+test[0])
-                    return True
+                    raise ExecutionError("VariableError", "Could not find class "+test[0])
                 useclass.remove(item)
             else:
-                self.adderror("VariableError", "Could not find "+original)
-                return True
+                raise ExecutionError("VariableError", "Could not find "+original)
             self.printdebug("< "+original+" >")
             return True
 
@@ -519,8 +443,7 @@ Import Commands:
                                 docalc = False
                                 break
                             else:
-                                self.adderror("ClassError", "Could not set "+classlist[x]+" in "+self.e.prepare(last, False, True, True))
-                                return True
+                                raise ExecutionError("ClassError", "Could not set "+classlist[x]+" in "+self.e.prepare(last, False, True, True))
                 elif classlist[0] in self.e.variables and istext(self.e.variables[classlist[0]]) and len(classlist) == 1:
                     sides[1] = "( "+self.e.variables[classlist[0]]+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
                     sides[0] = classlist[0]
@@ -528,8 +451,7 @@ Import Commands:
                     classlist = []
                     docalc = False
                 else:
-                    self.adderror("VariableError", "Could not find class "+classlist[0])
-                    return True
+                    raise ExecutionError("VariableError", "Could not find class "+classlist[0])
             sides[1] = basicformat(sides[1])
             for func in self.set_cmds:
                 value = func(sides)
@@ -575,7 +497,7 @@ Import Commands:
             try:
                 impclass = dirimport(sides[1]).interface
             except IOError:
-                self.adderror("IOError", "Could not find for import file "+str(sides[1]))
+                raise ExecutionError("IOError", "Could not find for import file "+str(sides[1]))
             else:
                 if iseval(impclass):
                     return impclass(self)
@@ -627,8 +549,8 @@ Import Commands:
                         x = x.split(":", 1)
                         x[0] = delspace(x[0])
                         if not x[0] or self.e.isreserved(x[0]):
-                            self.adderror("VariableError", "Could not set to invalid personal "+x[0])
                             doparam = False
+                            raise ExecutionError("VariableError", "Could not set to invalid personal "+x[0])
                         else:
                             self.e.info = " <\\"
                             personals[x[0]] = self.e.calc(x[1])
@@ -637,13 +559,13 @@ Import Commands:
                         x = delspace(x)
                     if doallargs:
                         if not x or self.e.isreserved(x):
-                            self.adderror("VariableError", "Could not set to invalid allargs "+x)
                             doparam = False
+                            raise ExecutionError("VariableError", "Could not set to invalid allargs "+x)
                         else:
                             allargs = x
                     if doparam:
                         if not x or self.e.isreserved(x):
-                            self.adderror("VariableError", "Could not set to invalid variable "+x)
+                            raise ExecutionError("VariableError", "Could not set to invalid variable "+x)
                         else:
                             params.append(x)
             if allargs:
@@ -660,13 +582,11 @@ Import Commands:
         """Evaluates Functions."""
         self.returned = 0
         test = self.calc(original)
-        if test != None and not isnull(test):
+        if test != None:
             self.ans.append(test)
             if self.returned == 0:
                 self.show(self.e.prepare(self.ans[-1], True, True))
-        else:
-            self.adderror("NoneError", "Nothing was returned")
-        return True
+            return True
 
     def trycalc(self, inputobject):
         """Attempts To Calculate A Variable."""
@@ -679,8 +599,9 @@ Import Commands:
         """Evaluates An Item With A Value."""
         out = self.e.call(item, value, varname)
         if out == None:
-            self.adderror("NoneError", "Nothing to call")
-        return out
+            raise ExecutionError("NoneError", "Nothing to call")
+        else:
+            return out
 
 if __name__ == "__main__":
     mathbase().start()

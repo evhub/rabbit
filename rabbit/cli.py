@@ -29,19 +29,18 @@ class commandline(mathbase):
         """Initializes The Command Line Interface."""
         self.on = True
         self.debug = bool(debug)
-        self.printdebug(": ON")
         self.messages = []
         if message:
             message = str(message)
             self.messages.append(message)
         self.prompt = str(prompt)
         self.app = terminal(message, color=outcolor)
-        self.errorlog = {}
         self.ans = [matrix(0)]
         self.commands = []
         self.returned = 1
         self.top = False
         self.populator()
+        self.printdebug(": ON")
         self.e.color = debugcolor
         if helpstring != None:
             self.helpstring = str(helpstring)
@@ -60,10 +59,8 @@ class commandline(mathbase):
         self.cmds = [
             self.do_find,
             self.cmd_debug,
-            self.cmd_errors,
             self.cmd_exit,
             self.cmd_clean,
-            self.cmd_get,
             self.cmd_run,
             self.cmd_save,
             self.cmd_assert,
@@ -120,17 +117,18 @@ class commandline(mathbase):
         self.e.recursion = 0
         self.commands.append(original)
         cmd = carefulsplit(original, "#", '"`')[0]
-        if delspace(cmd) == "":
-            self.adderror("NoneError", "Nothing cannot be executed.")
-        else:
+        if delspace(cmd) != "":
             self.top = True
             self.process(cmd)
 
     def calc(self, expression):
         """Safely Evaluates An Expression."""
         if self.top:
-            self.e.info = -1
+            if self.debug:
+                self.e.info = -1
+            else:
+                self.e.info = " <<| Traceback"
             self.top = False
         else:
-            self.e.info = " <<"
+            self.e.info = " <<--"
         return self.saferun(self.e.calc, expression)

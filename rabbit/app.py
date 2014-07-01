@@ -112,24 +112,9 @@ class safebase(base):
         if self.debug:
             return function(*args)
         else:
-            try:
-                result = function(*args)
-            except ZeroDivisionError as detail:
-                self.adderror("ZeroDivisionError", detail)
-            except ValueError as detail:
-                self.adderror("ValueError", detail)
-            except OverflowError as detail:
-                self.adderror("OverflowError", detail)
-            except TypeError as detail:
-                self.adderror("TypeError", detail)
-            except KeyError as detail:
-                self.adderror("KeyError", detail)
-            except AttributeError as detail:
-                self.adderror("AttributeError", detail)
-            except IndexError as detail:
-                self.adderror("IndexError", detail)
-            except RuntimeError as detail:
-                self.adderror("RuntimeError", detail)
+            result, err = catch(lambda: function(*args))
+            if err:
+                self.adderror(err[0], err[1])
             else:
                 return result
 

@@ -224,6 +224,9 @@ class strfunc(funcfloat):
             out = self.calc(False)
             self.e.setvars(oldvars)
             return out
+    def curry(self, arg):
+        """Curries An Argument."""
+        self.personals[self.variables.pop(0)] = arg
     def __float__(self):
         """Retrieves A Float."""
         if self.e.debug:
@@ -453,6 +456,7 @@ class strcalc(numobject):
         return diagmatrixlist(out)
 
 class rawstrcalc(strcalc):
+    """A Raw Evaluator String."""
     def __init__(self, calcstr, e):
         """Initializes A Raw Evaluator String."""
         self.calcstr = str(calcstr)
@@ -707,40 +711,46 @@ class classcalc(cotobject):
         out = self.e.calc(inputstring)
         self.e.setvars(oldvars)
         return out
+    def __len__(self):
+        """Finds The Number Of Variables."""
+        return len(self.variables)
     def items(self):
         """Returns The Variables."""
         return self.variables.items()
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = self.e.prepare(key, False, False)
-        if bypass or not self.e.isreserved(test):
+        if bypass or not self.e.isreserved(test, allowed=string.digits):
             self.variables[delspace(test)] = value
         else:
-            self.e.processor.adderror("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
+            raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
+    def tryget(self, key):
+        """Attempts To Get An Item."""
+        try:
+            out = self.retrieve(key)
+        except ExecutionError:
+            out = None
+        return out
+    def getitem(self, test):
+        """Retrieves An Item At The Base Level."""
+        if istext(self.variables[test]):
+            return self.calc(self.variables[test])
+        else:
+            return self.variables[test]
     def retrieve(self, key):
         """Retrieves An Item."""
         test = self.e.prepare(key, False, False)
-        if not self.e.isreserved(test) and test in self.variables:
-            if istext(self.variables[test]):
-                return self.calc(self.variables[test])
+        if not self.e.isreserved(test, allowed=string.digits):
+            if test in self.variables:
+                return self.getitem(test)
             else:
-                return self.variables[test]
+                raise ExecutionError("ClassError", "Could not find "+test+" in "+self.e.prepare(self, False, True, True))
         else:
-            self.e.processor.adderror("ClassError", "Could not find "+test+" in "+self.e.prepare(self, False, True, True))
-            return matrix(0)
+            raise ExecutionError("ClassError", "Invalid class key of "+test)
     def call(self, variables):
         """Calculates An Item."""
         variables = varproc(variables)
-        if variables == None:
-            return self
-        elif len(variables) == 0:
-            return matrix(0)
-        elif len(variables) == 1:
-            return self.calc(self.e.prepare(variables[0], False, False))
-        else:
-            self.store(variables[0], variables[1])
-            self.e.overflow = variables[2:]
-            return self
+        return self.toinstance().init(variables)
     def __delitem__(self, key):
         """Wraps remove."""
         self.remove(key)
@@ -751,17 +761,16 @@ class classcalc(cotobject):
         if not self.e.isreserved(test) and test in self.variables:
             del self.variables[test]
         else:
-            self.e.processor.adderror("ClassError", "Could not remove "+test+" from "+self.e.prepare(self, False, True, True))
-            return matrix(0)
+            raise ExecutionError("ClassError", "Could not remove "+test+" from "+self.e.prepare(self, False, True, True))
     def extend(self, other):
         """Extends The Dictionary."""
-        if isinstance(other, classcalc):
+        if isinstance(other, (dict, classcalc)):
             self.add(other.variables)
             return self
         elif other == 0:
             return self
         else:
-            raise TypeError("Could not extend fake list with "+repr(other))
+            raise ExecutionError("ClassError", "Could not extend class with "+repr(other))
     def add(self, other):
         """Adds Variables."""
         for k,v in other.items():
@@ -772,3 +781,321 @@ class classcalc(cotobject):
             return self.variables == other.variables
         else:
             return False
+    def __imul__(self, other):
+        """Performs Multiplication In-Place."""
+        self.extend(other)
+    def toinstance(self):
+        """Creates An Instance Of The Class."""
+        return instancecalc(self.e, self.variables)
+
+class instancecalc(classcalc):
+    """An Evaluator Class Instance."""
+    def __init__(self, e, variables, parent=None):
+        """Creates An Instance Of An Evaluator Class."""
+        self.e = e
+        if parent == None:
+            self.parent = variables
+        else:
+            self.parent = parent
+        self.variables = variables.copy()
+    def copy(self):
+        """Copies The Instance."""
+        return instancecalc(self.e, self.variables, self.parent)
+    def getparent(self):
+        """Reconstructs The Parent Class."""
+        return classcalc(self.e, self.parent)
+    def toclass(self):
+        """Converts To A Normal Class."""
+        return classcalc(self.e, self.variables)
+    def isfrom(self, parent):
+        """Determines Whether The Instance Is From The Parent."""
+        if isinstance(parent, classcalc):
+            return self.parent == parent.variables
+        elif isinstance(parent, dict):
+            return self.parent == parent
+        else:
+            return False
+    def domethod(self, func, variables=[]):
+        """Calls A Method Function."""
+        if not islist(variables):
+            variables = [variables]
+        return getcall(func)([self]+variables)
+    def retrieve(self, key):
+        """Retrieves An Item."""
+        test = self.e.prepare(key, False, False)
+        if not self.e.isreserved(test, allowed=string.digits):
+            if test in self.variables:
+                out = self.getitem(test)
+            elif "__get__" in self.variables:
+                out = getcall(self.getitem("__get__"))([self, strcalc(test, self.e)])
+            else:
+                raise ExecutionError("ClassError", "Could not find "+test+" in the class")
+            if isinstance(out, strfunc):
+                if len(out.variables) > 0:
+                    out.curry(self)
+                else:
+                    raise ExecutionError("ClassError", "Methods must have self as their first argument")
+            return out
+        else:
+            raise ExecutionError("ClassError", "Invalid class key of "+test)
+    def init(self, params):
+        """Initializes The Instance."""
+        if "__init__" in self.variables:
+            item = self.calc("__init__")
+            if isfunc(item):
+                value = self.domethod(item, params)
+            else:
+                self.e.overflow = params
+                value = item
+            if isinstance(value, instancecalc):
+                return value
+            else:
+                raise ExecutionError("ClassError", "The class's __init__ method returned the non-class object "+self.e.prepare(value, False, True))
+        else:
+            return self
+    def isfunc(self):
+        """Determines Whether The Class Is A Function."""
+        return bool(self.tryget("__call__"))
+    def call(self, variables):
+        """Calls The Function."""
+        func = self.tryget("__call__")
+        if func == None:
+            raise ExecutionError("ClassError", "The class being called has no __call__ method")
+        else:
+            return self.domethod(func, variables)
+    def ismatrix(self):
+        """Determines Whether The Class Can Be A Matrix."""
+        return bool(self.tryget("__cont__"))
+    def getmatrix(self):
+        """Converts To Matrix."""
+        func = self.tryget("__cont__")
+        if func == None:
+            raise ExecutionError("ClassError", "The class being converted to a container has no __cont__ method")
+        else:
+            return self.domethod(func)
+    def __iadd__(self, other):
+        """Performs Addition."""
+        check_add = self.tryget("__add__")
+        if check_add:
+            return self.domethod(check_add, other)
+        check_sub = self.tryget("__sub__")
+        if check_sub:
+            return self.domethod(check_sub, -other)
+        raise ExecutionError("ClassError", "Insufficient methods defined for addition")
+    def __isub__(self, other):
+        """Performs Subtraction."""
+        check_sub = self.tryget("__sub__")
+        if check_sub:
+            return self.domethod(check_sub, other)
+        check_add = self.tryget("__add__")
+        if check_add:
+            return self.domethod(check_add, -other)
+        raise ExecutionError("ClassError", "Insufficient methods defined for subtraction")
+    def __imul__(self, other):
+        """Performs Multiplication."""
+        check_mul = self.tryget("__mul__")
+        if check_mul:
+            return self.domethod(check_mul, other)
+        check_div = self.tryget("__div__")
+        if check_div:
+            return self.domethod(check_div, 1.0/other)
+        if other == int(other):
+            try:
+                for x in xrange(0, int(other)):
+                    self += self
+            except ExecutionError:
+                pass
+        raise ExecutionError("ClassError", "Insufficient methods defined for multiplication")
+    def __idiv__(self, other):
+        """Performs Division."""
+        check_div = self.tryget("__div__")
+        if check_div:
+            return self.domethod(check_div, other)
+        check_mul = self.tryget("__mul__")
+        if check_mul:
+            return self.domethod(check_mul, 1.0/other)
+        other = 1.0/other
+        if other == int(other):
+            try:
+                for x in xrange(0, int(other)):
+                    self += self
+            except ExecutionError:
+                pass
+        raise ExecutionError("ClassError", "Insufficient methods defined for multiplication")
+    def __imod__(self, other):
+        """Performs Moduluo."""
+        check_mod = self.tryget("__mod__")
+        if check_mod:
+            self = self.domethod(check_mod, other)
+        try:
+            while self >= other:
+                self -= other
+        except ExecutionError:
+            try:
+                result = float(self/other)
+                self = (result-int(result))*other
+            except ExecutionError:
+                raise ExecutionError("ClassError", "Insufficient methods defined for modulo")
+        return self
+    def __ipow__(self, other):
+        """Performs Exponentiation."""
+        check_pow = self.tryget("__pow__")
+        if check_pow:
+            return self.domethod(check_pow, other)
+        if other == int(other):
+            try:
+                for x in xrange(0, int(other)):
+                    self *= self
+            except ExecutionError:
+                pass
+        raise ExecutionError("ClassError", "Insufficient methods defined for exponentiation")
+    def calc(self):
+        """Converts To Float."""
+        check_num = self.tryget("__num__")
+        if check_num:
+            return self.domethod(check_num)
+        raise ExecutionError("ClassError", "Insufficient methods defined for conversion to number")
+    def __abs__(self):
+        """Performs Absolute Value."""
+        check_abs = self.tryget("__abs__")
+        if check_abs:
+            return self.domethod(check_abs, other)
+        if self < 0:
+            return -self
+        else:
+            return self
+    def __cmp__(self, other):
+        """Performs Comparison."""
+        check_cmp = self.tryget("__cmp__")
+        if check_cmp:
+            return self.domethod(check_cmp, other)
+        if self == other:
+            return 0
+        elif self > other:
+            return 1
+        else:
+            return -1
+    def __eq__(self, other):
+        """Performs Equal."""
+        if other == None:
+            return False
+        else:
+            check_eq = self.tryget("__eq__")
+            if check_eq:
+                return self.domethod(check_eq, other)
+            check_cmp = self.tryget("__cmp__")
+            if check_cmp:
+                return self.domethod(check_cmp, other) == 0.0
+            check_ne = self.tryget("__ne__")
+            if check_ne:
+                return not self.domethod(check_ne, other)
+            check_gt = self.tryget("__gt__")
+            if check_gt:
+                check_lt = self.tryget("__lt__")
+                if check_lt:
+                    return not self.domethod(check_gt, other) and not self.domethod(check_lt, other)
+            return self.toclass() == other
+    def __ne__(self, other):
+        """Performs Not Equal."""
+        if other == None:
+            return True
+        else:
+            check_ne = self.tryget("__ne__")
+            if check_ne:
+                return self.domethod(check_ne, other)
+            check_cmp = self.tryget("__cmp__")
+            if check_cmp:
+                return self.domethod(check_cmp, other) == 0.0
+            check_eq = self.tryget("__eq__")
+            if check_eq:
+                return not self.domethod(check_eq, other)
+            check_gt = self.tryget("__gt__")
+            if check_gt:
+                check_lt = self.tryget("__lt__")
+                if check_lt:
+                    return not self.domethod(check_gt, other) and not self.domethod(check_lt, other)
+            return self.toclass() != other
+    def __gt__(self, other):
+        """Performs Greater Than."""
+        check_gt = self.tryget("__gt__")
+        if check_gt:
+            return self.domethod(check_gt, other)
+        check_cmp = self.tryget("__cmp__")
+        if check_cmp:
+            return self.domethod(check_cmp, other) > 0.0
+        check_le = self.tryget("__le__")
+        if check_le:
+            return not self.domethod(check_le, other)
+        raise ExecutionError("ClassError", "Insufficient methods defined for greater than")
+    def __lt__(self, other):
+        """Performs Less Than."""
+        check_lt = self.tryget("__lt__")
+        if check_lt:
+            return self.domethod(check_lt, other)
+        check_cmp = self.tryget("__cmp__")
+        if check_cmp:
+            return self.domethod(check_cmp, other) < 0.0
+        check_ge = self.tryget("__ge__")
+        if check_ge:
+            return not self.domethod(check_ge, other)
+        raise ExecutionError("ClassError", "Insufficient methods defined for greater than")
+    def __ge__(self, other):
+        """Performs Greater Than Or Equal."""
+        check_ge = self.tryget("__ge__")
+        if check_ge:
+            return self.domethod(check_ge, other)
+        check_cmp = self.tryget("__cmp__")
+        if check_cmp:
+            return self.domethod(check_cmp, other) >= 0.0
+        check_lt = self.tryget("__lt__")
+        if check_lt:
+            return not self.domethod(check_lt, other)
+        raise ExecutionError("ClassError", "Insufficient methods defined for greater than")
+    def __le__(self, other):
+        """Performs Less Than Or Equal."""
+        check_le = self.tryget("__le__")
+        if check_le:
+            return self.domethod(check_le, other)
+        check_cmp = self.tryget("__cmp__")
+        if check_cmp:
+            return self.domethod(check_cmp, other) <= 0.0
+        check_gt = self.tryget("__gt__")
+        if check_gt:
+            return not self.domethod(check_gt, other)
+        raise ExecutionError("ClassError", "Insufficient methods defined for greater than")
+    def __str__(self):
+        """Retrieves A String."""
+        check_str = self.tryget("__str__")
+        if check_str:
+            return self.domethod(check_str, other)
+        check_repr = self.tryget("__repr__")
+        if check_repr:
+            return self.domethod(check_repr, other)
+        return self.e.prepare(self.toclass(), True, False)+" ()"
+    def __repr__(self):
+        """Retrieves A Representation."""
+        check_repr = self.tryget("__repr__")
+        if check_repr:
+            return self.domethod(check_repr, other)
+        check_str = self.tryget("__str__")
+        if check_str:
+            return self.domethod(check_str, other)
+        return self.e.prepare(self.toclass(), False, True)+" ()"
+    def __len__(self):
+        """Retrieves The Length."""
+        check_len = self.tryget("__len__")
+        if check_len:
+            return self.domethod(check_len)
+        check_cont = self.tryget("__cont__")
+        if check_cont:
+            return len(self.domethod(check_cont))
+        raise ExecutionError("ClassError", "Insufficient methods defined for length")
+    def __bool__(self):
+        """Converts To A Boolean."""
+        check_bool = self.tryget("__bool__")
+        if check_bool:
+            return self.domethod(check_bool)
+        check_num = self.tryget("__num__")
+        if check_num:
+            return bool(self.domethod(check_num))
+        return len(self) > 0

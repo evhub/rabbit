@@ -51,7 +51,6 @@ Import Commands:
         """Initializes A PythonPlus Evaluator"""
         self.doshow = True
         self.debug = bool(debug)
-        self.printdebug(": ON")
         self.debug_old = self.debug
         self.root = Tkinter.Tk()
         self.root.title(str(name))
@@ -80,16 +79,15 @@ Import Commands:
         self.box.colortag("string", "darkgreen")
         self.box.colortag("comment", "red")
         self.box.colortag("variable", "blue")
-        self.box.colortag("modifier", "cyan")
         self.box.colortag("digit", "darkgrey")
         self.box.colortag("builtin", "purple")
         self.box.colortag("stringmod", "green")
         self.box.colortag("statement", "magenta")
         self.box.colortag("search", highlight="yellow")
-        self.errorlog = {}
         self.ans = [matrix(0)]
         self.returned = 1
         self.populator()
+        self.printdebug(": ON")
         if helpstring != None:
             self.helpstring = str(helpstring)
         if initializers == ():
@@ -108,9 +106,7 @@ Import Commands:
         self.cmds = [
             self.do_find,
             self.cmd_debug,
-            self.cmd_errors,
             self.cmd_clean,
-            self.cmd_get,
             self.cmd_run,
             self.cmd_save,
             self.cmd_assert,
@@ -173,7 +169,7 @@ Import Commands:
             elif x in [")", "]", "}"]:
                 space -= 1
         space += instring
-        if space <= 0 and endswithany(basicformat(last), "=:*+-%/^@~\\|&;<>.,([{$!?"):
+        if space <= 0 and endswithany(basicformat(last), "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"):
             space = 1
         insert = " "*space
         if instring:
@@ -200,7 +196,6 @@ Import Commands:
         self.box.remtag("string", start, end)
         self.box.remtag("reserved", start, end)
         self.box.remtag("variable", start, end)
-        self.box.remtag("modifier", start, end)
         self.box.remtag("digit", start, end)
         self.box.remtag("builtin", start, end)
         self.box.remtag("stringmod", start, end)
@@ -228,15 +223,8 @@ Import Commands:
                 if c == 1 and not iswhite(test):
                     if last[0] in [funcfloat.allargs, strfunc.autoarg]:
                         self.box.placetag("builtin", last[1], point+"-2c")
-                    elif last[0].startswith(self.e.defprefix):
-                        self.box.placetag("modifier", last[1], last[1]+"+1c")
                     elif last[0] in self.e.variables:
                         if isinstance(self.e.variables[last[0]], usefunc) or (isinstance(self.e.variables[last[0]], funcfloat) and not isinstance(self.e.variables[last[0]], strfunc)):
-                            self.box.placetag("builtin", last[1], point+"-2c")
-                        else:
-                            self.box.placetag("variable", last[1], point+"-2c")
-                    elif self.e.defprefix+last[0] in self.e.variables:
-                        if isinstance(self.e.variables[self.e.defprefix+last[0]], usefunc) or (isinstance(self.e.variables[self.e.defprefix+last[0]], funcfloat) and not isinstance(self.e.variables[self.e.defprefix+last[0]], strfunc)):
                             self.box.placetag("builtin", last[1], point+"-2c")
                         else:
                             self.box.placetag("variable", last[1], point+"-2c")
@@ -314,15 +302,8 @@ Import Commands:
                 else:
                     if last[0] in [funcfloat.allargs, strfunc.autoarg]:
                         self.box.placetag("builtin", last[1], point+"-1c")
-                    elif last[0].startswith(self.e.defprefix):
-                        self.box.placetag("modifier", last[1], last[1]+"+1c")
                     elif last[0] in self.e.variables:
                         if isinstance(self.e.variables[last[0]], usefunc) or (isinstance(self.e.variables[last[0]], funcfloat) and not isinstance(self.e.variables[last[0]], strfunc)):
-                            self.box.placetag("builtin", last[1], point+"-1c")
-                        else:
-                            self.box.placetag("variable", last[1], point+"-1c")
-                    elif self.e.defprefix+last[0] in self.e.variables:
-                        if isinstance(self.e.variables[self.e.defprefix+last[0]], usefunc) or (isinstance(self.e.variables[self.e.defprefix+last[0]], funcfloat) and not isinstance(self.e.variables[self.e.defprefix+last[0]], strfunc)):
                             self.box.placetag("builtin", last[1], point+"-1c")
                         else:
                             self.box.placetag("variable", last[1], point+"-1c")
@@ -386,8 +367,7 @@ Import Commands:
         if self.doshow:
             if not istext(arg):
                 arg = self.e.prepare(arg)
-            if arg != "()":
-                popup("Info", arg, "Output")
+            popup("Info", arg, "Output")
 
     def destroy(self):
         """Ends The Editor."""

@@ -44,11 +44,16 @@ def namestr(obj):
 def hascall(func):
     """Determines If An Object Has A Call Method."""
     try:
-        func.call
+        func.isfunc
     except AttributeError:
-        return False
+        try:
+            func.call
+        except AttributeError:
+            return False
+        else:
+            return True
     else:
-        return True
+        return func.isfunc()
 
 def getcall(func):
     """Gets The Callable Part Of A Function."""

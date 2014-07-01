@@ -61,7 +61,6 @@ Global Operator Precedence List:
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
     varname = "x"
-    defprefix = "'"
     parenchar = "\xa7"
     reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`\u2260\u2264\u2265'+parenchar
 
@@ -74,6 +73,7 @@ Global Operator Precedence List:
             self.debug = False
         else:
             self.debug = self.processor.debug
+        self.debuglog = []
         self.info = ""
         self.color = color
         self.recursion = 0
@@ -99,6 +99,10 @@ Global Operator Precedence List:
     def fresh(self):
         """Resets The Variables To Their Defaults."""
         self.variables = {
+            "error":classcalc(self, {
+                "__error__": 1.0
+                }),
+            "env":funcfloat(self.funcs.envcall, self, "env"),
             "copy":funcfloat(self.funcs.copycall, self, "copy"),
             "type":funcfloat(self.funcs.typecall, self, "type"),
             "to":funcfloat(self.funcs.tocall, self, "to"),
@@ -133,6 +137,10 @@ Global Operator Precedence List:
             "data":funcfloat(self.funcs.datacall, self, "data"),
             "frac":funcfloat(self.funcs.fractcall, self, "frac"),
             "simp":funcfloat(self.funcs.simpcall, self, "simp"),
+            "from":funcfloat(self.funcs.instanceofcall, self, "from"),
+            "iserr":funcfloat(self.funcs.iserrcall, self, "iserr"),
+            "val":funcfloat(self.funcs.getvarcall, self, "val"),
+            "raise":funcfloat(self.funcs.raisecall, self, "raise"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "floor":usefunc(math.floor, self, "floor", ["x"]),
             "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
@@ -177,9 +185,8 @@ Global Operator Precedence List:
             "none":matrix(0),
             "true":1.0,
             "false":0.0,
-            self.defprefix*2 : matrix(0),
-            self.defprefix+funcfloat.allargs : matrix(0),
-            self.defprefix+self.varname : matrix(0),
+            funcfloat.allargs : matrix(0),
+            self.varname : matrix(0),
             "\xf8" : "none",
             "\u2211" : "sum",
             "\u03c0" : "pi",
@@ -189,11 +196,12 @@ Global Operator Precedence List:
 
     def printdebug(self, message):
         """Prints Debug Output."""
+        message = self.recursion*"  "+str(message)
+        if self.color in colors:
+            message = addcolor(message, self.color)
+        self.debuglog.append(message)
         if self.debug:
-            message = str(message)
-            if self.color in colors:
-                message = addcolor(message, self.color)
-            print(self.recursion*"  "+message)
+            print(message)
 
     def makevars(self, variables):
         """Forcibly Stores Variables."""
@@ -230,7 +238,12 @@ Global Operator Precedence List:
 
     def prepare(self, item, top=False, bottom=True, indebug=False):
         """Prepares The Output Of An Evaluation."""
-        if isinstance(item, classcalc):
+        if isinstance(item, instancecalc):
+            if not top and (bottom or indebug):
+                out = repr(item)
+            else:
+                out = str(item)
+        elif isinstance(item, classcalc):
             out = "{"
             if top:
                 out += "\n"
@@ -369,25 +382,22 @@ Global Operator Precedence List:
         elif indebug:
             out = repr(item)
         else:
-            self.processor.adderror("DisplayError", "Unable to display "+repr(item))
-            out = "()"
+            raise ExecutionError("DisplayError", "Unable to display "+repr(item))
         return str(out)
 
     def test(self, equation):
         """Evaluates A Boolean Expression."""
-        if self.debug:
-            self.info = " | test"
+        self.info = " | test"
         return bool(self.calc(equation))
 
     def calc(self, expression):
         """Performs Full Evaluation On An Expression."""
         inputstring = self.prepare(expression, False, True)
-        if self.debug:
-            if self.info == 1:
-                self.info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
-            if self.info != -1:
-                self.printdebug(">>> "+inputstring+self.info)
-            self.info = ""
+        if self.info == 1:
+            self.info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
+        if self.info != -1:
+            self.printdebug(">>> "+inputstring+self.info)
+        self.info = ""
         self.recursion += 1
         out = self.calc_top(inputstring)
         self.printdebug(self.prepare(out, False, True, True)+" <<< "+inputstring)
@@ -433,8 +443,9 @@ Global Operator Precedence List:
             if istext(x):
                 command += x
             else:
-                indexstr = self.wrap(classcalc(self))
-                self.variables[indexstr].process(strlist(x, ";;"))
+                out = classcalc(self)
+                out.process(self.calc_class(x))
+                command += self.wrap(out)
         return command
 
     def calc_brack(self, bracklist):
@@ -501,13 +512,11 @@ Global Operator Precedence List:
         top = equation.split("|")
         for a in xrange(0, len(top)):
             top[a] = top[a].split("&")
-        if self.debug:
-            value = reassemble(top, ["|", "&"])
-            self.printdebug("=>> "+value)
+        value = reassemble(top, ["|", "&"])
+        self.printdebug("=>> "+value)
         self.recursion += 1
         out = self.bool_or(top)
-        if self.debug:
-            self.printdebug(self.prepare(out, False, True, True)+" <<= "+value)
+        self.printdebug(self.prepare(out, False, True, True)+" <<= "+value)
         self.recursion -= 1
         return out
 
@@ -612,13 +621,11 @@ Global Operator Precedence List:
                                 top[a][0][c][d][e][f] = top[a][0][c][d][e][f].split("%")
                                 for g in xrange(0, len(top[a][0][c][d][e][f])):
                                     top[a][0][c][d][e][f][g] = splitinplace(top[a][0][c][d][e][f][g].split("*"), "/")
-        if self.debug:
-            value = reassemble(top, ["~", "\\", "..", "**", ",", "+", "%", "*"])
-            self.printdebug("=> "+value)
+        value = reassemble(top, ["~", "\\", "..", "**", ",", "+", "%", "*"])
+        self.printdebug("=> "+value)
         self.recursion += 1
         out = self.eval_check(self.eval_comp(top), True)
-        if self.debug:
-            self.printdebug(self.prepare(out, False, True, True)+" <= "+value)
+        self.printdebug(self.prepare(out, False, True, True)+" <= "+value)
         self.recursion -= 1
         return out
 
@@ -661,7 +668,7 @@ Global Operator Precedence List:
                 if not isnull(item):
                     new.append(item)
             if fromstring:
-                out = strcalc(strlist(new, "", converter=lambda x: self.prepare(x, True, False)), self)
+                out = rawstrcalc(strlist(new, "", converter=lambda x: self.prepare(x, True, False)), self)
             elif value.onlydiag():
                 out = diagmatrixlist(new)
             else:
@@ -726,21 +733,21 @@ Global Operator Precedence List:
                                 doparam = False
                             x = x.split(":", 1)
                             if not x[0] or self.isreserved(x[0]):
-                                self.processor.adderror("VariableError", "Could not set to invalid personal "+x[0])
                                 doparam = False
+                                raise ExecutionError("VariableError", "Could not set to invalid personal "+x[0])
                             else:
                                 self.info = " <\\"
                                 personals[x[0]] = self.calc(x[1])
                             x = x[0]
                         if doallargs:
                             if not x or self.isreserved(x):
-                                self.processor.adderror("VariableError", "Could not set to invalid allargs "+x)
                                 doparam = False
+                                raise ExecutionError("VariableError", "Could not set to invalid allargs "+x)
                             else:
                                 allargs = x
                         if doparam:
                             if not x or self.isreserved(x):
-                                self.processor.adderror("VariableError", "Could not set to invalid variable "+x)
+                                raise ExecutionError("VariableError", "Could not set to invalid variable "+x)
                             else:
                                 params.append(x)
                 if out[1].startswith("\\"):
@@ -806,7 +813,7 @@ Global Operator Precedence List:
                     domultidata -= 1
                     tot -= 1
             if dostr > 0:
-                out = strcalc("", self)
+                out = rawstrcalc("", self)
                 for x in items:
                     out += x
                 return out
@@ -851,7 +858,7 @@ Global Operator Precedence List:
                         out.append(x)
                 return data(out)
             else:
-                raise TypeError("Could not concatenate items "+repr(items))
+                raise ExecutionError("TypeError", "Could not concatenate items "+repr(items))
 
     def eval_repeat(self, inputlist):
         """Evaluates Repeats."""
@@ -965,26 +972,20 @@ Global Operator Precedence List:
             elif hasreal(value) != None:
                 return self.eval_check(float(value))
             else:
-                self.processor.adderror("VariableError", "Unable to process "+str(value))
-                return matrix(0)
+                raise ExecutionError("VariableError", "Unable to process "+str(value))
 
     def call_var(self, inputstring):
         """Checks If Variable."""
         if inputstring in self.variables:
-            if self.defprefix+inputstring in self.variables:
-                self.variables[self.defprefix] = self.call_var(self.defprefix+inputstring)
             item = self.find(inputstring, True, False)
             if istext(item):
-                if self.debug:
-                    self.info = " | var"
+                self.info = " | var"
                 value = self.calc(str(item))
             elif hasnum(item) or islist(item):
                 value = item
             else:
                 value = getcall(item)(None)
             return value
-        elif self.defprefix+inputstring in self.variables:
-            return self.call_var(self.defprefix+inputstring)
 
     def call_none(self, inputstring):
         """Evaluates A Null."""
@@ -1028,14 +1029,18 @@ Global Operator Precedence List:
         if ":" in inputstring:
             inputlist = inputstring.split(":")
             if inputlist[0] == "":
-                for x in xrange(1, len(inputlist)):
-                    self.processor.process(self.prepare(self.eval_call(inputlist[x]), False, False))
-                try:
-                    self.processor.ans
-                except AttributeError:
-                    return matrix(0)
+                inputstring = strlist(inputlist[1:], ":")
+                result, err = catch(self.eval_call, inputstring)
+                if err:
+                    return instancecalc(self, {
+                        "__error__": 1.0,
+                        "name": strcalc(err[0], self),
+                        "message": strcalc(err[1], self)
+                        }, {
+                            "__error__": 1.0
+                            })
                 else:
-                    return self.processor.ans[-1]
+                    return result
             else:
                 params = []
                 for x in xrange(1, len(inputlist)):
@@ -1050,11 +1055,20 @@ Global Operator Precedence List:
         if isinstance(item, strcalc):
             item = item.calcstr
             if len(params) == 0:
-                value = strcalc(item[-1], self)
+                value = rawstrcalc(item[-1], self)
             elif len(params) == 1:
-                value = strcalc(item[int(params[0])], self)
+                value = rawstrcalc(item[int(params[0])], self)
             else:
-                value = strcalc(item[int(params[0]):int(params[1])], self)
+                value = rawstrcalc(item[int(params[0]):int(params[1])], self)
+                self.overflow = params[2:]
+        elif isinstance(item, classcalc) and not isinstance(item, instancecalc):
+            if len(params) == 0:
+                value = item.toinstance()
+            elif len(params) == 1:
+                value = item.calc(self.prepare(params[0], False, False))
+            else:
+                value = item.copy()
+                value.store(params[0], params[1])
                 self.overflow = params[2:]
         elif hasmatrix(item):
             item = getmatrix(item)
@@ -1150,7 +1164,7 @@ Global Operator Precedence List:
                         if name in self.variables:
                             feed.append(name)
                         else:
-                            self.processor.adderror("VariableError", "Could not find parentheses "+name)
+                            raise ExecutionError("VariableError", "Could not find parentheses "+name)
                         last = True
                     else:
                         last = False
@@ -1159,18 +1173,17 @@ Global Operator Precedence List:
                         inputlist.append([])
                         feed = inputlist[-1]
                     feed.append(templist[x])
-            if self.debug:
-                temp = "("+strlist(inputlist, ") * (", lambda l: strlist(l, " : "))+")"
-                self.printdebug("(>) "+temp)
+            temp = "("+strlist(inputlist, ") * (", lambda l: strlist(l, " : "))+")"
+            self.printdebug("(>) "+temp)
             self.recursion += 1
             values = []
             for l in inputlist:
+                item = matrix(0)
                 if l[0].startswith("."):
                     if len(values) > 0:
                         item = strfunc(strfunc.autoarg+l[0], self, [strfunc.autoarg]).call([values.pop()])
                     else:
-                        self.processor.adderror("NoneError", "Nothing does not have methods.")
-                        item = matrix(0)
+                        raise ExecutionError("NoneError", "Nothing does not have methods.")
                 else:
                     item = self.eval_call(l[0])
                 for x in xrange(1, len(l)):
@@ -1191,8 +1204,7 @@ Global Operator Precedence List:
                 value = values[0]
                 for x in xrange(1, len(values)):
                     value *= values[x]
-            if self.debug:
-                self.printdebug(self.prepare(value)+" (<) "+temp)
+            self.printdebug(self.prepare(value)+" (<) "+temp)
             self.recursion -= 1
             return value
 
@@ -1235,8 +1247,7 @@ Global Operator Precedence List:
             if item in self.variables:
                 item = self.variables[item]
             else:
-                if self.debug:
-                    self.info = " >"
+                self.info = " >"
                 item = self.calc(item)
             self.printdebug(self.prepare(item, False, True, True)+" < "+self.prepare(original, False, True, True))
             self.recursion -= 1
@@ -1301,6 +1312,85 @@ class evalfuncs(object):
         """Initializes The Functions."""
         self.e = e
 
+    def envcall(self, variables):
+        """Retrieves A Class Of The Global Environment."""
+        if variables:
+            self.e.overflow = variables
+        return classcalc(self.e, self.e.variables)
+
+    def raisecall(self, variables):
+        """Raises An Error."""
+        if not variables:
+            raise ExecutionError("Error", "An error occured")
+        elif len(variables) == 1:
+            if isinstance(variables[0], classcalc):
+                try:
+                    test = self.iserrcall(variables)
+                except ExecutionError:
+                    test = None
+                else:
+                    if test:
+                        name = test.tryget("name")
+                        if name:
+                            name = self.e.prepare(name, False, False)
+                        else:
+                            name = "Error"
+                        message = test.tryget("message")
+                        if message:
+                            message = self.e.prepare(message, False, False)
+                        else:
+                            message = "An error occured"
+                        raise ExecutionError(name, message)
+            raise ExecutionError(self.e.prepare(variables[0], False, False), "An error occured")
+        else:
+            raise ExecutionError(self.e.prepare(variables[0], False, False), strlist(variables[1:], "; ", lambda x: self.e.prepare(x, False, False)))
+
+    def instanceofcall(self, variables):
+        """Determines Whether Something Is An Instance Of Something Else."""
+        if not variables:
+            return matrix(0)
+        else:
+            if isinstance(variables[0], classcalc):
+                for x in xrange(1, len(variables)):
+                    if not variables[x].isfrom(variables[0]):
+                        return 0.0
+            else:
+                check = self.typecalc(variables[0])
+                for x in xrange(1, len(variables)):
+                    if check != self.typecalc(variables[x]):
+                        return 0.0
+            return 1.0
+
+    def iserrcall(self, variables):
+        """Determines Whether Something Is An Error."""
+        if variables == None:
+            return matrix(0)
+        else:
+            check = self.e.funcfind("error")
+            if isinstance(check, classcalc):
+                for item in variables:
+                    if not item.isfrom(check):
+                        return 0.0
+                return 1.0
+            else:
+                raise ExecutionError("VariableError", "Master error is not a class")
+
+    def getvarcall(self, variables):
+        """Gets The Value Of A Variable."""
+        if not variables:
+            return matrix(0)
+        elif len(variables) == 1:
+            original = self.e.prepare(variables[0], False, False)
+            if original in self.e.variables:
+                return strcalc(self.e.prepare(self.e.variables[original], True, True), self.e)
+            else:
+                return matrix(0)
+        else:
+            out = []
+            for x in variables:
+                out.append(self.getvarcall([x]))
+            return diagmatrixlist(out)
+
     def brackcall(self, variables):
         """Evaluates Brackets."""
         if variables == None:
@@ -1310,7 +1400,7 @@ class evalfuncs(object):
 
     def copycall(self, variables):
         """Makes Copies Of Items."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         elif len(variables) == 1:
             if iseval(variables[0]):
@@ -1325,7 +1415,7 @@ class evalfuncs(object):
 
     def getmatrixcall(self, variables):
         """Converts To Matrices."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         elif len(variables) == 1:
             return getmatrix(variables[0])
@@ -1337,7 +1427,7 @@ class evalfuncs(object):
 
     def matrixcall(self, variables):
         """Constructs A Matrix."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         else:
             tomatrix = []
@@ -1352,7 +1442,7 @@ class evalfuncs(object):
 
     def detcall(self, variables):
         """Returns The Determinant Of The Matrix."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         elif len(variables) == 1 and isinstance(variables[0], matrix):
             return variables[0].det()
@@ -1364,7 +1454,7 @@ class evalfuncs(object):
 
     def listcall(self, variables):
         """Constructs A Matrix List."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         elif len(variables) == 1:
             if isinstance(variables[0], matrix):
@@ -1409,7 +1499,7 @@ class evalfuncs(object):
 
     def joincall(self, variables):
         """Joins Variables."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         else:
             if isinstance(variables[0], matrix):
@@ -1453,7 +1543,7 @@ class evalfuncs(object):
 
     def mergecall(self, variables):
         """Merges Variables."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         else:
             return diagmatrixlist(merge(variables))
@@ -1482,7 +1572,7 @@ class evalfuncs(object):
 
     def rangecall(self, variables):
         """Constructs A Range."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         elif len(variables) == 1:
             return rangematrix(0.0, collapse(variables[0]))
@@ -1535,7 +1625,7 @@ class evalfuncs(object):
                             temp = ""
                             for y in x.getitems():
                                 temp += self.e.prepare(y, True, False)
-                            new.append(strcalc(temp, self))
+                            new.append(rawstrcalc(temp, self))
                         else:
                             new.append(x)
                     return new
@@ -1576,7 +1666,7 @@ class evalfuncs(object):
                     new = ""
                     for x in out.getitems():
                         new += self.e.prepare(x, True, False)
-                    return strcalc(new, self)
+                    return rawstrcalc(new, self)
                 else:
                     return out
             elif ismatrix(variables[0]):
@@ -1603,7 +1693,7 @@ class evalfuncs(object):
 
     def sortcall(self, variables):
         """Performs sort."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         elif len(variables) == 1:
             if isinstance(variables[0], data):
@@ -1632,7 +1722,7 @@ class evalfuncs(object):
 
     def reversecall(self, variables):
         """Performs reverse."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         elif len(variables) == 1:
             variables[0] = getmatrix(collapse(variables[0]))
@@ -1665,7 +1755,7 @@ class evalfuncs(object):
 
     def collapsecall(self, variables):
         """Collapses Float Strings."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         elif len(variables) == 1:
             while isinstance(variables[0], funcfloat):
@@ -1693,7 +1783,7 @@ class evalfuncs(object):
 
     def tocall(self, variables, varstrings="xyzwpqrabchjklmnABCFGHJKMNOQRTUVWXYZ"):
         """Returns A Converter Function."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         elif len(variables) == 1:
             if isinstance(variables[0], (strcalc, funcfloat)):
@@ -1723,7 +1813,7 @@ class evalfuncs(object):
                     out = out[:-1]
                 return strfloat(out, self.e, args)
             else:
-                raise ValueError("Unable to create a converter for "+repr(variables[0]))
+                raise ExecutionError("ValueError", "Unable to create a converter for "+repr(variables[0]))
         else:
             return self.tocall([diagmatrixlist(variables)])
 
@@ -1744,12 +1834,14 @@ class evalfuncs(object):
 
     def typecalc(self, item):
         """Finds A Type."""
-        if isinstance(item, classcalc):
-            return strcalc("class")
+        if isinstance(item, instancecalc):
+            return strcalc("instance", self.e)
+        elif isinstance(item, classcalc):
+            return strcalc("class", self.e)
         elif isinstance(item, data):
-            return strcalc("data")
+            return strcalc("data", self.e)
         elif isinstance(item, multidata):
-            return strcalc("multidata")
+            return strcalc("multidata", self.e)
         elif isinstance(item, matrix):
             if len(item) == 0:
                 return strcalc("none", self.e)
@@ -1770,7 +1862,7 @@ class evalfuncs(object):
         elif isnum(item):
             return strcalc("number", self.e)
         else:
-            return strcalc(namestr(item), self.e)
+            return rawstrcalc(namestr(item), self.e)
 
     def strcall(self, variables):
         """Finds A String."""
@@ -1785,7 +1877,7 @@ class evalfuncs(object):
                     out += self.strcall(getmatrix(x).getitems())
                 else:
                     out += self.e.prepare(x, True, False)
-            return strcalc(out, self.e)
+            return rawstrcalc(out, self.e)
 
     def reprcall(self, variables):
         """Finds A Representation."""
@@ -1798,7 +1890,7 @@ class evalfuncs(object):
                     out += self.reprcall(getmatrix(x).getitems())
                 else:
                     out += self.e.prepare(x, False, True)
-            return strcalc(out, self.e)
+            return rawstrcalc(out, self.e)
 
     def abscall(self, variables):
         """Performs abs."""
@@ -1869,7 +1961,7 @@ class evalfuncs(object):
 
     def foldcall(self, variables, func=None, overflow=True):
         """Folds A Function Over A Matrix."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         elif len(variables) == 1:
             return getcall(self.e.funcfind(variables[0]))(self.e.variables)
@@ -1905,7 +1997,7 @@ class evalfuncs(object):
 
     def derivcall(self, variables):
         """Returns The nth Derivative Of A Function."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         else:
             n = 1
@@ -1934,7 +2026,7 @@ class evalfuncs(object):
 
     def integcall(self, variables):
         """Returns The Integral Of A Function."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         else:
             varname = self.e.varname
@@ -1957,7 +2049,7 @@ class evalfuncs(object):
 
     def randcall(self, variables):
         """Returns A Random Number Generator Object."""
-        if variables == None or len(variables) == 0:
+        if not variables:
             return matrix(0)
         else:
             stop = getnum(variables[0])

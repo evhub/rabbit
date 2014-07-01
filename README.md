@@ -331,13 +331,7 @@ var = 2
 1+var		# But the normal variable is, now using its new value instead of the default (result = 3)
 ```
 
-Sixth is the execute operator (:). When a colon is placed at before an item with nothing before it, it will execute its argument as a top-level command. The basic syntax is:
-```
-:"x = 5"	# This will execute "x = 5" as a top-level command, setting x to 5
-x			# result = 5
-```
-
-Seventh is the all arguments variable (\_\_). When \_\_ is passed as an argument to a function it sets it to a list of all the arguments passed. The basic syntax is:
+Sixth is the all arguments variable (\_\_). When \_\_ is passed as an argument to a function it sets it to a list of all the arguments passed. The basic syntax is:
 ```
 applyplus(__) = __~\x\(x+1)
 ```
