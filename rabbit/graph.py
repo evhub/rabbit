@@ -35,7 +35,6 @@ Expressions:
 Console Commands:
     show <expression>
     help [string]
-    errors
     clear
     clean
 Grid Control:
@@ -67,7 +66,6 @@ Special Functions:
 Control Commands:
     do <command>
     del <variable>
-    get [variable]
 Import Commands:
     <name> = import <file>
     run <file>
@@ -116,7 +114,6 @@ Import Commands:
         self.xsize = self.pixel.width()
         self.identifiers = []
         self.grid = []
-        self.returned = 1
         self.populator()
         self.printdebug(": ON")
         if initializers == ():

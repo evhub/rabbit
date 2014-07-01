@@ -37,22 +37,23 @@ Expressions:
 Console Commands:
     show <expression>
     help [string]
-    errors
     clear
     clean
 Control Commands:
     do <command>
     del <variable>
-    get [variable]
 Import Commands:
     <name> = import <file>
     run <file>
     save <file>"""
+    messages = []
+    ans = [matrix(0)]
+    returned = 1
+    useclass = None
 
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
-        self.messages = []
         if message:
             message = str(message)
             self.messages.append(message)
@@ -60,8 +61,6 @@ Import Commands:
             self.root, self.app, self.box = startconsole(self.handler, message, str(name))
         else:
             self.root, self.app, self.box = startconsole(self.handler, message, str(name), int(height))
-        self.ans = [matrix(0)]
-        self.returned = 1
         self.populator()
         self.printdebug(": ON")
         if helpstring != None:
@@ -199,9 +198,14 @@ Import Commands:
             for x in args:
                 self.initialize(x)
 
+    def reset(self):
+        """Resets Top Variables."""
+        self.dumpdebug(True)
+        self.e.recursion = 0
+
     def handler(self, event=None):
         """Handles A Return Event."""
-        self.e.recursion = 0
+        self.reset()
         original = self.box.output()
         cmd = carefulsplit(original, "#", '"`')[0]
         if delspace(cmd) == "":
@@ -226,6 +230,7 @@ Import Commands:
         cmdlist = inputstring.splitlines()
         x = 0
         while True:
+            self.reset()
             if x == len(cmdlist):
                 break
             cmdlist[x] = carefulsplit(cmdlist[x], "#", '"`')[0]
@@ -238,7 +243,6 @@ Import Commands:
         """Processes A Command."""
         if delspace(inputstring) != "":
             self.returned = 1
-            self.dumpdebug(top)
             inputstring = basicformat(inputstring)
             for func in self.pre_cmds:
                 if func(inputstring) != None:
@@ -420,8 +424,12 @@ Import Commands:
             sides[0] = delspace(sides[0][0])+"("+sides[0][1]
         else:
             sides[0] = delspace(sides[0][0])
+        useclass = self.useclass
+        if useclass:
+            classlist = [useclass]
+        else:
+            classlist = []
         if self.readytofunc(sides[0], allowed="."):
-            useclass = None
             classlist = []
             if "." in sides[0]:
                 classlist += sides[0].split(".")
@@ -429,6 +437,8 @@ Import Commands:
                     if self.e.isreserved(classlist[x]):
                         return False
                 sides[0] = classlist.pop()
+                if useclass:
+                    classlist = [self.e.wrap(useclass)]+classlist
                 useclass = self.e.find(classlist[0], True, False)
                 if isinstance(useclass, classcalc):
                     for x in xrange(1, len(classlist)):
@@ -451,7 +461,7 @@ Import Commands:
                     classlist = []
                     docalc = False
                 else:
-                    raise ExecutionError("VariableError", "Could not find class "+classlist[0])
+                    raise ExecutionError("VariableError", "Could not find class "+self.e.prepare(classlist[0], False, True, True))
             sides[1] = basicformat(sides[1])
             for func in self.set_cmds:
                 value = func(sides)

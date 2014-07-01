@@ -1256,7 +1256,10 @@ Global Operator Precedence List:
     def find(self, key, follow=False, destroy=False):
         """Finds A String."""
         old = ""
-        new = basicformat(key)
+        if istext(key):
+            new = basicformat(key)
+        else:
+            new = key
         while old != new:
             old = new
             new = self.finding(old, follow, destroy)

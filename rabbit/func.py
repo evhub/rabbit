@@ -86,12 +86,15 @@ class funcfloat(numobject):
         self.funcstr = str(funcstr)
         self.func = func
         self.e = e
+
     def copy(self):
         """Returns A Copy Of The Float Function."""
         return funcfloat(self.func, self.e, self.funcstr)
+
     def calc(self):
         """Calculates The Float Function."""
         return self.func(None)
+
     def call(self, variables):
         """Calls The Float Function."""
         variables = varproc(variables)
@@ -99,66 +102,79 @@ class funcfloat(numobject):
             return self
         else:
             return self.func(variables)
+
     def __repr__(self):
         """Returns A String Representation."""
         return "("+self.funcstr+")"
+
     def __str__(self):
         """Retrieves The Function String."""
         return self.funcstr
+
     def __float__(self):
         """Retrieves A Float."""
         return float(self.calc())
+
     def __int__(self):
         """Retrieves An Integer."""
         return int(self.calc())
+
     def __iadd__(self, other):
         """Performs Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.funcstr+"("+self.allargs+"))+("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
+
     def __idiv__(self, other):
         """Performs Division."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.funcstr+"("+self.allargs+"))/("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
+
     def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.funcstr+"("+self.allargs+"))*("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
+
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.funcstr+"("+self.allargs+"))^("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
+
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.e.prepare(other, False, True)+")+("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         if isnull(other):
             return self
         else:
             return strfloat("("+self.e.prepare(other, False, True)+")^("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         if isnull(other):
             return self
         else:
             return strfloat("("+self.e.prepare(other, False, True)+")/("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.e.prepare(other, False, True)+")*("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, strfunc):
@@ -193,9 +209,11 @@ class strfunc(funcfloat):
         else:
             self.personals = dict(personals)
         self.e = e
+
     def copy(self):
         """Copies The String Function."""
         return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow, self.allargs)
+
     def calc(self, personals=True):
         """Calculates The String."""
         if personals:
@@ -204,6 +222,7 @@ class strfunc(funcfloat):
         if personals:
             self.e.setvars(oldvars)
         return out
+
     def call(self, variables):
         """Calls The String Function."""
         variables = varproc(variables)
@@ -224,70 +243,83 @@ class strfunc(funcfloat):
             out = self.calc(False)
             self.e.setvars(oldvars)
             return out
+
     def curry(self, arg):
         """Curries An Argument."""
         self.personals[self.variables.pop(0)] = arg
+
     def __float__(self):
         """Retrieves A Float."""
         if self.e.debug:
             self.e.info = " | float"
         return float(self.calc())
+
     def __int__(self):
         """Retrieves An Integer."""
         if self.e.debug:
             self.e.info = " | int"
         return int(self.calc())
+
     def __iadd__(self, other):
         """Performs Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.name+":"+strlist(self.variables,":")+")+("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+
     def __idiv__(self, other):
         """Performs Division."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.name+":"+strlist(self.variables,":")+")/("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+
     def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.name+":"+strlist(self.variables,":")+")*("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.name+":"+strlist(self.variables,":")+")^("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.e.prepare(other, False, True)+")+("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         if isnull(other):
             return self
         else:
             return strfloat("("+self.e.prepare(other, False, True)+")^("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         if isnull(other):
             return self
         else:
             return strfloat("("+self.e.prepare(other, False, True)+")/("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return strfloat("("+self.e.prepare(other, False, True)+")*("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+
     def find(self):
         """Simplifies The Function String."""
         self.funcstr = self.e.find(self.funcstr, False, False)
+
     def getvars(self):
         """Returns The Original Variable List."""
         out = self.variables[:]
@@ -297,9 +329,11 @@ class strfunc(funcfloat):
             else:
                 out.append("*"+self.allargs)
         return out
+
     def getpers(self):
         """Returns The Modified Personals List."""
         return self.personals.copy()
+
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, strfunc):
@@ -353,6 +387,7 @@ class strfloat(strfunc):
 class strcalc(numobject):
     """Allows Strings Inside Evaluation."""
     check = 2
+
     def __init__(self, calcstr, e):
         """Initializes An Evaluator String."""
         self.calcstr = ""
@@ -374,39 +409,49 @@ class strcalc(numobject):
             self.calcstr += x
         self.calcstr = str(compute('"'+self.calcstr.replace('"', '\\"')+'"'))
         self.e = e
+
     def copy(self):
         """Returns A Copy Of The Evaluator String."""
         return strcalc(self.calcstr, self.e)
+
     def __float__(self):
         """Attempts To Get A Float."""
         return float(self.calcstr)
+
     def __int__(self):
         """Attempts To Get An Integer."""
         return int(self.calcstr)
+
     def __round__(self, n=None):
         """Performs round."""
         return self
+
     def __repr__(self):
         """Retrieves A Representation."""
         return '"'+repr(self.calcstr)[2:-1].replace("\\'", "'").replace('\\"', '"').replace('"', "\\'")+'"'
+
     def __str__(self):
         """Retrieves The Evaluator String."""
         return self.calcstr
+
     def __iadd__(self, other):
         """Performs Addition."""
         if other != 0 and not isnull(other):
             self.calcstr += self.e.prepare(other, True, False)
         return self
+
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if other != 0 and not isnull(other):
             self.calcstr = self.e.prepare(other, True, False)+self.calcstr
         return self
+
     def __idiv__(self, other):
         """Performs Division."""
         if other != 1 and not isnull(other):
             self.calcstr = self.calcstr[:int(len(self.calcstr)/other)]
         return self
+
     def __imul__(self, other):
         """Performs Multiplication."""
         if isinstance(other, strcalc):
@@ -420,16 +465,19 @@ class strcalc(numobject):
                 else:
                     self.calcstr = self.calcstr*int(other)+self.calcstr[:int(len(self.calcstr)*(other-int(other)))]
         return self
+
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if other != 1 and not isnull(other):
             self *= len(self)**(other-1.0)
         return self
+
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, strcalc):
             other = other.calcstr
         return self.calcstr == other
+
     def __cmp__(self, other):
         """Performs comparison."""
         if ismatrix(other):
@@ -442,12 +490,15 @@ class strcalc(numobject):
             return -1
         else:
             return 1
+
     def __len__(self):
         """Performs len."""
         return len(self.calcstr)
+
     def __contains__(self, other):
         """Performs in."""
         return self.e.prepare(other, True, False) in self.calcstr
+
     def tomatrix(self):
         """Returns A Matrix Of The Characters."""
         out = []
@@ -478,9 +529,11 @@ class usefunc(funcfloat):
             self.extras = dict(extras)
         self.func = func
         self.e = e
+
     def copy(self):
         """Copies The Function."""
         return usefunc(self.func, self.e, self.funcstr, self.variables, self.extras, self.overflow)
+
     def call(self, params):
         """Calls The Function."""
         params = varproc(params)
@@ -508,9 +561,11 @@ class unifunc(funcfloat):
         self.store = []
         self.precall = precall
         self.e = e
+
     def copy(self):
         """Copies The Universalizer Function."""
         return unifunc(self.precall, self.e, self.funcstr)
+
     def call(self, args):
         """Performs A Universalized Function Call."""
         args = varproc(args)
@@ -540,9 +595,11 @@ class makefunc(funcfloat):
             self.funcstr = self.autoarg
         self.func = func
         self.e = e
+
     def copy(self):
         """Copies The Evaluator Function."""
         return makefunc(self.func, self.e, self.funcstr)
+
     def call(variables):
         """Calls The Evaluator Function."""
         variables = varproc(variables)
@@ -560,6 +617,7 @@ class makefunc(funcfloat):
 
 class derivbase(object):
     """Holds Methods Used In Derivative Functions."""
+
     def calc(self, x=None):
         """Calculates The Derivative Function."""
         items = dict(self.personals)
@@ -573,6 +631,7 @@ class derivbase(object):
             out = self.e.calc(self.funcstr)
             self.e.setvars(oldvars)
             return out
+
     def call(self, variables):
         """Calls The Derivative Function."""
         variables = varproc(variables)
@@ -586,6 +645,7 @@ class derivbase(object):
 
 class integbase(derivbase):
     """Holdes Methods Used In Integral Functions."""
+
     def call(self, variables):
         """Calls The Integral Function."""
         if variables == None:
@@ -615,6 +675,7 @@ class derivfunc(derivbase, strfunc):
             self.personals = dict(personals)
         self.overflow = True
         self.e = e
+
     def copy(self):
         """Returns A Copy Of The Derivative Function."""
         return derivfunc(self.funcstr, self.n, self.accuracy, self.scaledown, self.e, self.variables[0], self.personals, self.name)
@@ -636,6 +697,7 @@ class integfunc(integbase, strfunc):
             self.personals = dict(personals)
         self.overflow = True
         self.e = e
+
     def copy(self):
         """Returns A Copy Of The Integral Function."""
         return integfunc(self.funcstr, self.accuracy, self.e, self.variables[0], self.personals, self.name)
@@ -653,9 +715,11 @@ class derivfuncfloat(derivbase, funcfloat):
             self.funcstr = self.autoarg
         self.func = func
         self.e = e
+
     def copy(self):
         """Returns A Copy Of The Derivative Float Function."""
         return integfunc(self.func, self.n, self.accuracy, self.scaledown, self.e, self.funcstr)
+
     def calc(self, x=None):
         """Calculates The Derivative Function."""
         if x == None:
@@ -674,6 +738,7 @@ class integfuncfloat(integbase, funcfloat):
             self.funcstr = self.autoarg
         self.func = func
         self.e = e
+
     def copy(self):
         """Returns A Copy Of The Integral Function."""
         return integfuncfloat(self.func, self.accuracy, self.e, self.funcstr)
@@ -688,22 +753,24 @@ class classcalc(cotobject):
         self.e = e
         if variables != None:
             self.add(variables)
+
     def copy(self):
         """Copies The Dictionary."""
         return classcalc(self.e, self.variables)
+
     def process(self, command):
         """Processes A Command And Puts The Result In The Variables."""
-        oldvars = self.e.variables.copy()
         returned = self.e.processor.returned
-        self.e.setvars(self.variables)
+        oldclass = self.e.processor.useclass
+        self.e.processor.useclass = self
+
+        oldvars = self.e.setvars(self.variables)
         self.e.processor.process(str(command))
+        self.e.setvars(oldvars)
+
+        self.e.processor.useclass = oldclass
         self.e.processor.returned = returned
-        for k in self.e.variables:
-            if self.e.isreserved(k):
-                oldvars[k] = self.e.variables[k]
-            elif not k in oldvars or not self.e.variables[k] is oldvars[k]:
-                self.store(k, self.e.variables[k], True)
-        self.e.variables = oldvars
+
     def calc(self, inputstring):
         """Calculates A String In The Environment Of The Dictionary."""
         oldvars = self.e.setvars(self.variables)
@@ -711,12 +778,15 @@ class classcalc(cotobject):
         out = self.e.calc(inputstring)
         self.e.setvars(oldvars)
         return out
+
     def __len__(self):
         """Finds The Number Of Variables."""
         return len(self.variables)
+
     def items(self):
         """Returns The Variables."""
         return self.variables.items()
+
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = self.e.prepare(key, False, False)
@@ -724,6 +794,7 @@ class classcalc(cotobject):
             self.variables[delspace(test)] = value
         else:
             raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
+
     def tryget(self, key):
         """Attempts To Get An Item."""
         try:
@@ -731,12 +802,14 @@ class classcalc(cotobject):
         except ExecutionError:
             out = None
         return out
+
     def getitem(self, test):
         """Retrieves An Item At The Base Level."""
         if istext(self.variables[test]):
             return self.calc(self.variables[test])
         else:
             return self.variables[test]
+
     def retrieve(self, key):
         """Retrieves An Item."""
         test = self.e.prepare(key, False, False)
@@ -747,14 +820,17 @@ class classcalc(cotobject):
                 raise ExecutionError("ClassError", "Could not find "+test+" in "+self.e.prepare(self, False, True, True))
         else:
             raise ExecutionError("ClassError", "Invalid class key of "+test)
+
     def call(self, variables):
         """Calculates An Item."""
         variables = varproc(variables)
         return self.toinstance().init(variables)
+
     def __delitem__(self, key):
         """Wraps remove."""
         self.remove(key)
         return self
+
     def remove(self, key):
         """Removes An Item."""
         test = self.e.prepare(key, False, False)
@@ -762,6 +838,7 @@ class classcalc(cotobject):
             del self.variables[test]
         else:
             raise ExecutionError("ClassError", "Could not remove "+test+" from "+self.e.prepare(self, False, True, True))
+
     def extend(self, other):
         """Extends The Dictionary."""
         if isinstance(other, (dict, classcalc)):
@@ -771,19 +848,23 @@ class classcalc(cotobject):
             return self
         else:
             raise ExecutionError("ClassError", "Could not extend class with "+repr(other))
+
     def add(self, other):
         """Adds Variables."""
         for k,v in other.items():
             self.store(k, v, True)
+
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, classcalc):
             return self.variables == other.variables
         else:
             return False
+
     def __imul__(self, other):
         """Performs Multiplication In-Place."""
         self.extend(other)
+
     def toinstance(self):
         """Creates An Instance Of The Class."""
         return instancecalc(self.e, self.variables)
@@ -798,15 +879,19 @@ class instancecalc(classcalc):
         else:
             self.parent = parent
         self.variables = variables.copy()
+
     def copy(self):
         """Copies The Instance."""
         return instancecalc(self.e, self.variables, self.parent)
+
     def getparent(self):
         """Reconstructs The Parent Class."""
         return classcalc(self.e, self.parent)
+
     def toclass(self):
         """Converts To A Normal Class."""
         return classcalc(self.e, self.variables)
+
     def isfrom(self, parent):
         """Determines Whether The Instance Is From The Parent."""
         if isinstance(parent, classcalc):
@@ -815,11 +900,13 @@ class instancecalc(classcalc):
             return self.parent == parent
         else:
             return False
+
     def domethod(self, func, variables=[]):
         """Calls A Method Function."""
         if not islist(variables):
             variables = [variables]
         return getcall(func)([self]+variables)
+
     def retrieve(self, key):
         """Retrieves An Item."""
         test = self.e.prepare(key, False, False)
@@ -838,6 +925,7 @@ class instancecalc(classcalc):
             return out
         else:
             raise ExecutionError("ClassError", "Invalid class key of "+test)
+
     def init(self, params):
         """Initializes The Instance."""
         if "__init__" in self.variables:
@@ -850,12 +938,14 @@ class instancecalc(classcalc):
             if isinstance(value, instancecalc):
                 return value
             else:
-                raise ExecutionError("ClassError", "The class's __init__ method returned the non-class object "+self.e.prepare(value, False, True))
+                raise ExecutionError("ClassError", "The class's __init__ method returned the non-class object "+self.e.prepare(value, False, True, True))
         else:
             return self
+
     def isfunc(self):
         """Determines Whether The Class Is A Function."""
         return bool(self.tryget("__call__"))
+
     def call(self, variables):
         """Calls The Function."""
         func = self.tryget("__call__")
@@ -863,9 +953,11 @@ class instancecalc(classcalc):
             raise ExecutionError("ClassError", "The class being called has no __call__ method")
         else:
             return self.domethod(func, variables)
+
     def ismatrix(self):
         """Determines Whether The Class Can Be A Matrix."""
         return bool(self.tryget("__cont__"))
+
     def getmatrix(self):
         """Converts To Matrix."""
         func = self.tryget("__cont__")
@@ -873,6 +965,7 @@ class instancecalc(classcalc):
             raise ExecutionError("ClassError", "The class being converted to a container has no __cont__ method")
         else:
             return self.domethod(func)
+
     def __iadd__(self, other):
         """Performs Addition."""
         check_add = self.tryget("__add__")
@@ -882,6 +975,7 @@ class instancecalc(classcalc):
         if check_sub:
             return self.domethod(check_sub, -other)
         raise ExecutionError("ClassError", "Insufficient methods defined for addition")
+
     def __isub__(self, other):
         """Performs Subtraction."""
         check_sub = self.tryget("__sub__")
@@ -891,6 +985,7 @@ class instancecalc(classcalc):
         if check_add:
             return self.domethod(check_add, -other)
         raise ExecutionError("ClassError", "Insufficient methods defined for subtraction")
+
     def __imul__(self, other):
         """Performs Multiplication."""
         check_mul = self.tryget("__mul__")
@@ -906,6 +1001,7 @@ class instancecalc(classcalc):
             except ExecutionError:
                 pass
         raise ExecutionError("ClassError", "Insufficient methods defined for multiplication")
+
     def __idiv__(self, other):
         """Performs Division."""
         check_div = self.tryget("__div__")
@@ -922,6 +1018,7 @@ class instancecalc(classcalc):
             except ExecutionError:
                 pass
         raise ExecutionError("ClassError", "Insufficient methods defined for multiplication")
+
     def __imod__(self, other):
         """Performs Moduluo."""
         check_mod = self.tryget("__mod__")
@@ -937,6 +1034,7 @@ class instancecalc(classcalc):
             except ExecutionError:
                 raise ExecutionError("ClassError", "Insufficient methods defined for modulo")
         return self
+
     def __ipow__(self, other):
         """Performs Exponentiation."""
         check_pow = self.tryget("__pow__")
@@ -949,12 +1047,14 @@ class instancecalc(classcalc):
             except ExecutionError:
                 pass
         raise ExecutionError("ClassError", "Insufficient methods defined for exponentiation")
+
     def calc(self):
         """Converts To Float."""
         check_num = self.tryget("__num__")
         if check_num:
             return self.domethod(check_num)
         raise ExecutionError("ClassError", "Insufficient methods defined for conversion to number")
+
     def __abs__(self):
         """Performs Absolute Value."""
         check_abs = self.tryget("__abs__")
@@ -964,6 +1064,7 @@ class instancecalc(classcalc):
             return -self
         else:
             return self
+
     def __cmp__(self, other):
         """Performs Comparison."""
         check_cmp = self.tryget("__cmp__")
@@ -975,6 +1076,7 @@ class instancecalc(classcalc):
             return 1
         else:
             return -1
+
     def __eq__(self, other):
         """Performs Equal."""
         if other == None:
@@ -995,6 +1097,7 @@ class instancecalc(classcalc):
                 if check_lt:
                     return not self.domethod(check_gt, other) and not self.domethod(check_lt, other)
             return self.toclass() == other
+
     def __ne__(self, other):
         """Performs Not Equal."""
         if other == None:
@@ -1015,6 +1118,7 @@ class instancecalc(classcalc):
                 if check_lt:
                     return not self.domethod(check_gt, other) and not self.domethod(check_lt, other)
             return self.toclass() != other
+
     def __gt__(self, other):
         """Performs Greater Than."""
         check_gt = self.tryget("__gt__")
@@ -1027,6 +1131,7 @@ class instancecalc(classcalc):
         if check_le:
             return not self.domethod(check_le, other)
         raise ExecutionError("ClassError", "Insufficient methods defined for greater than")
+
     def __lt__(self, other):
         """Performs Less Than."""
         check_lt = self.tryget("__lt__")
@@ -1039,6 +1144,7 @@ class instancecalc(classcalc):
         if check_ge:
             return not self.domethod(check_ge, other)
         raise ExecutionError("ClassError", "Insufficient methods defined for greater than")
+
     def __ge__(self, other):
         """Performs Greater Than Or Equal."""
         check_ge = self.tryget("__ge__")
@@ -1051,6 +1157,7 @@ class instancecalc(classcalc):
         if check_lt:
             return not self.domethod(check_lt, other)
         raise ExecutionError("ClassError", "Insufficient methods defined for greater than")
+
     def __le__(self, other):
         """Performs Less Than Or Equal."""
         check_le = self.tryget("__le__")
@@ -1063,6 +1170,7 @@ class instancecalc(classcalc):
         if check_gt:
             return not self.domethod(check_gt, other)
         raise ExecutionError("ClassError", "Insufficient methods defined for greater than")
+
     def __str__(self):
         """Retrieves A String."""
         check_str = self.tryget("__str__")
@@ -1072,6 +1180,7 @@ class instancecalc(classcalc):
         if check_repr:
             return self.domethod(check_repr, other)
         return self.e.prepare(self.toclass(), True, False)+" ()"
+
     def __repr__(self):
         """Retrieves A Representation."""
         check_repr = self.tryget("__repr__")
@@ -1081,6 +1190,7 @@ class instancecalc(classcalc):
         if check_str:
             return self.domethod(check_str, other)
         return self.e.prepare(self.toclass(), False, True)+" ()"
+
     def __len__(self):
         """Retrieves The Length."""
         check_len = self.tryget("__len__")
@@ -1090,6 +1200,7 @@ class instancecalc(classcalc):
         if check_cont:
             return len(self.domethod(check_cont))
         raise ExecutionError("ClassError", "Insufficient methods defined for length")
+
     def __bool__(self):
         """Converts To A Boolean."""
         check_bool = self.tryget("__bool__")

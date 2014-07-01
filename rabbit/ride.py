@@ -36,12 +36,10 @@ Expressions:
 Console Commands:
     show <expression>
     help [string]
-    errors
     clean
 Control Commands:
     do <command>
     del <variable>
-    get [variable]
 Import Commands:
     <name> = import <file>
     run <file>
@@ -84,8 +82,6 @@ Import Commands:
         self.box.colortag("stringmod", "green")
         self.box.colortag("statement", "magenta")
         self.box.colortag("search", highlight="yellow")
-        self.ans = [matrix(0)]
-        self.returned = 1
         self.populator()
         self.printdebug(": ON")
         if helpstring != None:

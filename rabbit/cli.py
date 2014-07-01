@@ -29,15 +29,12 @@ class commandline(mathbase):
         """Initializes The Command Line Interface."""
         self.on = True
         self.debug = bool(debug)
-        self.messages = []
         if message:
             message = str(message)
             self.messages.append(message)
         self.prompt = str(prompt)
         self.app = terminal(message, color=outcolor)
-        self.ans = [matrix(0)]
         self.commands = []
-        self.returned = 1
         self.top = False
         self.populator()
         self.printdebug(": ON")

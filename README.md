@@ -244,7 +244,6 @@ Strings in rabbit are also not complicated, and are really very similar to strin
 Classes in Rabbit are essentially namespace objects. What that means is that classes are just groups of commands that are fed to them, and then any new definitions put into their own namespace. The basic syntax for classes is:
 ```
 { x = 1 }			# Will create a class whose only variable, x, is set to 1
-						# Note that this will only work if x is not currently set to 1--if it is, Rabbit won't detect any change, and you'll end up with an empty class
 { x = 1 ;; y = 2 }	# Because the interior of a class is just treated as a command, command separators can be used to define multiple items inside of a class
 { f(x) = x }		# That also means that functions can be defined within classes just the same as if they were being defined at the top level
 ```
