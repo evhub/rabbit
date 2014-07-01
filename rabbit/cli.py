@@ -112,7 +112,7 @@ class commandline(mathbase):
 
     def handler(self, original):
         """Handles Raw Input."""
-        self.e.recursion = 0
+        self.reset()
         self.commands.append(original)
         cmd = carefulsplit(original, "#", '"`')[0]
         if delspace(cmd) != "":
@@ -122,10 +122,7 @@ class commandline(mathbase):
     def calc(self, expression):
         """Safely Evaluates An Expression."""
         if self.top:
-            if self.debug:
-                self.e.info = -1
-            else:
-                self.e.info = " <<| Traceback"
+            self.e.info = -1
             self.top = False
         else:
             self.e.info = " <<--"

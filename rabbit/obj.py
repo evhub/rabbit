@@ -26,6 +26,15 @@ try:
 except NameError:
     xrange = range
 
+try:
+    raw_input
+except NameError:
+    old_input = input
+else:
+    old_input = raw_input
+
+raw_input = lambda *args: old_input(*args).decode("UTF")
+
 str = unicode
 
 def typestr(obj):
