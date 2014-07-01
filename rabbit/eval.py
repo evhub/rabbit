@@ -109,6 +109,7 @@ Global Operator Precedence List:
             "str":funcfloat(self.funcs.strcall, self, "str"),
             "repr":funcfloat(self.funcs.reprcall, self, "repr"),
             "calc":funcfloat(self.funcs.docalc, self, "calc"),
+            "proc":funcfloat(self.funcs.cmdcall, self, "proc"),
             "fold":funcfloat(self.funcs.foldcall, self, "fold"),
             "row":funcfloat(self.funcs.brackcall, self, "row"),
             "list":funcfloat(self.funcs.listcall, self, "list"),
@@ -1966,6 +1967,14 @@ class evalfuncs(object):
                 return out[0]
             else:
                 return diagmatrixlist(out)
+
+    def cmdcall(self, variables):
+        """Performs proc."""
+        if variables == None:
+            return matrix(0)
+        else:
+            for item in variables:
+                self.e.processor.process(self.e.prepare(item, False, False))
 
     def foldcall(self, variables, func=None, overflow=True):
         """Folds A Function Over A Matrix."""

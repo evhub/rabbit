@@ -377,6 +377,7 @@ matrix			# Convert to or create matrix
 merge			# Merge containers
 num				# Convert to number
 perm			# Permutations
+proc			# Execute an interpreter command
 prod			# Product of items
 rad				# Radians
 raise			# Raise an error
