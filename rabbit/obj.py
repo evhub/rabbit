@@ -35,6 +35,9 @@ else:
 
 raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode("UTF")
 
+old_repr = repr
+repr = lambda *args, **kwargs: old_repr(*args, **kwargs).decode("UTF")
+
 old_str = str
 str = unicode
 

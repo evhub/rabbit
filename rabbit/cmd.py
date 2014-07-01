@@ -214,7 +214,8 @@ Import Commands:
         original = self.box.output()
         cmd = carefulsplit(original, "#", '"`')[0]
         if delspace(cmd) == "":
-            self.process(self.box.commands[-2])
+            if len(self.box.commands) > 1:
+                self.process(self.box.commands[-2])
         else:
             self.box.add(original)
             self.process(cmd)

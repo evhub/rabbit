@@ -274,9 +274,12 @@ def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf")):
             level -= 1
         elif x == closestr:
             if -(1+level) < maxlevel:
-                directory.pop()
-                feed = directory[len(directory)-1]
-                feed.append("")
+                if len(directory) <= 1:
+                    raise ExecutionError("SyntaxError", "Unmatched close token '"+str(closestr)+"'")
+                else:
+                    directory.pop()
+                    feed = directory[-1]
+                    feed.append("")
             else:
                 feed[len(feed)-1] += closestr
             level += 1

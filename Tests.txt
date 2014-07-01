@@ -40,21 +40,21 @@ assert (1,2,3):0:2 ?= 1,2
 # Variable Setting Tests:
 assert x ?= 1			$ x = 1
 assert x ?= 1			$ x := 1
-assert 2(x) ?= 2			$ x = 1
+assert 2(x) ?= 2		$ x = 1
 assert 2x ?= 2			$ x = 1
 assert x ?= 2			$ def x += 1 $ x = 1
 
 # Function Tests:
-assert t()+1 ?= t:+1 ?= 2					$ t() = 1
-assert f(2,)*3 ?= f:2*3 ?= f(2)*3 ?= 9		$ f(x) = x+1
-assert g(2,3)-5 ?= g:2:3-5 ?= 7					$ g(x,y) = 2*x*y
-assert add(a) ?= 6					$ a = 1,2,3 $ add(x,y,z) = x+y+z
-assert plusone(1,2,3) ?= 2,3,4					$ plusone(l) = l+1
-assert \1 ?= one					$ one() = 1
+assert t()+1 ?= t:+1 ?= 2							$ t() = 1
+assert f(2,)*3 ?= f:2*3 ?= f(2)*3 ?= 9				$ f(x) = x+1
+assert g(2,3)-5 ?= g:2:3-5 ?= 7						$ g(x,y) = 2*x*y
+assert add(a) ?= 6									$ a = 1,2,3 $ add(x,y,z) = x+y+z
+assert plusone(1,2,3) ?= 2,3,4						$ plusone(l) = l+1
+assert \1 ?= one									$ one() = 1
 assert (\x\x+1):5 ?= (\x\(x+1)):5 ?= 6
 assert (\(x,y)\(x+y))(1,2) ?= 3
 assert (\(x,x:1)\x): ?= 1
-assert gen_func:2:5 ?= 1					$ gen_func(n) = \(x,n:n)\(x%n)
+assert gen_func:2:5 ?= 1							$ gen_func(n) = \(x,n:n)\(x%n)
 assert inlist[1,2,3] ?= [1,2,3],					$ inlist(l) = l,
 
 # String Tests:
@@ -63,20 +63,22 @@ assert "Answer: "+1 ?= "Answer: 1"
 assert "hello"*2 ?= "hellohello"
 assert "01234":2 ?= "2"
 assert "01234":1:3 ?= "12"
-assert a"b" ?= "ab"					$ a(x) = "a"+x
+assert a"b" ?= "ab"									$ a(x) = "a"+x
 
 # Class Tests:
 assert { x = 1 } ?= { x = 1 }
 assert { x = 1 } != { x = 2 }
 assert { y = 2 ;; x = 1 }.y ?= 2
-assert a.x ?= 1					$ a = { x = 1 }
-assert a.x ?= 1					$ a := { x = 1 }
-assert a.f(2) ?= a.f:2 ?= 3					$ a = { f(x) = x+1 }
-assert a:"x+1" ?= 2					$ a = { x = 1 }
-assert b ?= { z := 5 }					$ b = a:"z":5 $ a = {}
+assert a.x ?= 1										$ a = { x = 1 }
+assert a.x ?= 1										$ a := { x = 1 }
+assert a.f(2) ?= a.f:2 ?= 3							$ a = { f(x) = x+1 }
+assert a:"x+1" ?= 2									$ a = { x = 1 }
+assert b ?= { z := 5 }								$ b = a:"z":5 $ a = {}
+assert { x = 1 } + { z = 5 } ?= { x = 1 ;; z = 5 }
 
 # Instance Tests:
-nil := {
+nothing := {
+ __type__(self) = "nil"								;;
  __init__(self) = self								;;
  __get__(self, key) = key							;;
  __call__(self, args) = args						;;
@@ -103,7 +105,9 @@ nil := {
  __repr__(self) = `\nil`							;;
  __len__(self) = 0									;;
  __bool__(self) = 0
- } ()
+ }
+nil := nothing()
+assert type(nil) ?= "nil"
 assert nil.thing ?= "thing"
 assert nil(1) ?= 1,
 assert cont(nil) ?= []
@@ -154,10 +158,10 @@ assert 1,2,3,4~~ \(x,y)\(x+y) ?= 3,7
 assert 10,20~ 1,2~ \(x,y)\(x+y) ?= (11,12),(21,22)
 
 # Multi-Set Tests:
-assert a,b ?= 1,2				$ a,b = 1,2
-assert a ?= 1 & b ?= 2				$ a,b = 1,2
+assert a,b ?= 1,2						$ a,b = 1,2
+assert a ?= 1 & b ?= 2					$ a,b = 1,2
 assert a ?= 1 & b ?= 2,3				$ a,b = 1,2,3
-assert a ?= 1 & ! b				$ a,b = 1
+assert a ?= 1 & ! b						$ a,b = 1
 assert smoosh((1,2),(3,4)) ?= 1,2,3,4
  $ smoosh(a) = (
   x .. smoosh(xs) @ xs;
@@ -166,9 +170,9 @@ assert smoosh((1,2),(3,4)) ?= 1,2,3,4
   )
 
 # Miscellaneous Tests:
-assert f.g(2) ?= 9					$ f(x) = x^2 $ g(x) = x+1
-assert var ?= 2					$ var = 2 $ 'var = 1
-assert applyplus(0,-2) ?= 1,-1					$ applyplus(__) = __~\x\(x+1)
+assert f.g(2) ?= 9						$ f(x) = x^2 $ g(x) = x+1
+assert var ?= 2							$ var = 2 $ 'var = 1
+assert applyplus(0,-2) ?= 1,-1			$ applyplus(__) = __~\x\(x+1)
 assert (x $ x = 1) ?= 1
 
 # Complex Tests:
@@ -206,7 +210,7 @@ assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
    ) @ l
 
 # Built-Ins Tests:
-assert a != b				$ def b.x = 2 $ b := copy(a) $ a := { x = 1 }
+assert a != b					$ def b.x = 2 $ b := copy(a) $ a := { x = 1 }
 assert type:(1,2,3) ?= "list"
 assert num"1" ?= 1
 assert (to:"num"):"1" ?= 1
@@ -258,11 +262,11 @@ assert gcd:8:6 ?= 2
 assert lcm:4:6 ?= 12
 assert perm:5:2 ?= 20
 assert comb:4:2 ?= 6
-assert env().a ?= a ?= 2	$ a = 2
+assert env().a ?= a ?= 2		$ a = 2
 assert iserr(:raise())
 assert from(error, :raise())
-assert val:"a" ?= "b"		$ a = b
-assert a ?= 5				$ proc("a = 5")
+assert val:"a" ?= "b"			$ a = b
+assert a ?= 5					$ proc("a = 5")
 
 # New Feature Tests:
 assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1

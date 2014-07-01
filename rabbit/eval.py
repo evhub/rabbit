@@ -222,7 +222,7 @@ Global Operator Precedence List:
                         self.printdebug(": < "+self.prepare(k, False, True, True)+" >")
                 else:
                     self.variables[k] = v
-                    self.printdebug(": "+self.prepare(k, False, True, True)+" = "+self.prepare(v, False, True, True))
+                    self.printdebug(": "+self.prepare(k, False, True, True)+" = "+self.prepare(v, False, True, True, maxrecursion=0))
         return oldvars
 
     def store(self, name, value):
@@ -244,45 +244,56 @@ Global Operator Precedence List:
         else:
             return str(arg)
 
-    def prepare(self, item, top=False, bottom=True, indebug=False):
+    def prepare(self, item, top=False, bottom=True, indebug=False, maxrecursion=20, errorstring="{ <!> }"):
         """Prepares The Output Of An Evaluation."""
         if isinstance(item, instancecalc):
-            if not top and (bottom or indebug):
-                out = repr(item)
+            if maxrecursion <= 0:
+                out = errorstring
+            elif not top and (bottom or indebug):
+                out = item.getrepr(maxrecursion-1)
             else:
                 out = str(item)
         elif isinstance(item, classcalc):
-            out = "{"
-            if top:
-                out += "\n"
-            for k,v in item.variables.items():
-                out += " "+k+" = "
-                if item is v or item == v:
-                    out += "__self__"
-                else:
-                    out += self.prepare(v, False, bottom)
-                out += " ;;"
+            if maxrecursion <= 0:
+                out = errorstring
+            else:
+                out = "{"
                 if top:
                     out += "\n"
-            if len(item.variables) > 0:
-                out = out[:-1*(3+top)]
-                if top:
-                    out += "\n"
-            elif top:
-                out = out[:-1]
-            out += " }"
+                for k,v in item.variables.items():
+                    out += " "+k+" "
+                    if istext(v):
+                        out += "= "+v
+                    else:
+                        out += ":= "
+                        if item is v:
+                            out += "__self__"
+                        elif maxrecursion <= 0 and isinstance(v, classcalc):
+                            out += errorstring
+                        else:
+                            out += self.prepare(v, False, bottom, maxrecursion=maxrecursion-1)
+                    out += " ;;"
+                    if top:
+                        out += "\n"
+                if len(item.variables) > 0:
+                    out = out[:-1*(3+top)]
+                    if top:
+                        out += "\n"
+                elif top:
+                    out = out[:-1]
+                out += " }"
         elif isinstance(item, (data, multidata)):
             if bottom:
-                out = "data:(" + self.prepare(getmatrix(item), False, True) + ")"
+                out = "data:(" + self.prepare(getmatrix(item), False, True, maxrecursion=maxrecursion) + ")"
             else:
-                out = self.prepare(getmatrix(item), top, bottom)
+                out = self.prepare(getmatrix(item), top, bottom, maxrecursion=maxrecursion)
         elif isinstance(item, matrix):
             if item.y == 0:
                 out = "()"
             elif item.onlydiag():
                 out = "("
                 for x in item.getdiag():
-                    out += self.prepare(x, False, bottom)+","
+                    out += self.prepare(x, False, bottom, maxrecursion=maxrecursion)+","
                 if len(item) > 1:
                     out = out[:-1]
                 out += ")"
@@ -295,7 +306,7 @@ Global Operator Precedence List:
                         out += " "
                     out += "["
                     for x in y:
-                        out += self.prepare(x, False, bottom)+","
+                        out += self.prepare(x, False, bottom, maxrecursion=maxrecursion)+","
                     if len(y) > 0:
                         out = out[:-1]
                     out += "]:\n"
@@ -304,32 +315,32 @@ Global Operator Precedence List:
                 out = "matrix:["
                 for y in item.a:
                     for x in y:
-                        out += self.prepare(x, False, bottom)+","
+                        out += self.prepare(x, False, bottom, maxrecursion=maxrecursion)+","
                     out = out[:-1]+"]:["
                 out = out[:-2]
         elif isinstance(item, (fraction, reciprocal)):
             out = ""
-            a = self.prepare(item.n, False, bottom)
+            a = self.prepare(item.n, False, bottom, maxrecursion=maxrecursion)
             if not bottom or madeof(a, string.digits) or not self.isreserved(a):
                 out += a
             else:
                 out += "("+a+")"
             out += "/"
-            b = self.prepare(item.d, False, bottom)
+            b = self.prepare(item.d, False, bottom, maxrecursion=maxrecursion)
             if not bottom or madeof(b, string.digits) or not self.isreserved(b):
                 out += b
             else:
                 out += "("+b+")"
         elif isinstance(item, bool):
-            out = self.prepare(float(item), False, bottom)
+            out = self.prepare(float(item), False, bottom, maxrecursion=maxrecursion)
         elif isinstance(item, complex):
             out = ""
             if item.real != 0:
-                out += self.prepare(item.real, False, bottom)+"+"
+                out += self.prepare(item.real, False, bottom, maxrecursion=maxrecursion)+"+"
             if item.imag == 1:
                 out += "i"
             else:
-                out += self.prepare(item.imag, False, bottom)+"*i"
+                out += self.prepare(item.imag, False, bottom, maxrecursion=maxrecursion)+"*i"
         elif isnum(item):
             out = repr(item)
             if "e" in out:
@@ -341,7 +352,7 @@ Global Operator Precedence List:
             elif out.endswith("L"):
                 out = out[:-1]
         elif bottom and isinstance(item, rollfunc):
-            out = "d:"+self.prepare(item.stop, False, bottom)
+            out = "d:"+self.prepare(item.stop, False, bottom, maxrecursion=maxrecursion)
         elif bottom and isinstance(item, strfunc):
             out = ""
             if isinstance(item, integbase):
@@ -351,13 +362,18 @@ Global Operator Precedence List:
             variables = item.getvars()
             personals = item.getpers()
             out += "\\("+strlist(variables,",")
-            if len(variables) > 1:
+            if len(variables) > 0:
                 out += ","
             for x,y in personals.items():
-                out += str(x)+":("+self.prepare(y, False, bottom)+"),"
+                out += str(x)+":("
+                if maxrecurison <= 0 and isinstance(y, classcalc):
+                    out += errorstring
+                else:
+                    out += self.prepare(y, False, bottom, maxrecursion=maxrecursion-1)
+                out += "),"
             out = out[:-1]+")"
             out += "\\"
-            test = self.prepare(item.funcstr, False, bottom)
+            test = self.prepare(item.funcstr, False, bottom, maxrecursion=maxrecursion)
             if madeof(test, string.digits) or not self.isreserved(test):
                 out += test
             else:
@@ -375,7 +391,7 @@ Global Operator Precedence List:
                     out = "S:"
                 else:
                     out = "D:"
-                out += self.prepare(item.func, False, bottom)
+                out += self.prepare(item.func, False, bottom, maxrecursion=maxrecursion)
                 try:
                     item.n
                 except AttributeError:
@@ -393,7 +409,12 @@ Global Operator Precedence List:
             if indebug > 1:
                 out = str(item)
             else:
-                out = repr(item)
+                try:
+                    item.getrepr
+                except AttributeError:
+                    out = repr(item)
+                else:
+                    out = item.getrepr(maxrecursion-1)
         else:
             raise ExecutionError("DisplayError", "Unable to display "+repr(item))
         return str(out)
@@ -1857,7 +1878,7 @@ class evalfuncs(object):
     def typecalc(self, item):
         """Finds A Type."""
         if isinstance(item, instancecalc):
-            return strcalc("instance", self.e)
+            return item.typecalc()
         elif isinstance(item, classcalc):
             return strcalc("class", self.e)
         elif isinstance(item, data):

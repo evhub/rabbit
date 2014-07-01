@@ -311,7 +311,7 @@ def mapto(keylist, termlist):
             extra.append(termlist[x])
     return outdict, extra
 
-def useparams(params, maps):
+def useparams(params, maps, nothing=None):
     """Maps A Set Of Maps To A Set Of Parameters."""
     if isinstance(params, tuple):
         return mapto(maps, list(params))
@@ -320,7 +320,7 @@ def useparams(params, maps):
     else:
         newparams = {}
         for x in maps:
-            newparams[x] = haskey(params, x)
+            newparams[x] = haskey(params, x) or nothing
         return newparams, []
 
 def flip(inputdict):
