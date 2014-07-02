@@ -113,11 +113,42 @@ def thetime():
     """Finds The Current Time."""
     return time.ctime().split(" ")
 
-colors = {"end":"\033[0m", "pink":"\033[95m", "purple":"\033[94m", "green":"\033[92m", "yellow":"\033[93m", "red":"\033[91m"}
+colors = {
+    "end" : "\033[0m",
+    "bold" : "\033[1m",
+    "blink" : "\033[5m",
+    "black" : "\033[30m",
+    "red" : "\033[31m",
+    "green" : "\033[32m",
+    "yellow" : "\033[33m",
+    "blue" : "\033[34m",
+    "magenta" : "\033[35m",
+    "cyan" : "\033[36m",
+    "white" : "\033[37m",
+    "blackhighlight" : "\033[40m",
+    "redhighlight" : "\033[41m",
+    "greenhighlight" : "\033[42m",
+    "yellowhighlight" : "\033[43m",
+    "bluehighlight" : "\033[44m",
+    "magentahighlight" : "\033[45m",
+    "cyanhighlight" : "\033[46m",
+    "whitehighlight" : "\033[47m",
+    "pink" : "\033[95m",
+    "purple" : "\033[94m",
+    "lightgreen" : "\033[92m",
+    "lightyellow" : "\033[93m",
+    "lightred" : "\033[91m"
+    }
 
-def addcolor(inputstring, color):
-    """Adds The Specified Color To The String."""
-    return colors[str(color)]+str(inputstring)+colors["end"]
+def addcolor(inputstring, colors):
+    """Adds The Specified Colors To The String."""
+    if islist(colors):
+        out = ""
+        for color in colors:
+            out += colors[str(color)]
+    else:
+        out = colors[str(color)]
+    return out+str(inputstring)+colors["end"]
 
 def delcolor(inputstring):
     """Removes Recognized Colors From A String."""
