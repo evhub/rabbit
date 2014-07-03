@@ -203,9 +203,10 @@ Global Operator Precedence List:
         message = self.recursion*"  "+str(message)
         if self.color in colors:
             message = addcolor(message, self.color)
-        self.debuglog.append(message)
         if self.debug:
             print(message)
+        else:
+            self.debuglog.append(message)
 
     def makevars(self, variables):
         """Forcibly Stores Variables."""
