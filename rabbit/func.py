@@ -180,22 +180,23 @@ class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
     autoarg = "__auto__"
 
-    def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=funcfloat.allargs):
+    def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None):
         """Creates A Callable String Function."""
         self.funcstr = str(funcstr)
-        self.allargs = str(allargs)
         if name:
             self.name = str(name)
         else:
             self.name = self.autoarg
+        if allargs != None:
+            self.allargs = str(allargs)
         self.variables = variables[:]
-        if self.allargs in self.variables:
-            self.variables.remove(self.allargs)
-            self.overflow = False
-        elif overflow == None:
+        if overflow == None:
             self.overflow = True
         else:
             self.overflow = bool(overflow)
+        if self.overflow and self.allargs in self.variables:
+            self.variables.remove(self.allargs)
+            self.overflow = False
         if personals == None:
             self.personals = {}
         else:
@@ -340,21 +341,22 @@ class strfunc(funcfloat):
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
-    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name=None, overflow=None, allargs=funcfloat.allargs):
+    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name=None, overflow=None, allargs=None):
         """Initializes The String Float."""
         if name:
             self.name = str(name)
         else:
             self.name = self.autoarg
-        self.allargs = str(allargs)
+        if allargs != None:
+            self.allargs = str(allargs)
         self.variables = variables[:]
-        if self.allargs in self.variables:
-            self.variables.remove(self.allargs)
-            overflow = False
-        elif overflow == None:
+        if overflow == None:
             overflow = True
         else:
             overflow = bool(overflow)
+        if overflow and self.allargs in self.variables:
+            self.variables.remove(self.allargs)
+            overflow = False
         if personals == None:
             personals = {}
         else:

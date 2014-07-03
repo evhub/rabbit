@@ -98,6 +98,10 @@ Global Operator Precedence List:
             self.call_normal
             ]
 
+    def new(self):
+        """Makes A New Identically-Configured Evaluator."""
+        return evaluator(None, self.processor, self.color, self.speedy, self.maxrecursion)
+
     def fresh(self):
         """Resets The Variables To Their Defaults."""
         self.variables = {
@@ -126,7 +130,7 @@ Global Operator Precedence List:
             "rev":funcfloat(self.funcs.reversecall, self, "rev"),
             "round":funcfloat(self.funcs.roundcall, self, "round"),
             "num":funcfloat(self.funcs.numcall, self, "num"),
-            "eval":funcfloat(self.funcs.collapsecall, self, "eval"),
+            "eval":funcfloat(self.funcs.evalcall, self, "eval"),
             "find":funcfloat(self.funcs.findcall, self, "find"),
             "split":funcfloat(self.funcs.splitcall, self, "split"),
             "replace":funcfloat(self.funcs.replacecall, self, "replace"),
@@ -382,9 +386,7 @@ Global Operator Precedence List:
                 out += "D:"
             variables = item.getvars()
             personals = item.getpers()
-            out += "\\("+strlist(variables,",")
-            if len(variables) > 0:
-                out += ","
+            out += "\\("+strlist(variables,",")+","
             for x,y in personals.items():
                 out += str(x)+":("
                 if maxrecursion <= 0 and isinstance(y, classcalc):
@@ -392,8 +394,10 @@ Global Operator Precedence List:
                 else:
                     out += self.prepare(y, False, bottom, indebug, maxrecursion-1)
                 out += "),"
-            out = out[:-1]+")"
-            out += "\\"
+            if len(variables) == 0:
+                out = out[:-2]
+            else:
+                out = out[:-1]+")\\"
             test = self.prepare(item.funcstr, False, bottom, indebug, maxrecursion)
             if madeof(test, string.digits) or not self.isreserved(test):
                 out += test
@@ -1884,20 +1888,6 @@ class evalfuncs(object):
                         return 1.0
         return 0.0
 
-    def collapsecall(self, variables):
-        """Collapses Float Strings."""
-        if not variables:
-            return matrix(0)
-        elif len(variables) == 1:
-            while isinstance(variables[0], funcfloat):
-                variables[0] = collapse(variables[0])
-            return variables[0]
-        else:
-            out = []
-            for x in variables:
-                out.append(collapsecall([x]))
-            return diagmatrixlist(out)
-
     def typecall(self, variables):
         """Finds Types."""
         if variables == None:
@@ -2063,6 +2053,20 @@ class evalfuncs(object):
             out = []
             for x in variables:
                 out.append(self.e.calc(self.e.prepare(x, False, False)))
+            if len(out) == 1:
+                return out[0]
+            else:
+                return diagmatrixlist(out)
+
+    def evalcall(self, variables):
+        """Performs eval."""
+        if variables == None:
+            return matrix(0)
+        else:
+            out = []
+            e = self.e.new()
+            for x in variables:
+                out.append(e.calc(self.e.prepare(x, False, False)))
             if len(out) == 1:
                 return out[0]
             else:
