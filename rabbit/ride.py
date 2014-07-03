@@ -139,7 +139,7 @@ Import Commands:
 
     def endline(self):
         """Checks The Last Line."""
-        last = carefulsplit(self.box.output("insert-1l", "insert-1c"), "#", '"`')[0]
+        last = carefulsplit(self.box.output("insert-1l", "insert-1c"), "#", '"`', {"\u201c":"\u201d"})[0]
         space = 0
         start = True
         instring = False
@@ -161,6 +161,8 @@ Import Commands:
                     instring = not instring
             elif x in ['"', "`"]:
                 instring = x
+            elif x == "\u201c":
+                instring = "\u201d"
             elif x in ["(", "[", "{"]:
                 space += 1
             elif x in [")", "]", "}"]:
@@ -179,7 +181,7 @@ Import Commands:
         test = self.box.output(point+"-1c", point)
         if test == "#":
             self.box.placetag("comment", point+"-1c", point)
-        elif test in ['"', "`"]:
+        elif test in ['"', "`", "\u201c", "\u201d"]:
             self.box.placetag("string", point+"-1c", point)
         elif test in string.digits:
             self.box.placetag("digit", point+"-1c", point)
@@ -249,13 +251,17 @@ Import Commands:
                             else:
                                 self.box.placetag("string", point+"-1c", point)
                             strmod = False
-                        elif instring == '"' and test == "\\":
+                        elif instring != "`" and test == "\\":
                             self.box.placetag("stringmod", point+"-1c", point)
                             strmod = True
                         else:
                             self.box.placetag("string", point+"-1c", point)
                 elif test in ['"', "`"]:
                     instring = test
+                    decimal = False
+                    strmod = False
+                elif test == "\u201c":
+                    instring = "\u201d"
                     decimal = False
                     strmod = False
                 elif test == "#":

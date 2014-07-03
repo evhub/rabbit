@@ -210,7 +210,7 @@ Import Commands:
         """Handles A Return Event."""
         self.reset()
         original = self.box.output()
-        cmd = carefulsplit(original, "#", '"`')[0]
+        cmd = carefulsplit(original, "#", '"`', {"\u201c":"\u201d"})[0]
         if delspace(cmd) == "":
             if len(self.box.commands) > 1:
                 self.process(self.box.commands[-2])
@@ -237,9 +237,9 @@ Import Commands:
             self.reset()
             if x == len(cmdlist):
                 break
-            cmdlist[x] = carefulsplit(cmdlist[x], "#", '"`')[0]
+            cmdlist[x] = carefulsplit(cmdlist[x], "#", '"`', {"\u201c":"\u201d"})[0]
             while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or iswhite(cmdlist[x+1][0])):
-                cmdlist[x] += "\n"+carefulsplit(cmdlist.pop(x+1), "#", '"`')[0]
+                cmdlist[x] += "\n"+carefulsplit(cmdlist.pop(x+1), "#", '"`', {"\u201c":"\u201d"})[0]
             self.process(cmdlist[x])
             x += 1
 
@@ -269,7 +269,7 @@ Import Commands:
 
     def pre_cmd(self, inputstring):
         """Evaluates Commands."""
-        for original in carefulsplit(inputstring, ";;", '"`', "{", "}"):
+        for original in carefulsplit(inputstring, ";;", '"`', {"{":"}", "\u201c":"\u201d"}):
             if delspace(original) != "":
                 original = basicformat(original)
                 for func in self.cmds:
@@ -382,7 +382,7 @@ Import Commands:
             if sides[0].endswith(":"):
                 sides[0] = sides[0][:-1]
                 docalc = True
-            sides[0] = carefulsplit(sides[0], ",", '"`', openstr="(", closestr=")")
+            sides[0] = carefulsplit(sides[0], ",", '"`', {"(":")", "[":"]", "{":"}", "\u201c":"\u201d"})
             if len(sides[0]) > 1:
                 test = True
                 for x in sides[0]:

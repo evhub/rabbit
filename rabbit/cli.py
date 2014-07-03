@@ -106,7 +106,7 @@ class commandline(mathbase):
         """Handles Raw Input."""
         self.reset()
         self.commands.append(original)
-        cmd = carefulsplit(original, "#", '"`')[0]
+        cmd = carefulsplit(original, "#", '"`', {"\u201c":"\u201d"})[0]
         if delspace(cmd) != "":
             self.top = True
             self.process(cmd)

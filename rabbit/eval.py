@@ -62,7 +62,7 @@ Global Operator Precedence List:
     normal  Evaluates numbers."""
     varname = "x"
     parenchar = "\xa7"
-    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`\u2260\u2264\u2265'+parenchar
+    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`\u2260\u2264\u2265\u201c\u201d'+parenchar
     debuglog = []
     info = ""
     recursion = 0
@@ -478,12 +478,12 @@ Global Operator Precedence List:
 
     def calc_string(self, expression):
         """Evaluates The String Part Of An Expression."""
-        strlist = eithersplit(expression, '"`')
+        strlist = eithersplit(expression, '"`', {"\u201c":"\u201d"})
         command = ""
         for item in strlist:
             if istext(item):
                 command += item
-            elif item[0] == '"':
+            elif item[0] in ['"', "\u201c", "\u201d"]:
                 command += self.wrap(strcalc(item[1], self))
             elif item[0] == "`":
                 command += self.wrap(rawstrcalc(item[1], self))

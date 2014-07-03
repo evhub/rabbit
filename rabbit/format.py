@@ -323,14 +323,13 @@ def splitinplace(inputlist, findstr, reserved="", domod=None):
                 outlist.append(findstr+test[i])
     return outlist
 
-def carefulsplit(inputstring, splitstring, holdstrings='"', openstr="", closestr=""):
+def carefulsplit(inputstring, splitstring, holdstrings='"', closers={}):
     """Splits A String By Something Not Inside Something Else."""
     out = [""]
     hold = False
-    level = 0
     check = 0
     for x in inputstring:
-        if not hold and level >= 0 and x == splitstring[check]:
+        if not hold and x == splitstring[check]:
             check += 1
             if check == len(splitstring):
                 out.append("")
@@ -343,10 +342,10 @@ def carefulsplit(inputstring, splitstring, holdstrings='"', openstr="", closestr
                 if x == hold:
                     hold = not hold
             else:
+                if x in closers:
+                    hold = closers[x]
                 if x in holdstrings:
                     hold = x
-            level -= x == openstr
-            level += x == closestr
             out[-1] += x
     return out
 
@@ -367,7 +366,7 @@ def switchsplit(inputstring, splitstring, otherstring=None):
         old = new
     return out
 
-def eithersplit(inputstring, holdstrings):
+def eithersplit(inputstring, holdstrings, closers={}):
     """Splists A String By Any Of The Hold Strings."""
     out = [""]
     inside = False
@@ -379,7 +378,10 @@ def eithersplit(inputstring, holdstrings):
             else:
                 out[-1][1] += x
         else:
-            if x in holdstrings:
+            if x in closers:
+                out.append([closers[x], ""])
+                inside = True
+            elif x in holdstrings:
                 out.append([x, ""])
                 inside = True
             else:
