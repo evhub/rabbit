@@ -17,7 +17,7 @@
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 from __future__ import absolute_import, print_function, unicode_literals
-from .obj import *
+from .list import *
 import os
 import subprocess
 import imp
@@ -140,12 +140,12 @@ colors = {
     "lightred" : "\033[91m"
     }
 
-def addcolor(inputstring, colors):
+def addcolor(inputstring, color):
     """Adds The Specified Colors To The String."""
-    if islist(colors):
+    if islist(color):
         out = ""
-        for color in colors:
-            out += colors[str(color)]
+        for item in color:
+            out += colors[str(item)]
     else:
         out = colors[str(color)]
     return out+str(inputstring)+colors["end"]

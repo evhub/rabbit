@@ -35,7 +35,6 @@ File List:
     obj () : Functions for managing objects at a base level.
 
     base (obj) : Base classes for custom objects.
-    sys (obj) : Functions for interfacing with the operating system.
     math (obj) : Advanced mathematical functions.
     web (obj) : Utilities for interfacing with the web.
     proc (obj) : Utilities for managing multiple processes.
@@ -43,19 +42,20 @@ File List:
     check (base) : Functions for analyzing objects for basic properties.
     path (sys) : Utilities for implementing pathfinding.
     stats (math) : Advanced statistical functions.
-    rand (math, sys) : Random number generation utilities.
 
     list (check) : Utilities for managing lists and other containers.
 
+    sys (list) : Functions for interfacing with the operating system.
     format (list) : Utilities for managing and formatting strings.
 
-    file (format, sys) : Utilities for managing different types of files.
+    rand (sys, math) : Random number generation utilities.
     fraction (format, math) : Utilities for managing fraction objects.
-    matrix (format, rand) : Utilities for using mathematical matrices.
-    crypto (format, rand) : Cryptographic utilities.
+    file (format, sys) : Utilities for managing different types of files.
 
     gui (file) : Utilities for creating and managing basic windows.
     func (matrix) : Utilities for managing functions as mathematical objects.
+    matrix (format, rand) : Utilities for using mathematical matrices.
+    crypto (format, rand) : Cryptographic utilities.
 
     app (gui, web) : Utilities for creating graphical applications.
     data (func, stats) : Utilities for managing statistical data.

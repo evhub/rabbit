@@ -391,11 +391,6 @@ Import Commands:
             if sides[0].endswith(":"):
                 sides[0] = sides[0][:-1]
                 docalc = True
-            test = endswithany(sides[0], ["+", "**", "*", "^", "%", "-", "/", ":", "&", "|", "@", "..", ";", ",", "(", ".", "$"])
-            if test:
-                sides[0] = sides[0][:-1*len(test)]
-                sides[1] = "("+sides[0]+")"+test+"("+sides[1]+")"
-                docalc = True
             sides[0] = carefulsplit(sides[0], ",", '"`', openstr="(", closestr=")")
             if len(sides[0]) > 1:
                 test = True

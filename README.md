@@ -84,15 +84,6 @@ It is, however, possible to circumvent lazy evaluation and force Rabbit to figur
 a := x+1	# The colon tells the interpreter not to do lazy evaluation
 ```
 
-Because one of the most common reasons to circumvent lazy evaluation is to increment or decrement a variable, or otherwise use the variable itself in giving it a new value, special syntax was added to do so:
-```
-# The new syntax:
-a += x		# While addition is used here, most other mathematical operators will also work
-
-# The same thing in the old syntax:
-a := a+x
-```
-
 #### Rabbits Have Bools
 
 In addition to basic mathematical operators, Rabbit also features basic boolean operators, used most commonly in conditionals. Rabbit's conditionals use two symbols each with their own, well-defined, independent function, that when put together, allow the formation of conditions. Within them, logical, inequality, and equality operators can all be used. All of these symbols have higher precedence than mathematical operators, as well as themselves having a precedence of their own.
