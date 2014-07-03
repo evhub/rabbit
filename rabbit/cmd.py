@@ -75,17 +75,18 @@ Import Commands:
 
     def setdebug(self, state):
         """Sets The Debugging State."""
+        state = bool(state)
         self.e.debug = True
-        if self.debug:
-            self.e.printdebug(": OFF")
+        if state:
+            self.printdebug(": ON")
         else:
-            self.e.printdebug(": ON")
-        self.debug = bool(state)
+            self.printdebug(": OFF")
+        self.debug = state
         self.e.debug = self.debug
 
     def printdebug(self, message):
         """Prints Debug Output."""
-        self.e.printdebug(str(message))
+        self.e.printdebug(message)
 
     def adderror(self, error, detail):
         """Adds An Error To The Log."""
@@ -279,9 +280,14 @@ Import Commands:
 
     def cmd_debug(self, original):
         """Controls Debugging."""
-        if superformat(original) == "debug":
-            self.setdebug(not self.debug)
-            return True
+        if superformat(original).startswith("debug"):
+            original = delspace(original[5:])
+            if original == "":
+                self.setdebug(not self.debug)
+                return True
+            else:
+                self.setdebug(formatisyes(original))
+                return True
 
     def cmd_clear(self, original):
         """Performs clear."""

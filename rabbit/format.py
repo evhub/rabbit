@@ -25,10 +25,23 @@ import re
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+def basicformat(inputstring, leading=True, tailing=True):
+    """Performs Basic Formatting On A String."""
+    out = str(inputstring)
+    if leading:
+        out = out.lstrip()
+    if tailing:
+        out = out.rstrip()
+    return out
+
+def superformat(inputstring):
+    """Performs Advanced Formatting On A String."""
+    return basicformat(inputstring).lower()
+
 class lists(object):
     """A Container Class Used For Globals."""
-    yes = ["yes", "yes.", "y", "1", "1.0", "true", "t", "true.", "y.", "t."]
-    no = ["no", "no.", "n", "0", "0.0", "false", "f", "false.", "n.", "f."]
+    yes = ["yes", "y", "1", "1.0", "true", "t", "on"]
+    no = ["no", "n", "0", "0.0", "false", "f", "off"]
     def __init__(self):
         """Initializes The Containers."""
         self.default()
@@ -55,6 +68,9 @@ class lists(object):
 
 def isyes(inputstring, info=lists):
     """Determines If A String Is Affirming."""
+    inputstring = basicformat(inputstring)
+    if inputstring.endswith("."):
+        inputstring = inputstring[:-1]
     if inputstring in info.yes:
         return True
     else:
@@ -62,10 +78,27 @@ def isyes(inputstring, info=lists):
 
 def isno(inputstring, info=lists):
     """Determines If A String Is Negating."""
+    inputstring = basicformat(inputstring)
+    if inputstring.endswith("."):
+        inputstring = inputstring[:-1]
     if inputstring in info.no:
         return True
     else:
         return False
+
+def formatisyes(inputstring, info=None):
+    """Determines If A String, When Formatted, Is Affirming."""
+    if info == None:
+        return isyes(superformat(inputstring))
+    else:
+        return isyes(superformat(inputstring), info)
+
+def formatisno(inputstring, info=None):
+    """Determines If A String, When Formatted, Is Negating."""
+    if info == None:
+        return isno(superformat(inputstring))
+    else:
+        return isno(superformat(inputstring), info)
 
 def startswithany(inputstring, inputlist):
     """Determines If A String Starts With Any Of A Set Of Items."""
@@ -103,33 +136,6 @@ def table(freqs, delimiter=",", seperator=" | "):
             out += str(freqs[x])
         out += "\n"
     return out[:-1]
-
-def basicformat(inputstring, leading=True, tailing=True):
-    """Performs Basic Formatting On A String."""
-    out = str(inputstring)
-    if leading:
-        out = out.lstrip()
-    if tailing:
-        out = out.rstrip()
-    return out
-
-def superformat(inputstring):
-    """Performs Advanced Formatting On A String."""
-    return basicformat(inputstring).lower()
-
-def formatisyes(inputstring, info=None):
-    """Determines If A String, When Formatted, Is Affirming."""
-    if info == None:
-        return isyes(superformat(inputstring))
-    else:
-        return isyes(superformat(inputstring), info)
-
-def formatisno(inputstring, info=None):
-    """Determines If A String, When Formatted, Is Negating."""
-    if info == None:
-        return isno(superformat(inputstring))
-    else:
-        return isno(superformat(inputstring), info)
 
 def sanitize(inputstring):
     """Insures A String Is Printable."""
