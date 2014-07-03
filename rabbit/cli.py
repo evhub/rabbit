@@ -50,12 +50,10 @@ class commandline(mathbase):
     def populator(self):
         """Creates An Evaluator And Lists Of Commands."""
         self.pre_cmds = [
-            self.do_find,
             self.pre_help,
             self.pre_cmd
             ]
         self.cmds = [
-            self.do_find,
             self.cmd_debug,
             self.cmd_exit,
             self.cmd_clean,

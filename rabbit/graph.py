@@ -308,12 +308,10 @@ Import Commands:
     def populator(self):
         """Populates The Grapher."""
         self.pre_cmds = [
-            self.do_find,
             self.pre_help,
             self.pre_cmd
             ]
         self.cmds = [
-            self.do_find,
             self.cmd_debug,
             self.cmd_clear,
             self.cmd_clean,
@@ -338,8 +336,8 @@ Import Commands:
         self.e = evaluator(processor=self)
         self.e.makevars({
             "print":funcfloat(self.printcall, self.e, "print"),
-            "render":"cleargrid;;axis;;ticks",
-            "display":"center;;render",
+            "render":'proc("cleargrid;;axis;;ticks")',
+            "display":'proc("center;;render")',
             "stretch":1.0,
             "xstretch":"stretch",
             "ystretch":"stretch",

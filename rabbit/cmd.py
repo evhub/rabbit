@@ -164,12 +164,10 @@ Import Commands:
     def populator(self):
         """Creates An Evaluator And Lists Of Commands."""
         self.pre_cmds = [
-            self.do_find,
             self.pre_help,
             self.pre_cmd
             ]
         self.cmds = [
-            self.do_find,
             self.cmd_debug,
             self.cmd_clear,
             self.cmd_clean,
@@ -257,13 +255,6 @@ Import Commands:
         inputstring = str(inputstring)
         for func in self.pre_cmds:
             if func(inputstring) != None:
-                return True
-
-    def do_find(self, item):
-        """Unpacks A Variable."""
-        if item in self.e.variables:
-            if istext(self.e.variables[item]):
-                self.process(self.e.find(item, False, False))
                 return True
 
     def pre_help(self, inputstring):
