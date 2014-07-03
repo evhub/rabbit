@@ -142,7 +142,8 @@ Global Operator Precedence List:
             "simp":funcfloat(self.funcs.simpcall, self, "simp"),
             "from":funcfloat(self.funcs.instanceofcall, self, "from"),
             "iserr":funcfloat(self.funcs.iserrcall, self, "iserr"),
-            "val":funcfloat(self.funcs.getvarcall, self, "val"),
+            "var":funcfloat(self.funcs.getvarcall, self, "var"),
+            "val":funcfloat(self.funcs.getvalcall, self, "val"),
             "raise":funcfloat(self.funcs.raisecall, self, "raise"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "floor":usefunc(math.floor, self, "floor", ["x"]),
@@ -1034,7 +1035,7 @@ Global Operator Precedence List:
     def call_var(self, inputstring):
         """Checks If Variable."""
         if inputstring in self.variables:
-            item = self.find(inputstring, True, False)
+            item, key = self.getfind(inputstring, True, False)
             if istext(item):
                 self.info = " | var"
                 value = self.calc(str(item))
@@ -1042,6 +1043,7 @@ Global Operator Precedence List:
                 value = item
             else:
                 value = getcall(item)(None)
+            self.variables[key] = value
             return value
 
     def call_none(self, inputstring):
@@ -1310,7 +1312,12 @@ Global Operator Precedence List:
             self.recursion -= 1
         return item
 
-    def find(self, key, follow=False, destroy=False):
+    def find(self, *args, **kwargs):
+        """Wraps getfind."""
+        out, trash = self.getfind(*args, **kwargs)
+        return out
+
+    def getfind(self, key, follow=False, destroy=False):
         """Finds A String."""
         old = ""
         if istext(key):
@@ -1318,9 +1325,10 @@ Global Operator Precedence List:
         else:
             new = key
         while old != new:
+            key = old
             old = new
             new = self.finding(old, follow, destroy)
-        return new
+        return new, key
 
     def finding(self, key, follow=False, destroy=False):
         """Performs String Finding."""
@@ -1466,6 +1474,22 @@ class evalfuncs(object):
                 return 1.0
             else:
                 raise ExecutionError("VariableError", "Master error is not a class")
+
+    def getvalcall(self, variables):
+        """Calculates A Variable Without Changing It."""
+        if not variables:
+            return matrix(0)
+        elif len(variables) == 1:
+            original = self.e.prepare(variables[0], False, False)
+            if original in self.e.variables:
+                return self.e.funcfind(original)
+            else:
+                return matrix(0)
+        else:
+            out = []
+            for x in variables:
+                out.append(self.getvarcall([x]))
+            return diagmatrixlist(out)
 
     def getvarcall(self, variables):
         """Gets The Value Of A Variable."""
