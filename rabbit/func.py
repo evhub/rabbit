@@ -855,8 +855,7 @@ class classcalc(cotobject):
     def getvars(self):
         """Gets Original Variables."""
         out = self.variables.copy()
-        if "__self__" in out:
-            del out["__self__"]
+        del out["__self__"]
         return out
 
     def __eq__(self, other):
@@ -907,11 +906,16 @@ class instancecalc(numobject, classcalc):
     def isfrom(self, parent):
         """Determines Whether The Instance Is From The Parent."""
         if isinstance(parent, classcalc):
-            return self.parent == parent.variables
-        elif isinstance(parent, dict):
-            return self.parent == parent
-        else:
+            parent = parent.variables
+        elif not isinstance(parent, dict):
             return False
+        if parent["__self__"] is self.variables["__self__"]:
+            return True
+        parent = parent.copy()
+        del parent["__self__"]
+        variables = self.variables.copy()
+        del variables["__self__"]
+        return variables == parent
 
     def domethod(self, item, args=[]):
         """Calls A Method Function."""

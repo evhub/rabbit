@@ -34,6 +34,7 @@ RabbitLang, or more commonly just Rabbit, is one of the Rabbit library's core fe
 * Not whitespace sensitive
 * Good for complex math
 * Extendable with Python
+* Full, in-line unicode support
 
 ### Language Basics
 
