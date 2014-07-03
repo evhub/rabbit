@@ -281,7 +281,7 @@ def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf")):
         elif x == closestr:
             if -(1+level) < maxlevel:
                 if len(directory) <= 1:
-                    raise ExecutionError("SyntaxError", "Unmatched close token '"+str(closestr)+"'")
+                    raise ExecutionError("SyntaxError", "Unmatched close token "+str(closestr))
                 else:
                     directory.pop()
                     feed = directory[-1]
@@ -291,6 +291,8 @@ def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf")):
             level += 1
         else:
             feed[len(feed)-1] += x
+    if len(directory) > 1:
+        raise ExecutionError("SyntaxError", "Unmatched open token "+str(openstr))
     return clean(outlist)
 
 def splitinplace(inputlist, findstr, reserved="", domod=None):
@@ -390,6 +392,10 @@ def eithersplit(inputstring, holdstrings, closers={}):
             elif x in holdstrings:
                 out.append([x, ""])
                 inside = True
+            elif x in closers.values():
+                raise ExecutionError("SyntaxError", "Misplaced token "+x)
             else:
                 out[-1] += x
+    if inside:
+        raise ExecutionError("SyntaxError", "Unmatched token "+out[-1][0])
     return out

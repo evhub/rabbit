@@ -380,6 +380,7 @@ atan			# Arc tangent
 calc			# Calculate a string of code
 ceil			# Ceiling function
 comb			# Combinations
+connect			# Connects matrices
 cont			# Convert to container
 contains		# Equivalent to in
 copy			# Make a copy
@@ -398,7 +399,7 @@ from			# Whether instanceof
 gamma			# Gamma function
 gcd				# Greatest common denominator
 iserr			# Whether instanceof error
-join			# Join containers
+join			# Join containers by a delimiter
 lcm				# Least common multiple
 len				# Length
 list			# Convert to or create list

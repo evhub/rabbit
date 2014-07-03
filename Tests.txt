@@ -108,7 +108,7 @@ nothing := {
 nil := nothing()
 assert type(nil) ?= "nil"
 assert nil.thing ?= "thing"
-assert nil(1) ?= 1,
+assert nil(1,2) ?= 1,2
 assert cont(nil) ?= []
 assert nil+1 ?= 1
 assert nil-1 ?= -1
@@ -130,7 +130,7 @@ assert nil <= .5
 assert str(nil) ?= "nil"
 assert repr(nil) ?= `\nil`
 assert len(nil) ?= 0
-assert bool(nil) ?= 0
+assert (?nil) ?= 0
 
 # Multi-Line Tests:
 assert # A mid-line comment
@@ -213,7 +213,7 @@ assert a != b					$ def b.x = 2 $ b := copy(a) $ a := { x = 1 }
 assert type:(1,2,3) ?= "list"
 assert num"1" ?= 1
 assert (to:"num"):"1" ?= 1
-assert str:"a":(1,"b") ?= "a1b"
+assert str:"a" ?= "a"
 assert repr:"a" ?= "\'a\'"
 assert calc:"1" ?= 1
 assert fold:\(x,y)\(x+y):(1,2,3) ?= 6
@@ -226,7 +226,8 @@ assert cont:"abc" ?= "a","b","c"
 assert det:(matrix:[1,2]:[3,4]) ?= -2
 assert sum(2,2,3) ?= 7
 assert prod(2,2,3) ?= 12
-assert join:[1,2]:[3,4] ?= matrix:[1,2]:[3,4]
+assert join:",":[1,2] ?= "1,2"
+assert connect:[1,2]:[3,4] ?= matrix:[1,2]:[3,4]
 assert merge:(1,(2,2)):(3,4) ?= 1,2,2,3,4
 assert sort(1,0,9,5) ?= 0,1,5,9
 assert rev(1,2,3) ?= 3,2,1
@@ -269,10 +270,11 @@ assert a ?= 5					$ proc("a = 5")
 
 # New Feature Tests:
 assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
-assert f() ?= 5, & f(1) ?= 1,					$ f(*l:(5,)) = l
+assert f() ?= 5, & f(1) ?= 1,				$ f(*l:(5,)) = l
 assert a ?= 1 & b ?= [2,3]					$ a,b = [1,2,3]
 assert a ?= "a" & b ?= "bc"					$ a,b = "abc"
 assert "∑" ?= "\u2211"
 assert π ?= pi
 assert "\'\\'\\n#" ?= `"\'\n#`
 assert :(1) ?= 1
+assert {x=1}~\x\x ?= "x",

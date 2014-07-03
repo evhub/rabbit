@@ -300,11 +300,11 @@ def delist(inputlist):
             inputlist = inputlist[0]
     return inputlist
 
-def mapto(keylist, termlist):
+def mapto(keylist, termlist, nothing=None):
     """Maps A List Of Keys To A List of Terms."""
     outdict = {}
     for x in xrange(0, len(keylist)):
-        outdict[keylist[x]] = haskey(termlist, x)
+        outdict[keylist[x]] = haskey(termlist, x) or nothing
     extra = []
     if len(termlist) > len(keylist):
         for x in xrange(len(keylist), len(termlist)):
@@ -314,9 +314,9 @@ def mapto(keylist, termlist):
 def useparams(params, maps, nothing=None):
     """Maps A Set Of Maps To A Set Of Parameters."""
     if isinstance(params, tuple):
-        return mapto(maps, list(params))
+        return mapto(maps, list(params), nothing)
     elif islist(params):
-        return mapto(maps, params)
+        return mapto(maps, params, nothing)
     else:
         newparams = {}
         for x in maps:

@@ -120,6 +120,7 @@ Global Operator Precedence List:
             "sum":funcfloat(self.funcs.sumcall, self, "sum"),
             "prod":funcfloat(self.funcs.prodcall, self, "prod"),
             "join":funcfloat(self.funcs.joincall, self, "join"),
+            "connect":funcfloat(self.funcs.connectcall, self, "connect"),
             "merge":funcfloat(self.funcs.mergecall, self, "merge"),
             "sort":funcfloat(self.funcs.sortcall, self, "sort"),
             "rev":funcfloat(self.funcs.reversecall, self, "rev"),
@@ -219,8 +220,8 @@ Global Operator Precedence List:
         for k in newvars:
             oldvars[k] = haskey(self.variables, k)
         for k,v in newvars.items():
-            if k != v:
-                if v == None:
+            if not k is v:
+                if v is None:
                     if k in self.variables:
                         del self.variables[k]
                         self.printdebug(": < "+self.prepare(k, False, True, True)+" >")
@@ -251,14 +252,14 @@ Global Operator Precedence List:
     def speedyprep(self, item, top=False, bottom=False, indebug=False, maxrecursion=0):
         """Speedily Prepares The Output Of An Evaluation."""
         out = "{"+"\n"*top
-        if maxrecursion < 0 or (not indebug and top != bottom):
+        if not indebug and top != bottom:
             out += 'raise("RuntimeError", "Maximum recursion depth exceeded in object preperation")'
         else:
             out += " __type__ "
             if istext(item):
                 out += ":= "+str(item)
             else:
-                out += "= "+self.prepare(self.typecalc(item), top, bottom, indebug, -1)
+                out += "= `"+self.evaltypestr(item)+"`"
         out += "\n"*top+" }"
         return out
 
@@ -279,7 +280,8 @@ Global Operator Precedence List:
             out = "{"
             if top:
                 out += "\n"
-            for k,v in item.variables.items():
+            variables = item.getvars()
+            for k,v in variables.items():
                 out += " "+k+" "
                 if istext(v):
                     out += "= "+v
@@ -294,7 +296,7 @@ Global Operator Precedence List:
                 out += " ;;"
                 if top:
                     out += "\n"
-            if len(item.variables) > 0:
+            if len(variables) > 0:
                 out = out[:-1*(3+top)]
                 if top:
                     out += "\n"
@@ -1375,37 +1377,44 @@ Global Operator Precedence List:
             self.setvars(oldvars)
         return self.call(out, value, varname)
 
+    def evaltypestr(self, item):
+        """Finds A String For A Type."""
+        if isinstance(item, instancecalc):
+            return "instance"
+        elif isinstance(item, classcalc):
+            return "class"
+        elif isinstance(item, data):
+            return "data"
+        elif isinstance(item, multidata):
+            return "multidata"
+        elif isnull(item):
+            return "none"
+        elif isinstance(item, matrix):
+            if item.onlydiag():
+                return "list"
+            elif item.onlyrow():
+                return "row"
+            else:
+                return "matrix"
+        elif isinstance(item, fraction):
+            return "fraction"
+        elif isinstance(item, strcalc):
+            return "string"
+        elif isinstance(item, funcfloat):
+            return "function"
+        elif isinstance(item, complex):
+            return "complex"
+        elif isnum(item):
+            return "number"
+        else:
+            return namestr(item)
+
     def typecalc(self, item):
         """Finds A Type."""
         if isinstance(item, instancecalc):
             return item.typecalc()
-        elif isinstance(item, classcalc):
-            return strcalc("class", self)
-        elif isinstance(item, data):
-            return strcalc("data", self)
-        elif isinstance(item, multidata):
-            return strcalc("multidata", self)
-        elif isinstance(item, matrix):
-            if len(item) == 0:
-                return strcalc("none", self)
-            elif item.onlydiag():
-                return strcalc("list", self)
-            elif item.onlyrow():
-                return strcalc("row", self)
-            else:
-                return strcalc("matrix", self)
-        elif isinstance(item, fraction):
-            return strcalc("fraction", self)
-        elif isinstance(item, strcalc):
-            return strcalc("string", self)
-        elif isinstance(item, funcfloat):
-            return strcalc("function", self)
-        elif isinstance(item, complex):
-            return strcalc("complex", self)
-        elif isnum(item):
-            return strcalc("number", self)
         else:
-            return rawstrcalc(namestr(item), self)
+            return rawstrcalc(self.evaltypestr(item), self)
 
 class evalfuncs(object):
     """Implements Evaluator Functions."""
@@ -1614,8 +1623,8 @@ class evalfuncs(object):
                     value *= x
             return value
 
-    def joincall(self, variables):
-        """Joins Variables."""
+    def connectcall(self, variables):
+        """Connects Variables."""
         if not variables:
             return matrix(0)
         else:
@@ -1681,10 +1690,13 @@ class evalfuncs(object):
             for x in variables:
                 if isinstance(x, matrix):
                     tot += x.getlen()
-                elif isinstance(x, (strcalc, data, multidata)):
-                    tot += len(x)
                 else:
-                    tot += 1.0
+                    try:
+                        test = len(x)
+                    except:
+                        tot += 1.0
+                    else:
+                        tot += float(test)
             return tot
 
     def rangecall(self, variables):
@@ -1716,11 +1728,13 @@ class evalfuncs(object):
         elif len(variables) == 0:
             return 0.0
         elif len(variables) == 1:
-            if ismatrix(variables[0]):
+            try:
+                variables[0].code
+            except AttributeError:
+                return getnum(variables[0])
+            else:
                 variables[0].code(lambda x: getnum(x))
                 return variables[0]
-            else:
-                return getnum(variables[0])
         else:
             return self.numcall([diagmatrixlist(variables)])
 
@@ -1852,7 +1866,7 @@ class evalfuncs(object):
                 out.reverse()
                 return matrixitems(out, variables[0].y)
         else:
-            return self.reversecall([self.joincall(variables)])
+            return self.reversecall([self.connectcall(variables)])
 
     def containscall(self, variables):
         """Performs contains."""
@@ -1956,12 +1970,7 @@ class evalfuncs(object):
         else:
             out = ""
             for x in variables:
-                if isinstance(x, strcalc):
-                    out += str(x)
-                elif ismatrix(x):
-                    out += self.strcall(getmatrix(x).getitems())
-                else:
-                    out += self.e.prepare(x, True, False)
+                out += self.e.prepare(x, True, False)
             return rawstrcalc(out, self.e)
 
     def reprcall(self, variables):
@@ -1971,11 +1980,26 @@ class evalfuncs(object):
         else:
             out = ""
             for x in variables:
-                if ismatrix(x):
-                    out += self.reprcall(getmatrix(x).getitems())
-                else:
-                    out += self.e.prepare(x, False, True)
+                out += self.e.prepare(x, False, True)
             return rawstrcalc(out, self.e)
+
+    def joincall(self, variables):
+        """Joins Variables By A Delimiter."""
+        if variables == None:
+            return matrix(0)
+        elif len(variables) < 2:
+            return rawstrcalc("", self.e)
+        else:
+            delim = self.e.prepare(variables[0], True, False)
+            out = ""
+            for x in xrange(1, len(variables)):
+                item = variables[x]
+                if ismatrix(item):
+                    out += self.joincall(getmatrix(item).getitems()).calcstr
+                else:
+                    out += self.e.prepare(item, True, False)
+                out += delim
+            return rawstrcalc(out[:-len(delim)], self.e)
 
     def abscall(self, variables):
         """Performs abs."""

@@ -228,7 +228,7 @@ class strfunc(funcfloat):
                 items, trash = useparams(variables, self.variables, matrix(0))
             items[self.allargs] = allvars
             for k in self.personals:
-                if not k in items or isnull(items[k]):
+                if (not k in items) or isnull(items[k]):
                     items[k] = self.personals[k]
             oldvars = self.e.setvars(items)
             self.e.info = " \\>"
@@ -739,18 +739,16 @@ class integfuncfloat(integbase, funcfloat):
         return integfuncfloat(self.func, self.accuracy, self.e, self.funcstr)
 
 class classcalc(cotobject):
-    """Implements An Evaluator Dictionary."""
-    check = 1
-
+    """Implements An Evaluator Class."""
     def __init__(self, e, variables=None):
-        """Initializes The Dictionary."""
+        """Initializes The Class."""
         self.e = e
         self.variables = {"__self__": self}
         if variables != None:
             self.add(variables)
 
     def copy(self):
-        """Copies The Dictionary."""
+        """Copies The Class."""
         return classcalc(self.e, self.variables)
 
     def process(self, command):
@@ -767,7 +765,7 @@ class classcalc(cotobject):
         self.e.processor.returned = returned
 
     def calc(self, inputstring):
-        """Calculates A String In The Environment Of The Dictionary."""
+        """Calculates A String In The Environment Of The Class."""
         oldvars = self.e.setvars(self.variables)
         self.e.info = " | class"
         out = self.e.calc(inputstring)
@@ -838,7 +836,7 @@ class classcalc(cotobject):
             raise ExecutionError("ClassError", "Could not remove "+test+" from "+self.e.prepare(self, False, True, True))
 
     def extend(self, other):
-        """Extends The Dictionary."""
+        """Extends The Class."""
         if isinstance(other, (dict, classcalc)):
             self.add(other.variables)
             return self
@@ -852,10 +850,17 @@ class classcalc(cotobject):
         for k,v in other.items():
             self.store(k, v, True)
 
+    def getvars(self):
+        """Gets Original Variables."""
+        out = self.variables.copy()
+        if "__self__" in out:
+            del out["__self__"]
+        return out
+
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, classcalc):
-            return self.variables == other.variables
+            return self.variables["__self__"] is other.variables["__self__"] or self.getvars() == other.getvars()
         else:
             return False
 
@@ -867,7 +872,14 @@ class classcalc(cotobject):
         """Creates An Instance Of The Class."""
         return instancecalc(self.e, self.variables)
 
-class instancecalc(classcalc):
+    def tomatrix(self):
+        """Returns A Matrix Of The Variables."""
+        out = []
+        for key in self.getvars().keys():
+            out.append(strcalc(key, self.e))
+        return diagmatrixlist(out)
+
+class instancecalc(numobject, classcalc):
     """An Evaluator Class Instance."""
     def __init__(self, e, variables, parent=None):
         """Creates An Instance Of An Evaluator Class."""
@@ -899,16 +911,18 @@ class instancecalc(classcalc):
         else:
             return False
 
-    def domethod(self, func, variables=[]):
+    def domethod(self, item, args=[]):
         """Calls A Method Function."""
-        if isfunc(func):
-            if not islist(variables):
-                variables = [variables]
-            if isinstance(func, strfunc):
-                self.selfcurry(func)
-            return getcall(func)(variables)
+        if isfunc(item):
+            if not islist(args):
+                args = [args]
+            if isinstance(item, strfunc):
+                self.selfcurry(item)
+                if item.overflow and len(args) > len(item.variables):
+                    args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
+            return getcall(item)(args)
         else:
-            return func
+            return item
 
     def selfcurry(self, out):
         """Curries Self Into The Function."""
@@ -984,7 +998,7 @@ class instancecalc(classcalc):
         """Determines Whether The Class Can Be A Matrix."""
         return bool(self.tryget("__cont__"))
 
-    def getmatrix(self):
+    def tomatrix(self):
         """Converts To Matrix."""
         func = self.tryget("__cont__")
         if func == None:
@@ -1095,25 +1109,26 @@ class instancecalc(classcalc):
             return self.domethod(check_rpow, other)
         raise ExecutionError("ClassError", "Insufficient methods defined for reverse exponentiation")
 
-    def calc(self, arg=None):
+    def __float__(self):
+        """Retrieves A Float."""
+        return float(self.tonum())
+
+    def __int__(self):
+        """Retrieves An Integer."""
+        return int(self.tonum())
+
+    def tonum(self):
         """Converts To Float."""
-        if arg == None:
-            check_num = self.tryget("__num__")
-            if check_num:
-                return self.domethod(check_num)
-            raise ExecutionError("ClassError", "Insufficient methods defined for conversion to number")
-        else:
-            oldvars = self.e.setvars(self.variables)
-            self.e.info = " | instance"
-            out = self.e.calc(arg)
-            self.e.setvars(oldvars)
-            return out
+        check_num = self.tryget("__num__")
+        if check_num:
+            return self.domethod(check_num)
+        raise ExecutionError("ClassError", "Insufficient methods defined for conversion to number")
 
     def __abs__(self):
         """Performs Absolute Value."""
         check_abs = self.tryget("__abs__")
         if check_abs:
-            return self.domethod(check_abs, other)
+            return self.domethod(check_abs)
         if self < 0:
             return -self
         else:
@@ -1270,7 +1285,7 @@ class instancecalc(classcalc):
             if check_repr:
                 out = self.domethod(check_repr)
         if out == None:
-            return self.e.prepare(self.toclass(), True, False)+" ()"
+            return self.e.prepare(self.toclass(), True, False)+"( )"
         else:
             return self.e.prepare(out, True, False)
 
@@ -1285,7 +1300,7 @@ class instancecalc(classcalc):
             if check_str:
                 out = self.domethod(check_str)
         if out == None:
-            return self.e.prepare(self.toclass(), False, True, maxrecursion=maxrecursion-1)+" ()"
+            return self.e.prepare(self.toclass(), False, True, maxrecursion=maxrecursion-1)+"( )"
         else:
             return self.e.prepare(out, False, False, maxrecursion=maxrecursion-1)
 
@@ -1325,6 +1340,6 @@ class instancecalc(classcalc):
         """Finds The Type Of The Instance."""
         item = self.tryget("__type__")
         if item:
-            return item
+            return self.domethod(item)
         else:
             return strcalc("instance", self.e)
