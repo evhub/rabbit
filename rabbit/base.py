@@ -300,7 +300,7 @@ class cotobject(evalobject):
         try:
             test = tuple(other.items())
         except AttributeError:
-            test = tuple(other)
+            test = (other,)
         items = tuple(self.items())
         if items == test:
             return 0

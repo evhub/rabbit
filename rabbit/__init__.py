@@ -21,7 +21,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-__all__ = ["proc", "path", "crypto", "cli", "ride", "graph"]
+__all__ = ["proc", "path", "crypto", "ride", "graph", "comp"]
 
 __doc__ = """Overview:
     Rabbit (PythonPlus) is a compilation of functions, classes, and variables that extend basic Python functionality.
@@ -68,5 +68,7 @@ File List:
     cli (cmd) : The Rabbit Command Line Interface.
     ride (cmd) : The Rabbit Integrated Development Environment.
     graph (cmd) : A Graphing Module For Rabbit Functions.
+
+    comp (cli) : The Rabbit Semi-Compiler.
 
     all (graph, ride, crypto, path, proc, web) : All Rabbit functions in one place."""

@@ -52,6 +52,7 @@ Import Commands:
     returned = 1
     useclass = None
     redef = False
+    doshow = True
 
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
@@ -224,7 +225,7 @@ Import Commands:
         try:
             tempfile = openfile(name, "rb")
         except IOError:
-            return None
+            return False
         else:
             self.evaltext(readfile(tempfile))
             tempfile.close()
@@ -611,7 +612,7 @@ Import Commands:
         test = self.calc(original)
         if test != None:
             self.ans.append(test)
-            if self.returned == 0:
+            if self.doshow and self.returned == 0:
                 self.show(self.e.prepare(self.ans[-1], True, True))
             return True
 

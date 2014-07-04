@@ -261,9 +261,9 @@ Global Operator Precedence List:
         else:
             out += " __type__ "
             if istext(item):
-                out += ":= "+str(item)
+                out += "= "+str(item)
             else:
-                out += "= `"+self.evaltypestr(item)+"`"
+                out += ":= `"+self.evaltypestr(item)+"`"
         out += "\n"*top+" }"
         return out
 
@@ -271,7 +271,7 @@ Global Operator Precedence List:
         """Prepares The Output Of An Evaluation."""
         if maxrecursion == None:
             maxrecursion = self.maxrecursion
-        if self.speedy and indebug and maxrecursion >= 0:
+        if self.speedy and indebug:
             out = self.speedyprep(item, top, bottom, True, maxrecursion)
         elif isinstance(item, instancecalc):
             if maxrecursion <= 0:

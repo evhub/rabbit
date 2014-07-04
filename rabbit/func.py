@@ -756,6 +756,8 @@ class classcalc(cotobject):
     def process(self, command):
         """Processes A Command And Puts The Result In The Variables."""
         returned = self.e.processor.returned
+        oldshow = self.e.processor.doshow
+        self.e.processor.doshow = False
         oldclass = self.e.processor.useclass
         self.e.processor.useclass = "__self__"
 
@@ -764,6 +766,7 @@ class classcalc(cotobject):
         self.e.setvars(oldvars)
 
         self.e.processor.useclass = oldclass
+        self.e.processor.doshow = oldshow
         self.e.processor.returned = returned
 
     def calc(self, inputstring):
@@ -1291,7 +1294,7 @@ class instancecalc(numobject, classcalc):
             if check_repr:
                 out = self.domethod(check_repr)
         if out == None:
-            return self.e.prepare(self.toclass(), True, False)+"( )"
+            return self.e.prepare(self.toclass(), True, False)+" ( )"
         else:
             return self.e.prepare(out, True, False)
 

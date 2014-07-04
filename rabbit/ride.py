@@ -48,7 +48,6 @@ Import Commands:
 
     def __init__(self, name="RIDE", width=100, height=40, helpstring=None, refresh=600, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
-        self.doshow = True
         self.debug = bool(debug)
         self.debug_old = self.debug
         self.root = Tkinter.Tk()

@@ -25,21 +25,22 @@ from .cmd import *
 
 class commandline(mathbase):
     """The Rabbit Command Line Interface."""
+    on = True
+    top = False
+    commands = []
+    
     def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", helpstring=None, debug=False, outcolor="cyan", debugcolor="lightred", *initializers):
         """Initializes The Command Line Interface."""
-        self.on = True
         self.debug = bool(debug)
         if message:
             message = str(message)
             self.messages.append(message)
         self.prompt = str(prompt)
         self.app = terminal(message, color=outcolor)
-        self.commands = []
         self.show = self.appshow
-        self.top = False
         self.populator()
-        self.printdebug(": ON")
         self.e.color = debugcolor
+        self.printdebug(": ON")
         if helpstring != None:
             self.helpstring = str(helpstring)
         if initializers == ():

@@ -263,14 +263,14 @@ class fakelist(cotobject):
         """Returns A Representation."""
         return str((self.default, self.a, len(self)))
 
-def haskey(inputlist, key):
+def haskey(inputlist, key, nothing=None):
     """Checks To See If A Key Exists In A List."""
     try:
         temp = inputlist[key]
     except KeyError:
-        return None
+        return nothing
     except IndexError:
-        return None
+        return nothing
     else:
         return temp
 
@@ -304,7 +304,7 @@ def mapto(keylist, termlist, nothing=None):
     """Maps A List Of Keys To A List of Terms."""
     outdict = {}
     for x in xrange(0, len(keylist)):
-        outdict[keylist[x]] = haskey(termlist, x) or nothing
+        outdict[keylist[x]] = haskey(termlist, x, nothing)
     extra = []
     if len(termlist) > len(keylist):
         for x in xrange(len(keylist), len(termlist)):
@@ -320,7 +320,7 @@ def useparams(params, maps, nothing=None):
     else:
         newparams = {}
         for x in maps:
-            newparams[x] = haskey(params, x) or nothing
+            newparams[x] = haskey(params, x, nothing)
         return newparams, []
 
 def flip(inputdict):
