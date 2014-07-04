@@ -58,13 +58,16 @@ def FP(stop, dfT, dfE, e):
 
 class data(mctobject):
     """Implements A Data Set."""
-
     def __init__(self, units=None, gotsort=False):
         """Initializes The Data."""
         self.units = []
         self.gotsort = bool(gotsort)
         if units != None:
             self.extend(units)
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("data", self.units, self.gotsort)
 
     def __len__(self):
         """Performs len"""
@@ -667,7 +670,6 @@ class data(mctobject):
 
 class multidata(mctobject):
     """Implements A Multivariate Data Set."""
-
     def __init__(self, x=None, y=None):
         """Creates A Joint Data Set."""
         if y == None and x != None:
@@ -692,6 +694,10 @@ class multidata(mctobject):
             self.y = data(y)
         self.x.gotsort = True
         self.y.gotsort = True
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("multidata", self.x.units, self.y.units)
 
     def code(self, func):
         """Codes Over All The Data With A Function."""
@@ -973,9 +979,15 @@ class rollfunc(strfunc):
         else:
             self.name = self.autoarg
         self.e = e
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("rollfunc", self.stop, self.gen.key, self.variables[0], self.name)
+
     def copy(self):
         """Copies The Random Number Generator."""
         return rollfunc(self.stop, self.e, self.gen.key, self.variables[0], self.name)
+
     def calc(self, m=1.0):
         """Generates A Random Number."""
         stop = self.stop*m
@@ -983,6 +995,7 @@ class rollfunc(strfunc):
             return 1+self.gen.chooseint(int(stop))
         else:
             return 1.0+self.gen.choosefloat(float(stop))
+
     def call(self, variables):
         """Generates Random Numbers."""
         variables = varproc(variables)
@@ -1001,18 +1014,22 @@ class rollfunc(strfunc):
             if variables[0] > int(variables[0]):
                 out += self.calc(variables[0]-int(variables[0]))
         return out
+
     def __float__(self):
         """Retrieves A Float."""
         return float(self.calc())
+
     def __int__(self):
         """Retrieves An Integer."""
         return int(self.calc())
+
     def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
             return strfloat(self.name+":(("+self.e.prepare(other, False, True)+")*"+self.variables[0]+")", self.e, self.variables, {self.name:self, self.variables[0]:1.0})
+
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
         out = self.copy()

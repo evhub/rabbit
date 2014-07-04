@@ -30,6 +30,9 @@ class reciprocal(numobject):
     def __init__(self, base):
         """Creates The Reciprocal Object."""
         self.d = base
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("reciprocal", self.d)
     def copy(self):
         """Copies The Reciprocal Object."""
         return reciprocal(self.d)
@@ -46,6 +49,14 @@ class fraction(numobject):
         """Constructs The Fraction."""
         self.n = n
         self.d = d
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("fraction", self.n, self.d)
+
+    def copy(self):
+        """Copies The Fraction Object."""
+        return fraction(self.n, self.d)
 
     def simplify(self):
         """Simplifies The Fraction."""

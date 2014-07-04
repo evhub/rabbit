@@ -172,15 +172,15 @@ Global Operator Precedence List:
                 "poissonP":usefunc(poissonP, self, "poissonP", ["lambda", "x"]),
                 "hypgeoP":usefunc(hypgeoP, self, "hypgeoP", ["x", "n", "K", "N"]),
                 "tdist":usefunc(tdist, self, "tdist", ["x", "df"]),
-                "teq":usefunc(teq, self, "teq", ["df"], {"e":self}),
+                "teq":usefunc(teq, self, "teq", ["df"], evalinclude="e"),
                 "chisqdist":usefunc(chisqdist, self, "chisqdist", ["x", "df"]),
-                "chisqeq":usefunc(chisqeq, self, "chisqeq", ["df"], {"e":self}),
+                "chisqeq":usefunc(chisqeq, self, "chisqeq", ["df"], evalinclude="e"),
                 "Fdist":usefunc(Fdist, self, "Fdist", ["x", "dfT", "dfE"]),
-                "Feq":usefunc(Feq, self, "Feq", ["dfT", "dfE"], {"e":self}),
+                "Feq":usefunc(Feq, self, "Feq", ["dfT", "dfE"], evalinclude="e"),
                 "normP":usefunc(normP, self, "normP", ["x", "y", "mean", "stdev"]),
-                "tP":usefunc(tP, self, "tP", ["x", "y", "df"], {"e":self}),
-                "chisqP":usefunc(chisqP, self, "chisqP", ["x", "df"], {"e":self}),
-                "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], {"e":self})
+                "tP":usefunc(tP, self, "tP", ["x", "y", "df"], evalinclude="e"),
+                "chisqP":usefunc(chisqP, self, "chisqP", ["x", "df"], evalinclude="e"),
+                "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], evalinclude="e")
                 }),
             "gamma":usefunc(gamma, self, "gamma", ["x"]),
             "gcd":usefunc(gcd, self, "gcd", ["x", "y"]),
@@ -1400,7 +1400,7 @@ Global Operator Precedence List:
                 return "row"
             else:
                 return "matrix"
-        elif isinstance(item, fraction):
+        elif isinstance(item, (fraction, reciprocal)):
             return "fraction"
         elif isinstance(item, strcalc):
             return "string"

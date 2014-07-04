@@ -179,6 +179,7 @@ Import Commands:
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,
+            self.cmd_make,
             self.cmd_def,
             self.cmd_set,
             self.cmd_normal
@@ -369,7 +370,17 @@ Import Commands:
             self.printdebug("< "+original+" >")
             return True
 
+    def cmd_make(self, original):
+        """Sets A Variable."""
+        if superformat(original).startswith("make "):
+            test = self.cmd_set(original[5:])
+            if test:
+                return test
+            else:
+                raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
+
     def cmd_def(self, original):
+        """Defines A Variable."""
         if superformat(original).startswith("def "):
             self.redef = True
             test = self.cmd_set(original[4:])
@@ -377,7 +388,7 @@ Import Commands:
             if test:
                 return test
             else:
-                raise ExecutionError("RedefinitionError", "No definition was done in the statement "+original)
+                raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
 
     def cmd_set(self, original):
         """Evaluates Definition Commands."""

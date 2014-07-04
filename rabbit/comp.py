@@ -29,6 +29,7 @@ class compiler(commandline):
     debug = False
     doshow = False
     compiling = False
+    makes = []
 
     def __init__(self, debugcolor="lightred", prompt=addcolor("Rabbit:", "pink")+" ", nprompt=addcolor(">>>", "pink")+" ", outcolor="cyan", *initializers):
         """Initializes The Command Line Interface."""
@@ -102,11 +103,10 @@ class compiler(commandline):
         """Decompiles Text."""
         compiling = self.compiling
         self.compiling = False
-        oldvars = self.e.variables
-        commands, self.e.variables = self.disassemble(inputstring)
+        commands, variables = self.disassemble(inputstring)
+        self.e.makevars(variables)
         for command in commands:
             self.calc(command)
-        self.e.variables = oldvars
         self.compiling = compiling
         return True
 
@@ -143,6 +143,7 @@ class compiler(commandline):
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,
+            self.cmd_make,
             self.cmd_def,
             self.cmd_set,
             self.cmd_normal
@@ -160,23 +161,115 @@ class compiler(commandline):
     def cmd_do(self, original):
         """Evaluates Functions Silently."""
         if superformat(original).startswith("do "):
-            self.calc(original[3:])
+            original = original[3:]
+            self.calc(original)
             return True
+
+    def cmd_make(self, original):
+        """Adds A Package Make Command."""
+        if superformat(original).startswith("make "):
+            original = original[5:]
+            if self.compiling:
+                self.makes.append(original)
+                return True
+            else:
+                test = self.cmd_set(original)
+                if test:
+                    return test
+                else:
+                    raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
 
     def cmd_normal(self, original):
         """Evaluates Functions."""
         self.returned = 0
         if self.compiling and self.top:
             self.commands.append(original)
+            return True
         else:
             test = self.calc(original)
             if test != None:
                 return True
 
-    def assemble(self, inputcode):
+    def getstates(self, variables):
+        """Compiles Variables."""
+        out = {}
+        for k,v in variables.items():
+            try:
+                v.getstate
+            except AttributeError:
+                value = v
+            else:
+                value = v.getstate()
+            out[k] = value
+        return out
+
+    def assemble(self, protocol=0):
         """Compiles Code."""
-        raise NotImplementedError("Semi-compilation is not currently possible in Rabbit.")
+        out = cPickle.dumps({
+            "commands": self.commands,
+            "makes": self.makes,
+            "variables": self.getstates(self.e.variables)
+            }, protocol=int(protocol))
+        self.commands = []
+        self.makes = []
+        return out
+
+    def deitem(self, item):
+        """Decompiles An Item."""
+        if isinstance(item, tuple):
+            name = str(item[0])
+            args = item[1:]
+            if name == "reciprocal":
+                value = reciprocal(self.deitem(args[0]))
+            elif name == "fraction":
+                value = fraction(self.deitem(args[0]), self.deitem(args[1]))
+            elif name == "data":
+                value = data(args[0], args[1])
+            elif name == "multidata":
+                value = multidata(args[0], args[1])
+            elif name == "rollfunc":
+                value = rollfunc(args[0], self.e, args[1], args[2], args[3])
+            elif name == "matrix":
+                value = matrix(args[1], args[2], converter=args[3], fake=args[4])
+                for y in xrange(0, len(args[0])):
+                    for x in xrange(0, len(args[0][y])):
+                        value.store(y,x, self.deitem(args[0][y][x]))
+            elif name == "strfunc":
+                value = strfunc(args[0], self.e, args[1], args[2], args[3], args[4], args[5])
+            elif name == "strcalc":
+                value = strcalc(args[0], self.e)
+            elif name == "derivfunc":
+                value = derivfunc(args[0], args[1], args[2], args[3], self.e, args[4], args[5], args[6])
+            elif name == "integfunc":
+                value = integfunc(args[0], args[1], self.e, args[2], args[3], args[4])
+            elif name == "usefunc":
+                value = usefunc(args[0], self.e, args[1], args[2], args[3], args[4], args[5])
+            elif name == "classcalc":
+                value = classcalc(self.e, self.devariables(args[0]))
+            elif name == "instancecalc":
+                value = instancecalc(self.e, self.devariables(args[0]), self.devariables(args[1]))
+            elif name == "find":
+                tofind = str(args[0])
+                if tofind in self.e.variables:
+                    value = self.e.variables[tofind]
+                else:
+                    raise ExecutionError("UnpicklingError", "Rabbit could not find "+tofind)
+            else:
+                raise ExecutionError("UnpicklingError", "Rabbit could not unpickle "+name)
+        else:
+            value = item
+        return value
+
+    def devariables(self, variables):
+        """Decompiles Variables."""
+        out = {}
+        for k,v in variables.items():
+            out[k] = self.deitem(v)
+        return out
 
     def disassemble(self, inputstring):
         """Decompiles Code."""
-        raise NotImplementedError("Semi-compilation is not currently possible in Rabbit.")
+        out = cPickle.loads(inputstring)
+        for command in out["makes"]:
+            self.calc(command)
+        return out["commands"], self.devariables(out["variables"])

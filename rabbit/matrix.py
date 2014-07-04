@@ -44,15 +44,30 @@ class matrix(mctobject):
         for z in xrange(0, self.y):
             self.a.append(temp[:])
 
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        out = []
+        for row in self.a:
+            out.append([])
+            for item in row:
+                try:
+                    item.getstate
+                except AttributeError:
+                    value = item
+                else:
+                    value = item.getstate()
+                out[-1].append(value)
+        return ("matrix", out, self.y, self.x, self.converter, self.onlydiag())
+
     def new(self, y=None, x=None, fake=None):
         """Creates A New Matrix With The Same Basic Attributes."""
         if fake == None:
             fake = self.onlydiag()
         return matrix(y or self.y, x or self.x, converter=self.converter, fake=fake)
 
-    def copy(self):
+    def copy(self, fake=None):
         """Creates A Copy Of The Matrix."""
-        out = self.new()
+        out = self.new(fake=fake)
         for y,x in self.coords():
             out.store(y,x, self.retrieve(y,x))
         return out

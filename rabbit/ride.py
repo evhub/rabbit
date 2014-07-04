@@ -108,6 +108,7 @@ Import Commands:
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,
+            self.cmd_make,
             self.cmd_def,
             self.cmd_set,
             self.cmd_normal
@@ -286,7 +287,7 @@ Import Commands:
                             if test:
                                 statement = test
                         elif iswhite(test):
-                            if statement in ["debug", "clean", "run", "save", "assert", "do", "show", "del", "import", "def"]:
+                            if statement in ["debug", "clean", "run", "save", "assert", "do", "show", "del", "import", "def", "make"]:
                                 self.box.placetag("statement", point+"-"+str(len(statement)+1)+"c", point+"-1c")
                                 last = ("", point+"-1c")
                             statement = False

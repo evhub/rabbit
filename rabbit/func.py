@@ -87,6 +87,10 @@ class funcfloat(numobject):
         self.func = func
         self.e = e
 
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("find", self.funcstr)
+
     def copy(self):
         """Returns A Copy Of The Float Function."""
         return funcfloat(self.func, self.e, self.funcstr)
@@ -202,6 +206,10 @@ class strfunc(funcfloat):
         else:
             self.personals = dict(personals)
         self.e = e
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("strfunc", self.funcstr, self.variables, self.personals, self.name, self.overflow, self.allargs)
 
     def copy(self):
         """Copies The String Function."""
@@ -407,6 +415,10 @@ class strcalc(numobject):
         self.calcstr = str(compute('"'+self.calcstr.replace('"', '\\"')+'"'))
         self.e = e
 
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("strcalc", self.calcstr)
+
     def copy(self):
         """Returns A Copy Of The Evaluator String."""
         return strcalc(self.calcstr, self.e)
@@ -512,7 +524,7 @@ class rawstrcalc(strcalc):
 
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
-    def __init__(self, func, e, funcstr="func", variables=None, extras=None, overflow=False):
+    def __init__(self, func, e, funcstr="func", variables=None, extras=None, overflow=False, evalinclude=False):
         """Creates A Callable Function."""
         self.overflow = bool(overflow)
         self.funcstr = str(funcstr)
@@ -526,10 +538,22 @@ class usefunc(funcfloat):
             self.extras = dict(extras)
         self.func = func
         self.e = e
+        self.evalinclude = evalinclude
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("usefunc", self.func, self.funcstr, self.variables, self.extras, self.overflow, self.evalinclude)
 
     def copy(self):
         """Copies The Function."""
-        return usefunc(self.func, self.e, self.funcstr, self.variables, self.extras, self.overflow)
+        return usefunc(self.func, self.e, self.funcstr, self.variables, self.extras, self.overflow, self.evalinclude)
+
+    def getextras(self):
+        """Retrieves Extras."""
+        out = self.extras.copy()
+        if self.evalinclude:
+            out[self.evalinclude] = self.e
+        return out
 
     def call(self, params):
         """Calls The Function."""
@@ -545,7 +569,7 @@ class usefunc(funcfloat):
         elif not self.overflow and len(params) > len(self.variables):
             self.e.overflow = params[len(self.variables):]
             params = params[:len(self.variables)]
-        return self.func(*params, **self.extras)
+        return self.func(*params, **self.getextras())
 
 class unifunc(funcfloat):
     """Universalizes Function Calls."""
@@ -673,6 +697,10 @@ class derivfunc(derivbase, strfunc):
         self.overflow = True
         self.e = e
 
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("derivfunc", self.funcstr, self.n, self.accuracy, self.scaledown, self.varname, self.personals, self.name)
+
     def copy(self):
         """Returns A Copy Of The Derivative Function."""
         return derivfunc(self.funcstr, self.n, self.accuracy, self.scaledown, self.e, self.variables[0], self.personals, self.name)
@@ -694,6 +722,10 @@ class integfunc(integbase, strfunc):
             self.personals = dict(personals)
         self.overflow = True
         self.e = e
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("integfunc", self.funcstr, self.accuracy, self.varname, self.personals, self.name)
 
     def copy(self):
         """Returns A Copy Of The Integral Function."""
@@ -749,6 +781,10 @@ class classcalc(cotobject):
         if variables != None:
             self.add(variables)
 
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("classcalc", self.e.processor.getstates(self.getvars()))
+
     def copy(self):
         """Copies The Class."""
         return classcalc(self.e, self.variables)
@@ -784,6 +820,10 @@ class classcalc(cotobject):
     def items(self):
         """Returns The Variables."""
         return self.variables.items()
+
+    def __repr__(self):
+        """Finds A Representation."""
+        return '{ "CLASS" }'
 
     def store(self, key, value, bypass=False):
         """Stores An Item."""
@@ -893,6 +933,10 @@ class instancecalc(numobject, classcalc):
         else:
             self.parent = parent
         self.variables = variables.copy()
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("instancecalc", self.e.processor.getstates(self.getvars()), self.e.processor.getstates(self.parent))
 
     def copy(self):
         """Copies The Instance."""
