@@ -273,3 +273,7 @@ class compiler(commandline):
         for command in out["makes"]:
             self.calc(command)
         return out["commands"], self.devariables(out["variables"])
+
+    def test(self):
+        """Determines Whether Or Not Compilation Is Working Properly."""
+        return self.e.variables == self.disassemble(self.assemble())[1]
