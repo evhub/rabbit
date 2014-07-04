@@ -156,7 +156,10 @@ class matrix(mctobject):
                         v += self.retrieve(y, z)*other.retrieve(z, x)
                     out.store(y, x, v)
             else:
-                raise IndexError("Matrix multiplication invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
+                try:
+                    out = self.dot(other)
+                except IndexError:
+                    raise IndexError("Matrix multiplication invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
         else:
             out = self.new()
             for y,x in self.coords():

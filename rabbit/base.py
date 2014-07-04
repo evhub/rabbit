@@ -26,9 +26,11 @@ from .obj import *
 old_round = round
 def round(x, n=0):
     try:
-        return x.__round__(n)
+        x.__round__
     except AttributeError:
         return old_round(x, n)
+    else:
+        return x.__round__(n)
 
 class evalobject(object):
     """A Base Class For Evaluator Objects."""
