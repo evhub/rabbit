@@ -622,5 +622,5 @@ show "Hello, world!"      # A common interpreter command, show will print its ar
 qsort(l) = (
   qsort:(as~\x\(x@x<=a)) .. a .. qsort:(as~\x\(x@x>a))
   $ a,as = l
-  ) @ l
+  ) @ len:l
 ```

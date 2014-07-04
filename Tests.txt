@@ -200,12 +200,12 @@ assert zip:(1,2):(10,20) ?= (1,10),(2,20)
    $ a,as = la
    $ b,bs = lb
    )
-  @ la & lb
+  @ len:la & len:lb
 assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
  $ qsort(l) = (
    qsort:(as~\x\(x@x<=a)) .. a .. qsort:(as~\x\(x@x>a))
    $ a,as = l
-   ) @ l
+   ) @ len:l
 
 # Built-Ins Tests:
 assert a != b					$ def b.x = 2 $ b := copy(a) $ a := { x = 1 }

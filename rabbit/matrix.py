@@ -155,9 +155,6 @@ class matrix(mctobject):
                     for z in xrange(0, self.x):
                         v += self.retrieve(y, z)*other.retrieve(z, x)
                     out.store(y, x, v)
-            elif self.onlyrow() and other.onlyrow() and self.x == other.x:
-                out = self*other.trans()
-                out = out.retrieve(0, 0)
             else:
                 raise IndexError("Matrix multiplication invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
         else:
@@ -364,6 +361,14 @@ class matrix(mctobject):
         out.delrow(y)
         out.delcol(x)
         return out
+
+    def dot(self, other):
+        """Finds The Dot Product With Another Matrix."""
+        if self.onlyrow() and other.onlyrow() and self.x == other.x:
+            out = self*other.trans()
+            out = out.retrieve(0, 0)
+        else:
+            raise IndexError("Matrix dot product invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
 
     def cross(self, other):
         """Finds The Cross Product With Another Matrix."""

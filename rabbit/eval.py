@@ -88,10 +88,10 @@ Global Operator Precedence List:
         self.calls = [
             self.call_var,
             self.call_none,
+            self.call_lambda,
             self.call_neg,
             self.call_reciproc,
             self.call_exp,
-            self.call_lambda,
             self.call_colon,
             self.call_paren,
             self.call_method,
@@ -1058,6 +1058,11 @@ Global Operator Precedence List:
         if inputstring == "":
             return matrix(0)
 
+    def call_lambda(self, inputstring):
+        """Wraps Lambda Evaluation."""
+        if inputstring.startswith("\\"):
+            return self.eval_lambda([inputstring])
+
     def call_neg(self, inputstring):
         """Evaluates -."""
         if inputstring.startswith("-"):
@@ -1085,26 +1090,17 @@ Global Operator Precedence List:
                 value = self.eval_call(inputlist[x])**value
             return value
 
-    def call_lambda(self, inputstring):
-        """Wraps Lambda Evaluation."""
-        if inputstring.startswith("\\"):
-            return self.eval_lambda([inputstring])
-
     def call_colon(self, inputstring):
         """Evaluates Colons."""
         if ":" in inputstring:
             inputlist = inputstring.split(":")
             if inputlist[0] == "":
-                inputstring = strlist(inputlist[1:], ":")
-                result, err = catch(self.eval_call, inputstring)
+                result, err = catch(self.eval_call, strlist(inputlist[1:], ":"))
                 if err:
-                    return instancecalc(self, {
-                        "__error__": 1.0,
-                        "name": strcalc(err[0], self),
-                        "message": strcalc(err[1], self)
-                        }, {
-                            "__error__": 1.0
-                            })
+                    out = self.funcfind("error").call([])
+                    out.store("name", strcalc(err[0], self))
+                    out.store("message", strcalc(err[1], self))
+                    return out
                 else:
                     return result
             else:
@@ -1118,7 +1114,9 @@ Global Operator Precedence List:
         """Performs Colon Function Calls."""
         self.overflow = []
         docalc = False
-        if isinstance(item, strcalc):
+        if isnull(item):
+            raise ExecutionError("NoneError", "Nothing cannot be called")
+        elif isinstance(item, strcalc):
             item = item.calcstr
             if len(params) == 0:
                 value = rawstrcalc(item[-1], self)
@@ -1692,15 +1690,17 @@ class evalfuncs(object):
         else:
             tot = 0.0
             for x in variables:
-                if isinstance(x, matrix):
-                    tot += x.getlen()
-                else:
+                try:
+                    x.getlen
+                except AttributeError:
                     try:
                         test = len(x)
                     except:
                         tot += 1.0
                     else:
                         tot += float(test)
+                else:
+                    tot += float(x.getlen())
             return tot
 
     def rangecall(self, variables):
