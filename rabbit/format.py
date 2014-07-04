@@ -355,6 +355,7 @@ def carefulsplit(inputstring, splitstring, holdstrings='"', closers={}):
                 if x in holdstrings:
                     hold = x
             out[-1] += x
+    out[-1] += splitstring[:check]
     return out
 
 def switchsplit(inputstring, splitstring, otherstring=None):
