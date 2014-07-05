@@ -53,6 +53,7 @@ Import Commands:
     useclass = None
     redef = False
     doshow = True
+    top = False
 
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
@@ -216,10 +217,10 @@ Import Commands:
         cmd = carefulsplit(original, "#", '"`', {"\u201c":"\u201d"})[0]
         if delspace(cmd) == "":
             if len(self.box.commands) > 1:
-                self.process(self.box.commands[-2])
+                self.process(self.box.commands[-2], True)
         else:
             self.box.add(original)
-            self.process(cmd)
+            self.process(cmd, True)
 
     def evalfile(self, name):
         """Runs A File."""
@@ -243,14 +244,15 @@ Import Commands:
             cmdlist[x] = carefulsplit(cmdlist[x], "#", '"`', {"\u201c":"\u201d"})[0]
             while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or iswhite(cmdlist[x+1][0])):
                 cmdlist[x] += "\n"+carefulsplit(cmdlist.pop(x+1), "#", '"`', {"\u201c":"\u201d"})[0]
-            self.process(cmdlist[x])
+            self.process(cmdlist[x], True)
             x += 1
 
-    def process(self, inputstring):
+    def process(self, inputstring, top=False):
         """Processes A Command."""
         inputstring = basicformat(inputstring)
+        self.returned = 1
+        self.top = bool(top)
         if inputstring != "":
-            self.returned = 1
             self.saferun(self.doproc, inputstring)
 
     def doproc(self, inputstring):

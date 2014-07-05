@@ -158,6 +158,22 @@ class compiler(commandline):
             "print":funcfloat(self.printcall, self.e, "print")
             })
 
+    def pre_cmd(self, inputstring):
+        """Evaluates Commands."""
+        for original in carefulsplit(inputstring, ";;", '"`', {"{":"}", "\u201c":"\u201d"}):
+            if delspace(original) != "":
+                original = basicformat(original)
+                for func in self.cmds:
+                    if func(original) != None:
+                        name = namestr(func).split("_")[-1]
+                        if self.compiling and self.top:
+                            if name == "make":
+                                self.makes.append(original)
+                            elif not name in ["assert", "run", "set", "def"]:
+                                self.commands.append(original)
+                        self.printdebug(":| "+name)
+                        break
+
     def cmd_do(self, original):
         """Evaluates Functions Silently."""
         if superformat(original).startswith("do "):
@@ -165,30 +181,12 @@ class compiler(commandline):
             self.calc(original)
             return True
 
-    def cmd_make(self, original):
-        """Adds A Package Make Command."""
-        if superformat(original).startswith("make "):
-            original = original[5:]
-            if self.compiling:
-                self.makes.append(original)
-                return True
-            else:
-                test = self.cmd_set(original)
-                if test:
-                    return test
-                else:
-                    raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
-
     def cmd_normal(self, original):
         """Evaluates Functions."""
         self.returned = 0
-        if self.compiling and self.top:
-            self.commands.append(original)
+        test = self.calc(original)
+        if test != None:
             return True
-        else:
-            test = self.calc(original)
-            if test != None:
-                return True
 
     def getstates(self, variables):
         """Compiles Variables."""

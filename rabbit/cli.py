@@ -26,7 +26,6 @@ from .cmd import *
 class commandline(mathbase):
     """The Rabbit Command Line Interface."""
     on = True
-    top = False
     commands = []
     
     def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", helpstring=None, debug=False, outcolor="cyan", debugcolor="lightred", *initializers):
@@ -110,7 +109,6 @@ class commandline(mathbase):
         self.commands.append(original)
         cmd = carefulsplit(original, "#", '"`', {"\u201c":"\u201d"})[0]
         if delspace(cmd) != "":
-            self.top = True
             self.process(cmd)
 
     def calc(self, expression):
