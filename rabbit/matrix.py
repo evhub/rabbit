@@ -369,7 +369,7 @@ class matrix(mctobject):
         """Finds The Dot Product With Another Matrix."""
         if self.onlyrow() and other.onlyrow() and self.x == other.x:
             out = self*other.trans()
-            out = out.retrieve(0, 0)
+            return out.retrieve(0, 0)
         else:
             raise IndexError("Matrix dot product invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
 

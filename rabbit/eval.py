@@ -1985,7 +1985,7 @@ class evalfuncs(object):
             for x in xrange(1, len(variables)):
                 item = variables[x]
                 if ismatrix(item):
-                    out += self.joincall(getmatrix(item).getitems()).calcstr
+                    out += self.joincall([delim]+getmatrix(item).getitems()).calcstr
                 else:
                     out += self.e.prepare(item, True, False)
                 out += delim

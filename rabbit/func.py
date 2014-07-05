@@ -787,7 +787,7 @@ class classcalc(cotobject):
 
     def copy(self):
         """Copies The Class."""
-        return classcalc(self.e, self.variables)
+        return classcalc(self.e, self.getvars())
 
     def process(self, command):
         """Processes A Command And Puts The Result In The Variables."""
@@ -940,7 +940,7 @@ class instancecalc(numobject, classcalc):
 
     def copy(self):
         """Copies The Instance."""
-        return instancecalc(self.e, self.variables, self.parent)
+        return instancecalc(self.e, self.getvars(), self.parent)
 
     def getparent(self):
         """Reconstructs The Parent Class."""
@@ -1006,7 +1006,9 @@ class instancecalc(numobject, classcalc):
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if bypass:
+        if test == "__self__":
+            raise ExecutionError("RedefinitionError", "The __self__ variable cannot be redefined.")
+        elif bypass:
             self.variables[test] = value
         else:
             check_set = self.tryget("__set__")
