@@ -774,6 +774,8 @@ class integfuncfloat(integbase, funcfloat):
 
 class classcalc(cotobject):
     """Implements An Evaluator Class."""
+    doset = False
+
     def __init__(self, e, variables=None):
         """Initializes The Class."""
         self.e = e
@@ -798,7 +800,9 @@ class classcalc(cotobject):
         self.e.processor.useclass = "__self__"
 
         oldvars = self.e.setvars(self.variables)
+        self.doset = True
         self.e.processor.process(str(command))
+        self.doset = False
         self.e.setvars(oldvars)
 
         self.e.processor.useclass = oldclass
@@ -807,10 +811,17 @@ class classcalc(cotobject):
 
     def calc(self, inputstring):
         """Calculates A String In The Environment Of The Class."""
+        oldclass = self.e.processor.useclass
+        self.e.processor.useclass = "__self__"
+
         oldvars = self.e.setvars(self.variables)
+        self.doset = True
         self.e.info = " | class"
         out = self.e.calc(inputstring)
+        self.doset = False
         self.e.setvars(oldvars)
+
+        self.e.processor.useclass = oldclass
         return out
 
     def __len__(self):
@@ -830,6 +841,8 @@ class classcalc(cotobject):
         test = delspace(self.e.prepare(key, False, False))
         if bypass or not self.e.isreserved(test, allowed=string.digits):
             self.variables[test] = value
+            if self.doset:
+                self.e.variables[test] = self.variables[test]
         else:
             raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
 
@@ -1018,6 +1031,8 @@ class instancecalc(numobject, classcalc):
                 if isinstance(value, strfunc):
                     self.selfcurry(value)
                 self.variables[test] = value
+                if self.doset:
+                    self.e.variables[test] = self.variables[test]
             else:
                 raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
 

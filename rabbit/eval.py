@@ -1306,7 +1306,7 @@ Global Operator Precedence List:
         """Finds A Value."""
         while istext(item):
             original = item
-            self.printdebug(self.recursion*"  "+"> "+self.prepare(original, False, True, True))
+            self.printdebug("> "+self.prepare(original, False, True, True))
             self.recursion += 1
             if item in self.variables:
                 item = self.variables[item]
