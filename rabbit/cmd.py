@@ -523,34 +523,30 @@ Import Commands:
     def readytofunc(self, expression, extra="", allowed=""):
         """Determines If An Expression Could Be Turned Into A Function."""
         funcparts = expression.split("(", 1)
-        out = funcparts[0] != "" and not self.e.isreserved(funcparts[0], extra, allowed)
+        top = True
+        if len(funcparts) == 1 and self.e.parenchar in funcparts[0]:
+                funcparts = funcparts[0].split(self.e.parenchar, 1)
+                top = False
+        out = funcparts[0] != "" and not self.e.isreserved(funcparts[0], extra, allowed) and (len(funcparts) == 1 or funcparts[1].endswith(")"*top or self.e.parenchar))
         if not out:
             return out
         else:
-            if len(funcparts) == 1 and self.e.parenchar in funcparts[0]:
-                funcparts = funcparts[0].split(self.e.parenchar, 1)
-                out = out and (len(funcparts) == 1 or funcparts[1].endswith(self.e.parenchar))
-            else:
-                out = out and (len(funcparts) == 1 or funcparts[1].endswith(")"))
-            if not out:
-                return out
-            else:
-                inside = None
-                for x in funcparts[1][:-1]:
-                    if inside:
-                        if x == inside:
-                            inside = None
-                    elif x in '`"':
-                        inside = x
-                    elif x == "\u201c":
-                        inside = "\u201d"
-                    elif x == "(":
-                        inside = ")"
-                    elif x == "[":
-                        inside = "]"
-                    elif x == "{":
-                        inside = "}"
-                return not inside
+            inside = None
+            for x in funcparts[1][:-1]:
+                if inside:
+                    if x == inside:
+                        inside = None
+                elif x in '`"':
+                    inside = x
+                elif x == "\u201c":
+                    inside = "\u201d"
+                elif x == "(":
+                    inside = ")"
+                elif x == "[":
+                    inside = "]"
+                elif x == "{":
+                    inside = "}"
+            return not inside
 
     def set_import(self, sides):
         """Performs x = import."""
