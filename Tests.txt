@@ -189,7 +189,7 @@ assert max(1,0,9,6,8,3) ?= 9
    a @ a > maxtail;
    maxtail
    $ maxtail = max:as
-   ) @ as;
+   ) @ len:as;
   a
   $ a,as = l
  )

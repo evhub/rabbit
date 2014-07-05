@@ -800,7 +800,7 @@ class classcalc(cotobject):
         self.e.processor.useclass = "__self__"
 
         oldvars = self.e.setvars(self.variables)
-        self.doset = True
+        self.doset = oldvars
         self.e.processor.process(str(command))
         self.doset = False
         self.e.setvars(oldvars)
@@ -815,7 +815,7 @@ class classcalc(cotobject):
         self.e.processor.useclass = "__self__"
 
         oldvars = self.e.setvars(self.variables)
-        self.doset = True
+        self.doset = oldvars
         self.e.info = " | class"
         out = self.e.calc(inputstring)
         self.doset = False
@@ -842,6 +842,7 @@ class classcalc(cotobject):
         if bypass or not self.e.isreserved(test, allowed=string.digits):
             self.variables[test] = value
             if self.doset:
+                self.doset[test] = haskey(self.e.variables, test)
                 self.e.variables[test] = self.variables[test]
         else:
             raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
@@ -1032,6 +1033,7 @@ class instancecalc(numobject, classcalc):
                     self.selfcurry(value)
                 self.variables[test] = value
                 if self.doset:
+                    self.doset[test] = haskey(self.e.variables, test)
                     self.e.variables[test] = self.variables[test]
             else:
                 raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))

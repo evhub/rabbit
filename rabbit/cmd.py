@@ -527,7 +527,6 @@ Import Commands:
         if len(funcparts) == 1 and self.e.parenchar in funcparts[0]:
                 funcparts = funcparts[0].split(self.e.parenchar, 1)
                 top = False
-        print(funcparts)
         out = funcparts[0] != "" and (not self.e.isreserved(funcparts[0], extra, allowed)) and (len(funcparts) == 1 or funcparts[1].endswith(")"*top or self.e.parenchar))
         if not out or len(funcparts) == 1:
             return out
