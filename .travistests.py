@@ -28,6 +28,6 @@ cli.terminate = True
 cli.evalfile("Tests.txt")
 print("Tests Complete.")
 comp = compiler()
-comp.e = cli.e
+comp.e.variables = cli.e.variables
 if not comp.test():
     raise ExecutionError("CompileError", "Decompiled variables failed to equal compiled variables.")
