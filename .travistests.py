@@ -23,13 +23,27 @@ from rabbit.all import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-cli = commandline("Running Tests.txt...")
+cli = commandline(addcolor("\nRunning Tests.txt...", "pink"))
 cli.terminate = True
 cli.evalfile("Tests.txt")
-print("Tests.txt Evaluation Complete.")
-comp = compiler()
-if not comp.test():
-    raise ExecutionError("CompileError", "Decompiled variables failed to equal compiled variables.")
-print("Compilation Testing Complete.")
+print(addcolor("Tests.txt Evaluation Complete.", "cyan"))
 
-print("\nAll Tests Pass.")
+comp = compiler()
+print(addcolor("\nCompiling...", "pink"))
+newvars = comp.disassemble(comp.assemble())[1]
+print(addcolor("Compiled.", "cyan"))
+
+print(addcolor("Testing Compilation...", "pink"))
+for k,v in comp.e.variables.items():
+    nv = haskey(newvars, k)
+    if v != nv:
+        print(addcolor("<!> For variable "+str(k)+" the old value of "+repr(v)+" is not equal to the new value "+repr(nv), "lightred"))
+for k,v in newvars.items():
+    ov = haskey(comp.e.variables, k)
+    if v != ov:
+        print(addcolor("<!> For variable "+str(k)+" the new value of "+repr(v)+" is not equal to the old value "+repr(ov), "lightred"))
+if not comp.e.variables == newvars:
+    raise ExecutionError("CompileError", "Decompiled variables failed to equal compiled variables.")
+print(addcolor("Compilation Testing Complete.", "cyan"))
+
+print(addcolor("\nAll Tests Pass.", "green"))
