@@ -799,11 +799,10 @@ class classcalc(cotobject):
         oldclass = self.e.processor.useclass
         self.e.processor.useclass = "__self__"
 
-        oldvars = self.e.setvars(self.variables)
-        self.doset = oldvars
+        self.doset = self.e.setvars(self.variables)
         self.e.processor.process(str(command))
+        self.e.setvars(self.doset)
         self.doset = False
-        self.e.setvars(oldvars)
 
         self.e.processor.useclass = oldclass
         self.e.processor.doshow = oldshow
@@ -814,12 +813,11 @@ class classcalc(cotobject):
         oldclass = self.e.processor.useclass
         self.e.processor.useclass = "__self__"
 
-        oldvars = self.e.setvars(self.variables)
-        self.doset = oldvars
+        self.doset = self.e.setvars(self.variables)
         self.e.info = " | class"
         out = self.e.calc(inputstring)
+        self.e.setvars(self.doset)
         self.doset = False
-        self.e.setvars(oldvars)
 
         self.e.processor.useclass = oldclass
         return out

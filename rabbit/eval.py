@@ -1050,7 +1050,8 @@ Global Operator Precedence List:
                 value = item
             else:
                 value = getcall(item)(None)
-            self.variables[key] = value
+            if not self.isreserved(key):
+                self.variables[key] = value
             return value
 
     def call_none(self, inputstring):

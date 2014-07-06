@@ -422,7 +422,6 @@ Import Commands:
                         func = None
                     else:
                         sides[1] = [sides[1]]
-                    out = False
                     for x in xrange(0, len(sides[0])):
                         if x == len(sides[0])-1:
                             toset = sides[1][x:]
@@ -439,8 +438,9 @@ Import Commands:
                             toset = itemlist.pop(0)
                             for item in itemlist:
                                 toset += item
-                        out = self.cmd_set_do([sides[0][x], self.e.wrap(toset)], docalc) or out
-                    return out
+                        if not self.cmd_set_do([sides[0][x], self.e.wrap(toset)], docalc):
+                            raise ExecutionError("VariableError", "Could not multi-set to invalid variable "+sides[0][x])
+                    return True
             else:
                 sides[0] = sides[0][0]
                 return self.cmd_set_do(sides, docalc)
