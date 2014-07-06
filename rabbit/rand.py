@@ -19,7 +19,8 @@
 from __future__ import absolute_import, print_function, unicode_literals
 from .sys import *
 from .math import *
-import md5
+import hashlib
+md5 = hashlib.md5
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
