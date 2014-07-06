@@ -20,7 +20,6 @@ from __future__ import absolute_import, print_function, unicode_literals
 from .sys import *
 from .math import *
 import hashlib
-md5 = hashlib.md5
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
@@ -36,8 +35,8 @@ class random(object):
         if key == None:
             self.key = os.urandom(16)
         else:
-            self.key = md5.new(key).digest()
-        self.basestate = md5.new(self.key)
+            self.key = hashlib.md5(key).digest()
+        self.basestate = hashlib.md5(self.key)
         self.counter = 0
         self.bitstore = ""
         self.digitstore = ""
