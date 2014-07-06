@@ -29,7 +29,6 @@ class compiler(commandline):
     debug = False
     doshow = False
     compiling = False
-    makes = []
 
     def __init__(self, debugcolor="lightred", prompt=addcolor("Rabbit:", "pink")+" ", nprompt=addcolor(">>>", "pink")+" ", outcolor="cyan", *initializers):
         """Initializes The Command Line Interface."""
@@ -47,6 +46,9 @@ class compiler(commandline):
     def fresh(self):
         """Refreshes The Environment."""
         self.e.fresh()
+        self.e.makevars({
+            "print":funcfloat(self.printcall, self.e, "print")
+            })
         self.commands = []
         self.makes = []
 
@@ -123,11 +125,9 @@ class compiler(commandline):
         self.evalfile(name)
         self.compiling = compiling
         resultfile = openfile(result, "wb")
-        try:
-            writefile(resultfile, self.assemble())
-        finally:
-            resultfile.close()
-            return True
+        writefile(resultfile, self.assemble())
+        resultfile.close()
+        return True
 
     def comptext(self, inputstring):
         """Compiles Text."""
@@ -160,9 +160,7 @@ class compiler(commandline):
             self.set_normal
             ]
         self.e = evaluator(processor=self, speedy=True)
-        self.e.makevars({
-            "print":funcfloat(self.printcall, self.e, "print")
-            })
+        self.fresh()
 
     def pre_cmd(self, inputstring):
         """Evaluates Commands."""
@@ -272,7 +270,7 @@ class compiler(commandline):
 
     def disassemble(self, inputstring):
         """Decompiles Code."""
-        out = cPickle.loads(inputstring)
+        out = cPickle.loads(sanitize(inputstring))
         for command in out["makes"]:
             self.calc(command)
         return out["commands"], self.devariables(out["variables"])

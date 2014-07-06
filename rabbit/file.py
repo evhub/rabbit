@@ -35,7 +35,7 @@ def writefile(openfile, writer):
     """Sets The Contents Of A File."""
     openfile.seek(0)
     openfile.truncate()
-    openfile.write(str(writer))
+    openfile.write(writer.encode("UTF"))
 
 def readfile(openfile):
     """Reads The Contents Of A File."""

@@ -143,7 +143,7 @@ def sanitize(inputstring):
     for x in inputstring:
         if x in string.printable:
             outputstring += x
-    return str(outputstring)
+    return old_str(outputstring)
 
 def listformat(inputlist):
     """Performs Basic Formatting On A List."""
