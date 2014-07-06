@@ -44,6 +44,12 @@ class compiler(commandline):
         else:
             self.initialize(args=initializers)
 
+    def fresh(self):
+        """Refreshes The Environment."""
+        self.e.fresh()
+        self.commands = []
+        self.makes = []
+
     def show(self, arg, message=None):
         """Prints A Message To The Console."""
         self.app.display(self.e.forshow(arg))
@@ -208,8 +214,7 @@ class compiler(commandline):
             "makes": self.makes,
             "variables": self.getstates(self.e.variables)
             }, protocol=int(protocol))
-        self.commands = []
-        self.makes = []
+        self.fresh()
         return out
 
     def deitem(self, item):
