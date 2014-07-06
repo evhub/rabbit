@@ -277,4 +277,15 @@ class compiler(commandline):
 
     def test(self):
         """Determines Whether Or Not Compilation Is Working Properly."""
-        return self.e.variables == self.disassemble(self.assemble())[1]
+        print("Compiling...")
+        newvars = self.disassemble(self.assemble())[1]
+        print("Compiled.")
+        for k,v in self.e.variables.items():
+            nv = haskey(newvars, k)
+            if v != nv:
+                print("<!> For variable "+str(k)+" the old value of "+repr(v)+" is not equal to the new value "+repr(nv))
+        for k,v in newvars.items():
+            ov = haskey(self.e.variables, k)
+            if v != ov:
+                print("<!> For variable "+str(k)+" the new value of "+repr(v)+" is not equal to the old value "+repr(ov))
+        return self.e.variables == newvars
