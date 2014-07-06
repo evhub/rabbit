@@ -23,9 +23,9 @@ from rabbit.all import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-main = compiler("Running Tests...")
+main = commandline("Running Tests...")
 main.terminate = True
 main.evalfile("Tests.txt")
-if not main.test():
+if not compiler().test():
     raise ExecutionError("CompileError", "Decompiled variables failed to equal compiled variables.")
 print("Tests Complete.")

@@ -209,7 +209,7 @@ class strfunc(funcfloat):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("strfunc", self.funcstr, self.variables, self.personals, self.name, self.overflow, self.allargs)
+        return ("strfunc", self.funcstr, self.variables, self.e.processor.getstates(self.personals), self.name, self.overflow, self.allargs)
 
     def copy(self):
         """Copies The String Function."""

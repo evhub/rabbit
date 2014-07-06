@@ -236,7 +236,7 @@ class compiler(commandline):
                     for x in xrange(0, len(args[0][y])):
                         value.store(y,x, self.deitem(args[0][y][x]))
             elif name == "strfunc":
-                value = strfunc(args[0], self.e, args[1], args[2], args[3], args[4], args[5])
+                value = strfunc(args[0], self.e, args[1], self.devariables(args[2]), args[3], args[4], args[5])
             elif name == "strcalc":
                 value = strcalc(args[0], self.e)
             elif name == "derivfunc":
