@@ -23,17 +23,17 @@ from rabbit.all import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-cli = commandline(addcolor("\nRunning Tests.txt...", "pink"))
+cli = commandline(addcolor("\nRunning Tests.txt...", "magenta"))
 cli.terminate = True
 cli.evalfile("Tests.txt")
 print(addcolor("Tests.txt Evaluation Complete.", "cyan"))
 
 comp = compiler()
-print(addcolor("\nCompiling...", "pink"))
+print(addcolor("\nCompiling...", "magenta"))
 newvars = comp.disassemble(comp.assemble())[1]
 print(addcolor("Compiled.", "cyan"))
 
-print(addcolor("Testing Compilation...", "pink"))
+print(addcolor("Testing Compilation...", "magenta"))
 for k,v in comp.e.variables.items():
     nv = haskey(newvars, k)
     if v != nv:
@@ -46,4 +46,4 @@ if not comp.e.variables == newvars:
     raise ExecutionError("CompileError", "Decompiled variables failed to equal compiled variables.")
 print(addcolor("Compilation Testing Complete.", "cyan"))
 
-print(addcolor("\nAll Tests Pass.", "green"))
+print(addcolor("\nAll Tests Pass.", "blue"))
