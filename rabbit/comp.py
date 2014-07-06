@@ -205,7 +205,7 @@ class compiler(commandline):
             out[k] = value
         return out
 
-    def assemble(self, protocol=0):
+    def assemble(self, protocol=-1):
         """Compiles Code."""
         out = cPickle.dumps({
             "commands": self.commands,
@@ -270,7 +270,7 @@ class compiler(commandline):
 
     def disassemble(self, inputstring):
         """Decompiles Code."""
-        out = cPickle.loads(sanitize(inputstring))
+        out = cPickle.loads(inputstring)
         for command in out["makes"]:
             self.calc(command)
         return out["commands"], self.devariables(out["variables"])
