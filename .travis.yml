@@ -9,7 +9,7 @@ python:
   - "2.7"
 
 script:
-  - python runtests.py
+  - python ./.travistests.py
 
 notifications:
   email: false
