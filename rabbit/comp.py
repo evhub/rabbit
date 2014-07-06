@@ -279,7 +279,7 @@ class compiler(commandline):
         """Determines Whether Or Not Compilation Is Working Properly."""
         print("Compiling...")
         newvars = self.disassemble(self.assemble())[1]
-        print("Compiled.")
+        print("Compiled.\nTesting Compilation...")
         for k,v in self.e.variables.items():
             nv = haskey(newvars, k)
             if v != nv:
