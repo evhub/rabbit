@@ -25,7 +25,7 @@ from rabbit.all import *
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
-    main = commandline("Running Tests...")
+    main = commandline(addcolor("Running Tests...", "magenta"))
     main.evalfile("Tests.txt")
-    print("Tests Complete.")
+    print(addcolor("Tests Complete.", "cyan"))
     main.start()
