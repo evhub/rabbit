@@ -832,7 +832,7 @@ class classcalc(cotobject):
 
     def __repr__(self):
         """Finds A Representation."""
-        return '{ "CLASS" }'
+        return self.e.prepare(self, False, True, True)
 
     def store(self, key, value, bypass=False):
         """Stores An Item."""
