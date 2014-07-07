@@ -257,7 +257,7 @@ Global Operator Precedence List:
         """Speedily Prepares The Output Of An Evaluation."""
         out = "{"+"\n"*top
         if not indebug and top != bottom:
-            out += 'raise("RuntimeError", "Maximum recursion depth exceeded in object preperation")'
+            out += 'raise("RuntimeError", "Maximum recursion depth exceeded in object preparation")'
         else:
             out += " __type__ "
             if istext(item):
