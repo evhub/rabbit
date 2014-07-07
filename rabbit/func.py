@@ -1397,33 +1397,19 @@ class instancecalc(numobject, classcalc):
 
     def __str__(self):
         """Retrieves A String."""
-        out = None
         check_str = self.tryget("__str__")
         if check_str:
-            out = self.domethod(check_str)
+            return self.e.prepare(self.domethod(check_str), True, False)
         else:
-            check_repr = self.tryget("__repr__")
-            if check_repr:
-                out = self.domethod(check_repr)
-        if out == None:
-            return self.e.prepare(self.toclass(), True, False)+" ( )"
-        else:
-            return self.e.prepare(out, True, False)
+            return self.getrepr(True)
 
-    def getrepr(self, maxrecursion=10):
+    def getrepr(self, top=False, maxrecursion=10):
         """Retrieves A Representation."""
-        out = None
         check_repr = self.tryget("__repr__")
         if check_repr:
-            out = self.domethod(check_repr)
+            return self.e.prepare(self.domethod(check_repr), top, False, maxrecursion=maxrecursion-1)
         else:
-            check_str = self.tryget("__str__")
-            if check_str:
-                out = self.domethod(check_str)
-        if out == None:
-            return self.e.prepare(self.toclass(), False, True, maxrecursion=maxrecursion-1)+"( )"
-        else:
-            return self.e.prepare(out, False, False, maxrecursion=maxrecursion-1)
+            return self.e.prepare(self.toclass(), top, True, maxrecursion=maxrecursion-1)+" ( )"
 
     def __len__(self):
         """Retrieves The Length."""

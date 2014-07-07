@@ -393,6 +393,7 @@ deg				# Degrees
 det				# Determinant
 env				# Get the global environment
 eval			# Calculates a string of code in a fresh environment
+except			# Excepts only particular errors
 find			# Find the position of an item in a container
 floor			# Floor function
 fold			# Fold a function over a container

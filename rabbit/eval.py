@@ -151,6 +151,7 @@ Global Operator Precedence List:
             "var":funcfloat(self.funcs.getvarcall, self, "var"),
             "val":funcfloat(self.funcs.getvalcall, self, "val"),
             "raise":funcfloat(self.funcs.raisecall, self, "raise"),
+            "except":funcfloat(self.funcs.exceptcall, self, "except"),
             "real":funcfloat(self.funcs.realcall, self, "real"),
             "imag":funcfloat(self.funcs.imagcall, self, "imag"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
@@ -259,7 +260,7 @@ Global Operator Precedence List:
     def speedyprep(self, item, top=False, bottom=False, indebug=False, maxrecursion=0):
         """Speedily Prepares The Output Of An Evaluation."""
         out = "{"+"\n"*top
-        if not indebug and top != bottom:
+        if not indebug and bottom and not top:
             out += 'raise("RuntimeError", "Maximum recursion depth exceeded in object preparation")'
         else:
             out += " __type__ "
@@ -279,8 +280,8 @@ Global Operator Precedence List:
         elif isinstance(item, instancecalc):
             if maxrecursion <= 0:
                 out = self.speedyprep(item, False, bottom, indebug, maxrecursion)
-            elif not top and (bottom or indebug):
-                out = item.getrepr(maxrecursion-1)
+            elif indebug or bottom:
+                out = item.getrepr(top, maxrecursion-1)
             else:
                 out = str(item)
         elif isinstance(item, classcalc):
@@ -444,7 +445,7 @@ Global Operator Precedence List:
                 except AttributeError:
                     out = repr(item)
                 else:
-                    out = item.getrepr(maxrecursion-1)
+                    out = item.getrepr(top, maxrecursion-1)
         else:
             raise ExecutionError("DisplayError", "Unable to display "+repr(item))
         return str(out)
@@ -1465,27 +1466,37 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("Error", "An error occured")
         elif len(variables) == 1:
-            if isinstance(variables[0], classcalc):
-                try:
-                    test = self.iserrcall(variables)
-                except ExecutionError:
-                    test = None
+            if isinstance(variables[0], classcalc) and self.iserrcall(variables):
+                name = variables[0].tryget("name")
+                if name:
+                    name = self.e.prepare(name, False, False)
                 else:
-                    if test:
-                        name = test.tryget("name")
-                        if name:
-                            name = self.e.prepare(name, False, False)
-                        else:
-                            name = "Error"
-                        message = test.tryget("message")
-                        if message:
-                            message = self.e.prepare(message, False, False)
-                        else:
-                            message = "An error occured"
-                        raise ExecutionError(name, message)
-            raise ExecutionError(self.e.prepare(variables[0], False, False), "An error occured")
+                    name = "Error"
+                message = variables[0].tryget("message")
+                if message:
+                    message = self.e.prepare(message, False, False)
+                else:
+                    message = "An error occured"
+                raise ExecutionError(name, message)
+            else:
+                raise ExecutionError(self.e.prepare(variables[0], False, False), "An error occured")
         else:
             raise ExecutionError(self.e.prepare(variables[0], False, False), strlist(variables[1:], "; ", lambda x: self.e.prepare(x, False, False)))
+
+    def exceptcall(self, variables):
+        """Excepts Errors."""
+        if not variables:
+            return 0.0
+        elif len(variables) == 1:
+            return self.iserrcall(variables)
+        else:
+            if self.exceptcall([variables[0]]):
+                for check in variables[1:]:
+                    if variables[0] == check or variables[0].tryget("name") == check:
+                        return 1.0
+                return self.raisecall([variables[0]])
+            else:
+                return 0.0
 
     def instanceofcall(self, variables):
         """Determines Whether Something Is An Instance Of Something Else."""
@@ -1494,7 +1505,7 @@ class evalfuncs(object):
         else:
             if isinstance(variables[0], classcalc):
                 for x in xrange(1, len(variables)):
-                    if not variables[x].isfrom(variables[0]):
+                    if not (isinstance(variables[x], instancecalc) and variables[x].isfrom(variables[0])):
                         return 0.0
             else:
                 check = self.e.typecalc(variables[0])
@@ -1511,7 +1522,7 @@ class evalfuncs(object):
             check = self.e.funcfind("error")
             if isinstance(check, classcalc):
                 for item in variables:
-                    if not item.isfrom(check):
+                    if not (isinstance(item, instancecalc) and item.isfrom(check)):
                         return 0.0
                 return 1.0
             else:
