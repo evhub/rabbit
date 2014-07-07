@@ -29,24 +29,23 @@ import Tkinter
 
 def openfile(filename, opentype="r+b"):
     """Returns An Open File Object."""
-    return codecs.open(str(filename), str(opentype), "UTF")
+    return codecs.open(str(filename), str(opentype), encoding="UTF")
 
 def writefile(openfile, writer):
     """Sets The Contents Of A File."""
     openfile.seek(0)
     openfile.truncate()
-    openfile.write(str(writer).encode("UTF"))
+    openfile.write(str(writer))
 
 def readfile(openfile):
     """Reads The Contents Of A File."""
-    return openfile.read()
+    return str(openfile.read())
 
 def createfile(filename, opentype="r+b"):
     """Creates A File And Returns An Open File Object For It."""
-    writelist = ["w", "wb"]
     filename = str(filename)
-    if opentype not in writelist:
-        out = openfile(filename, "wb")
+    if not "w" in opentype:
+        openfile(filename, "wb").close()
     out = openfile(filename, str(opentype))
     return out
 
