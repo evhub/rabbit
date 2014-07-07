@@ -370,7 +370,7 @@ Import Commands:
         return out
 
     def reset(self):
-        """Sets The Rendering Variable."""
+        """Sets The Rendering Variables."""
         self.dumpdebug(True)
         self.e.recursion = 0
         self.xstretch = self.calc("xstretch")*0.01

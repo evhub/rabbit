@@ -240,10 +240,8 @@ Import Commands:
         """Runs Text."""
         cmdlist = inputstring.splitlines()
         x = 0
-        while True:
+        while x < len(cmdlist):
             self.reset()
-            if x == len(cmdlist):
-                break
             cmdlist[x] = carefulsplit(cmdlist[x], "#", '"`', {"\u201c":"\u201d"})[0]
             while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or iswhite(cmdlist[x+1][0])):
                 cmdlist[x] += "\n"+carefulsplit(cmdlist.pop(x+1), "#", '"`', {"\u201c":"\u201d"})[0]

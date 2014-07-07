@@ -297,13 +297,15 @@ Global Operator Precedence List:
                         out += self.speedyprep(v, False, bottom, indebug, maxrecursion)
                     else:
                         out += self.prepare(v, False, bottom, indebug, maxrecursion-1)
-                out += " ;;"
                 if top:
                     out += "\n"
+                else:
+                    out += " ;;"
             if len(variables) > 0:
-                out = out[:-1*(3+top)]
                 if top:
-                    out += "\n"
+                    out = out[:-1]+"\n"
+                else:
+                    out = out[:-3]
             elif top:
                 out = out[:-1]
             out += " }"
@@ -502,8 +504,28 @@ Global Operator Precedence List:
             if istext(x):
                 command += x
             else:
+                original = self.calc_class(x)
+                lines = []
+                for line in original.splitlines():
+                    if not delspace(line) == "":
+                        lines.append(line)
                 out = classcalc(self)
-                out.process(self.calc_class(x))
+                last = ""
+                for x in xrange(0, len(lines)):
+                    if x == 0:
+                        num = leading(lines[x])
+                        last = lines[x]
+                    else:
+                        check = leading(lines[x])
+                        if check > num:
+                            last += lines[x]
+                        elif check == num:
+                            out.process(last)
+                            last = lines[x]
+                        else:
+                            raise ExecutionError("IndentationError", "Unexpected unindent in line "+lines[x])
+                if last:
+                    out.process(last)
                 command += self.wrap(out)
         return command
 

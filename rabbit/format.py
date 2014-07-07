@@ -180,6 +180,22 @@ def iswhite(inputstring):
     """Determines Whether A String Is Made Of Whitespace."""
     return re.compile("\s+").match(str(inputstring))
 
+def leading(inputstring, check=iswhite, func=True):
+    """Counts Leading Special Characters."""
+    count = 0
+    for x in inputstring:
+        if func:
+            if check(x):
+                count += 1
+            else:
+                break
+        else:
+            if check == x:
+                count += 1
+            else:
+                break
+    return count
+
 def repeating(inputstring):
     """Generates A Repeating Representation Of A String."""
     opts = [(inputstring,"")]

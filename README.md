@@ -261,7 +261,7 @@ f(x) =
 
 # Defining a class:
 a = {
- f(x) = x ;;
+ f(x) = x		# No need to use command seperators if you put the class on multiple lines: each line indented to the same degree as the first is a new command
  x = 1
  }
 ```
@@ -289,32 +289,32 @@ On their own, classes are very useful container objects. When instantiated, howe
 Methods of instantiated classes will always take the instance as the first argument, and are urged to return it as the first argument as well. In addition, instances support a variety of special methods to define their behavior:
 ```
 nothing := {
- __type__(self) = "nil"								;;
- __init__(self) = self								;;
- __get__(self, key) = key							;;
- __call__(self, args) = args						;;
- __cont__(self) = []								;;
- __add__(self, other) = other						;;
- __sub__(self, other) = -other						;;
- __mul__(self, other) = 0							;;
- __div__(self, other) = 0							;;
- __mod__(self, other) = 0							;;
- __pow__(self, other) = 0							;;
- __rdiv__(self, other) = other/0					;;
- __rmod__(self, other) = other%0					;;
- __rpow__(self, other) = 1							;;
- __num__(self) = 0									;;
- __abs__(self) = 0									;;
- __cmp__(self, other) = other						;;
- __eq__(self, other) = !other						;;
- __ne__(self, other) = ?other						;;
- __gt__(self, other) = other < 0					;;
- __lt__(self, other) = other > 0					;;
- __ge__(self, other) = other <= 0					;;
- __le__(self, other) = other >= 0					;;
- __str__(self) = "nil"								;;
- __repr__(self) = `\nil`							;;
- __len__(self) = 0									;;
+ __type__(self) = "nil"
+ __init__(self) = self
+ __get__(self, key) = key
+ __call__(self, args) = args
+ __cont__(self) = []
+ __add__(self, other) = other
+ __sub__(self, other) = -other
+ __mul__(self, other) = 0
+ __div__(self, other) = 0
+ __mod__(self, other) = 0
+ __pow__(self, other) = 0
+ __rdiv__(self, other) = other/0
+ __rmod__(self, other) = other%0
+ __rpow__(self, other) = 1
+ __num__(self) = 0
+ __abs__(self) = 0
+ __cmp__(self, other) = other
+ __eq__(self, other) = !other
+ __ne__(self, other) = ?other
+ __gt__(self, other) = other < 0
+ __lt__(self, other) = other > 0
+ __ge__(self, other) = other <= 0
+ __le__(self, other) = other >= 0
+ __str__(self) = "nil"
+ __repr__(self) = `\nil`
+ __len__(self) = 0
  __bool__(self) = 0
  }
 nil := nothing()
