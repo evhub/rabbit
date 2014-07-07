@@ -1390,16 +1390,20 @@ Global Operator Precedence List:
             return None
         elif istext(item):
             oldvars = self.setvars({varname: value})
-            out = self.calc(item)
-            self.setvars(oldvars)
+            try:
+                out = self.calc(item)
+            finally:
+                self.setvars(oldvars)
         elif isfunc(item):
             out = getcall(item)(varproc(value))
         elif hasnum(item):
             return item
         else:
             oldvars = self.setvars({varname: value})
-            out = getcall(item)(None)
-            self.setvars(oldvars)
+            try:
+                out = getcall(item)(None)
+            finally:
+                self.setvars(oldvars)
         return self.call(out, value, varname)
 
     def evaltypestr(self, item):

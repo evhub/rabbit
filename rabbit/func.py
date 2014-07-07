@@ -219,9 +219,11 @@ class strfunc(funcfloat):
         """Calculates The String."""
         if personals:
             oldvars = self.e.setvars(self.personals)
-        out = self.e.calc(self.funcstr)
-        if personals:
-            self.e.setvars(oldvars)
+        try:
+            out = self.e.calc(self.funcstr)
+        finally:
+            if personals:
+                self.e.setvars(oldvars)
         return out
 
     def call(self, variables):
@@ -241,8 +243,10 @@ class strfunc(funcfloat):
                     items[k] = self.personals[k]
             oldvars = self.e.setvars(items)
             self.e.info = " \\>"
-            out = self.calc(False)
-            self.e.setvars(oldvars)
+            try:
+                out = self.calc(False)
+            finally:
+                self.e.setvars(oldvars)
             return out
 
     def curry(self, arg):
@@ -649,8 +653,10 @@ class derivbase(object):
             items[self.allargs] = matrix(1,1, x, fake=True)
             oldvars = self.e.setvars(items)
             self.e.info = " \\>"
-            out = self.e.calc(self.funcstr)
-            self.e.setvars(oldvars)
+            try:
+                out = self.e.calc(self.funcstr)
+            finally:
+                self.e.setvars(oldvars)
             return out
 
     def call(self, variables):
@@ -800,13 +806,15 @@ class classcalc(cotobject):
         self.e.processor.useclass = "__self__"
 
         self.doset = self.e.setvars(self.variables)
-        self.e.processor.process(str(command))
-        self.e.setvars(self.doset)
-        self.doset = False
+        try:
+            self.e.processor.process(str(command))
+        finally:
+            self.e.setvars(self.doset)
+            self.doset = False
 
-        self.e.processor.useclass = oldclass
-        self.e.processor.doshow = oldshow
-        self.e.processor.returned = returned
+            self.e.processor.useclass = oldclass
+            self.e.processor.doshow = oldshow
+            self.e.processor.returned = returned
 
     def calc(self, inputstring):
         """Calculates A String In The Environment Of The Class."""
@@ -815,11 +823,13 @@ class classcalc(cotobject):
 
         self.doset = self.e.setvars(self.variables)
         self.e.info = " | class"
-        out = self.e.calc(inputstring)
-        self.e.setvars(self.doset)
-        self.doset = False
+        try:
+            out = self.e.calc(inputstring)
+        finally:
+            self.e.setvars(self.doset)
+            self.doset = False
 
-        self.e.processor.useclass = oldclass
+            self.e.processor.useclass = oldclass
         return out
 
     def __len__(self):
