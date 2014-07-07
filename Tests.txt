@@ -277,3 +277,8 @@ assert π ?= pi
 assert "\'\\'\\n#" ?= `"\'\n#`
 assert :(1) ?= 1
 assert {x=1}~\x\x ?= "x",
+assert {x=1 ;; y=2} ?= {
+   x = 1
+  
+   y = 2
+ }
