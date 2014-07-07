@@ -1487,10 +1487,8 @@ class evalfuncs(object):
         """Excepts Errors."""
         if not variables:
             return 0.0
-        elif len(variables) == 1:
-            return self.iserrcall(variables)
         else:
-            if self.exceptcall([variables[0]]):
+            if self.iserrcall([variables[0]]):
                 for check in variables[1:]:
                     if variables[0] == check or variables[0].tryget("name") == check:
                         return 1.0
