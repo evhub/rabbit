@@ -930,6 +930,47 @@ class classcalc(cotobject):
         else:
             return False
 
+    def __cmp__(self, other):
+        """Performs Comparison."""
+        if isinstance(other, classcalc):
+            return cmp(self.variables, other.variables)
+        else:
+            raise ExecutionError("TypeError", "Classes can only be compared with other classes")
+
+    def __gt__(self, other):
+        """Determines If Proper Subset."""
+        if isinstance(other, classcalc):
+            if len(self.variables) > len(other.variables):
+                return self >= other
+            else:
+                return False
+        else:
+            raise ExecutionError("TypeError", "Classes can only be compared with other classes")
+
+    def __ge__(self, other):
+        """Determines If Subset."""
+        if isinstance(other, classcalc):
+            for item in other.variables:
+                if not item in self.variables:
+                    return False
+            return True
+        else:
+            raise ExecutionError("TypeError", "Classes can only be compared with other classes")
+
+    def __lt__(self, other):
+        """Wraps Greater Than."""
+        if isinstance(other, classcalc):
+            return other > self
+        else:
+            raise ExecutionError("TypeError", "Classes can only be compared with other classes")
+
+    def __le__(self, other):
+        """Wraps Greater Than Or Equal."""
+        if isinstance(other, classcalc):
+            return other >= self
+        else:
+            raise ExecutionError("TypeError", "Classes can only be compared with other classes")
+
     def __imul__(self, other):
         """Performs Multiplication In-Place."""
         self.extend(other)

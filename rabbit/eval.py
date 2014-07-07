@@ -150,6 +150,8 @@ Global Operator Precedence List:
             "var":funcfloat(self.funcs.getvarcall, self, "var"),
             "val":funcfloat(self.funcs.getvalcall, self, "val"),
             "raise":funcfloat(self.funcs.raisecall, self, "raise"),
+            "real":funcfloat(self.funcs.realcall, self, "real"),
+            "imag":funcfloat(self.funcs.imagcall, self, "imag"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "floor":usefunc(math.floor, self, "floor", ["x"]),
             "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
@@ -1752,7 +1754,7 @@ class evalfuncs(object):
         else:
             return round(getnum(variables[0]), getint(variables[1]))
 
-    def numcall(self, variables):
+    def numcall(self, variables, new=True, func=makenum):
         """Performs float."""
         if variables == None:
             return matrix(0)
@@ -1762,12 +1764,41 @@ class evalfuncs(object):
             try:
                 variables[0].code
             except AttributeError:
-                return getnum(variables[0])
+                return func(variables[0])
             else:
-                variables[0].code(lambda x: getnum(x))
-                return variables[0]
+                if new:
+                    out = variables[0].copy()
+                else:
+                    out = variables[0]
+                out.code(lambda x: func(x))
+                return out
         else:
-            return self.numcall([diagmatrixlist(variables)])
+            return self.numcall([diagmatrixlist(variables)], False)
+
+    def realcall(self, variables):
+        """Performs Re."""
+        return self.numcall(variables, func=getnum)
+
+    def imagcall(self, variables, new=True):
+        """Performs Im."""
+        if variables == None:
+            return matrix(0)
+        elif len(variables) == 0:
+            return complex(0.0, 1.0)
+        elif len(variables) == 1:
+            try:
+                variables[0].code
+            except AttributeError:
+                return getimag(variables[0])
+            else:
+                if new:
+                    out = variables[0].copy()
+                else:
+                    out = variables[0]
+                out.code(lambda x: getimag(x))
+                return out
+        else:
+            return self.imagcall([diagmatrixlist(variables)], False)
 
     def splitcall(self, variables):
         """Performs split."""

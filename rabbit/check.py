@@ -78,9 +78,23 @@ def getnum(inputobject):
         else:
             return value
 
-def getint(inputstring):
-    """Formats A String Into An Integer."""
-    return int(getnum(inputstring))
+def getimag(inputobject):
+    """Gets The Imaginary Part Of An Object."""
+    if isinstance(inputobject, complex):
+        return getnum(inputobject.imag)
+    else:
+        return 0.0
+
+def getint(inputobject):
+    """Turns An Object Into An Integer."""
+    return int(getnum(inputobject))
+
+def makenum(inputobject):
+    """Makes An Object A Number."""
+    if isnum(inputobject):
+        return inputobject
+    else:
+        return getnum(inputobject)
 
 def catch(function, *args):
     """Gets The Errors From A Function."""

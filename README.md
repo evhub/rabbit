@@ -400,6 +400,7 @@ frac			# Convert to fraction
 from			# Whether instanceof
 gamma			# Gamma function
 gcd				# Greatest common denominator
+imag			# Gets the imaginary part
 iserr			# Whether instanceof error
 join			# Join containers by a delimiter
 lcm				# Least common multiple
@@ -416,6 +417,7 @@ prod			# Product of items
 rad				# Radians
 raise			# Raise an error
 range			# Create a range
+real			# Gets the real part
 replace			# Replace an item with an item
 repr			# Get representation
 reverse			# Reverse items

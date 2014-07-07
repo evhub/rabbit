@@ -266,6 +266,9 @@ assert iserr(:raise())
 assert from(error, :raise())
 assert var:"a" ?= "b"			$ a = b
 assert a ?= 5					$ proc("a = 5")
+assert num(i) ?= i
+assert real(i) ?= 0
+assert imag(i) ?= 1
 
 # New Feature Tests:
 assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
@@ -283,3 +286,7 @@ assert {x=1 ;; y=2} ?= {
    y =
     2
  }
+assert {x=1 ;; y=2} > {x=1}
+assert ! {x=1 ;; y=2} > {z=1}
+assert {x=1} >= {x=1}
+assert {x=1} <= {x=1}
