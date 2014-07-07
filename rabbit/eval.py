@@ -61,6 +61,7 @@ Global Operator Precedence List:
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
     varname = "x"
+    trynames = ["", "try"]
     parenchar = "\xa7"
     reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`\u2260\u2264\u2265\u201c\u201d'+parenchar
     debuglog = []
@@ -1119,7 +1120,7 @@ Global Operator Precedence List:
         """Evaluates Colons."""
         if ":" in inputstring:
             inputlist = inputstring.split(":")
-            if inputlist[0] == "":
+            if inputlist[0] in self.trynames:
                 result, err = catch(self.eval_call, strlist(inputlist[1:], ":"))
                 if err:
                     out = self.funcfind("error").call([])
