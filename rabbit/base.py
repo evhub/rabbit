@@ -16,7 +16,8 @@
 # DATA AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import with_statement, absolute_import, print_function, unicode_literals
+
 from .obj import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,7 +47,7 @@ class evalobject(object):
 
     def __rmul__(self, other):
         """Implements Reverse Multiplication."""
-        return self*other
+        return self * other
 
     def __add__(self, other):
         """Performs Addition."""
@@ -162,15 +163,15 @@ class numobject(evalobject):
 
     def __long__(self):
         """Implements long."""
-        return long(self.__int__())
+        return long(int(self))
 
     def __complex__(self):
         """Implements complex."""
-        return complex(self.__float__())
+        return complex(float(self))
 
     def __int__(self):
         """Implements int."""
-        return int(self.__float__())
+        return int(float(self))
 
     def __imod__(self, other):
         """Implements Modulus In-Place."""
@@ -184,24 +185,27 @@ class numobject(evalobject):
 
     def __iadd__(self, other):
         """Performs Addition In-Place."""
-        return float(self)+other
+        return float(self) + other
 
     def __idiv__(self, other):
         """Performs Division In-Place."""
-        return float(self)/other
+        return float(self) / other
 
     def __rdiv__(self, other):
         """Performs Division In-Place."""
-        return other/float(self)
+        return other / float(self)
 
     def __imul__(self, other):
         """Performs Multiplication In-Place."""
-        return float(self)*other
+        return float(self) * other
 
     def __ipow__(self, other):
         """Performs Exponentiation In-Place."""
-        self.code(lambda x: x**other)
-        return self
+        return float(self) ** other
+
+    def __rpow__(self, other):
+        """Performs Reverse Exponentiation In-Place."""
+        return other ** float(self)
 
     def __cmp__(self, other):
         """Performs Comparison."""
@@ -246,10 +250,7 @@ class cotobject(evalobject):
 
     def __contains__(self, item):
         """Determines If An Item Is In The Object."""
-        if item in self.items():
-            return True
-        else:
-            return False
+        return item in self.items()
 
     def __len__(self):
         """Performs len."""

@@ -16,7 +16,8 @@
 # DATA AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import with_statement, absolute_import, print_function, unicode_literals
+
 from .matrix import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1135,7 +1136,7 @@ class instancecalc(numobject, classcalc):
         check_sub = self.tryget("__sub__")
         if check_sub:
             return self.domethod(check_sub, -other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for addition")
+        return NotImplemented
 
     def __isub__(self, other):
         """Performs Subtraction."""
@@ -1145,7 +1146,7 @@ class instancecalc(numobject, classcalc):
         check_add = self.tryget("__add__")
         if check_add:
             return self.domethod(check_add, -other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for subtraction")
+        return NotImplemented
 
     def __imul__(self, other):
         """Performs Multiplication."""
@@ -1161,7 +1162,7 @@ class instancecalc(numobject, classcalc):
                     self += self
             except ExecutionError:
                 pass
-        raise ExecutionError("ClassError", "Insufficient methods defined for multiplication")
+        return NotImplemented
 
     def __idiv__(self, other):
         """Performs Division."""
@@ -1178,7 +1179,7 @@ class instancecalc(numobject, classcalc):
                     self += self
             except ExecutionError:
                 pass
-        raise ExecutionError("ClassError", "Insufficient methods defined for division")
+        return NotImplemented
 
     def __imod__(self, other):
         """Performs Moduluo."""
@@ -1193,7 +1194,7 @@ class instancecalc(numobject, classcalc):
                 result = float(self/other)
                 self = (result-int(result))*other
             except ExecutionError:
-                raise ExecutionError("ClassError", "Insufficient methods defined for modulo")
+                return NotImplemented
         return self
 
     def __ipow__(self, other):
@@ -1207,28 +1208,28 @@ class instancecalc(numobject, classcalc):
                     self *= self
             except ExecutionError:
                 pass
-        raise ExecutionError("ClassError", "Insufficient methods defined for exponentiation")
+        return NotImplemented
 
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         check_rdiv = self.tryget("__rdiv__")
         if check_rdiv:
             return self.domethod(check_rdiv, other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for reverse division")
+        return NotImplemented
 
     def __rmod__(self, other):
         """Performs Reverse Modulo."""
         check_rmod = self.tryget("__rmod__")
         if check_rmod:
             return self.domethod(check_rmod, other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for reverse modulo")
+        return NotImplemented
 
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         check_rpow = self.tryget("__rpow__")
         if check_rpow:
             return self.domethod(check_rpow, other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for reverse exponentiation")
+        return NotImplemented
 
     def __float__(self):
         """Retrieves A Float."""
@@ -1339,7 +1340,7 @@ class instancecalc(numobject, classcalc):
             check_eq = self.tryget("__eq__")
             if check_eq:
                 return self.domethod(check_ge, other) and not self.domethod(check_eq, other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for greater than")
+        return NotImplemented
 
     def __lt__(self, other):
         """Performs Less Than."""
@@ -1357,7 +1358,7 @@ class instancecalc(numobject, classcalc):
             check_eq = self.tryget("__eq__")
             if check_eq:
                 return self.domethod(check_le, other) and not self.domethod(check_eq, other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for less than")
+        return NotImplemented
 
     def __ge__(self, other):
         """Performs Greater Than Or Equal."""
@@ -1375,7 +1376,7 @@ class instancecalc(numobject, classcalc):
             check_eq = self.tryget("__eq__")
             if check_eq:
                 return self.domethod(check_gt, other) or self.domethod(check_eq, other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for greater than or equal")
+        return NotImplemented
 
     def __le__(self, other):
         """Performs Less Than Or Equal."""
@@ -1393,7 +1394,7 @@ class instancecalc(numobject, classcalc):
             check_eq = self.tryget("__eq__")
             if check_eq:
                 return self.domethod(check_lt, other) or self.domethod(check_eq, other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for less than or equal")
+        return NotImplemented
 
     def __str__(self):
         """Retrieves A String."""
@@ -1422,7 +1423,7 @@ class instancecalc(numobject, classcalc):
             if check_cont:
                 out = len(self.domethod(check_cont))
         if out is None:
-            raise ExecutionError("ClassError", "Insufficient methods defined for length")
+            return NotImplemented
         else:
             return int(out)
 
@@ -1440,7 +1441,7 @@ class instancecalc(numobject, classcalc):
             try:
                 out = len(self) > 0
             except ExecutionError:
-                raise ExecutionError("ClassError", "Insufficient methods defined for bool")
+                return NotImplemented
         return bool(out)
 
     def typecalc(self):
