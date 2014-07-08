@@ -367,17 +367,17 @@ class ExecutionError(Exception):
         """Creates The Error."""
         self.name = str(name)
         self.message = str(message)
-        self.args = {}
+        self.variables = {}
         if variables:
             self.makevars(variables)
     def makevars(self, variables):
         """Sets Variables To The Arguments."""
         for k,v in variables.items():
-            self.args[str(k)] = v
+            self.variables[str(k)] = v
     def __repr__(self):
         """Creates A Representation Of The Error."""
         out = self.name+": "+self.message
-        for k,v in self.args.items():
+        for k,v in self.variables.items():
             out += "\n    "+k+": "+str(v)
         return out
     __str__ = __repr__
