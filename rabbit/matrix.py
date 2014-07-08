@@ -642,6 +642,10 @@ class matrix(mctobject):
         else:
             raise IndexError("Matrix Chi Squared invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
 
+    def tomatrix(self):
+        """Returns self."""
+        return self
+
 def diagmatrix(size=2, full=1.0, empty=0.0, converter=float, fake=True):
     """Constructs Matrix I."""
     size = int(size)

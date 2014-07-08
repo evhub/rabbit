@@ -312,6 +312,10 @@ class cotobject(evalobject):
         else:
             return -1
 
+    def tomatrix(self):
+        """Converts To A Matrix."""
+        return diagmatrixlist(self.items())
+
 class mctobject(cotobject, numobject):
     """A Base Class For Mathematical Container Objects."""
 
