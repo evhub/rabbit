@@ -46,6 +46,7 @@ Import Commands:
     <name> = import <file>
     run <file>
     save <file>"""
+    multiargops = "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"
 
     def __init__(self, name="RIDE", tablen=1, width=100, height=40, helpstring=None, refresh=600, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
@@ -171,7 +172,7 @@ Import Commands:
                 space -= self.tablen
         if instring:
             space += self.tablen
-        elif space <= 0 and endswithany(basicformat(last), "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"):
+        elif space <= 0 and endswithany(basicformat(last), self.multiargops):
             space = self.tablen
         insert = " "*space
         if instring:

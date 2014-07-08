@@ -136,7 +136,7 @@ Global Operator Precedence List:
             "find":funcfloat(self.funcs.findcall, self, "find"),
             "split":funcfloat(self.funcs.splitcall, self, "split"),
             "replace":funcfloat(self.funcs.replacecall, self, "replace"),
-            "contains":funcfloat(self.funcs.containscall, self, "contains"),
+            "in":funcfloat(self.funcs.containscall, self, "in"),
             "range":funcfloat(self.funcs.rangecall, self, "range"),
             "len":funcfloat(self.funcs.lencall, self, "len"),
             "size":funcfloat(self.funcs.sizecall, self, "size"),
@@ -202,10 +202,19 @@ Global Operator Precedence List:
             funcfloat.allargs : matrix(0),
             self.varname : matrix(0),
             "\xf8" : "none",
+            "\u221e" : "inf",
             "\u2211" : "sum",
             "\u03c0" : "pi",
             "\u221a" : "sqrt",
-            "\u222b" : "S"
+            "\u222b" : "S",
+            "\u0393" : "gamma",
+            "\u220f" : "prod",
+            "\u2208" : "in",
+            "\u2209" : strfunc("!\u2208(__)", self, [], name="\u2209", overflow=False),
+            "\u220b" : strfunc("\u2208(rev(__))", self, [], name="\u220b", overflow=False),
+            "\u220c" : strfunc("!\u220b(__)", self, [], name="\u220c", overflow=False),
+            "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
+            "\u221c" : strfunc("sqrt(sqrt(x))", self, ["x"], name="\u221c")
             }
 
     def printdebug(self, message):

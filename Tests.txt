@@ -235,7 +235,7 @@ assert eval:\1 ?= 1
 assert find:"a":(0,1,"a",3,4) ?= 2
 assert split:"abcde":"c" ?= "ab","de"
 assert replace:"abc":"b":"" ?= "ac"
-assert contains:(0,1,2,3):2
+assert in:(0,1,2,3):2
 assert range(1,6,2) ?= 1,3,5
 assert len:(0,0,(0,0)) ?= 3
 assert size:(0,(0,0),0) ?= 4
@@ -301,3 +301,8 @@ assert :raise( ComplicatedError() ) ?= ComplicatedError()	$ ComplicatedError = e
 																							top = True
 																							}
 																						}
+assert ∉ ?= \__\!∈(__)
+assert ∋ ?= \__\∈(rev(__))
+assert ∌ ?= \__\!∋(__)
+assert ∛ ?= \x\x^(1/3)
+assert ∜ ?= \x\sqrt(sqrt(x))

@@ -386,7 +386,6 @@ ceil			# Ceiling function
 comb			# Combinations
 connect			# Connects matrices
 cont			# Convert to container
-contains		# Equivalent to in
 copy			# Make a copy
 cos				# Cosine
 d				# Random number dice
@@ -404,6 +403,7 @@ from			# Whether instanceof
 gamma			# Gamma function
 gcd				# Greatest common denominator
 imag			# Gets the imaginary part
+in				# Contains
 iserr			# Whether instanceof error
 join			# Join containers by a delimiter
 lcm				# Least common multiple
@@ -472,10 +472,19 @@ stats			# Contains statistical functions
 
 # Built-In Rabbit Unicode Aliases:
 ø = none
+∞ = inf
 ∑ = sum
 π = pi
 √ = sqrt
 ∫ = S
+Γ = gamma
+∏ = prod
+∈ = in
+∉ = \__\!∈(__)
+∋ = \__\∈(rev(__))
+∌ = \__\!∋(__)
+∛ = \x\x^(1/3)
+∜ = \x\sqrt(sqrt(x))
 ```
 
 #### More Rabbits?
