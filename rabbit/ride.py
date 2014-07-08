@@ -47,7 +47,7 @@ Import Commands:
     run <file>
     save <file>"""
 
-    def __init__(self, name="RIDE", width=100, height=40, helpstring=None, refresh=600, debug=False, *initializers):
+    def __init__(self, name="RIDE", tablen=1, width=100, height=40, helpstring=None, refresh=600, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
         self.debug_old = self.debug
@@ -55,6 +55,7 @@ Import Commands:
         self.root.title(str(name))
         self.show = self.popshow
         self.refresh = int(refresh)
+        self.tablen = int(tablen)
         rootbind(self.root, self.destroy)
         self.root.bind("<Control-r>", lambda event: self.run())
         self.root.bind("<Control-s>", lambda event: self.handle(self.save))
@@ -165,12 +166,13 @@ Import Commands:
             elif x == "\u201c":
                 instring = "\u201d"
             elif x in ["(", "[", "{"]:
-                space += 1
+                space += self.tablen
             elif x in [")", "]", "}"]:
-                space -= 1
-        space += instring
-        if space <= 0 and endswithany(basicformat(last), "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"):
-            space = 1
+                space -= self.tablen
+        if instring:
+            space += self.tablen
+        elif space <= 0 and endswithany(basicformat(last), "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"):
+            space = self.tablen
         insert = " "*space
         if instring:
             insert += "\\-"*space

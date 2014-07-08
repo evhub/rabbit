@@ -29,7 +29,7 @@ class commandline(mathbase):
     on = True
     commands = []
     
-    def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", helpstring=None, debug=False, outcolor="cyan", debugcolor="lightred", terminate=None, *initializers):
+    def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", helpstring=None, outcolor="cyan", debugcolor="lightred", debug=False, terminate=None, *initializers):
         """Initializes The Command Line Interface."""
         self.debug = bool(debug)
         if terminate is not None:

@@ -505,12 +505,11 @@ Import Commands:
                     if check >= 2:
                         if docalc:
                             value[1] = self.trycalc(value[1])
-                        self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" = "+self.e.prepare(value[1], False, True, True))
-
+                        self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.e.prepare(value[1], False, True, True))
                     else:
                         if docalc:
                             value = self.trycalc(value)
-                        self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+sides[0]+" = "+self.e.prepare(value, False, True, True))
+                        self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+sides[0]+" "+":"*docalc+"= "+self.e.prepare(value, False, True, True))
                         value = sides[0], value
                     if useclass is None:
                         if not self.redef and value[0] in self.e.variables:

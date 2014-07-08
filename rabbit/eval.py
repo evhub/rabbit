@@ -233,10 +233,13 @@ Global Operator Precedence List:
                 if v is None:
                     if k in self.variables:
                         del self.variables[k]
-                        self.printdebug(": < "+self.prepare(k, False, True, True)+" >")
+                        self.printdebug(": < "+str(k)+" >")
                 else:
                     self.variables[k] = v
-                    self.printdebug(": "+self.prepare(k, False, True, True)+" = "+self.prepare(v, False, True, True, maxrecursion=0))
+                    if istext(v):
+                        self.printdebug(": "+str(k)+" = "+str(v))
+                    else:
+                        self.printdebug(": "+str(k)+" := "+self.prepare(v, False, True, True, maxrecursion=0))
         return oldvars
 
     def store(self, name, value):
