@@ -195,19 +195,6 @@ class compiler(commandline):
         if test is not None:
             return True
 
-    def getstates(self, variables):
-        """Compiles Variables."""
-        out = {}
-        for k,v in variables.items():
-            try:
-                v.getstate
-            except AttributeError:
-                value = v
-            else:
-                value = v.getstate()
-            out[k] = value
-        return out
-
     def assemble(self, protocol=0):
         """Compiles Code."""
         out = cPickle.dumps({
@@ -216,59 +203,6 @@ class compiler(commandline):
             "variables": self.getstates(self.e.variables)
             }, protocol=int(protocol))
         self.fresh()
-        return out
-
-    def deitem(self, item):
-        """Decompiles An Item."""
-        if isinstance(item, tuple):
-            name = str(item[0])
-            args = item[1:]
-            if name == "reciprocal":
-                value = reciprocal(self.deitem(args[0]))
-            elif name == "fraction":
-                value = fraction(self.deitem(args[0]), self.deitem(args[1]))
-            elif name == "data":
-                value = data(args[0], args[1])
-            elif name == "multidata":
-                value = multidata(args[0], args[1])
-            elif name == "rollfunc":
-                value = rollfunc(args[0], self.e, args[1], args[2], args[3])
-            elif name == "matrix":
-                value = matrix(args[1], args[2], converter=args[3], fake=args[4])
-                for y in xrange(0, len(args[0])):
-                    for x in xrange(0, len(args[0][y])):
-                        value.store(y,x, self.deitem(args[0][y][x]))
-            elif name == "strfunc":
-                value = strfunc(args[0], self.e, args[1], self.devariables(args[2]), args[3], args[4], args[5])
-            elif name == "strcalc":
-                value = strcalc(args[0], self.e)
-            elif name == "derivfunc":
-                value = derivfunc(args[0], args[1], args[2], args[3], self.e, args[4], args[5], args[6])
-            elif name == "integfunc":
-                value = integfunc(args[0], args[1], self.e, args[2], args[3], args[4])
-            elif name == "usefunc":
-                value = usefunc(args[0], self.e, args[1], args[2], args[3], args[4], args[5])
-            elif name == "classcalc":
-                value = classcalc(self.e, self.devariables(args[0]))
-            elif name == "instancecalc":
-                value = instancecalc(self.e, self.devariables(args[0]), self.devariables(args[1]))
-            elif name == "find":
-                tofind = str(args[0])
-                if tofind in self.e.variables:
-                    value = self.e.variables[tofind]
-                else:
-                    raise ExecutionError("UnpicklingError", "Rabbit could not find "+tofind)
-            else:
-                raise ExecutionError("UnpicklingError", "Rabbit could not unpickle "+name)
-        else:
-            value = item
-        return value
-
-    def devariables(self, variables):
-        """Decompiles Variables."""
-        out = {}
-        for k,v in variables.items():
-            out[k] = self.deitem(v)
         return out
 
     def disassemble(self, inputstring):
