@@ -135,7 +135,7 @@ def tdist(x, df):
 
 def teq(df, e=None):
     """Finds The t Distribution For The Given Degrees Of Freedom."""
-    if e == None:
+    if e is None:
         e = evaluator()
     v = float(df)
     n = v+1.0
@@ -173,7 +173,7 @@ def chisqdist(x, df):
 
 def chisqeq(df, e=None):
     """Finds The Chi Squared Distribution For The Given Degrees Of Freedom."""
-    if e == None:
+    if e is None:
         e = evaluator()
     v = float(df)
     return strfunc("x^"+e.prepare((v-2.0)/2.0)+"*e^(-x/2)/"+e.prepare(2.0**(v/2.0)*gamma(v/2.0)), e, ["x"])
@@ -197,7 +197,7 @@ def Fdist(x, dfT, dfE):
 
 def Feq(dfT, dfE, e=None):
     """Finds The F Distribution For The Given Degrees Of Freedom."""
-    if e == None:
+    if e is None:
         e = evaluator()
     v = float(dfT)
     w = float(dfE)
@@ -220,7 +220,7 @@ def contstdev(func, start=-20.0, stop=20.0, mean=None, accuracy=0.0001):
     start = float(start)
     stop = float(stop)
     accuracy = float(accuracy)
-    if mean == None:
+    if mean is None:
         mean = contmean(func, start, stop, accuracy)
     else:
         mean = float(mean)

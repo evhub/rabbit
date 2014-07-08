@@ -62,7 +62,7 @@ class data(mctobject):
         """Initializes The Data."""
         self.units = []
         self.gotsort = bool(gotsort)
-        if units != None:
+        if units is not None:
             self.extend(units)
 
     def getstate(self):
@@ -118,15 +118,15 @@ class data(mctobject):
 
     def choose(self, gen=None):
         """Returns A Random Value."""
-        if gen == None:
+        if gen is None:
             gen = random()
         return gen.choose(self.units)
 
     def take(self, num=None, gen=None):
         """Samples From The Data."""
-        if gen == None:
+        if gen is None:
             gen = random()
-        if num == None:
+        if num is None:
             num = len(self)
         return gen.take(self.units)
 
@@ -176,7 +176,7 @@ class data(mctobject):
 
     def mad(self, mean=None):
         """Finds The Mean Absolute Deviation."""
-        if mean == None:
+        if mean is None:
             mean = self.mean()
         else:
             mean = float(mean)
@@ -187,7 +187,7 @@ class data(mctobject):
 
     def stdev(self, sample=True, mean=None):
         """Finds The Standard Deviation."""
-        if mean == None:
+        if mean is None:
             mean = self.mean()
         else:
             mean = float(mean)
@@ -209,7 +209,7 @@ class data(mctobject):
 
     def devs(self, point=None):
         """Finds The Deviation From A Point."""
-        if point == None:
+        if point is None:
             point = self.mean()
         else:
             point = float(point)
@@ -273,7 +273,7 @@ class data(mctobject):
         """Finds The Median."""
         if sort:
             self.sort()
-        if point == None:
+        if point is None:
             point = len(self)/2.0
         else:
             point = float(point)
@@ -357,7 +357,7 @@ class data(mctobject):
 
     def plot(self, scale=None, edge="-", center="_", left="[", right="]", divider="|"):
         """Creates A Box Plot."""
-        if scale == None:
+        if scale is None:
             scale = (self.units[-1]-self.units[0])/50.0
         else:
             scale = float(scale)
@@ -374,7 +374,7 @@ class data(mctobject):
         """Creates A Box Plot Between Two Specific Values."""
         start = float(start)
         end = float(end)
-        if scale == None:
+        if scale is None:
             scale = (end-start)/50.0
         else:
             scale = float(scale)
@@ -384,13 +384,13 @@ class data(mctobject):
             first = self.units[0]
             last = self.units[-1]
             toplot = [int((first-start)/scale), int((end-last)/scale)]
-            if plotfunc == None:
+            if plotfunc is None:
                 plotfunc = self.plot
             return space*toplot[0]+ plotfunc(scale, edge, center, left, right, divider) +space*toplot[1]
 
     def modplot(self, scale=None, edge="-", center="_", left="[", right="]", divider="|", point=".", space=" "):
         """Creates A Modified Box Plot."""
-        if scale == None:
+        if scale is None:
             scale = (self.units[-1]-self.units[0])/50.0
         else:
             scale = float(scale)
@@ -480,19 +480,19 @@ class data(mctobject):
         """Finds The Rank Margin Of Error For A Median."""
         dev = float(dev)
         n = float(len(self))
-        if N != None:
+        if N is not None:
             dev *= self.finpopcor(N)
         return dev*n**0.5/2.0
 
     def meanme(self, dev=1.96, stdev=None, N=None):
         """Finds The Margin Of Error For A Mean."""
         dev = float(dev)
-        if stdev == None:
+        if stdev is None:
             stdev = self.stdev()
         else:
             stdev = float(stdev)
         n = float(len(self))
-        if N != None:
+        if N is not None:
             stdev *= self.finpopcor(N)
         return dev*stdev/n**0.5
 
@@ -500,18 +500,18 @@ class data(mctobject):
         """Finds The Margin Of Error For Multiple Of The Same Item."""
         dev = float(dev)
         num = float(num)
-        if stdev == None:
+        if stdev is None:
             stdev = self.stdev()
         else:
             stdev = float(stdev)
-        if N != None:
+        if N is not None:
             stdev *= self.finpopcor(N)
         return dev*stdev*num**0.5
 
     def addme(self, dev=1.96, stdevs=None, N=None):
         """Finds The Margin Of Error For Multiple Different Items."""
         dev = float(dev)
-        if stdevs == None:
+        if stdevs is None:
             stdevs = [self.stdev()]
         elif not islist(stdevs):
             return self.me(dev, stdevs, None, N)
@@ -519,14 +519,14 @@ class data(mctobject):
         for s in stdevs:
             stdev += s**0.5
         stdev **= 0.5
-        if N != None:
+        if N is not None:
             stdev *= self.finpopcor(N)
         return dev*stdev
 
     def propme(self, dev=1.96, plist=None, N=None):
         """Finds The Margin Of Error For Proportions."""
         dev = float(dev)
-        if plist == None:
+        if plist is None:
             plist = [0.5]
         elif not islist(plist):
             plist = float(p)
@@ -535,7 +535,7 @@ class data(mctobject):
         for p in plist:
             stdev += p*(1.0-p)/n
         stdev **= 0.5
-        if N != None:
+        if N is not None:
             stdev *= self.finpopcor(N)
         return dev*stdev
 
@@ -550,11 +550,11 @@ class data(mctobject):
     def dev(self, point, stdev=None, mean=None):
         """Finds The Standard Deviations From The Mean."""
         point = float(point)
-        if stdev == None:
+        if stdev is None:
             stdev = self.stdev()
         else:
             stdev = float(stdev)
-        if mean == None:
+        if mean is None:
             mean = self.mean()
         else:
             mean = float(mean)
@@ -581,7 +581,7 @@ class data(mctobject):
     def chisqn(self, expected, n=None):
         """Calculates Chi Squared Based On Size."""
         expected = float(expected)
-        if n == None:
+        if n is None:
             n = len(self)
         n = float(n)
         return (n-expected)**2.0/expected
@@ -608,11 +608,11 @@ class data(mctobject):
     def teststat(self, expected=0.0, observed=None, mefunc=None):
         """Calculates A z Or t Value For A Hypothesis Test."""
         expected = float(expected)
-        if observed == None:
+        if observed is None:
             observed = self.mean()
         else:
             observed = float(observed)
-        if mefunc == None:
+        if mefunc is None:
             mefunc = self.meanme
         return (observed-expected)/float(mefunc(dev=1.0))
 
@@ -626,11 +626,11 @@ class data(mctobject):
 
     def I(self, med=None, stdev=None):
         """Finds The Spearnan Index Of Skewness."""
-        if med == None:
+        if med is None:
             med = float(self.med())
         else:
             med = float(med)
-        if stdev == None:
+        if stdev is None:
             stdev = float(self.stdev())
         else:
             stdev = float(stdev)
@@ -672,7 +672,7 @@ class multidata(mctobject):
     """Implements A Multivariate Data Set."""
     def __init__(self, x=None, y=None):
         """Creates A Joint Data Set."""
-        if y == None and x != None:
+        if y is None and x is not None:
             if isinstance(x, dict):
                 x, y = x.keys(), x.values()
             else:
@@ -682,7 +682,7 @@ class multidata(mctobject):
                     ny.append(ty)
                 x = nx
                 y = ny
-        elif x == None and y != None:
+        elif x is None and y is not None:
             x = range(1,len(y)+1)
         if isinstance(x, data):
             self.x = x
@@ -884,7 +884,7 @@ class multidata(mctobject):
 
     def resids(self, func=None):
         """Finds Residuals."""
-        if func == None:
+        if func is None:
             eq = self.linreg()
             func = lambda x: eq.call([x])
         values = {}
@@ -923,15 +923,15 @@ class multidata(mctobject):
     def regtest(self, e, expected=0.0, observed=None, mefunc=None, regeq=None):
         """Finds The t Value For The Slope Of The Regression Line."""
         expected = float(expected)
-        if observed == None:
+        if observed is None:
             observed = self.b()
         else:
             observed = float(observed)
-        if regeq == None:
+        if regeq is None:
             regeq = self.linreg()
         else:
             regeq = str(regeq)
-        if mefunc == None:
+        if mefunc is None:
             mefunc = self.sb
         return (observed-expected)/float(mefunc(func=lambda x: regeq.call([x])))
 
@@ -999,7 +999,7 @@ class rollfunc(strfunc):
     def call(self, variables):
         """Generates Random Numbers."""
         variables = varproc(variables)
-        if variables == None:
+        if variables is None:
             out = self
         elif len(variables) == 0 or (len(variables) == 1 and isnull(variables[0])):
             out = self.call([1.0])

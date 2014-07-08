@@ -27,7 +27,7 @@ class interpreter(base):
     """A Runnable Class That Runs The PythonPlus Interpreter Console."""
     def __init__(self, height=None):
         """Initializes The PythonPlus Interpreter Console."""
-        if height == None:
+        if height is None:
             self.root, self.app, self.box = startconsole(self.handler, "Welcome to a Python interactive procesor.\nTo See The Help Enter: printhelp\nEnter A Command:")
         else:
             self.root, self.app, self.box = startconsole(self.handler, "Welcome to a Python interactive procesor.\nTo See The Help Enter: printhelp\nEnter A Command:", int(height))

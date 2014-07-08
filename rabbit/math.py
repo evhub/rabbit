@@ -222,7 +222,7 @@ def gamma(n, accuracy=0.00000001, stop=None):
     """Implements The Gamma Function Over The Positive Numbers."""
     n = float(n)
     accuracy = float(accuracy)
-    if stop == None:
+    if stop is None:
         stop = -n*math.log(accuracy**(1/n)/n)/math.log(2.0)
     return defint(lambda x: x**(n-1.0)*math.e**(-1.0*x), 0.0, stop)
 

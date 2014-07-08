@@ -62,14 +62,14 @@ Import Commands:
         if message:
             message = str(message)
             self.messages.append(message)
-        if height == None:
+        if height is None:
             self.root, self.app, self.box = startconsole(self.handler, message, str(name))
         else:
             self.root, self.app, self.box = startconsole(self.handler, message, str(name), int(height))
         self.show = self.appshow
         self.populator()
         self.printdebug(": ON")
-        if helpstring != None:
+        if helpstring is not None:
             self.helpstring = str(helpstring)
         if initializers == ():
             self.initialize()
@@ -133,7 +133,7 @@ Import Commands:
     def printcall(self, variables):
         """Performs print."""
         self.returned = 1
-        if variables == None or len(variables) == 0:
+        if variables is None or len(variables) == 0:
             out = self.e.prepare(matrix(0), True, False)
         else:
             out = ""
@@ -145,7 +145,7 @@ Import Commands:
 
     def anscall(self, variables):
         """Performs ans."""
-        if variables == None or len(variables) == 0:
+        if variables is None or len(variables) == 0:
             return self.ans[-1]
         else:
             self.e.overflow = variables[1:]
@@ -153,7 +153,7 @@ Import Commands:
 
     def grabcall(self, variables):
         """Performs grab."""
-        if variables == None or len(variables) == 0:
+        if variables is None or len(variables) == 0:
             out = self.app.get().split("\n")[-1]
             if out in self.messages:
                 return strcalc(out, self.e)
@@ -260,7 +260,7 @@ Import Commands:
         """Does The Processing."""
         inputstring = str(inputstring)
         for func in self.pre_cmds:
-            if func(inputstring) != None:
+            if func(inputstring) is not None:
                 return True
 
     def pre_help(self, inputstring):
@@ -279,7 +279,7 @@ Import Commands:
             if delspace(original) != "":
                 original = basicformat(original)
                 for func in self.cmds:
-                    if func(original) != None:
+                    if func(original) is not None:
                         self.printdebug(":| "+namestr(func).split("_")[-1])
                         break
         return True
@@ -340,7 +340,7 @@ Import Commands:
         """Evaluates Functions Silently."""
         if superformat(original).startswith("do "):
             test = self.calc(original[3:])
-            if test != None and not isnull(test):
+            if test is not None and not isnull(test):
                 self.ans.append(test)
             return True
 
@@ -432,7 +432,7 @@ Import Commands:
                             toset = matrix(0)
                         elif len(toset) == 1:
                             toset = toset[0]
-                        elif func != None:
+                        elif func is not None:
                             toset = func(toset)
                         else:
                             itemlist = toset
@@ -493,7 +493,7 @@ Import Commands:
             sides[1] = basicformat(sides[1])
             for func in self.set_cmds:
                 value = func(sides)
-                if value != None:
+                if value is not None:
                     if istext(value):
                         check = 0
                     else:
@@ -511,7 +511,7 @@ Import Commands:
                             value = self.trycalc(value)
                         self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+sides[0]+" = "+self.e.prepare(value, False, True, True))
                         value = sides[0], value
-                    if useclass == None:
+                    if useclass is None:
                         if not self.redef and value[0] in self.e.variables:
                             raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
                         else:
@@ -584,7 +584,7 @@ Import Commands:
             top = True
         elif self.e.parenchar in sides[0] and sides[0].endswith(self.e.parenchar):
             top = False
-        if top != None:
+        if top is not None:
             if top:
                 sides[0] = sides[0][:-1].split("(", 1)
             else:
@@ -644,7 +644,7 @@ Import Commands:
         """Evaluates Functions."""
         self.returned = 0
         test = self.calc(original)
-        if test != None:
+        if test is not None:
             self.ans.append(test)
             if self.doshow and self.returned == 0:
                 self.show(self.e.prepare(self.ans[-1], True, True))
@@ -660,7 +660,7 @@ Import Commands:
     def call(self, item, value, varname="x"):
         """Evaluates An Item With A Value."""
         out = self.e.call(item, value, varname)
-        if out == None:
+        if out is None:
             raise ExecutionError("NoneError", "Nothing to call")
         else:
             return out

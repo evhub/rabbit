@@ -29,7 +29,7 @@ class terminal(object):
     """Wraps Base Terminal Commands To Create A Fake Console."""
     def __init__(self, display=None, doshow=True, color=None):
         """Base Constructure For The Terminal Wrapper."""
-        if display != None:
+        if display is not None:
             print(str(display))
         self.clear()
         self.doshow = bool(doshow)
@@ -51,7 +51,7 @@ class terminal(object):
         """Prints A Message."""
         if self.doshow:
             newmessage = ""
-            if message != None:
+            if message is not None:
                 newmessage += str(message)
             for x in messages:
                 newmessage += " " + str(x)
@@ -70,13 +70,13 @@ class console(object):
     def __init__(self, root, display=None, height=35, width=100, side="bottom", doshow=True, **kwargs):
         """Base Constructor For The Fake Console."""
         self.message = Tkinter.StringVar()
-        if display != None:
+        if display is not None:
             self.message.set(str(display))
         self.history = []
         height = int(height)
-        if height != None:
+        if height is not None:
             kwargs["height"] = int(height)
-        if width != None:
+        if width is not None:
             width = int(width)
             kwargs["width"] = width
             kwargs["wraplength"] = width*8
@@ -102,7 +102,7 @@ class console(object):
         """Displays A Message."""
         if self.doshow:
             newmessage = "\n"
-            if message != None:
+            if message is not None:
                 newmessage += str(message)
             for x in messages:
                 newmessage += " " + str(x)
@@ -159,7 +159,7 @@ class console(object):
 
     def dobind(self, tobind=None):
         """Makes The Conventional Bindings."""
-        if tobind == None:
+        if tobind is None:
             tobind = self.text
         tobind.bind("<MouseWheel>", self.scroll)
         tobind.bind("<Tab>", lambda event: self.drop())
@@ -167,16 +167,16 @@ class console(object):
 
 def startconsole(handler=None, message=None, name="PythonPlus", height=None, root=None):
     """Initializes An Instance Of The Fake Console."""
-    if root == None:
+    if root is None:
         root = Tkinter.Tk()
     rootbind(root)
     root.title(str(name))
-    if height != None:
+    if height is not None:
         app = console(root, message, height)
     else:
         app = console(root, message)
     app.dobind()
-    if handler != None:
+    if handler is not None:
         box = entry(app)
         box.dobind(handler)
         return root, app, box
@@ -185,14 +185,14 @@ def startconsole(handler=None, message=None, name="PythonPlus", height=None, roo
 
 def rootbind(root, handler=None):
     """Makes The Conventional Root Bindings."""
-    if handler == None:
+    if handler is None:
         handler = root.destroy
     root.bind("<Escape>", lambda event: handler())
     root.protocol("WM_DELETE_WINDOW", handler)
 
 def popup(which, message, title=None):
     """Displays A Pop-Up Message."""
-    if title == None:
+    if title is None:
         title = which
     which = superformat(which)
     if which == "info":
@@ -226,7 +226,7 @@ class entry(object):
             root = app
         else:
             root = app.main
-        if width != None:
+        if width is not None:
             kwargs["width"] = int(width)
         self.main = Tkinter.Entry(root, **kwargs)
         if pack:
@@ -297,23 +297,23 @@ class entry(object):
 
     def dobind(self, handler=None, tobind=None):
         """Makes The Conventional Bindings."""
-        if tobind == None:
+        if tobind is None:
             tobind = self.main
         tobind.bind("<Up>", lambda event: self.back())
         tobind.bind("<Down>", lambda event: self.forth())
         tobind.bind("<Control-z>", lambda event: self.main.delete(0, "end"))
         tobind.bind("<Control-f>", lambda event: self.clean())
-        if handler != None:
+        if handler is not None:
             tobind.bind("<Return>", handler)
 
 class texter(object):
     """A Graphical Class That Allows The Use Of A Text Entry Area."""
     def __init__(self, root, width=100, y=None, pack=True, scroll=False, **kwargs):
         """Initializes A Text Entry Area."""
-        if y != None:
+        if y is not None:
             kwargs["height"] = y
         if scroll:
-            if width != None:
+            if width is not None:
                 width = int(width)
                 self.frame = Tkinter.Frame(root, width=width+1)
                 kwargs["width"] = width
@@ -327,7 +327,7 @@ class texter(object):
             if pack:
                 self.frame.pack(side="bottom", fill="both")
         else:
-            if width != None:
+            if width is not None:
                 kwargs["width"] = int(width)
             self.main = Tkinter.Text(root, **kwargs)
             if pack:
@@ -427,7 +427,7 @@ class texter(object):
 class button(object):
     """A Graphical Class That Implements A Button."""
     def __init__(self, root, text, command, default=None, pack=True, **kwargs):
-        if default != None:
+        if default is not None:
             kwargs["default"] = default
         self.main = Tkinter.Button(root, text=str(text), command=command, **kwargs)
         if pack:
@@ -460,9 +460,9 @@ class displayer(object):
 
     def new(self, photo, x=None, y=None):
         """Displays An Image."""
-        if x == None:
+        if x is None:
             x = self.x/2
-        if y == None:
+        if y is None:
             y = self.y/2
         if typestr(photo) != "instance":
             photo = openphoto(str(photo))

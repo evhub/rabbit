@@ -32,7 +32,7 @@ class random(object):
     def __init__(self, key=None, debug=False):
         """Initializes The Random Number Generator."""
         self.debug = bool(debug)
-        if key == None:
+        if key is None:
             self.key = os.urandom(16)
         else:
             self.key = hashlib.md5(key).digest()

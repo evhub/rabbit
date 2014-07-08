@@ -59,7 +59,7 @@ def getfile(filename, opentype="r+b"):
 
 def runfile(filename, currentos=None):
     """Opens A File With Its Default Program."""
-    if currentos == None:
+    if currentos is None:
         currentos = getos()
     else:
         currentos = str(currentos)
@@ -86,7 +86,7 @@ def openzip(filename, mode="r"):
 
 def unzip(openzip, path=None):
     """Unzips A Zip File."""
-    if path == None:
+    if path is None:
         path = os.getcwd()
     else:
         makedir(path)

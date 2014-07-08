@@ -175,7 +175,7 @@ Import Commands:
             testy = self.saferun(function, testx)
             if self.returned == 1:
                 break
-            elif testy != None and testy != matrix(0):
+            elif testy is not None and testy != matrix(0):
                 self.singlerender(testx, testy)
             testx += self.xstretch
         self.returned = 1
@@ -188,7 +188,7 @@ Import Commands:
             testx = self.saferun(function, testy)
             if self.returned == 1:
                 break
-            elif testx != None and testx != matrix(0):
+            elif testx is not None and testx != matrix(0):
                 self.singlerender(testx, testy)
             testy += self.xstretch
         self.returned = 1
@@ -196,7 +196,7 @@ Import Commands:
     def atrender(self, x, function):
         """Renders A Function At A Point."""
         y = self.saferun(function, x)
-        if y != None:
+        if y is not None:
             self.pointrender(x,y)
 
     def pointrender(self, x, y):
@@ -214,7 +214,7 @@ Import Commands:
     def atswaprender(self, y, function):
         """Renders The Inverse Of A Function At A Point."""
         x = self.saferun(function, y)
-        if x != None:
+        if x is not None:
             self.pointrender(x,y)
 
     def gridpoint(self, x=0, y=0):
@@ -479,7 +479,7 @@ Import Commands:
                 stop = self.calc("stop")
                 while angle < stop:
                     r = self.call(item, angle)
-                    if r != None:
+                    if r is not None:
                         self.singlerender(math.cos(angle)*r, math.sin(angle)*r)
                     angle += inter
                 return True

@@ -30,7 +30,7 @@ class fakelist(cotobject):
         self.length = int(length)
         self.default = default
         self.a = {}
-        if inputlist != None:
+        if inputlist is not None:
             self.extend(inputlist)
 
     def __len__(self):
@@ -68,7 +68,7 @@ class fakelist(cotobject):
 
     def new(self, length=None, inputlist=None):
         """Creates An Empty Fake List With The Same Parameters."""
-        if length == None:
+        if length is None:
             length = len(self)
         return fakelist(inputlist, self.default, length)
 
@@ -116,7 +116,7 @@ class fakelist(cotobject):
 
     def __contains__(self, other):
         """Determins If The Fake List Contains A Value."""
-        if other == self.default and self.firstdefault != None:
+        if other == self.default and self.firstdefault is not None:
             return True
         else:
             for x in self.a:
@@ -218,7 +218,7 @@ class fakelist(cotobject):
         out = []
         if item == self.default:
             test = self.firstdefault()
-            if test != None:
+            if test is not None:
                 out.append(test)
         for x in self.a:
             if self[x] == item:
@@ -233,7 +233,7 @@ class fakelist(cotobject):
 
     def pop(self, x=None):
         """Pops The Item At The Index."""
-        if x == None:
+        if x is None:
             x = -1
         else:
             x = int(x)

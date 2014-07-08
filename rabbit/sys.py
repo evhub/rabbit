@@ -30,14 +30,14 @@ import time
 def compute(inputstring, extras=None, builtins=None):
     """Evaluates Code In A Safe Environment."""
     inputstring = str(inputstring)
-    if extras == None:
+    if extras is None:
         extras = {}
     extras["__builtins__"] = builtins
     return eval(inputstring, extras)
 
 def runcode(code, extras=None):
     """Executes Code With Access Only To Global Variables."""
-    if extras == None:
+    if extras is None:
         exec str(code) in globals()
     else:
         exec str(code) in globals(), extras
@@ -49,7 +49,7 @@ def runcmd(command):
 def dirimport(modname, directory=None):
     """Allows Importing Of A Remote Module."""
     modname = str(modname)
-    if directory != None:
+    if directory is not None:
         filename, pathname, description = imp.find_module(modname, [directory])
     else:
         filename, pathname, description = imp.find_module(modname)
@@ -57,7 +57,7 @@ def dirimport(modname, directory=None):
 
 def scan(variables=None, lenfunc=len):
     """Scans Variables To Analyze Memory Allocation."""
-    if variables == None:
+    if variables is None:
         variables = globals()
     out = []
     for x in variables:
@@ -80,7 +80,7 @@ def printret(*args):
 
 def getos(findos=None):
     """Determines The Current Operating System."""
-    if findos == None:
+    if findos is None:
         osname = os.name
         if osname in ["nt", "win"]:
             return "win."+osname

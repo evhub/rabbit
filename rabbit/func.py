@@ -68,7 +68,7 @@ def merge(inputlist):
 
 def varproc(variables):
     """Processes A Set Of Variables."""
-    if variables == None or islist(variables) or isinstance(variables, dict):
+    if variables is None or islist(variables) or isinstance(variables, dict):
         return variables
     elif isinstance(variables, matrix):
         return variables.getitems()
@@ -102,7 +102,7 @@ class funcfloat(numobject):
     def call(self, variables):
         """Calls The Float Function."""
         variables = varproc(variables)
-        if variables == None:
+        if variables is None:
             return self
         else:
             return self.func(variables)
@@ -191,17 +191,17 @@ class strfunc(funcfloat):
             self.name = str(name)
         else:
             self.name = self.autoarg
-        if allargs != None:
+        if allargs is not None:
             self.allargs = str(allargs)
         self.variables = variables[:]
-        if overflow == None:
+        if overflow is None:
             self.overflow = True
         else:
             self.overflow = bool(overflow)
         if self.overflow and self.allargs in self.variables:
             self.variables.remove(self.allargs)
             self.overflow = False
-        if personals == None:
+        if personals is None:
             self.personals = {}
         else:
             self.personals = dict(personals)
@@ -229,7 +229,7 @@ class strfunc(funcfloat):
     def call(self, variables):
         """Calls The String Function."""
         variables = varproc(variables)
-        if variables == None:
+        if variables is None:
             return self
         else:
             allvars = diagmatrixlist(variables)
@@ -359,17 +359,17 @@ class strfloat(strfunc):
             self.name = str(name)
         else:
             self.name = self.autoarg
-        if allargs != None:
+        if allargs is not None:
             self.allargs = str(allargs)
         self.variables = variables[:]
-        if overflow == None:
+        if overflow is None:
             overflow = True
         else:
             overflow = bool(overflow)
         if overflow and self.allargs in self.variables:
             self.variables.remove(self.allargs)
             overflow = False
-        if personals == None:
+        if personals is None:
             personals = {}
         else:
             personals = dict(personals)
@@ -532,11 +532,11 @@ class usefunc(funcfloat):
         """Creates A Callable Function."""
         self.overflow = bool(overflow)
         self.funcstr = str(funcstr)
-        if variables == None:
+        if variables is None:
             self.variables = ["x"]
         else:
             self.variables = variables
-        if extras == None:
+        if extras is None:
             self.extras = {}
         else:
             self.extras = dict(extras)
@@ -562,7 +562,7 @@ class usefunc(funcfloat):
     def call(self, params):
         """Calls The Function."""
         params = varproc(params)
-        if params == None:
+        if params is None:
             return strfloat(self.funcstr+":"+strlist(self.variables,":"), self.e, self.variables)
         elif len(params) < len(self.variables):
             for x in xrange(len(params), len(self.variables)):
@@ -594,7 +594,7 @@ class unifunc(funcfloat):
     def call(self, args):
         """Performs A Universalized Function Call."""
         args = varproc(args)
-        if args == None:
+        if args is None:
             return strfloat(self.funcstr+":x", self.e, ["x"])
         elif islist(args):
             x = args[0]
@@ -628,7 +628,7 @@ class makefunc(funcfloat):
     def call(variables):
         """Calls The Evaluator Function."""
         variables = varproc(variables)
-        if variables == None:
+        if variables is None:
             return strfloat(self.funcstr+":x", self.e, ["x"])
         elif len(variables) == 0:
             return matrix(0)
@@ -646,7 +646,7 @@ class derivbase(object):
     def calc(self, x=None):
         """Calculates The Derivative Function."""
         items = dict(self.personals)
-        if x == None:
+        if x is None:
             return self.call([])
         else:
             items[self.variables[0]] = float(x)
@@ -662,7 +662,7 @@ class derivbase(object):
     def call(self, variables):
         """Calls The Derivative Function."""
         variables = varproc(variables)
-        if variables == None:
+        if variables is None:
             return self
         elif len(variables) == 0:
             return matrix(0)
@@ -675,7 +675,7 @@ class integbase(derivbase):
 
     def call(self, variables):
         """Calls The Integral Function."""
-        if variables == None:
+        if variables is None:
             return self
         elif len(variables) < 2:
             return matrix(0)
@@ -696,7 +696,7 @@ class derivfunc(derivbase, strfunc):
         self.accuracy = float(accuracy)
         self.scaledown = float(scaledown)
         self.variables = [str(varname)]
-        if personals == None:
+        if personals is None:
             self.personals = {}
         else:
             self.personals = dict(personals)
@@ -722,7 +722,7 @@ class integfunc(integbase, strfunc):
         self.funcstr = str(funcstr)
         self.accuracy = float(accuracy)
         self.variables = [str(varname)]
-        if personals == None:
+        if personals is None:
             self.personals = {}
         else:
             self.personals = dict(personals)
@@ -757,7 +757,7 @@ class derivfuncfloat(derivbase, funcfloat):
 
     def calc(self, x=None):
         """Calculates The Derivative Function."""
-        if x == None:
+        if x is None:
             return self.func.call([])
         else:
             return self.func.call([x])
@@ -786,7 +786,7 @@ class classcalc(cotobject):
         """Initializes The Class."""
         self.e = e
         self.variables = {"__self__": self}
-        if variables != None:
+        if variables is not None:
             self.add(variables)
 
     def getstate(self):
@@ -991,7 +991,7 @@ class instancecalc(numobject, classcalc):
     def __init__(self, e, variables, parent=None):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
-        if parent == None:
+        if parent is None:
             self.parent = variables
         else:
             self.parent = parent
@@ -1110,7 +1110,7 @@ class instancecalc(numobject, classcalc):
     def call(self, variables):
         """Calls The Function."""
         func = self.tryget("__call__")
-        if func == None:
+        if func is None:
             raise ExecutionError("ClassError", "The class being called has no __call__ method")
         else:
             return self.domethod(func, variables)
@@ -1122,7 +1122,7 @@ class instancecalc(numobject, classcalc):
     def tomatrix(self):
         """Converts To Matrix."""
         func = self.tryget("__cont__")
-        if func == None:
+        if func is None:
             raise ExecutionError("ClassError", "The class being converted to a container has no __cont__ method")
         else:
             return self.domethod(func)
@@ -1421,7 +1421,7 @@ class instancecalc(numobject, classcalc):
             check_cont = self.tryget("__cont__")
             if check_cont:
                 out = len(self.domethod(check_cont))
-        if out == None:
+        if out is None:
             raise ExecutionError("ClassError", "Insufficient methods defined for length")
         else:
             return int(out)
@@ -1436,7 +1436,7 @@ class instancecalc(numobject, classcalc):
             check_num = self.tryget("__num__")
             if check_num:
                 out = self.domethod(check_num)
-        if out == None:
+        if out is None:
             try:
                 out = len(self) > 0
             except ExecutionError:

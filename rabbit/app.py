@@ -31,7 +31,7 @@ class base(object):
     def __init__(self, name="PythonPlus Application", message="Welcome!", height=None, debug=False, *initializers):
         """Initializes A PythonPlus Application."""
         self.debug = bool(debug)
-        if height == None:
+        if height is None:
             self.root, self.app, self.box = startconsole(self.handler, str(message), str(name))
         else:
             self.root, self.app, self.box = startconsole(self.handler, str(message), str(name), int(height))
@@ -81,7 +81,7 @@ class base(object):
     def die(self, error=None):
         """Kills The App With An Error."""
         self.root.destroy()
-        if error != None:
+        if error is not None:
             raise error
         else:
             raise IOError("Application was killed.")
@@ -93,14 +93,14 @@ class safebase(base):
     def __init__(self, name="PythonPlus Application", message="Welcome!", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A Safe PythonPlus Application"""
         self.debug = bool(debug)
-        if height == None:
+        if height is None:
             self.root, self.app, self.box = startconsole(self.handler, str(message), str(name))
         else:
             self.root, self.app, self.box = startconsole(self.handler, str(message), str(name), int(height))
         self.returned = 0
         self.show = self.app.display
         self.errorlog = {}
-        if helpstring != None:
+        if helpstring is not None:
             self.helpstring = str(helpstring)
         if initializers == ():
             self.initialize()
@@ -163,7 +163,7 @@ class serverbase(base):
         """Creates The Server Or Client."""
         self.ready = False
         self.debug = bool(debug)
-        if height == None:
+        if height is None:
             self.root, self.app, self.box = startconsole(self.handler, str(message), str(name))
         else:
             self.root, self.app, self.box = startconsole(self.handler, str(message), str(name), int(height))
@@ -300,7 +300,7 @@ class serverbase(base):
                 if len(self.c.items[a]) == 0:
                     extra = False
                     break
-        elif self.server != None:
+        elif self.server is not None:
             extra = len(self.c.items) > 0
         else:
             extra = False
@@ -324,7 +324,7 @@ class serverbase(base):
                     test = test.strip(empty)
                     if test:
                         self.addsent((test,a))
-        elif self.server != None:
+        elif self.server is not None:
             for test in self.cget():
                 test = test.strip(empty)
                 if test:
@@ -361,7 +361,7 @@ class serverbase(base):
             for a in self.c.c:
                 if (not to or a == to) and (not exempt or a != exempt):
                     self.queue[a].append(item)
-        elif self.server != None:
+        elif self.server is not None:
             self.queue.append(item)
         else:
             return False
@@ -378,7 +378,7 @@ class serverbase(base):
                     out.append(("", a))
                 else:
                     out.append((self.sent[a].pop(0), a))
-        elif self.server != None:
+        elif self.server is not None:
             if len(self.sent) == 0:
                 out = ""
             else:
@@ -392,7 +392,7 @@ class serverbase(base):
                 if len(self.sent[a]) == 0:
                     return False
             return True
-        elif self.server != None:
+        elif self.server is not None:
             return len(self.sent) > 0
         else:
             return None
@@ -403,7 +403,7 @@ class serverbase(base):
             while not self.responded():
                 self.update()
             return self.getsent()
-        elif self.server != None:
+        elif self.server is not None:
             while not self.responded():
                 self.update()
             return self.getsent()
@@ -421,7 +421,7 @@ class serverbase(base):
         item = str(item)
         if self.server:
             out = self.chat(item, self.names[None])
-        elif self.server != None:
+        elif self.server is not None:
             out = self.chat(item, self.name)
         else:
             return False
@@ -430,7 +430,7 @@ class serverbase(base):
 
     def broadcast(self, item, to=None, exempt=None, display=True):
         """Broadcasts A Message."""
-        if self.server == None:
+        if self.server is None:
             return False
         else:
             item = str(item)
@@ -461,7 +461,7 @@ class serverbase(base):
                 self.printdebug(":: "+str(key)+" : "+str(item))
             else:
                 self.sent[a].append(item)
-        elif self.server != None:
+        elif self.server is not None:
             item = str(item)
             if item.startswith("+:"):
                 self.app.display(item[2:])
@@ -495,7 +495,7 @@ class serverbase(base):
                         break
             for a in self.sent:
                 self.sent[a].remove(test)
-        elif self.server != None:
+        elif self.server is not None:
             self.send(test)
             while not test in self.sent:
                 self.update()
@@ -506,7 +506,7 @@ class serverbase(base):
 
     def disconnect(self, arg=None, a=None):
         """Disconnects From The Server Or Clients."""
-        if self.server != None:
+        if self.server is not None:
             self.app.display("Disconnecting...")
             if self.server:
                 self.trigger("x")
@@ -519,7 +519,7 @@ class serverbase(base):
     def retrieve(self, a=None):
         """Retrieves A Message At A Base Level."""
         try:
-            if a == None:
+            if a is None:
                 out = self.c.retrieve(self.root.update)
             else:
                 out = self.c.retrieve(a, self.root.update)
@@ -531,7 +531,7 @@ class serverbase(base):
     def cget(self, a=None):
         """Retrieves Messages At A Base Level."""
         try:
-            if a == None:
+            if a is None:
                 out = self.c.getitems(self.root.update)
             else:
                 out = self.c.getitems(a, self.root.update)

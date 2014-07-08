@@ -85,7 +85,7 @@ Import Commands:
         self.box.colortag("search", highlight="yellow")
         self.populator()
         self.printdebug(": ON")
-        if helpstring != None:
+        if helpstring is not None:
             self.helpstring = str(helpstring)
         if initializers == ():
             self.initialize()

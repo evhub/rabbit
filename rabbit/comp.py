@@ -32,7 +32,7 @@ class compiler(commandline):
 
     def __init__(self, debugcolor="lightred", prompt=addcolor("Rabbit:", "pink")+" ", nprompt=addcolor(">>>", "pink")+" ", outcolor="cyan", terminate=None, *initializers):
         """Initializes The Command Line Interface."""
-        if terminate != None:
+        if terminate is not None:
             self.terminate = bool(terminate)
         self.app = terminal()
         self.populator()
@@ -170,7 +170,7 @@ class compiler(commandline):
             if delspace(original) != "":
                 original = basicformat(original)
                 for func in self.cmds:
-                    if func(original) != None:
+                    if func(original) is not None:
                         name = namestr(func).split("_")[-1]
                         if self.compiling and self.top:
                             if name == "make":
@@ -191,7 +191,7 @@ class compiler(commandline):
         """Evaluates Functions."""
         self.returned = 0
         test = self.calc(original)
-        if test != None:
+        if test is not None:
             return True
 
     def getstates(self, variables):

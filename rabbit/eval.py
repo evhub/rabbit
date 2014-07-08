@@ -84,7 +84,7 @@ Global Operator Precedence List:
         self.color = color
         self.funcs = evalfuncs(self)
         self.fresh()
-        if variables != None:
+        if variables is not None:
             self.makevars(variables)
         self.calls = [
             self.call_var,
@@ -273,7 +273,7 @@ Global Operator Precedence List:
 
     def prepare(self, item, top=False, bottom=True, indebug=False, maxrecursion=None):
         """Prepares The Output Of An Evaluation."""
-        if maxrecursion == None:
+        if maxrecursion is None:
             maxrecursion = self.maxrecursion
         if self.speedy and indebug:
             out = self.speedyprep(item, top, bottom, True, maxrecursion)
@@ -882,7 +882,7 @@ Global Operator Precedence List:
                     dostr += 1
                 elif isinstance(x, matrix):
                     dodata += 1
-                    if rowlen == None:
+                    if rowlen is None:
                         rowlen = x.x
                     if x.x == rowlen:
                         domatrix += 1
@@ -1031,7 +1031,7 @@ Global Operator Precedence List:
         self.recursion += 1
         for func in self.calls:
             value = func(inputstring)
-            if value != None:
+            if value is not None:
                 break
         out = self.eval_check(value)
         self.printdebug(self.prepare(out, False, True, True)+" <- "+inputstring+" | "+namestr(func).split("_")[-1])
@@ -1040,7 +1040,7 @@ Global Operator Precedence List:
 
     def eval_check(self, value, top=False):
         """Checks A Value."""
-        if value == None:
+        if value is None:
             return matrix(0)
         elif top and isinstance(value, reciprocal):
             return value.calc()
@@ -1060,7 +1060,7 @@ Global Operator Precedence List:
                     return float(value)
                 else:
                     return matrix(0)
-            elif hasreal(value) != None:
+            elif hasreal(value) is not None:
                 return self.eval_check(float(value))
             else:
                 raise ExecutionError("VariableError", "Unable to process "+str(value))
@@ -1391,7 +1391,7 @@ Global Operator Precedence List:
 
     def call(self, item, value, varname=None):
         """Evaluates An Item With A Value."""
-        if varname == None:
+        if varname is None:
             varname = self.varname
         if isnull(item):
             return None
@@ -1522,7 +1522,7 @@ class evalfuncs(object):
 
     def iserrcall(self, variables):
         """Determines Whether Something Is An Error."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             check = self.e.funcfind("error")
@@ -1568,7 +1568,7 @@ class evalfuncs(object):
 
     def brackcall(self, variables):
         """Evaluates Brackets."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             return rowmatrixlist(variables)
@@ -1646,7 +1646,7 @@ class evalfuncs(object):
 
     def sumcall(self, variables):
         """Finds A Sum."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             value = 0.0
@@ -1660,7 +1660,7 @@ class evalfuncs(object):
 
     def prodcall(self, variables):
         """Finds A Product."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             value = 1.0
@@ -1704,7 +1704,7 @@ class evalfuncs(object):
 
     def findcall(self, variables):
         """Finds Equivalencies."""
-        if variables != None and len(variables) >= 2:
+        if variables is not None and len(variables) >= 2:
             variables[1] = getmatrix(variables[1])
             if variables[1].onlydiag():
                 for x in xrange(0, variables[1].lendiag()):
@@ -1725,14 +1725,14 @@ class evalfuncs(object):
 
     def sizecall(self, variables):
         """Finds A Size."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             return totlen(diagmatrixlist(variables))
 
     def lencall(self, variables):
         """Finds A Length."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             tot = 0.0
@@ -1763,7 +1763,7 @@ class evalfuncs(object):
 
     def roundcall(self, variables):
         """Performs round."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         elif len(variables) == 0:
             return 0.0
@@ -1774,7 +1774,7 @@ class evalfuncs(object):
 
     def numcall(self, variables, new=True, func=makenum):
         """Performs float."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         elif len(variables) == 0:
             return 0.0
@@ -1799,7 +1799,7 @@ class evalfuncs(object):
 
     def imagcall(self, variables, new=True):
         """Performs Im."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         elif len(variables) == 0:
             return complex(0.0, 1.0)
@@ -1820,7 +1820,7 @@ class evalfuncs(object):
 
     def splitcall(self, variables):
         """Performs split."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             variables[0] = collapse(variables[0])
@@ -1857,7 +1857,7 @@ class evalfuncs(object):
 
     def replacecall(self, variables):
         """Performs replace."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             variables[0] = collapse(variables[0])
@@ -1950,7 +1950,7 @@ class evalfuncs(object):
 
     def containscall(self, variables):
         """Performs contains."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         elif len(variables) > 1:
             variables[0] = collapse(variables[0])
@@ -1966,7 +1966,7 @@ class evalfuncs(object):
 
     def typecall(self, variables):
         """Finds Types."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         elif len(variables) == 0:
             return self.e.typecalc(matrix(0))
@@ -2031,7 +2031,7 @@ class evalfuncs(object):
 
     def strcall(self, variables):
         """Finds A String."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             out = ""
@@ -2041,7 +2041,7 @@ class evalfuncs(object):
 
     def reprcall(self, variables):
         """Finds A Representation."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             out = ""
@@ -2051,7 +2051,7 @@ class evalfuncs(object):
 
     def joincall(self, variables):
         """Joins Variables By A Delimiter."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         elif len(variables) < 2:
             return rawstrcalc("", self.e)
@@ -2069,7 +2069,7 @@ class evalfuncs(object):
 
     def abscall(self, variables):
         """Performs abs."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         elif len(variables) == 1:
             return abs(variables[0])
@@ -2078,7 +2078,7 @@ class evalfuncs(object):
 
     def datacall(self, variables):
         """Performs data."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         elif len(variables) == 1 and isinstance(variables[0], data):
             return variables[0]
@@ -2093,7 +2093,7 @@ class evalfuncs(object):
 
     def fractcall(self, variables, dosimp=False):
         """Performs frac."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         elif len(variables) == 0:
             return fraction()
@@ -2114,7 +2114,7 @@ class evalfuncs(object):
 
     def simpcall(self, variables):
         """Simplifies Fractions."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             out = self.fractcall(variables, True)
@@ -2123,7 +2123,7 @@ class evalfuncs(object):
 
     def docalc(self, variables):
         """Performs calc."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             out = []
@@ -2136,7 +2136,7 @@ class evalfuncs(object):
 
     def evalcall(self, variables):
         """Performs eval."""
-        if variables == None:
+        if variables is None:
             return matrix(0)
         else:
             out = []
@@ -2150,7 +2150,7 @@ class evalfuncs(object):
 
     def cmdcall(self, variables):
         """Performs proc."""
-        if variables != None:
+        if variables is not None:
             for item in variables:
                 self.e.processor.process(self.e.prepare(item, False, False))
         return matrix(0)
@@ -2181,12 +2181,12 @@ class evalfuncs(object):
                     return matrix(0)
                 else:
                     items = item.getitems()
-                    if start == None:
+                    if start is None:
                         start = items.pop(0)
                     for x in items:
                         start = func([start, x])
                     return start
-            elif start != None:
+            elif start is not None:
                 return func([start, item])
             else:
                 return item

@@ -31,7 +31,7 @@ class encoder(object):
         self.charlist = []
         for x in string.printable:
             self.charlist.append(x)
-        if key == None:
+        if key is None:
             self.key = random().getraw()
         else:
             self.key = key
@@ -101,7 +101,7 @@ class encoder(object):
 
     def stream(self, inputint, entropy="", length=None):
         """Encodes An Integer Into Another Integer."""
-        if length == None:
+        if length is None:
             length = inputint.bit_length()
         gen = random(entropy+str(self.level)+str(length)+self.key)
         for x in xrange(0, self.level):
@@ -132,7 +132,7 @@ def keyexchange(send, receive, privatekey=None,
                 prime=2410312426921032588552076022197566074856950548502459942654116941958108831682612228890093858261341614673227141477904012196503648957050582631942730706805009223062734745341073406696246014589361659774041027169249453200378729434170325843778659198143763193776859869524088940195577346119843545301547043747207749969763750084308926339295559968882457872412993810129130294592999947926365264059284647209730384947211681434464714438488520940127459844288859336526896320919633919,
                 generator=2):
     """Performs A Diffie-Hellman Key Exchange."""
-    if privatekey == None:
+    if privatekey is None:
         privatekey = random().get()
     send(str(pow(generator, privatekey, prime)))
     return pow(int(receive()), privatekey, prime)

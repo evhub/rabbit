@@ -30,7 +30,7 @@ class matrix(mctobject):
     def __init__(self, y, x=None, empty=0.0, converter=float, fake=False):
         """Constructs The Matrix."""
         self.y = int(y)
-        if x == None:
+        if x is None:
             self.x = self.y
         else:
             self.x = int(x)
@@ -61,7 +61,7 @@ class matrix(mctobject):
 
     def new(self, y=None, x=None, fake=None):
         """Creates A New Matrix With The Same Basic Attributes."""
-        if fake == None:
+        if fake is None:
             fake = self.onlydiag()
         return matrix(y or self.y, x or self.x, converter=self.converter, fake=fake)
 
@@ -89,7 +89,7 @@ class matrix(mctobject):
 
     def convert(self, converter=None):
         """Converts All The Values Using The Converter."""
-        if converter != None:
+        if converter is not None:
             self.converter = converter
         self.code(self.prepare)
 
@@ -99,7 +99,7 @@ class matrix(mctobject):
 
     def retrieve(self, y=0, x=None):
         """Retrieves A Value."""
-        if x == None:
+        if x is None:
             x = y
         return self.a[int(y)][int(x)]
 
@@ -430,7 +430,7 @@ class matrix(mctobject):
 
     def getaugment(self, auglen=None):
         """Gets The Augment."""
-        if auglen == None:
+        if auglen is None:
             auglen = self.x-self.y
         else:
             auglen = int(auglen)
@@ -631,7 +631,7 @@ class matrix(mctobject):
 
     def chisq(self, expected=None):
         """Calculates Chi Squared For Independence."""
-        if expected == None:
+        if expected is None:
             expected = self.indep()
         if self.y == expected.y and self.x == expected.x:
             tot = 0.0
@@ -651,7 +651,7 @@ def diagmatrix(size=2, full=1.0, empty=0.0, converter=float, fake=True):
 
 def matrixitems(inputitems, y, x=None, converter=float, fake=False):
     """Constructs A Matrix From Items."""
-    if x == None:
+    if x is None:
         x = len(inputitems)/y
     out = matrix(y, x, converter=converter, fake=fake)
     z = 0
@@ -670,7 +670,7 @@ def domatrixlist(inputlist, converter=float):
 
 def diagmatrixlist(inputlist, converter=float, func=None, fake=True):
     """Constructs A Diagonal Matrix From A List."""
-    if func == None:
+    if func is None:
         func = diagmatrixlist
     out = matrix(len(inputlist), converter=converter, fake=fake)
     for x in xrange(0, len(inputlist)):
@@ -681,7 +681,7 @@ def diagmatrixlist(inputlist, converter=float, func=None, fake=True):
 
 def rowmatrixlist(inputlist, converter=float, func=None, fake=False):
     """Constructs A Row Matrix From A List."""
-    if func == None:
+    if func is None:
         func = rowmatrixlist
     out = matrix(1, len(inputlist), converter=converter, fake=fake)
     for x in xrange(0, len(inputlist)):
@@ -701,7 +701,7 @@ def matrixstr(inputstr, converter=float):
 
 def matrixlist(inputlist, converter=float, fake=False):
     """Converts A List Of Lists Into A Matrix."""
-    if converter == None:
+    if converter is None:
         converter = type(inputlist[0][0])
     xlen = len(inputlist[0])
     for x in xrange(1,len(inputlist)):

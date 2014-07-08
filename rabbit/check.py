@@ -59,7 +59,7 @@ def hasmatrix(inputobject):
 def isreal(value, start=float("-inf"), end=float("inf"), mid=0.0):
     """Tests To See If A Value Is A Real."""
     value = hasreal(value)
-    if value != None:
+    if value is not None:
         if start < value and value < end and (value <= mid or value >= mid):
             return value
         else:
@@ -73,7 +73,7 @@ def getnum(inputobject):
         return getnum(inputobject.real)
     else:
         value = isreal(inputobject)
-        if value == None:
+        if value is None:
             return 0.0
         else:
             return value

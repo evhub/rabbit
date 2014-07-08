@@ -29,7 +29,7 @@ class pathfinder(cotobject):
     def __init__(self, paths=None, debug=False):
         """Initializes The Paths."""
         self.debug = bool(debug)
-        if paths == None:
+        if paths is None:
             self.paths = []
         else:
             self.paths = paths

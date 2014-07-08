@@ -27,7 +27,7 @@ import urllib
 
 def download(url, filename=None):
     """Downloads An Object Off The Web."""
-    if filename == None:
+    if filename is None:
         return urllib.urlretrieve(str(url))
     else:
         return urllib.urlretrieve(str(url), str(filename))
@@ -65,7 +65,7 @@ class server(object):
                     self.items.append(x[1:])
             if counter > limit:
                 raise IOError("Counter exceeds limit of "+str(limit))
-            elif refresh != None and len(self.items) == 0:
+            elif refresh is not None and len(self.items) == 0:
                 refresh()
         return self.items.pop(0)
     def getitems(self, refresh=None, limit=100):
@@ -142,7 +142,7 @@ class multiserver(server):
             self.items[address] = []
     def close(self, address=None):
         """Disconnects A Certain Client."""
-        if address == None:
+        if address is None:
             for a in self.c:
                 self.close(a)
         else:
@@ -171,7 +171,7 @@ class multiserver(server):
                     self.items[a].append(x[1:])
             if counter > limit:
                 raise IOError("Counter exceeds limit of "+str(limit))
-            elif refresh != None and len(self.items) == 0:
+            elif refresh is not None and len(self.items) == 0:
                 refresh()
         return self.items[a].pop(0)
     def getitems(self, a, refresh=None, limit=100):

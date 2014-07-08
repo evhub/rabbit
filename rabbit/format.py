@@ -88,14 +88,14 @@ def isno(inputstring, info=lists):
 
 def formatisyes(inputstring, info=None):
     """Determines If A String, When Formatted, Is Affirming."""
-    if info == None:
+    if info is None:
         return isyes(superformat(inputstring))
     else:
         return isyes(superformat(inputstring), info)
 
 def formatisno(inputstring, info=None):
     """Determines If A String, When Formatted, Is Negating."""
-    if info == None:
+    if info is None:
         return isno(superformat(inputstring))
     else:
         return isno(superformat(inputstring), info)
@@ -250,9 +250,9 @@ def dictstr(inputstring, keyconverter=None, termconverter=None, seperator=":", d
     outdict = {}
     for x in outlist:
         templist = x.split(seperator)
-        if keyconverter != None:
+        if keyconverter is not None:
             templist[0] = keyconverter(templist[0])
-        if termconverter != None:
+        if termconverter is not None:
             templist[1] = termconverter(templist[1])
         outdict[templist[0]] = templist[1]
     return outdict
@@ -335,7 +335,7 @@ def splitinplace(inputlist, findstr, reserved="", domod=None):
                     test.pop(i)
                     if i < len(test):
                         temp += 1
-                        if domod != None:
+                        if domod is not None:
                             temp %= domod
                         test[i] = temp*findstr+test[i]
                 else:

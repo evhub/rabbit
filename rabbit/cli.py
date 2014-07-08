@@ -31,7 +31,7 @@ class commandline(mathbase):
     def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", helpstring=None, debug=False, outcolor="cyan", debugcolor="lightred", terminate=None, *initializers):
         """Initializes The Command Line Interface."""
         self.debug = bool(debug)
-        if terminate != None:
+        if terminate is not None:
             self.terminate = bool(terminate)
         if message:
             message = str(message)
@@ -42,7 +42,7 @@ class commandline(mathbase):
         self.populator()
         self.e.color = debugcolor
         self.printdebug(": ON")
-        if helpstring != None:
+        if helpstring is not None:
             self.helpstring = str(helpstring)
         if initializers == ():
             self.initialize()
