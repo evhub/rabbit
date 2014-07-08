@@ -1127,6 +1127,9 @@ Global Operator Precedence List:
                     out = self.funcfind("error").call([])
                     out.store("name", strcalc(err[0], self))
                     out.store("message", strcalc(err[1], self))
+                    if len(err) > 2:
+                        for k,v in err[2].items():
+                            out.store(k, v)
                     return out
                 else:
                     return result
@@ -1477,7 +1480,12 @@ class evalfuncs(object):
                     message = self.e.prepare(message, False, False)
                 else:
                     message = "An error occured"
-                raise ExecutionError(name, message)
+                variables = variables[0].getvars()
+                if "name" in variables:
+                    del variables["name"]
+                if "message" in variables:
+                    del variables["message"]
+                raise ExecutionError(name, message, variables)
             else:
                 raise ExecutionError(self.e.prepare(variables[0], False, False), "An error occured")
         else:

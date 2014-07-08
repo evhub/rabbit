@@ -294,3 +294,10 @@ assert {x=1} >= {x=1}
 assert {x=1} <= {x=1}
 assert iserr(try:raise())
 assert :except( :(1/0) ) ?= :(1/0)
+assert :raise( ComplicatedError() ) ?= ComplicatedError()	$ ComplicatedError = error + {
+																						name = "ComplicatedError"
+																						message = "A complicated error occurred"
+																						metadata = {
+																							top = True
+																							}
+																						}
