@@ -237,7 +237,7 @@ class strfunc(funcfloat):
             if self.overflow:
                 items, self.e.overflow = useparams(variables, self.variables, matrix(0))
             else:
-                items, trash = useparams(variables, self.variables, matrix(0))
+                items, _ = useparams(variables, self.variables, matrix(0))
             items[self.allargs] = allvars
             for k in self.personals:
                 if (not k in items) or isnull(items[k]):

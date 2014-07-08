@@ -1362,7 +1362,7 @@ Global Operator Precedence List:
 
     def find(self, *args, **kwargs):
         """Wraps getfind."""
-        out, trash = self.getfind(*args, **kwargs)
+        out, _ = self.getfind(*args, **kwargs)
         return out
 
     def getfind(self, key, follow=False, destroy=False):
