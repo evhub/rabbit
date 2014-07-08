@@ -120,7 +120,7 @@ def catch(function, *args):
     except AssertionError as detail:
         err = ("AssertionError", detail)
     except ExecutionError as detail:
-        err = (detail.name, detail.message, detail.variables)
+        err = (detail.name, detail.message, detail.args)
     else:
         err = None
     return result, err
