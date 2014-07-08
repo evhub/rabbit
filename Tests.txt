@@ -110,23 +110,23 @@ assert type(nil) ?= "nil"
 assert nil.thing ?= "thing"
 assert nil(1,2) ?= 1,2
 assert cont(nil) ?= []
-assert nil+1 ?= 1
-assert nil-1 ?= -1
-assert nil*1 ?= 0
+assert nil+1 ?= 1 ?= 1+nil
+assert nil-1 ?= -1 ?= -(1-nil)
+assert nil*1 ?= 0 ?= 1*nil
 assert nil/1 ?= 0
-assert nil%1 ?= 0
-assert nil^1 ?= 0
 assert (:(1/nil)).name ?= "ZeroDivisionError"
+assert nil%1 ?= 0
 assert (:(1%nil)).name ?= "ZeroDivisionError"
+assert nil^1 ?= 0
 assert 1^nil ?= 1
+assert nil ?= 0 ?= nil
+assert nil != 1 != nil
+assert nil > -1 < nil
+assert nil < 1 > nil
+assert nil >= -.5 <= nil
+assert nil <= .5 >= nil
 assert num(nil) ?= 0
 assert abs(nil) ?= 0
-assert nil ?= 0
-assert nil != 1
-assert nil > -1
-assert nil < 1
-assert nil >= -.5
-assert nil <= .5
 assert str(nil) ?= "nil"
 assert repr(nil) ?= `\nil`
 assert len(nil) ?= 0
