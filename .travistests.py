@@ -24,28 +24,32 @@ from rabbit.all import *
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 print()
-cli = commandline(addcolor("Running Tests.txt...", "magenta"), debugcolor="red", terminate=True)
+cli = commandline(addcolor("Running Tests.txt...", "magenta"), debugcolor="red")
 cli.evalfile("Tests.txt")
-print(addcolor("Tests.txt Evaluation Complete.", "cyan"))
+print(addcolor("Tests.txt Evaluation Complete.", "magenta"))
 
 print()
 comp = compiler()
 print(addcolor("Compiling...", "magenta"))
 newvars = comp.disassemble(comp.assemble())[1]
-print(addcolor("Compiled.", "cyan"))
+print(addcolor("Compiled.", "magenta"))
 
 print(addcolor("Testing Compilation...", "magenta"))
 for k,v in comp.e.variables.items():
     nv = haskey(newvars, k)
     if v != nv:
-        print(addcolor("<!> For variable "+str(k)+" the old value of "+repr(v)+" is not equal to the new value "+repr(nv), "red"))
+        comp.printdebug(addcolor("<!> For variable "+str(k)+" the old value of "+repr(v)+" is not equal to the new value "+repr(nv), "red"))
 for k,v in newvars.items():
     ov = haskey(comp.e.variables, k)
     if v != ov:
-        print(addcolor("<!> For variable "+str(k)+" the new value of "+repr(v)+" is not equal to the old value "+repr(ov), "red"))
+        comp.printdebug(addcolor("<!> For variable "+str(k)+" the new value of "+repr(v)+" is not equal to the old value "+repr(ov), "red"))
 if not comp.e.variables == newvars:
-    raise ExecutionError("CompileError", "Decompiled variables failed to equal compiled variables.")
-print(addcolor("Compilation Testing Complete.", "cyan"))
+    comp.adderror("CompileError", "Decompiled variables failed to equal compiled variables")
+print(addcolor("Compilation Testing Complete.", "magenta"))
 
 print()
-print(addcolor("All Tests Pass.", "green"))
+if cli.errorlog or comp.errorlog:
+    print(addcolor("Some Tests Fail.", "red"))
+    raise ExecutionError("TestingError", "Not all tests passed, check logs for details")
+else:
+    print(addcolor("All Tests Pass.", "green"))

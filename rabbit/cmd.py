@@ -55,7 +55,7 @@ Import Commands:
     redef = False
     doshow = True
     top = False
-    terminate = False
+    errorlog = False
 
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, helpstring=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
@@ -96,13 +96,12 @@ Import Commands:
         """Adds An Error To The Log."""
         self.printdebug("<!> "+str(error)+": "+str(detail))
         self.dumpdebug()
-        if self.terminate:
-            raise ExecutionError(error, detail)
 
     def dumpdebug(self, top=False):
         """Dumps Debug Output."""
         if not top:
             self.show(strlist(self.e.debuglog, "\n"), True)
+            self.errorlog = True
         self.e.debuglog = []
 
     def appshow(self, arg, message=False):

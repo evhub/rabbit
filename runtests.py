@@ -27,5 +27,5 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
     main = commandline(addcolor("Running Tests...", "magenta"))
     main.evalfile("Tests.txt")
-    print(addcolor("Tests Complete.", "cyan"))
+    print(addcolor("Tests Complete.", "magenta"))
     main.start()

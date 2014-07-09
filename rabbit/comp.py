@@ -31,10 +31,8 @@ class compiler(commandline):
     doshow = False
     compiling = False
 
-    def __init__(self, debugcolor="lightred", prompt=addcolor("Rabbit:", "pink")+" ", nprompt=addcolor(">>>", "pink")+" ", outcolor="cyan", terminate=None, *initializers):
+    def __init__(self, debugcolor="lightred", prompt=addcolor("Rabbit:", "pink")+" ", nprompt=addcolor(">>>", "pink")+" ", outcolor="cyan", *initializers):
         """Initializes The Command Line Interface."""
-        if terminate is not None:
-            self.terminate = bool(terminate)
         self.app = terminal()
         self.populator()
         self.e.color = debugcolor
