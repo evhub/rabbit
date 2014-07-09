@@ -1029,7 +1029,7 @@ class rollfunc(strfunc):
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat(self.name+":(("+self.e.prepare(other, False, True)+")*"+self.variables[0]+")", self.e, self.variables, {self.name:self, self.variables[0]:1.0})
+            return strfunc(self.name+":(("+self.e.prepare(other, False, True)+")*"+self.variables[0]+")", self.e, self.variables, {self.name:self, self.variables[0]:1.0})
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
