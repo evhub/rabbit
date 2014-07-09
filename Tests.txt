@@ -306,3 +306,9 @@ assert :raise( ComplicatedError() ) ?= ComplicatedError()	$ ComplicatedError = e
 #assert ∌ ?= \__\!∋(__)										# FIXME: Broken
 #assert ∛ ?= \x\x^(1/3)										# FIXME: Broken
 #assert ∜ ?= \x\sqrt(sqrt(x))								# FIXME: Broken
+assert 3 ?= ((\x)+1):2
+assert 3 ?= (1+\x):2
+assert 4 ?= ((\x)*2):2
+assert 4 ?= (2*\x):2
+assert 9 ?= ((\x)^3):2
+assert 9 ?= (3^\x):2
