@@ -49,7 +49,7 @@ print(addcolor("Compilation Testing Complete.", "magenta"))
 
 print()
 if cli.errorlog or comp.errorlog:
-    print(addcolor("Some Tests Fail.", "red"))
-    raise ExecutionError("TestingError", "Not all tests passed, check logs for details")
+    print(addcolor("Some Tests Fail:", "red"))
+    raise ExecutionError("TestingError", "errors in cli"*cli.errorlog+", "*(cli.errorlog and comp.errorlog)+"errors in comp"*comp.errorlog)
 else:
     print(addcolor("All Tests Pass.", "green"))
