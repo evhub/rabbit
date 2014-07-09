@@ -121,56 +121,56 @@ class funcfloat(numobject):
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.funcstr+"("+self.allargs+"))+("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.funcstr+"("+self.allargs+"))+("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
 
     def __idiv__(self, other):
         """Performs Division."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.funcstr+"("+self.allargs+"))/("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.funcstr+"("+self.allargs+"))/("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
 
     def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.funcstr+"("+self.allargs+"))*("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.funcstr+"("+self.allargs+"))*("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
 
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.funcstr+"("+self.allargs+"))^("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.funcstr+"("+self.allargs+"))^("+self.e.prepare(other, False, True)+")", self.e, [self.allargs], {self.funcstr:self})
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")+("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.e.prepare(other, False, True)+")+("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
 
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")^("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.e.prepare(other, False, True)+")^("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
 
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         if isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")/("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.e.prepare(other, False, True)+")/("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")*("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.e.prepare(other, False, True)+")*("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
 
     def __eq__(self, other):
         """Performs ==."""
@@ -271,56 +271,56 @@ class strfunc(funcfloat):
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.name+":"+strlist(self.variables,":")+")+("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")+("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
 
     def __idiv__(self, other):
         """Performs Division."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.name+":"+strlist(self.variables,":")+")/("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")/("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
 
     def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.name+":"+strlist(self.variables,":")+")*("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")*("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
 
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.name+":"+strlist(self.variables,":")+")^("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")^("+self.e.prepare(other, False, True)+")", self.e, self.variables, {self.name:self})
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")+("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+            return strfunc("("+self.e.prepare(other, False, True)+")+("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
 
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")^("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+            return strfunc("("+self.e.prepare(other, False, True)+")^("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
 
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         if isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")/("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+            return strfunc("("+self.e.prepare(other, False, True)+")/("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfloat("("+self.e.prepare(other, False, True)+")*("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+            return strfunc("("+self.e.prepare(other, False, True)+")*("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
 
     def find(self):
         """Simplifies The Function String."""
@@ -564,7 +564,7 @@ class usefunc(funcfloat):
         """Calls The Function."""
         params = varproc(params)
         if params is None:
-            return strfloat(self.funcstr+":"+strlist(self.variables,":"), self.e, self.variables)
+            return strfunc(self.funcstr+":"+strlist(self.variables,":"), self.e, self.variables)
         elif len(params) < len(self.variables):
             for x in xrange(len(params), len(self.variables)):
                 if self.variables[x] in self.e.variables:
@@ -596,7 +596,7 @@ class unifunc(funcfloat):
         """Performs A Universalized Function Call."""
         args = varproc(args)
         if args is None:
-            return strfloat(self.funcstr+":x", self.e, ["x"])
+            return strfunc(self.funcstr+":x", self.e, ["x"])
         elif islist(args):
             x = args[0]
             if len(args) > 1:
@@ -630,7 +630,7 @@ class makefunc(funcfloat):
         """Calls The Evaluator Function."""
         variables = varproc(variables)
         if variables is None:
-            return strfloat(self.funcstr+":x", self.e, ["x"])
+            return strfunc(self.funcstr+":x", self.e, ["x"])
         elif len(variables) == 0:
             return matrix(0)
         elif len(variables) == 1:
@@ -848,7 +848,7 @@ class classcalc(cotobject):
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if bypass or not self.e.isreserved(test, allowed=string.digits):
+        if bypass or not self.e.isreserved(test):
             self.variables[test] = value
             if self.doset:
                 self.doset[test] = haskey(self.e.variables, test)
@@ -877,7 +877,7 @@ class classcalc(cotobject):
     def retrieve(self, key):
         """Retrieves An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if not self.e.isreserved(test, allowed=string.digits):
+        if not self.e.isreserved(test):
             if test in self.variables:
                 return self.getitem(test)
             else:
@@ -1054,7 +1054,7 @@ class instancecalc(numobject, classcalc):
     def retrieve(self, key):
         """Retrieves An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if not self.e.isreserved(test, allowed=string.digits):
+        if not self.e.isreserved(test):
             if test in self.variables:
                 out = self.getitem(test)
             elif "__get__" in self.variables:
@@ -1078,7 +1078,7 @@ class instancecalc(numobject, classcalc):
             check_set = self.tryget("__set__")
             if check_set:
                 self = self.domethod(check_set, [strcalc(key, self.e), value])
-            elif not self.e.isreserved(test, allowed=string.digits):
+            elif not self.e.isreserved(test):
                 if isinstance(value, strfunc):
                     self.selfcurry(value)
                 self.variables[test] = value

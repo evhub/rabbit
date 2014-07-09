@@ -1076,7 +1076,7 @@ Global Operator Precedence List:
             elif hasreal(value) is not None:
                 return self.eval_check(float(value))
             else:
-                raise ExecutionError("VariableError", "Unable to process "+str(value))
+                return strfloat(str(value), self, check=False)
 
     def call_var(self, inputstring):
         """Checks If Variable."""
@@ -2003,7 +2003,7 @@ class evalfuncs(object):
                 elif variables[0] in self.e.variables and (istext(variables[0]) or isnum(variables[0]) or isinstance(self.e.variables[variables[0]], bool) or (iseval(value) and not hascall(value))):
                     return strfloat(variables[0], self.e, [])
                 else:
-                    return strfloat(variables[0]+":x", self.e, ["x"])
+                    return strfunc(variables[0]+":x", self.e, ["x"])
             elif isinstance(variables[0], matrix):
                 funcs = []
                 for t in variables[0].getitems():
