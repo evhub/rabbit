@@ -26,13 +26,13 @@ from rabbit.all import *
 print()
 cli = commandline(addcolor("Running Tests.txt...", "magenta"), debugcolor="red")
 cli.evalfile("Tests.txt")
-print(addcolor("Tests.txt Evaluation Complete.", "magenta"))
+print(addcolor("Tests.txt Evaluation Complete.", "blue"))
 
 print()
 comp = compiler()
 print(addcolor("Compiling...", "magenta"))
 newvars = comp.disassemble(comp.assemble())[1]
-print(addcolor("Compiled.", "magenta"))
+print(addcolor("Compiled.", "blue"))
 
 print(addcolor("Testing Compilation...", "magenta"))
 for k,v in comp.e.variables.items():
@@ -45,11 +45,11 @@ for k,v in newvars.items():
         comp.printdebug(addcolor("<!> For variable "+str(k)+" the new value of "+repr(v)+" is not equal to the old value "+repr(ov), "red"))
 if not comp.e.variables == newvars:
     comp.adderror("CompileError", "Decompiled variables failed to equal compiled variables")
-print(addcolor("Compilation Testing Complete.", "magenta"))
+print(addcolor("Compilation Testing Complete.", "blue"))
 
 print()
 if cli.errorlog or comp.errorlog:
     print(addcolor("Some Tests Fail:", "red"))
-    raise ExecutionError("TestingError", "errors in cli"*cli.errorlog+", "*(cli.errorlog and comp.errorlog)+"errors in comp"*comp.errorlog)
+    raise ExecutionError(addcolor("TestingError", "red"), addcolor("Errors in cli"*cli.errorlog+", "*(cli.errorlog and comp.errorlog)+"Errors in comp"*comp.errorlog, "red"))
 else:
     print(addcolor("All Tests Pass.", "green"))
