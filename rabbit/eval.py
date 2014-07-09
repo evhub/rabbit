@@ -1076,7 +1076,7 @@ Global Operator Precedence List:
             elif hasreal(value) is not None:
                 return self.eval_check(float(value))
             else:
-                return strfloat(str(value), self, check=False)
+                raise ExecutionError("VariableError", "Unable to process "+str(value))
 
     def call_var(self, inputstring):
         """Checks If Variable."""
