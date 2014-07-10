@@ -1337,7 +1337,7 @@ Global Operator Precedence List:
 
     def namefind(self, varname):
         """Finds A Name."""
-        while varname.startswith(self.parenchar) and varname.endswith(self.parenchar):
+        while varname.startswith(self.parenchar) and varname.endswith(self.parenchar) and isreal(varname[1:-1]) is not None:
             num = int(self.eval_call(varname[1:-1]))
             if num < 0:
                 num += self.count
