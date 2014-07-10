@@ -200,7 +200,6 @@ Global Operator Precedence List:
             "true":1.0,
             "false":0.0,
             funcfloat.allargs : matrix(0),
-            self.varname : matrix(0),
             "\xf8" : "none",
             "\u221e" : "inf",
             "\u2211" : "sum",
