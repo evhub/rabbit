@@ -18,7 +18,7 @@
 
 from __future__ import with_statement, absolute_import, print_function, unicode_literals
 
-from .app import *
+from .carrot.app import *
 from .eval import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

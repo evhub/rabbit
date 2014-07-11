@@ -18,7 +18,9 @@
 
 from __future__ import with_statement, absolute_import, print_function, unicode_literals
 
-from .carrot.all import *
-from .ride import *
-from .graph import *
-from .comp import *
+from .web import *
+from .proc import *
+from .path import *
+from .stats import *
+from .crypto import *
+from .test import *

@@ -22,30 +22,40 @@ from __future__ import with_statement, absolute_import, print_function, unicode_
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-__all__ = ["carrot.all", "ride", "graph", "comp"]
+__all__ = ["web", "proc", "path", "stats", "crypto", "test"]
 
 __doc__ = """Overview:
-    Rabbit (RabbitLang) is a modern, functional programming language, documented most thouroughly in the README.
+    Carrot (RabbitLib) is a compilation of functions, classes, and variables that extend basic Python functionality.
+    Every single function, method, and class in Rabbit is documented, so have a look around, and feel free to contribute.
 
 Key:
     name_of_module (dependency_one, dependency_two) : A description of the module.
 
 File List:
-    fraction (carrot.format, carrot.math) : Utilities for managing fraction objects.
-    matrix (carrot.format, carrot.rand) : Utilities for using mathematical matrices.
+    obj () : Functions for managing objects at a base level.
 
-    func (matrix) : Utilities for managing functions as mathematical objects.
+    base (obj) : Base classes for custom objects.
+    math (obj) : Advanced mathematical functions.
+    web (obj) : Utilities for interfacing with the web.
+    proc (obj) : Utilities for managing multiple processes.
 
-    data (func, carrot.stats) : Utilities for managing statistical data.
+    check (base) : Functions for analyzing objects for basic properties.
+    path (sys) : Utilities for implementing pathfinding.
+    stats (math) : Advanced statistical functions.
 
-    eval (data, fraction) : Utilities for implementing the Rabbit language.
+    list (check) : Utilities for managing lists and other containers.
 
-    cmd (eval, carrot.app) : The standard Rabbit language interpreter.
+    sys (list) : Functions for interfacing with the operating system.
+    format (list) : Utilities for managing and formatting strings.
 
-    cli (cmd) : The Rabbit Command Line Interface.
-    ride (cmd) : The Rabbit Integrated Development Environment.
-    graph (cmd) : A Graphing Module For Rabbit Functions.
+    rand (sys, math) : Random number generation utilities.
+    file (format, sys) : Utilities for managing different types of files.
 
-    comp (cli) : The Rabbit Semi-Compiler.
+    gui (file) : Utilities for creating and managing basic windows.
+    crypto (format, rand) : Cryptographic utilities.
 
-    all (comp, graph, ride, carrot.all) : All Rabbit functions in one place."""
+    app (gui, web) : Utilities for creating graphical applications.
+
+    test (app) : A Python interpreter for testing purposes.
+
+    all (test, crypto, matrix, fraction, stats, path, proc, web) : All Carrot functions in one place."""
