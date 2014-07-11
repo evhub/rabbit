@@ -81,7 +81,7 @@ a = x+1				# A variable definition
 f(x,y) = 2(x+y)		# A function definition
 ```
 
-You might notice that at the point when a is defined x has not yet been defined, and yet a is told that it needs to have one greater than the value of x. Not only will this construction not raise an error in Rabbit, Rabbit won't even known until you do something with a. That's because Rabbit uses lazy evaluation. By default, when you define a variable, Rabbit will simply store the string of characters you typed in and not actually do anything with it until you try to use it somewhere else. This can be very useful when wanting one variable (a) to reflect the possibly changing value of another variable (x).
+You might notice that at the point when a is defined x has not yet been defined, and yet a is told that it needs to have one greater than the value of x. Not only will this construction not raise an error in Rabbit, Rabbit won't even known until you do something with a. That's because Rabbit uses lazy evaluation. By default, when you define a variable, Rabbit will simply store the string of characters you typed in and not actually do anything with it until you try to use it somewhere else.
 
 It is, however, possible to circumvent lazy evaluation and force Rabbit to figure out what the value is and calculate it then and there. This can't be used with functions, however, because that wouldn't make sense: Rabbit can't calculate them yet no matter what because they haven't been supplied with arguments. The syntax for circumventing lazy evaluation is very simple:
 ```
@@ -228,7 +228,7 @@ gen_func:2:5						# Because gen_func only takes one variable, colon syntax will 
 
 Strings in rabbit are also not complicated, and are really very similar to strings in any other language. Here's the basic syntax:
 ```
-"hello, world"		# Creates a string--it should be noted that single quotes will NOT work--they are reserved for creating defaults
+"hello, world"		# Creates a string; it should be noted that single quotes will NOT work, they are reserved for variable names
 "Answer: "+2		# Strings support addition, even with other things that are not strings (result = "Answer: 2")
 "hello"*2			# Multiplication behaves like one would expect, in this case doubling the string (result = "hellohello")
 "01234":2			# Strings also support indexes, just like matrices (result = "2")
