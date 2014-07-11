@@ -1,7 +1,7 @@
 Rabbit
 ======
 
-Rabbit is a modern, functional programming language built on top of Python.
+Rabbit is a modern, functional programming language built on top of Python. Many of Rabbit's tools are also helpful to Python programs that don't hook into the language, as Rabbit also provides powerful APIs for abstracting many complex operations. Read on for an explanation of Rabbit and how to use it.
 
 ![Travis CI Build Status](https://travis-ci.org/evhub/rabbit.svg?branch=master)
 
