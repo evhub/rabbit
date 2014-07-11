@@ -41,10 +41,6 @@ class evalobject(object):
         """Implements !=."""
         return not self == other
 
-    def __radd__(self, other):
-        """Implements Reverse Addition."""
-        return self + other
-
     def __rmul__(self, other):
         """Implements Reverse Multiplication."""
         return self * other
@@ -99,6 +95,10 @@ class evalobject(object):
 
 class numobject(evalobject):
     """A Base Class For Objects."""
+
+    def __radd__(self, other):
+        """Implements Reverse Addition."""
+        return self + other
 
     def __sub__(self, other):
         """Implements Subtraction."""
