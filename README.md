@@ -1,7 +1,7 @@
 Rabbit
 ======
 
-Rabbit (PythonPlus) is a compilation of functions, classes, and variables that extend basic Python functionality. Every single function, method, and class in Rabbit is documented, so have a look around, and feel free to contribute.
+Rabbit is a modern, functional programming language built on top of Python.
 
 ![Travis CI Build Status](https://travis-ci.org/evhub/rabbit.svg?branch=master)
 
