@@ -362,13 +362,13 @@ class strfloat(strfunc):
             self.name = self.autoarg
         if allargs is not None:
             self.allargs = str(allargs)
-        self.variables = variables[:]
+        variables = variables[:]
         if overflow is None:
             overflow = True
         else:
             overflow = bool(overflow)
-        if overflow and self.allargs in self.variables:
-            self.variables.remove(self.allargs)
+        if overflow and self.allargs in variables:
+            variables.remove(self.allargs)
             overflow = False
         if personals is None:
             personals = {}
@@ -388,6 +388,11 @@ class strfloat(strfunc):
             for x,y in personals:
                 if y != test:
                     self.personals[x] = y
+            if allargs is None:
+                self.allargs = test.allargs
+            if self.overflow and self.allargs in self.variables:
+                self.variables.remove(self.allargs)
+                self.overflow = False
         else:
             self.funcstr = str(funcstr)
             self.overflow = overflow
