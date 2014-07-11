@@ -44,6 +44,9 @@ else:
     old_str = str
     str = unicode
 
+old_print = print
+print = lambda *args: old_print(*(map(lambda x: str(x).encode("UTF"), args)))
+
 def typestr(obj):
     """Formats The Type Of Something Into A String."""
     return str(type(obj)).split("'")[1]
