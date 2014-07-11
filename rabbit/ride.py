@@ -37,7 +37,6 @@ Expressions:
 Console Commands:
     show <expression>
     help [string]
-    clean
 Control Commands:
     def <name> [:]= <expression>
     do <command>
@@ -104,7 +103,6 @@ Import Commands:
             ]
         self.cmds = [
             self.cmd_debug,
-            self.cmd_clean,
             self.cmd_run,
             self.cmd_save,
             self.cmd_assert,

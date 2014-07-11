@@ -144,7 +144,6 @@ class compiler(commandline):
             self.pre_cmd
             ]
         self.cmds = [
-            self.cmd_clean,
             self.cmd_run,
             self.cmd_assert,
             self.cmd_do,

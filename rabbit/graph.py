@@ -38,7 +38,6 @@ Console Commands:
     show <expression>
     help [string]
     clear
-    clean
 Grid Control:
     render
         axis
@@ -315,7 +314,6 @@ Import Commands:
         self.cmds = [
             self.cmd_debug,
             self.cmd_clear,
-            self.cmd_clean,
             self.cmd_run,
             self.cmd_save,
             self.cmd_assert,

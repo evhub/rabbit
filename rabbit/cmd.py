@@ -39,7 +39,6 @@ Console Commands:
     show <expression>
     help [string]
     clear
-    clean
 Control Commands:
     def <name> [:]= <expression>
     do <command>
@@ -176,7 +175,6 @@ Import Commands:
         self.cmds = [
             self.cmd_debug,
             self.cmd_clear,
-            self.cmd_clean,
             self.cmd_run,
             self.cmd_save,
             self.cmd_assert,
@@ -303,18 +301,6 @@ Import Commands:
         if superformat(original) == "clear":
             self.app.clear()
             return True
-
-    def cmd_clean(self, original):
-        """Removes Extra Parentheses."""
-        if superformat(original) == "clean":
-            todel = []
-            for x in self.e.variables:
-                if self.e.parenchar in x:
-                    todel.append(x)
-            for x in todel:
-                del self.e.variables[x]
-                self.printdebug("< "+x+" >")
-            self.e.count = 0
 
     def cmd_run(self, original):
         """Performs run."""

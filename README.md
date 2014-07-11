@@ -330,6 +330,24 @@ Sometimes, errors will occur in your code. Not to fret, Rabbit will show you exa
 :(1)		# If there is no error, this will just return the result (result = 1)
 ```
 
+#### Rabbits Make Statements
+
+The design of Rabbit is intended to use as few "special words" as possible, but there are some that are used. The syntax for these is always kept consistent: they can only be used wherever a top-level call is being made, and their syntax is like that of a commandline function.
+
+Statements can vary from interpreter to interpreter, but the ones implemented in basic Rabbit are:
+```
+debug [on|off]		# Turns verbose debug output on and off
+clear				# Clears the console
+run <filename>		# Runs code from a file
+save <filename>		# Saves all commands in this interactive session to a file
+assert <expression>	# Raises an error if <expression> isn't true
+do <expression>		# Skips over statement evaluation and just does <expression>
+show <expression>	# Prints the result of <expression>
+del <variable>		# Manually deletes the variable <variable>
+make <definition>	# Tags a definition as pre-compilation
+def <definition>		# Performs a definition, even if the variable name is already defined
+```
+
 #### Other Rabbits
 
 Before we move on, there are some remaining, more complex, less-used operators that deserve attention.

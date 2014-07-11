@@ -57,7 +57,6 @@ class commandline(mathbase):
         self.cmds = [
             self.cmd_debug,
             self.cmd_exit,
-            self.cmd_clean,
             self.cmd_run,
             self.cmd_save,
             self.cmd_assert,
