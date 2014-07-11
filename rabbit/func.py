@@ -184,6 +184,7 @@ class funcfloat(numobject):
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
+    lexical = True
     autoarg = "__auto__"
 
     def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None):
@@ -208,6 +209,10 @@ class strfunc(funcfloat):
         else:
             self.personals = dict(personals)
         self.e = e
+        if self.lexical:
+            self.snapshot = self.e.variables.copy()
+        else:
+            self.snapshot = {}
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -217,15 +222,18 @@ class strfunc(funcfloat):
         """Copies The String Function."""
         return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow, self.allargs)
 
-    def calc(self, personals=True):
+    def calc(self, personals=None):
         """Calculates The String."""
-        if personals:
-            oldvars = self.e.setvars(self.personals)
+        variables = self.snapshot.copy()
+        if personals is None:
+            variables.extend(self.personals)
+        else:
+            variables.extend(personals)
+        oldvars = self.e.setvars(variables)
         try:
             out = self.e.calc(self.funcstr)
         finally:
-            if personals:
-                self.e.setvars(oldvars)
+            self.e.setvars(oldvars)
         return out
 
     def call(self, variables):
@@ -243,12 +251,8 @@ class strfunc(funcfloat):
             for k in self.personals:
                 if (not k in items) or isnull(items[k]):
                     items[k] = self.personals[k]
-            oldvars = self.e.setvars(items)
             self.e.info = " \\>"
-            try:
-                out = self.calc(False)
-            finally:
-                self.e.setvars(oldvars)
+            out = self.calc(items)
             return out
 
     def curry(self, arg):
@@ -394,11 +398,18 @@ class strfloat(strfunc):
             if self.overflow and self.allargs in self.variables:
                 self.variables.remove(self.allargs)
                 self.overflow = False
+            self.snapshot = test.snapshot
+            if self.lexical:
+                self.snapshot.extend(self.e.variables)
         else:
             self.funcstr = str(funcstr)
             self.overflow = overflow
             self.variables = variables
             self.personals = personals
+            if self.lexical:
+                self.snapshot = self.e.variables.copy()
+            else:
+                self.snapshot = {}
 
 class strcalc(numobject):
     """Allows Strings Inside Evaluation."""
