@@ -267,10 +267,12 @@ Import Commands:
         """Performs help."""
         if superformat(inputstring).startswith("help"):
             inputstring = inputstring[4:]
-            if delspace(inputstring) == "":
+            if inputstring == "":
                 self.show(self.helpstring, True)
-            else:
+            elif inputstring[0] == " ":
                 self.show(self.findhelp(basicformat(inputstring)))
+            else:
+                return None
             return True
 
     def pre_cmd(self, inputstring):
@@ -287,13 +289,14 @@ Import Commands:
     def cmd_debug(self, original):
         """Controls Debugging."""
         if superformat(original).startswith("debug"):
-            original = delspace(original[5:])
+            original = original[5:]
             if original == "":
                 self.setdebug(not self.debug)
-                return True
+            elif original[0] == " ":
+                self.setdebug(formatisyes(delspace(original)))
             else:
-                self.setdebug(formatisyes(original))
-                return True
+                return None
+            return True
 
     def cmd_clear(self, original):
         """Performs clear."""
