@@ -1484,7 +1484,7 @@ class evalfuncs(object):
         if variables:
             self.e.overflow = variables
         out = classcalc(self.e)
-        out.variables = self.e.variables)
+        out.variables = self.e.variables
         return out
 
     def raisecall(self, variables):
