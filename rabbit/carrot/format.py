@@ -224,7 +224,7 @@ def strlist(inputlist, delimeter=" ", converter=str):
     out = []
     for x in inputlist:
         out.append(converter(x))
-    delimeter.join(out)
+    return str(delimeter).join(out)
 
 def strdict(inputdict, seperator=":", delimeter=" ", termconverter=str, keyconverter=str):
     """Formats A Dictionary Into A String."""
