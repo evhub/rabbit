@@ -344,8 +344,8 @@ class strfunc(funcfloat):
     def getpers(self):
         """Returns The Modified Personals List."""
         out = self.personals.copy()
-        if "__self__" in out:
-            del out["__self__"]
+        if self.selfvar in out:
+            del out[self.selfvar]
         return out
 
     def __eq__(self, other):
@@ -799,11 +799,12 @@ class integfuncfloat(integbase, funcfloat):
 class classcalc(cotobject):
     """Implements An Evaluator Class."""
     doset = False
+    selfvar = "__self__"
 
     def __init__(self, e, variables=None):
         """Initializes The Class."""
         self.e = e
-        self.variables = {"__self__": self}
+        self.variables = {self.selfvar : self}
         if variables is not None:
             self.add(variables, 2)
 
@@ -821,7 +822,7 @@ class classcalc(cotobject):
         oldshow = self.e.processor.doshow
         self.e.processor.doshow = False
         oldclass = self.e.processor.useclass
-        self.e.processor.useclass = "__self__"
+        self.e.processor.useclass = self.selfvar
 
         self.doset = self.e.setvars(self.variables)
         try:
@@ -837,7 +838,7 @@ class classcalc(cotobject):
     def calc(self, inputstring):
         """Calculates A String In The Environment Of The Class."""
         oldclass = self.e.processor.useclass
-        self.e.processor.useclass = "__self__"
+        self.e.processor.useclass = self.selfvar
 
         self.doset = self.e.setvars(self.variables)
         self.e.info = " | class"
@@ -865,8 +866,8 @@ class classcalc(cotobject):
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if test == "__self__":
-            raise ExecutionError("RedefinitionError", "The __self__ variable cannot be redefined.")
+        if test == self.selfvar:
+            raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined.")
         elif bypass:
             self.variables[test] = value
         elif self.e.isreserved(test):
@@ -942,13 +943,13 @@ class classcalc(cotobject):
     def getvars(self):
         """Gets Original Variables."""
         out = self.variables.copy()
-        del out["__self__"]
+        del out[self.selfvar]
         return out
 
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, classcalc):
-            return self.variables["__self__"] is other.variables["__self__"] or self.getvars() == other.getvars()
+            return self.variables[self.selfvar] is other.variables[self.selfvar] or self.getvars() == other.getvars()
         else:
             return False
 
@@ -999,7 +1000,7 @@ class classcalc(cotobject):
 
     def toinstance(self):
         """Creates An Instance Of The Class."""
-        return instancecalc(self.e, self.variables)
+        return instancecalc(self.e, self.getvars())
 
     def tomatrix(self):
         """Returns A Matrix Of The Variables."""
@@ -1010,14 +1011,16 @@ class classcalc(cotobject):
 
 class instancecalc(numobject, classcalc):
     """An Evaluator Class Instance."""
-    def __init__(self, e, variables, parent=None):
+    def __init__(self, e, variables=None, parent=None):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
         if parent is None:
             self.parent = variables
         else:
             self.parent = parent
-        self.variables = variables.copy()
+        self.variables = {self.selfvar : self}
+        if variables is not None:
+            self.add(variables)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -1041,12 +1044,12 @@ class instancecalc(numobject, classcalc):
             parent = parent.variables
         elif not isinstance(parent, dict):
             return False
-        if parent["__self__"] is self.variables["__self__"]:
+        if parent[self.selfvar] is self.variables[self.selfvar]:
             return True
         parent = parent.copy()
-        del parent["__self__"]
+        del parent[self.selfvar]
         variables = self.variables.copy()
-        del variables["__self__"]
+        del variables[self.selfvar]
         return variables == parent
 
     def domethod(self, item, args=[]):
@@ -1064,11 +1067,11 @@ class instancecalc(numobject, classcalc):
 
     def selfcurry(self, out):
         """Curries Self Into The Function."""
-        if "__self__" in out.personals:
-            out.personals["__self__"] = self
+        if self.selfvar in out.personals:
+            out.personals[self.selfvar] = self
         elif len(out.variables) > 0:
-            out.personals["__self__"] = self
-            out.curry("__self__")
+            out.personals[self.selfvar] = self
+            out.curry(self.selfvar)
         else:
             raise ExecutionError("ClassError", "Methods must have self as their first argument")
 
@@ -1091,8 +1094,8 @@ class instancecalc(numobject, classcalc):
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if bypass <= 1 and test == "__self__":
-            raise ExecutionError("RedefinitionError", "The __self__ variable cannot be redefined.")
+        if bypass <= 1 and test == self.selfvar:
+            raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined.")
         elif bypass:
             self.variables[test] = value
         else:

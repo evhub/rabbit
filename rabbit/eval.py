@@ -305,7 +305,7 @@ Global Operator Precedence List:
                 else:
                     out += ":= "
                     if item is v:
-                        out += "__self__"
+                        out += item.selfvar
                     elif maxrecursion <= 0 and isinstance(v, classcalc):
                         out += self.speedyprep(v, False, bottom, indebug, maxrecursion)
                     else:
