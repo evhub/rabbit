@@ -1038,21 +1038,28 @@ class instancecalc(numobject, classcalc):
 
     def toclass(self):
         """Converts To A Normal Class."""
-        return classcalc(self.e, self.getvars())
+        out = classcalc(self.e)
+        out.variables = self.variables
+        return out
 
     def isfrom(self, parent):
         """Determines Whether The Instance Is From The Parent."""
         if isinstance(parent, classcalc):
             parent = parent.variables
-        elif not isinstance(parent, dict):
+            selfvar = parent.selfvar
+        else:
+            selfvar = self.selfvar
+        if isinstance(parent, dict):
+            if parent[selfvar] is self.variables[self.selfvar]:
+                return True
+            else:
+                parent = parent.copy()
+                del parent[selfvar]
+                variables = self.variables.copy()
+                del variables[self.selfvar]
+                return variables == parent
+        else:
             return False
-        if parent[self.selfvar] is self.variables[self.selfvar]:
-            return True
-        parent = parent.copy()
-        del parent[self.selfvar]
-        variables = self.variables.copy()
-        del variables[self.selfvar]
-        return variables == parent
 
     def domethod(self, item, args=[]):
         """Calls A Method Function."""

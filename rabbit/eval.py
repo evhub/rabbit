@@ -1483,7 +1483,9 @@ class evalfuncs(object):
         """Retrieves A Class Of The Global Environment."""
         if variables:
             self.e.overflow = variables
-        return classcalc(self.e, self.e.variables)
+        out = classcalc(self.e)
+        out.variables = self.e.variables)
+        return out
 
     def raisecall(self, variables):
         """Raises An Error."""
