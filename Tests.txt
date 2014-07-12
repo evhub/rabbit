@@ -262,7 +262,9 @@ assert lcm:4:6 ?= 12
 assert perm:5:2 ?= 20
 assert comb:4:2 ?= 6
 assert env().a ?= a ?= 2		$ a = 2
+assert iserr(error())
 assert iserr(:raise())
+assert from(error, error())
 assert from(error, :raise())
 assert var:"a" ?= "b"			$ a = b
 assert a ?= 5					$ proc("a = 5")
