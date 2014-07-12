@@ -1045,17 +1045,14 @@ class instancecalc(numobject, classcalc):
     def isfrom(self, parent):
         """Determines Whether The Instance Is From The Parent."""
         if isinstance(parent, classcalc):
-            selfvar = parent.selfvar
             parent = parent.variables
-        else:
-            selfvar = self.selfvar
         if isinstance(parent, dict):
-            if parent[selfvar] is self.variables[self.selfvar]:
+            if parent[self.selfvar] is self.parent[self.selfvar]:
                 return True
             else:
                 parent = parent.copy()
-                del parent[selfvar]
-                variables = self.variables.copy()
+                del parent[self.selfvar]
+                variables = self.parent.copy()
                 del variables[self.selfvar]
                 return variables == parent
         else:
