@@ -1016,12 +1016,12 @@ class instancecalc(numobject, classcalc):
         self.e = e
         if parent is None:
             self.parent = variables
+            variables = variables.copy()
+            del variables[self.selfvar]
         else:
             self.parent = parent
         self.variables = {self.selfvar : self}
         if variables is not None:
-            variables = variables.copy()
-            del variables[self.selfvar]
             self.add(variables)
 
     def getstate(self):
