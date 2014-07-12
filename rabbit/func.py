@@ -865,13 +865,18 @@ class classcalc(cotobject):
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if bypass or not self.e.isreserved(test):
+        if test == "__self__":
+            raise ExecutionError("RedefinitionError", "The __self__ variable cannot be redefined.")
+        elif bypass:
             self.variables[test] = value
-            if self.doset:
-                self.doset[test] = haskey(self.e.variables, test)
-                self.e.variables[test] = self.variables[test]
         else:
-            raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
+            if self.e.isreserved(test):
+                raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
+            else:
+                self.variables[test] = value
+                if self.doset:
+                    self.doset[test] = haskey(self.e.variables, test)
+                    self.e.variables[test] = self.variables[test]
 
     def tryget(self, key):
         """Attempts To Get An Item."""
@@ -1092,18 +1097,15 @@ class instancecalc(numobject, classcalc):
         elif bypass:
             self.variables[test] = value
         else:
-            check_set = self.tryget("__set__")
-            if check_set:
-                self = self.domethod(check_set, [strcalc(key, self.e), value])
-            elif not self.e.isreserved(test):
+            if self.e.isreserved(test):
+                raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
+            else:
                 if isinstance(value, strfunc):
                     self.selfcurry(value)
                 self.variables[test] = value
                 if self.doset:
                     self.doset[test] = haskey(self.e.variables, test)
                     self.e.variables[test] = self.variables[test]
-            else:
-                raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
 
     def init(self, params):
         """Initializes The Instance."""
