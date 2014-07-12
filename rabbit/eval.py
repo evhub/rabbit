@@ -1473,6 +1473,13 @@ Global Operator Precedence List:
         else:
             return rawstrcalc(self.evaltypestr(item), self)
 
+    def getvars(self):
+        """Gets Variables Absent selfvar."""
+        out = self.variables.copy()
+        if classcalc.selfvar in out:
+            del out[classcalc.selfvar]
+        return out
+
 class evalfuncs(object):
     """Implements Evaluator Functions."""
     def __init__(self, e):
@@ -1483,9 +1490,7 @@ class evalfuncs(object):
         """Retrieves A Class Of The Global Environment."""
         if variables:
             self.e.overflow = variables
-        out = classcalc(self.e)
-        out.variables = self.e.variables
-        return out
+        return classcalc(self.e, self.e.getvars())
 
     def raisecall(self, variables):
         """Raises An Error."""
