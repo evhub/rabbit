@@ -208,13 +208,15 @@ Global Operator Precedence List:
             "\u222b" : "S",
             "\u0393" : "gamma",
             "\u220f" : "prod",
-            "\u2208" : "in",
+            "\u2208" : "in"
+            }
+        self.variables.extend({
             "\u2209" : strfunc("!\u2208(__)", self, [], name="\u2209", overflow=False),
             "\u220b" : strfunc("\u2208(rev(__))", self, [], name="\u220b", overflow=False),
             "\u220c" : strfunc("!\u220b(__)", self, [], name="\u220c", overflow=False),
             "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
             "\u221c" : strfunc("sqrt(sqrt(x))", self, ["x"], name="\u221c")
-            }
+            })
 
     def printdebug(self, message):
         """Prints Debug Output."""
