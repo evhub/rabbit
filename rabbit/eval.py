@@ -1555,7 +1555,7 @@ class evalfuncs(object):
             return matrix(0)
         else:
             for item in variables:
-                if not (isinstance(item, instancecalc) and item.tryget(self.errorvar)):
+                if not (isinstance(item, instancecalc) and item.tryget(self.e.errorvar)):
                     return 0.0
             return 1.0
 
