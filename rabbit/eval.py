@@ -1237,7 +1237,7 @@ Global Operator Precedence List:
             self.overflow = params[2:]
         elif isfunc(item):
             value = getcall(item)(params)
-        elif len(params) == 0:
+        elif len(params) == 0 or (len(params) == 1 and isnull(params[0])):
             value = item
         else:
             raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(params) > 1)+" of "+strlist(params, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(item, False, True, True))
