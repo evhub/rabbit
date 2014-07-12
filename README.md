@@ -253,7 +253,7 @@ a:"z":5						# Same as above--this will set "z" in the class to 5 (result = { x 
 a + { z = 5 }				# Same as above--class addition like this is the best method for inheritance (result = { x = 2 ;; z = 5 })
 ```
 
-Since class definitions can often get very long, it is reccomended that line continuations be used. Since we haven't introduced those yet, we'll do so here. Line continuations follow a very simple rule: any line that starts with whitespace will be added onto the previous line. It should be noted that this only works when running code from a file, not from the command line. Some common uses of this syntax are:
+Since class definitions can often get very long, it is recommended that line continuations be used. Since we haven't introduced those yet, we'll do so here. Line continuations follow a very simple rule: any line that starts with whitespace will be added onto the previous line. It should be noted that this only works when running code from a file, not from the command line. Some common uses of this syntax are:
 ```
 # Defining a piecewise function:
 f(x) =
@@ -358,7 +358,7 @@ First is the loop operator (~). The loop operator allows for the looping of func
 10,20~ 1,2~ \(x,y)\(x+y)	# Loops over 1,2, within a loop over 10,20, feeding each into the function (result = ((11,12),(21,22)))
 ```
 
-Second is the multi-set operator (,). When parentheses are used at the top level in the name of a variable to be set, a multi-variable set is performed. The basic syntax is:
+Second is the multi-set operator (,). When commas are used at the top level in the name of a variable to be set, a multi-variable set is performed. The basic syntax is:
 ```
 a,b = (1,2)		# Sets a to 1 and b to 2
 a,b = (1,2,3)	# Sets a to 1 and b to (2,3)
