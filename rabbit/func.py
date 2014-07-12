@@ -806,7 +806,7 @@ class classcalc(cotobject):
         self.e = e
         self.variables = {self.selfvar : self}
         if variables is not None:
-            self.add(variables, 2)
+            self.add(variables)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -1032,11 +1032,13 @@ class instancecalc(numobject, classcalc):
 
     def getparent(self):
         """Reconstructs The Parent Class."""
-        return classcalc(self.e, self.parent)
+        out = classcalc(self.e)
+        out.variables = self.parent
+        return out
 
     def toclass(self):
         """Converts To A Normal Class."""
-        return classcalc(self.e, self.variables)
+        return classcalc(self.e, self.getvars())
 
     def isfrom(self, parent):
         """Determines Whether The Instance Is From The Parent."""
@@ -1094,20 +1096,19 @@ class instancecalc(numobject, classcalc):
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if bypass <= 1 and test == self.selfvar:
+        if test == self.selfvar:
             raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined.")
         elif bypass:
             self.variables[test] = value
+        elif self.e.isreserved(test):
+            raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
         else:
-            if self.e.isreserved(test):
-                raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
-            else:
-                if isinstance(value, strfunc):
-                    self.selfcurry(value)
-                self.variables[test] = value
-                if self.doset:
-                    self.doset[test] = haskey(self.e.variables, test)
-                    self.e.variables[test] = self.variables[test]
+            if isinstance(value, strfunc):
+                self.selfcurry(value)
+            self.variables[test] = value
+            if self.doset:
+                self.doset[test] = haskey(self.e.variables, test)
+                self.e.variables[test] = self.variables[test]
 
     def init(self, params):
         """Initializes The Instance."""
