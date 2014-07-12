@@ -65,6 +65,7 @@ Global Operator Precedence List:
     trynames = ["", "try"]
     parenchar = "\xa7"
     reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`\u2260\u2264\u2265\u201c\u201d'+parenchar
+    errorvar = "__error__"
     debuglog = []
     info = ""
     recursion = 0
@@ -108,7 +109,7 @@ Global Operator Precedence List:
         """Resets The Variables To Their Defaults."""
         self.variables = {
             "error":classcalc(self, {
-                "__error__": 1.0
+                self.errorvar: 1.0
                 }),
             "env":funcfloat(self.funcs.envcall, self, "env"),
             "copy":funcfloat(self.funcs.copycall, self, "copy"),
@@ -1553,14 +1554,10 @@ class evalfuncs(object):
         if variables is None:
             return matrix(0)
         else:
-            check = self.e.funcfind("error")
-            if isinstance(check, classcalc):
-                for item in variables:
-                    if not (isinstance(item, instancecalc) and item.isfrom(check)):
-                        return 0.0
-                return 1.0
-            else:
-                raise ExecutionError("VariableError", "Master error is not a class")
+            for item in variables:
+                if not (isinstance(item, instancecalc) and item.tryget(self.errorvar)):
+                    return 0.0
+            return 1.0
 
     def getvalcall(self, variables):
         """Calculates A Variable Without Changing It."""
