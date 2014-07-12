@@ -311,3 +311,4 @@ assert 8 ?= ((\x\x)^3):2
 assert 9 ?= (3^\x\x):2
 assert (\y\x+y):2 ?= 5		$ x = 3
 assert (\x:5\x*y)() ?= 10	$ y = 2 $ x = 2
+assert (:1:1).name ?= "ArgumentError"

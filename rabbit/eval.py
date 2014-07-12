@@ -243,13 +243,8 @@ Global Operator Precedence List:
                 if v is None:
                     if k in self.variables:
                         del self.variables[k]
-                        self.printdebug(": < "+str(k)+" >")
                 else:
                     self.variables[k] = v
-                    if istext(v):
-                        self.printdebug(": "+str(k)+" = "+str(v))
-                    else:
-                        self.printdebug(": "+str(k)+" := "+self.prepare(v, False, True, True, maxrecursion=0))
         return oldvars
 
     def store(self, name, value):
@@ -1242,8 +1237,10 @@ Global Operator Precedence List:
             self.overflow = params[2:]
         elif isfunc(item):
             value = getcall(item)(params)
-        else:
+        elif len(params) == 0:
             value = item
+        else:
+            raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(params) > 1)+" of "+strlist(params, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(item, False, True, True))
         while docalc or len(self.overflow) > 0:
             docalc = False
             temp = self.overflow[:]
@@ -1294,6 +1291,7 @@ Global Operator Precedence List:
                         raise ExecutionError("NoneError", "Nothing does not have methods.")
                 else:
                     item = self.eval_call(l[0])
+                self.overflow = []
                 for x in xrange(1, len(l)):
                     arg = self.eval_call(l[x])
                     if not isfunc(item):
@@ -1305,7 +1303,12 @@ Global Operator Precedence List:
                         item = getcall(item)(args)
                     else:
                         item = getcall(item)([arg])
-                values.append(item)
+                if len(self.overflow) > 0:
+                    out = self.overflow
+                    self.overflow = []
+                    raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(out) > 1)+" of "+strlist(out, ", ", lambda x: self.prepare(x, False, True, True)))
+                else:
+                    values.append(item)
             if len(values) == 0:
                 value = matrix(0)
             else:
