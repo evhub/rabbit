@@ -210,7 +210,7 @@ Global Operator Precedence List:
             "\u220f" : "prod",
             "\u2208" : "in"
             }
-        self.variables.extend({
+        self.variables.update({
             "\u2209" : strfunc("!\u2208(__)", self, [], name="\u2209", overflow=False),
             "\u220b" : strfunc("\u2208(rev(__))", self, [], name="\u220b", overflow=False),
             "\u220c" : strfunc("!\u220b(__)", self, [], name="\u220c", overflow=False),

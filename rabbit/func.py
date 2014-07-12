@@ -226,9 +226,9 @@ class strfunc(funcfloat):
         """Calculates The String."""
         variables = self.snapshot.copy()
         if personals is None:
-            variables.extend(self.personals)
+            variables.update(self.personals)
         else:
-            variables.extend(personals)
+            variables.update(personals)
         oldvars = self.e.setvars(variables)
         try:
             out = self.e.calc(self.funcstr)
