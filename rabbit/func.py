@@ -1000,7 +1000,7 @@ class classcalc(cotobject):
 
     def toinstance(self):
         """Creates An Instance Of The Class."""
-        return instancecalc(self.e, self.getvars())
+        return instancecalc(self.e, self.variables)
 
     def tomatrix(self):
         """Returns A Matrix Of The Variables."""
@@ -1011,7 +1011,7 @@ class classcalc(cotobject):
 
 class instancecalc(numobject, classcalc):
     """An Evaluator Class Instance."""
-    def __init__(self, e, variables=None, parent=None):
+    def __init__(self, e, variables, parent=None):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
         if parent is None:
@@ -1020,6 +1020,8 @@ class instancecalc(numobject, classcalc):
             self.parent = parent
         self.variables = {self.selfvar : self}
         if variables is not None:
+            variables = variables.copy()
+            del variables[self.selfvar]
             self.add(variables)
 
     def getstate(self):
