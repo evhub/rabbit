@@ -869,14 +869,13 @@ class classcalc(cotobject):
             raise ExecutionError("RedefinitionError", "The __self__ variable cannot be redefined.")
         elif bypass:
             self.variables[test] = value
+        elif self.e.isreserved(test):
+            raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
         else:
-            if self.e.isreserved(test):
-                raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
-            else:
-                self.variables[test] = value
-                if self.doset:
-                    self.doset[test] = haskey(self.e.variables, test)
-                    self.e.variables[test] = self.variables[test]
+            self.variables[test] = value
+            if self.doset:
+                self.doset[test] = haskey(self.e.variables, test)
+                self.e.variables[test] = self.variables[test]
 
     def tryget(self, key):
         """Attempts To Get An Item."""
@@ -928,7 +927,7 @@ class classcalc(cotobject):
     def extend(self, other):
         """Extends The Class."""
         if isinstance(other, (dict, classcalc)):
-            self.add(other.variables)
+            self.add(other.getvars())
             return self
         elif other == 0:
             return self
