@@ -32,7 +32,7 @@ RabbitLang, or more commonly just Rabbit, is one of the Rabbit library's core fe
 * Best of functional and imperative
 * Object-oriented
 * Dynamic typing
-* Dynamic scoping
+* Lexical scoping
 * Interpreted
 * Not whitespace sensitive
 * Good for complex math
@@ -204,14 +204,13 @@ plusone(1,2,3)		# result = (2,3,4)
 # Before we can get into that, however, you need to understand how to define in-line functions, or lambdas.
 ```
 
-Lambda syntax in Rabbit is fairly straightforward, with a couple of strange quirks that result from Rabbit being dynamically scoped. Lambdas are defined using the backslash (\\) operator. Here're some examples of how to define different lambda functions:
+Lambda syntax in Rabbit is fairly straightforward; lambdas are defined using the backslash (\\) operator. Here're some examples of how to define different lambda functions:
 ```
 \1				# A zero-argument function that returns 1
 \x\(x+1)		# A one-variable function that returns that variable plus one
 (\x\x)+1		# The same as above--Rabbit will just curry any basic mathematical operation done to a function
 \(x,y)\(x+y)	# A two-variable function that adds the two variables
 \(x,x:(1))\x	# A one-variable function, whose one variable defaults to one, that returns the variable
-					# This syntax is particularly useful because the defaults are evaluated in the scope where the function is defined instead of the scope where it is called, allowing arguments to be passed between scopes
 f(x) = x
 \f				# Since f is a previously defined function, this will just return that function
 \\f				# This syntax is required to create a new zero-variable function that returns f
