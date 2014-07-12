@@ -805,7 +805,7 @@ class classcalc(cotobject):
         self.e = e
         self.variables = {"__self__": self}
         if variables is not None:
-            self.add(variables)
+            self.add(variables, 2)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -882,7 +882,7 @@ class classcalc(cotobject):
         try:
             out = self.retrieve(key)
         except ExecutionError as detail:
-            if detail.name == "ClassError" and detail.message.startswith("Could not find ") and detail.message.endswith(" in the class"):
+            if detail.name == "ClassError" and detail.message.startswith("Could not find "):
                 out = None
             else:
                 raise
@@ -934,10 +934,10 @@ class classcalc(cotobject):
         else:
             raise ExecutionError("ClassError", "Could not extend class with "+repr(other))
 
-    def add(self, other):
+    def add(self, other, bypass=True):
         """Adds Variables."""
         for k,v in other.items():
-            self.store(k, v, True)
+            self.store(k, v, bypass)
 
     def getvars(self):
         """Gets Original Variables."""
@@ -1091,7 +1091,7 @@ class instancecalc(numobject, classcalc):
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if test == "__self__":
+        if bypass <= 1 and test == "__self__":
             raise ExecutionError("RedefinitionError", "The __self__ variable cannot be redefined.")
         elif bypass:
             self.variables[test] = value
