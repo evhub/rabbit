@@ -91,9 +91,14 @@ Import Commands:
         """Prints Debug Output."""
         self.e.printdebug(message)
 
-    def adderror(self, error, detail):
+    def adderror(self, error, detail, variables=None):
         """Adds An Error To The Log."""
         self.printdebug("<!> "+str(error)+": "+str(detail))
+        if variables is not None:
+            self.e.recursion += 1
+            for k,v in variables.items():
+                self.printdebug(str(k)+": "+str(v))
+            self.e.recursion -= 1
         self.dumpdebug()
 
     def dumpdebug(self, top=False):

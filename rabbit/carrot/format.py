@@ -28,7 +28,7 @@ import re
 
 def basicformat(inputstring, leading=True, tailing=True):
     """Performs Basic Formatting On A String."""
-    out = str(inputstring)
+    out = str(inputstring).replace("\t", "    ")
     if leading:
         out = out.lstrip()
     if tailing:
@@ -221,13 +221,10 @@ def repeating(inputstring):
 
 def strlist(inputlist, delimeter=" ", converter=str):
     """Formats A List Into A String."""
-    outstring = ""
+    out = []
     for x in inputlist:
-        outstring += converter(x) + delimeter
-    if len(delimeter) == 0:
-        return outstring
-    else:
-        return outstring[:-len(delimeter)]
+        out.append(converter(x))
+    delimeter.join(out)
 
 def strdict(inputdict, seperator=":", delimeter=" ", termconverter=str, keyconverter=str):
     """Formats A Dictionary Into A String."""

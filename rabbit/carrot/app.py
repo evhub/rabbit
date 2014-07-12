@@ -115,14 +115,17 @@ class safebase(base):
         else:
             result, err = catch(lambda: function(*args))
             if err:
-                self.adderror(err[0], err[1])
+                self.adderror(err[0], err[1], err[2])
             else:
                 return result
 
-    def adderror(self, error, detail):
+    def adderror(self, error, detail, variables=None):
         """Adds An Error To The Log."""
         error = str(error)
         detail = str(detail)
+        if variables is not None:
+            for k,v in variables.items():
+                detail += "\n    "+str(k)+": "+str(v)
         if error not in self.errorlog:
             self.errorlog[error] = [detail]
         elif detail not in self.errorlog[error]:
