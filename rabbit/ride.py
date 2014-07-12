@@ -289,7 +289,7 @@ Import Commands:
                             if test:
                                 statement = test
                         elif iswhite(test):
-                            if statement in ["debug", "clean", "run", "save", "assert", "do", "show", "del", "import", "def", "make"]:
+                            if statement in ["debug", "run", "save", "assert", "do", "show", "del", "import", "def", "make"]:
                                 self.box.placetag("statement", point+"-"+str(len(statement)+1)+"c", point+"-1c")
                                 last = ("", point+"-1c")
                             statement = False
