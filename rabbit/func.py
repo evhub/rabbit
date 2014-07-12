@@ -344,8 +344,8 @@ class strfunc(funcfloat):
     def getpers(self):
         """Returns The Modified Personals List."""
         out = self.personals.copy()
-        if self.selfvar in out:
-            del out[self.selfvar]
+        if classcalc.selfvar in out:
+            del out[classcalc.selfvar]
         return out
 
     def __eq__(self, other):
