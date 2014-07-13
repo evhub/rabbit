@@ -1516,13 +1516,25 @@ class atom(evalobject):
     def copy(self):
         """Makes Another Atom."""
         return atom()
+    def calc(self):
+        """Converts To Nothing."""
+        return matrix(0)
     def __eq__(self, other):
+        """Always Is True."""
+        return True
+    def __ne__(self, other):
         """Always Is True."""
         return True
     def __gt__(self, other):
         """Always Is True."""
         return True
     def __lt__(self, other):
+        """Always Is True."""
+        return True
+    def __ge__(self, other):
+        """Always Is True."""
+        return True
+    def __le__(self, other):
         """Always Is True."""
         return True
     def __cmp__(self, other):
