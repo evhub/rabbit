@@ -194,6 +194,7 @@ class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
     lexical = True
     autoarg = "__auto__"
+    reqargs = -1
 
     def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None, reqargs=None):
         """Creates A Callable String Function."""
