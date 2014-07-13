@@ -200,6 +200,7 @@ Global Operator Precedence List:
             "none":matrix(0),
             "true":1.0,
             "false":0.0,
+            "_":atom(),
             funcfloat.allargs : matrix(0),
             "\xf8" : "none",
             "\u221e" : "inf",
@@ -372,6 +373,8 @@ Global Operator Precedence List:
                 out += b
             else:
                 out += "("+b+")"
+        elif isinstance(item, atom):
+            out = "_"
         elif isinstance(item, bool):
             out = self.prepare(float(item), False, bottom, indebug, maxrecursion)
         elif isinstance(item, complex):
@@ -1460,6 +1463,8 @@ Global Operator Precedence List:
             return "string"
         elif isinstance(item, funcfloat):
             return "function"
+        elif isinstance(item, atom):
+            return "atom"
         elif isinstance(item, complex):
             return "complex"
         elif isnum(item):

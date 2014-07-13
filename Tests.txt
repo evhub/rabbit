@@ -315,3 +315,6 @@ assert (\y\x+y):2 ?= 5		$ x = 3
 assert (\x:5\x*y)() ?= 10	$ y = 2 $ x = 2
 assert (:1:1).name ?= "ArgumentError"
 assert iserr:{__error__ = true}()
+assert [_, _] ?= [1, 2]
+assert (_, _) != (1, 2, 3)
+assert _ + _ ?= _

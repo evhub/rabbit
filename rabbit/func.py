@@ -24,6 +24,14 @@ from .matrix import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+def isnull(inputobject):
+    """Determines If The Object Is An Empty Matrix."""
+    return isinstance(inputobject, matrix) and inputobject.y == 0
+
+def nonull(inputlist):
+    """Cleans The Input Of Empty Matrices."""
+    return clean(inputlist, isnull, True)
+
 def collapse(item):
     """Collapses An Argument."""
     if isinstance(item, funcfloat):
@@ -1306,12 +1314,12 @@ class instancecalc(numobject, classcalc):
             check_eq = self.tryget("__eq__")
             if check_eq:
                 return self.domethod(check_eq, other)
-            check_cmp = self.tryget("__cmp__")
-            if check_cmp:
-                return self.domethod(check_cmp, other) == 0.0
             check_ne = self.tryget("__ne__")
             if check_ne:
                 return not self.domethod(check_ne, other)
+            check_cmp = self.tryget("__cmp__")
+            if check_cmp:
+                return self.domethod(check_cmp, other) == 0.0
             check_gt = self.tryget("__gt__")
             if check_gt:
                 check_lt = self.tryget("__lt__")
@@ -1334,12 +1342,12 @@ class instancecalc(numobject, classcalc):
             check_ne = self.tryget("__ne__")
             if check_ne:
                 return self.domethod(check_ne, other)
-            check_cmp = self.tryget("__cmp__")
-            if check_cmp:
-                return self.domethod(check_cmp, other) == 0.0
             check_eq = self.tryget("__eq__")
             if check_eq:
                 return not self.domethod(check_eq, other)
+            check_cmp = self.tryget("__cmp__")
+            if check_cmp:
+                return self.domethod(check_cmp, other) == 0.0
             check_gt = self.tryget("__gt__")
             if check_gt:
                 check_lt = self.tryget("__lt__")
@@ -1479,3 +1487,54 @@ class instancecalc(numobject, classcalc):
             return self.domethod(item)
         else:
             return strcalc("instance", self.e)
+
+class atom(evalobject):
+    """Implements Atoms."""
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("atom", )
+    def copy(self):
+        """Makes Another Atom."""
+        return atom()
+    def __eq__(self, other):
+        """Always Is Equal."""
+        return True
+    def __cmp__(self, other):
+        """Always Is Exactly Equal."""
+        return 0
+    def __iadd__(self, other):
+        """Always Returns self."""
+        return self
+    def __radd__(self, other):
+        """Always Returns self."""
+        return self
+    def __isub__(self, other):
+        """Always Returns self."""
+        return self
+    def __rsub__(self, other):
+        """Always Returns self."""
+        return self
+    def __imul__(self, other):
+        """Always Returns self."""
+        return self
+    def __rmul__(self, other):
+        """Always Returns self."""
+        return self
+    def __idiv__(self, other):
+        """Always Returns self."""
+        return self
+    def __rdiv__(self, other):
+        """Always Returns self."""
+        return self
+    def __ipow__(self, other):
+        """Always Returns self."""
+        return self
+    def __rpow__(self, other):
+        """Always Returns self."""
+        return self
+    def __imod__(self, other):
+        """Always Returns self."""
+        return self
+    def __rmod__(self, other):
+        """Always Returns self."""
+        return self

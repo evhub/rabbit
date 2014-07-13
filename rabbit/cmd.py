@@ -669,7 +669,9 @@ Import Commands:
         if isinstance(item, tuple):
             name = str(item[0])
             args = item[1:]
-            if name == "reciprocal":
+            if name == "atom":
+                value = atom()
+            elif name == "reciprocal":
                 value = reciprocal(self.deitem(args[0]))
             elif name == "fraction":
                 value = fraction(self.deitem(args[0]), self.deitem(args[1]))

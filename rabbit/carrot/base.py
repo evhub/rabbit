@@ -41,10 +41,6 @@ class evalobject(object):
         """Implements !=."""
         return not self == other
 
-    def __rmul__(self, other):
-        """Implements Reverse Multiplication."""
-        return self * other
-
     def __add__(self, other):
         """Performs Addition."""
         out = self.copy()
@@ -99,6 +95,10 @@ class numobject(evalobject):
     def __radd__(self, other):
         """Implements Reverse Addition."""
         return self + other
+
+    def __rmul__(self, other):
+        """Implements Reverse Multiplication."""
+        return self * other
 
     def __sub__(self, other):
         """Implements Subtraction."""
@@ -190,10 +190,6 @@ class numobject(evalobject):
     def __idiv__(self, other):
         """Performs Division In-Place."""
         return float(self) / other
-
-    def __rdiv__(self, other):
-        """Performs Division In-Place."""
-        return other / float(self)
 
     def __imul__(self, other):
         """Performs Multiplication In-Place."""

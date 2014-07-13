@@ -73,6 +73,10 @@ class matrix(mctobject):
             out.store(y,x, self.retrieve(y,x))
         return out
 
+    def calc(self):
+        """Retrieves A Boolean."""
+        return self.y != 0
+
     def code(self, func):
         """Codes A Function Over The Matrix."""
         for y,x in self.coords():
@@ -756,11 +760,3 @@ def totlen(inputlist):
             else:
                 tot += test
     return tot
-
-def isnull(inputobject):
-    """Determines If The Object Is An Empty Matrix."""
-    return isinstance(inputobject, matrix) and inputobject.y == 0
-
-def nonull(inputlist):
-    """Cleans The Input Of Empty Matrices."""
-    return clean(inputlist, isnull, True)
