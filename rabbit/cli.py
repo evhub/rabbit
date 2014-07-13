@@ -61,7 +61,6 @@ class commandline(mathbase):
             self.cmd_save,
             self.cmd_assert,
             self.cmd_do,
-            self.cmd_show,
             self.cmd_del,
             self.cmd_make,
             self.cmd_def,
@@ -76,6 +75,7 @@ class commandline(mathbase):
         self.e = evaluator(processor=self)
         self.e.makevars({
             "print":funcfloat(self.printcall, self.e, "print"),
+            "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab")
             })
@@ -84,12 +84,6 @@ class commandline(mathbase):
         """Exits The Command Line Interface."""
         if superformat(original) == "exit":
             self.on = False
-            return True
-
-    def cmd_show(self, original):
-        """Shows A Message."""
-        if superformat(original).startswith("show "):
-            self.app.display(self.e.prepare(self.calc(original[5:]), True, False))
             return True
 
     def cmd_save(self, original):

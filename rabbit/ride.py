@@ -107,7 +107,6 @@ Import Commands:
             self.cmd_save,
             self.cmd_assert,
             self.cmd_do,
-            self.cmd_show,
             self.cmd_del,
             self.cmd_make,
             self.cmd_def,
@@ -122,6 +121,7 @@ Import Commands:
         self.e = evaluator(processor=self)
         self.e.makevars({
             "print":funcfloat(self.printcall, self.e, "print"),
+            "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans")
             })
 

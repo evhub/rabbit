@@ -134,7 +134,7 @@ Import Commands:
         """Safely Tests An Expression."""
         return self.e.test(expression)
 
-    def printcall(self, variables):
+    def printcall(self, variables, func=None):
         """Performs print."""
         self.returned = 1
         if variables is None or len(variables) == 0:
@@ -144,8 +144,15 @@ Import Commands:
             for x in variables:
                 out += self.e.prepare(x, True, False)+"\n"
             out = out[:-1]
-        self.show(out)
-        return matrix(0)
+        if func is None:
+            self.show(out)
+        else:
+            func(out)
+        return out
+
+    def showcall(self, variables):
+        """Performs show."""
+        return self.printcall(variables, func=lambda x: popup("Info", x, "Output"))
 
     def anscall(self, variables):
         """Performs ans."""
@@ -184,7 +191,6 @@ Import Commands:
             self.cmd_save,
             self.cmd_assert,
             self.cmd_do,
-            self.cmd_show,
             self.cmd_del,
             self.cmd_make,
             self.cmd_def,
@@ -199,6 +205,7 @@ Import Commands:
         self.e = evaluator(processor=self)
         self.e.makevars({
             "print":funcfloat(self.printcall, self.e, "print"),
+            "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab")
             })
@@ -336,12 +343,6 @@ Import Commands:
             test = self.calc(original[3:])
             if test is not None and not isnull(test):
                 self.ans.append(test)
-            return True
-
-    def cmd_show(self, original):
-        """Shows A Popup."""
-        if superformat(original).startswith("show "):
-            popup("Info", self.e.prepare(self.calc(original[5:]), True, False), "Output")
             return True
 
     def cmd_del(self, original):
