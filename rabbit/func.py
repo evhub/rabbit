@@ -1517,10 +1517,16 @@ class atom(evalobject):
         """Makes Another Atom."""
         return atom()
     def __eq__(self, other):
-        """Always Is Equal."""
+        """Always Is True."""
+        return True
+    def __gt__(self, other):
+        """Always Is True."""
+        return True
+    def __lt__(self, other):
+        """Always Is True."""
         return True
     def __cmp__(self, other):
-        """Always Is Exactly Equal."""
+        """Always Is Equal."""
         return 0
     def __iadd__(self, other):
         """Always Returns self."""
