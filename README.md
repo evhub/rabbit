@@ -341,7 +341,6 @@ run <filename>		# Runs code from a file
 save <filename>		# Saves all commands in this interactive session to a file
 assert <expression>	# Raises an error if <expression> isn't true
 do <expression>		# Skips over statement evaluation and just does <expression>
-show <expression>	# Prints the result of <expression>
 del <variable>		# Manually deletes the variable <variable>
 make <definition>	# Tags a definition as pre-compilation
 def <definition>		# Performs a definition, even if the variable name is already defined
@@ -645,7 +644,7 @@ x | var         # Evaluates variables
 #### Hello World
 ```
 print("Hello, world!")    # The convential method, print is a built-in function just for this purpose
-show "Hello, world!"      # A common interpreter command, show will print its argument in a text box
+show("Hello, world!")     # An alternative method, show will print its argument in a text box
 ```
 
 #### Quick Sort
