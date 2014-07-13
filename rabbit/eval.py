@@ -853,6 +853,8 @@ Global Operator Precedence List:
                     raise ExecutionError("ArgumentError", "Cannot have required args after optional args")
                 elif x.startswith("+"):
                     x = x[1:]
+                else:
+                    special = False
                 if ":" in x:
                     if not special:
                         doparam = False

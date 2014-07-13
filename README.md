@@ -210,7 +210,7 @@ Lambda syntax in Rabbit is fairly straightforward; lambdas are defined using the
 \x\(x+1)		# A one-variable function that returns that variable plus one
 (\x\x)+1		# The same as above--Rabbit will just curry any basic mathematical operation done to a function
 \(x,y)\(x+y)	# A two-variable function that adds the two variables
-\(x,x:(1))\x	# A one-variable function, whose one variable defaults to one, that returns the variable
+\(-x:(1))\x		# A one-variable function, whose one variable defaults to one, that returns the variable
 f(x) = x
 \f				# Since f is a previously defined function, this will just return that function
 \\f				# This syntax is required to create a new zero-variable function that returns f
@@ -218,8 +218,8 @@ f(x) = x
 
 Now that we know how to define lambdas, here's what's special about colon syntax:
 ```
-gen_func(n) = \(x,n:(n))\(x%n)		# Creates and returns a function that will take the mod of its variable with the base equal to the variable of the generator
-gen_func:2:5						# Because gen_func only takes one variable, colon syntax will pass the remaining variables on to whatever is returned by gen_func
+gen_func(n) = \x\(x%n)		# Creates and returns a function that will take the mod of its variable with the base equal to the variable of the generator
+gen_func:2:5				# Because gen_func only takes one variable, colon syntax will pass the remaining variables on to whatever is returned by gen_func
 # result = 5 % 2 = 1
 ```
 

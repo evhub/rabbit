@@ -52,8 +52,9 @@ assert plusone(1,2,3) ?= 2,3,4						$ plusone(l) = l+1
 assert \1 ?= one									$ one() = 1
 assert (\x\x+1):5 ?= (\x\(x+1)):5 ?= 6
 assert (\(x,y)\(x+y))(1,2) ?= 3
-assert (\(x,x:1)\x): ?= 1
-assert gen_func:2:5 ?= 1							$ gen_func(n) = \(x,n:n)\(x%n)
+assert (\(-x:1)\x): ?= 1
+assert gen_func:2:5 ?= 1							$ gen_func(n) = \x\(x%n)
+assert gen_func:2:5 ?= 1							$ gen_func(n) = \x,n:n\(x%n)
 assert inlist[1,2,3] ?= [1,2,3],					$ inlist(l) = l,
 
 # String Tests:
