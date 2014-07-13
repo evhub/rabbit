@@ -97,7 +97,7 @@ Import Commands:
         if variables is not None:
             self.e.recursion += 1
             for k,v in variables.items():
-                self.printdebug(str(k)+": "+str(v))
+                self.printdebug(str(k)+" = "+str(v))
             self.e.recursion -= 1
         self.dumpdebug()
 

@@ -1134,7 +1134,7 @@ Global Operator Precedence List:
             if inputlist[0] in self.trynames:
                 result, err = catch(self.eval_call, strlist(inputlist[1:], ":"))
                 if err:
-                    out = self.funcfind("error").call([])
+                    out = instancecalc(self, {self.errorvar : 1.0})
                     out.store("name", strcalc(err[0], self))
                     out.store("message", strcalc(err[1], self))
                     if len(err) > 2:
