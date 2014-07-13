@@ -488,32 +488,25 @@ Import Commands:
             for func in self.set_cmds:
                 value = func(sides)
                 if value is not None:
-                    if istext(value):
-                        check = 0
-                    else:
-                        try:
-                            check = len(value)
-                        except:
-                            check = -1
-                    if check >= 2:
-                        if docalc:
-                            value[1] = self.trycalc(value[1])
-                        self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.e.prepare(value[1], False, True, True))
-                    else:
-                        if docalc:
-                            value = self.trycalc(value)
-                        self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+sides[0]+" "+":"*docalc+"= "+self.e.prepare(value, False, True, True))
+                    if not isinstance(value, tuple):
                         value = sides[0], value
+                    self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.e.prepare(value[1], False, True, True))
                     if useclass is None:
                         if not self.redef and value[0] in self.e.variables:
                             raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
                         else:
-                            self.e.variables[value[0]] = value[1]
+                            if docalc:
+                                self.e.variables[value[0]] = self.trycalc(value[1])
+                            else:
+                                self.e.variables[value[0]] = value[1]
                     else:
                         if not self.redef and value[0] in useclass.variables:
                             raise ExecutionError("RedefinitionError", "The attribute "+value[0]+" already exists")
                         else:
-                            useclass.store(value[0], value[1])
+                            if docalc:
+                                useclass.store(value[0], self.trycalc(value[1]))
+                            else:
+                                useclass.store(value[0], value[1])
                     return True
 
     def readytofunc(self, expression, extra="", allowed=""):
