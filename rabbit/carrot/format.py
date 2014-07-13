@@ -162,15 +162,14 @@ def listsuperformat(inputlist):
 
 def delspace(inputstring, wipestring=None):
     """Removes All Whitespace From A String."""
-    out = ""
-    inputstring = str(inputstring)
-    if not wipestring:
-        regex = re.compile("\s")
-    else:
+    if wipestring:
         wipestring = str(wipestring)
-    for x in inputstring:
+    else:
+        regex = re.compile("\s")
+    out = ""
+    for x in str(inputstring):
         if wipestring:
-            if not out in wipestring:
+            if not x in wipestring:
                 out += x
         else:
             if not regex.match(x):

@@ -405,7 +405,7 @@ Global Operator Precedence List:
                 out += "D:"
             variables = item.getvars()
             personals = item.getpers()
-            out += "\\("+strlist(variables,",")+","
+            out += "\\"+strlist(variables,",")+","
             for x,y in personals.items():
                 out += str(x)+":("
                 if maxrecursion <= 0 and isinstance(y, classcalc):
@@ -413,15 +413,14 @@ Global Operator Precedence List:
                 else:
                     out += self.prepare(y, False, bottom, indebug, maxrecursion-1)
                 out += "),"
-            if len(variables) == 0:
-                out = out[:-2]
-            else:
-                out = out[:-1]+")\\"
+            out = out[:-1]
+            if len(variables) != 0:
+                out += "\\"
             test = self.prepare(item.funcstr, False, bottom, indebug, maxrecursion)
-            if madeof(test, string.digits) or not self.isreserved(test):
-                out += test
-            else:
+            if self.isreserved(test, allowed=string.digits):
                 out += "("+test+")"
+            else:
+                out += test
             try:
                 item.n
             except AttributeError:
@@ -816,59 +815,67 @@ Global Operator Precedence List:
             elif out[0] == "":
                 return strfloat(out[1], self, check=False)
             else:
-                temp = self.namefind(out[0]).split(",")
-                params = []
-                personals = {}
-                allargs = None
-                for x in temp:
-                    x = basicformat(x)
-                    if x:
-                        doparam = True
-                        if x.startswith("*"):
-                            x = x[1:]
-                            doallargs = True
-                        else:
-                            doallargs = False
-                        if ":" in x:
-                            if x.startswith("+"):
-                                x = x[1:]
-                                doparam = True
-                            elif not doallargs:
-                                doparam = False
-                            x = x.split(":", 1)
-                            if not x[0] or self.isreserved(x[0]):
-                                doparam = False
-                                raise ExecutionError("VariableError", "Could not set to invalid personal "+x[0])
-                            else:
-                                self.info = " <\\"
-                                personals[x[0]] = self.calc(x[1])
-                            x = x[0]
-                        if doallargs:
-                            if not x or self.isreserved(x):
-                                doparam = False
-                                raise ExecutionError("VariableError", "Could not set to invalid allargs "+x)
-                            else:
-                                allargs = x
-                        if doparam:
-                            if not x or self.isreserved(x):
-                                raise ExecutionError("VariableError", "Could not set to invalid variable "+x)
-                            else:
-                                params.append(x)
+                params, personals, allargs, reqargs = self.eval_set(self.namefind(out[0]).split(","))
                 if out[1].startswith("\\"):
-                    if allargs:
-                        return strfloat(out[1][1:], self, params, personals, check=False, allargs=allargs)
-                    else:
-                        return strfloat(out[1][1:], self, params, personals, check=False)
+                    return strfloat(out[1][1:], self, params, personals, check=False, allargs=allargs, reqargs=reqargs)
                 else:
                     while out[1].startswith(self.parenchar) and out[1].endswith(self.parenchar) and out[1] in self.variables and (istext(self.variables[out[1]]) or isinstance(self.variables[out[1]], strcalc)):
                         if isinstance(self.variables[out[1]], strcalc):
                             out[1] = repr(self.variables[out[1]])
                         else:
                             out[1] = str(self.variables[out[1]])
-                    if allargs:
-                        return strfloat(out[1], self, params, personals, allargs=allargs)
+                    return strfloat(out[1], self, params, personals, allargs=allargs, reqargs=reqargs)
+
+    def eval_set(self, temp):
+        """Performs Setting."""
+        params = []
+        personals = {}
+        allargs = None
+        inopt = None
+        reqargs = None
+        for i in xrange(0, len(temp)):
+            x = basicformat(temp[i])
+            if x:
+                doparam = True
+                doallargs = False
+                special = True
+                if x.startswith("*"):
+                    if i == len(temp)-1:
+                        x = x[1:]
+                        doallargs = True
                     else:
-                        return strfloat(out[1], self, params, personals)
+                        raise ExecutionError("ArgumentError", "Catch all argument must come last")
+                elif x.startswith("-"):
+                    inopt = True
+                    reqargs = len(params)
+                    x = x[1:]
+                elif inopt:
+                    raise ExecutionError("ArgumentError", "Cannot have required args after optional args")
+                elif x.startswith("+"):
+                    x = x[1:]
+                if ":" in x:
+                    if not special:
+                        doparam = False
+                    x = x.split(":", 1)
+                    if not x[0] or self.isreserved(x[0]):
+                        raise ExecutionError("VariableError", "Could not set to invalid personal "+x[0])
+                    else:
+                        self.info = " <\\"
+                        personals[x[0]] = self.calc(x[1])
+                    x = x[0]
+                else:
+                    x = delspace(x)
+                if doallargs:
+                    if not x or self.isreserved(x):
+                        raise ExecutionError("VariableError", "Could not set to invalid allargs "+x)
+                    else:
+                        allargs = x
+                if doparam:
+                    if not x or self.isreserved(x):
+                        raise ExecutionError("VariableError", "Could not set to invalid variable "+x)
+                    else:
+                        params.append(x)
+        return params, personals, allargs, reqargs
 
     def eval_join(self, inputlist):
         """Performs Concatenation."""
@@ -1407,12 +1414,14 @@ Global Operator Precedence List:
 
     def isreserved(self, expression, extra="", allowed=""):
         """Determines If An Expression Contains Reserved Characters."""
-        if expression == "":
+        if not expression:
             return True
-        for x in expression:
-            if x in delspace(self.reserved, allowed)+extra:
-                return True
-        return False
+        else:
+            reserved = self.reserved+extra
+            for x in expression:
+                if x in self.reserved and not x in allowed:
+                    return True
+            return False
 
     def call(self, item, value, varname=None):
         """Evaluates An Item With A Value."""

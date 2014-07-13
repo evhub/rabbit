@@ -318,3 +318,7 @@ assert iserr:{__error__ = true}()
 assert [_, _] ?= [1, 2]
 assert (_, _) != (1, 2, 3)
 assert _ + _ ?= _
+assert ((\x,y\x+y):1):2 ?= 3
+assert (\x,y\x+y):1:2 ?= 3
+assert (\x,y\x+y)(1)(2) ?= 3
+assert (\x,-y:1\x+y):2 ?= 3

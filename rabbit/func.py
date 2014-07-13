@@ -195,7 +195,7 @@ class strfunc(funcfloat):
     lexical = True
     autoarg = "__auto__"
 
-    def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None):
+    def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None, reqargs=None):
         """Creates A Callable String Function."""
         self.funcstr = str(funcstr)
         if name:
@@ -216,6 +216,10 @@ class strfunc(funcfloat):
             self.personals = {}
         else:
             self.personals = dict(personals)
+        if reqargs is None:
+            self.reqargs = len(self.variables)
+        else:
+            self.reqargs = reqargs
         self.e = e
         if self.lexical:
             self.snapshot = self.e.variables.copy()
@@ -249,6 +253,11 @@ class strfunc(funcfloat):
         variables = varproc(variables)
         if variables is None:
             return self
+        elif len(variables) < self.reqargs:
+            out = self.copy()
+            for arg in variables:
+                out.curry(arg)
+            return out
         else:
             allvars = diagmatrixlist(variables)
             if self.overflow:
@@ -266,6 +275,7 @@ class strfunc(funcfloat):
     def curry(self, arg):
         """Curries An Argument."""
         self.personals[self.variables.pop(0)] = arg
+        self.reqargs -= 1
 
     def __float__(self):
         """Retrieves A Float."""
@@ -342,6 +352,8 @@ class strfunc(funcfloat):
     def getvars(self):
         """Returns The Original Variable List."""
         out = self.variables[:]
+        for x in xrange(self.reqargs, len(out)):
+            out[x] = "-"+out[x]
         if not self.overflow:
             if self.allargs == funcfloat.allargs:
                 out.append(self.allargs)
@@ -367,7 +379,7 @@ class strfunc(funcfloat):
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
-    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name=None, overflow=None, allargs=None):
+    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name=None, overflow=None, allargs=None, reqargs=None):
         """Initializes The String Float."""
         if name:
             self.name = str(name)
@@ -387,6 +399,10 @@ class strfloat(strfunc):
             personals = {}
         else:
             personals = dict(personals)
+        if reqargs is None:
+            self.reqargs = len(variables)
+        else:
+            self.reqargs = reqargs
         self.e = e
         if check:
             test = self.e.find(funcstr, True, False)
@@ -394,9 +410,12 @@ class strfloat(strfunc):
             self.funcstr = test.funcstr
             self.overflow = overflow and test.overflow
             self.variables = variables
+            self.reqargs += other.reqargs
             for x in test.variables:
                 if not x in self.variables:
                     self.variables.append(x)
+                else:
+                    self.reqargs -= 1
             self.personals = test.personals
             for x,y in personals:
                 if y != test:
