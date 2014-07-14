@@ -303,7 +303,12 @@ Import Commands:
             if original == "":
                 self.setdebug(not self.debug)
             elif original[0] == " ":
-                self.setdebug(formatisyes(delspace(original)))
+                if formatisyes(original):
+                    self.setdebug(True)
+                elif formatisno(original):
+                    self.setdebug(False)
+                else:
+                    raise ExecutionError("StatementError", "Unrecognized debug state of "+original)
             else:
                 return None
             return True
