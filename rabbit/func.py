@@ -1387,75 +1387,87 @@ class instancecalc(numobject, classcalc):
 
     def __gt__(self, other):
         """Performs Greater Than."""
-        check_gt = self.tryget("__gt__")
-        if check_gt:
-            return self.domethod(check_gt, other)
-        check_cmp = self.tryget("__cmp__")
-        if check_cmp:
-            return self.domethod(check_cmp, other) > 0.0
-        check_le = self.tryget("__le__")
-        if check_le:
-            return not self.domethod(check_le, other)
-        check_ge = self.tryget("__ge__")
-        if check_ge:
-            check_eq = self.tryget("__eq__")
-            if check_eq:
-                return self.domethod(check_ge, other) and not self.domethod(check_eq, other)
-        return NotImplemented
+        if not hasnum(other):
+            return False
+        else:
+            check_gt = self.tryget("__gt__")
+            if check_gt:
+                return self.domethod(check_gt, other)
+            check_cmp = self.tryget("__cmp__")
+            if check_cmp:
+                return self.domethod(check_cmp, other) > 0.0
+            check_le = self.tryget("__le__")
+            if check_le:
+                return not self.domethod(check_le, other)
+            check_ge = self.tryget("__ge__")
+            if check_ge:
+                check_eq = self.tryget("__eq__")
+                if check_eq:
+                    return self.domethod(check_ge, other) and not self.domethod(check_eq, other)
+            return NotImplemented
 
     def __lt__(self, other):
         """Performs Less Than."""
-        check_lt = self.tryget("__lt__")
-        if check_lt:
-            return self.domethod(check_lt, other)
-        check_cmp = self.tryget("__cmp__")
-        if check_cmp:
-            return self.domethod(check_cmp, other) < 0.0
-        check_ge = self.tryget("__ge__")
-        if check_ge:
-            return not self.domethod(check_ge, other)
-        check_le = self.tryget("__le__")
-        if check_le:
-            check_eq = self.tryget("__eq__")
-            if check_eq:
-                return self.domethod(check_le, other) and not self.domethod(check_eq, other)
-        return NotImplemented
+        if not hasnum(other):
+            return False
+        else:
+            check_lt = self.tryget("__lt__")
+            if check_lt:
+                return self.domethod(check_lt, other)
+            check_cmp = self.tryget("__cmp__")
+            if check_cmp:
+                return self.domethod(check_cmp, other) < 0.0
+            check_ge = self.tryget("__ge__")
+            if check_ge:
+                return not self.domethod(check_ge, other)
+            check_le = self.tryget("__le__")
+            if check_le:
+                check_eq = self.tryget("__eq__")
+                if check_eq:
+                    return self.domethod(check_le, other) and not self.domethod(check_eq, other)
+            return NotImplemented
 
     def __ge__(self, other):
         """Performs Greater Than Or Equal."""
-        check_ge = self.tryget("__ge__")
-        if check_ge:
-            return self.domethod(check_ge, other)
-        check_cmp = self.tryget("__cmp__")
-        if check_cmp:
-            return self.domethod(check_cmp, other) >= 0.0
-        check_lt = self.tryget("__lt__")
-        if check_lt:
-            return not self.domethod(check_lt, other)
-        check_gt = self.tryget("__gt__")
-        if check_gt:
-            check_eq = self.tryget("__eq__")
-            if check_eq:
-                return self.domethod(check_gt, other) or self.domethod(check_eq, other)
-        return NotImplemented
+        if not hasnum(other):
+            return False
+        else:
+            check_ge = self.tryget("__ge__")
+            if check_ge:
+                return self.domethod(check_ge, other)
+            check_cmp = self.tryget("__cmp__")
+            if check_cmp:
+                return self.domethod(check_cmp, other) >= 0.0
+            check_lt = self.tryget("__lt__")
+            if check_lt:
+                return not self.domethod(check_lt, other)
+            check_gt = self.tryget("__gt__")
+            if check_gt:
+                check_eq = self.tryget("__eq__")
+                if check_eq:
+                    return self.domethod(check_gt, other) or self.domethod(check_eq, other)
+            return NotImplemented
 
     def __le__(self, other):
         """Performs Less Than Or Equal."""
-        check_le = self.tryget("__le__")
-        if check_le:
-            return self.domethod(check_le, other)
-        check_cmp = self.tryget("__cmp__")
-        if check_cmp:
-            return self.domethod(check_cmp, other) <= 0.0
-        check_gt = self.tryget("__gt__")
-        if check_gt:
-            return not self.domethod(check_gt, other)
-        check_lt = self.tryget("__lt__")
-        if check_lt:
-            check_eq = self.tryget("__eq__")
-            if check_eq:
-                return self.domethod(check_lt, other) or self.domethod(check_eq, other)
-        return NotImplemented
+        if not hasnum(other):
+            return False
+        else:
+            check_le = self.tryget("__le__")
+            if check_le:
+                return self.domethod(check_le, other)
+            check_cmp = self.tryget("__cmp__")
+            if check_cmp:
+                return self.domethod(check_cmp, other) <= 0.0
+            check_gt = self.tryget("__gt__")
+            if check_gt:
+                return not self.domethod(check_gt, other)
+            check_lt = self.tryget("__lt__")
+            if check_lt:
+                check_eq = self.tryget("__eq__")
+                if check_eq:
+                    return self.domethod(check_lt, other) or self.domethod(check_eq, other)
+            return NotImplemented
 
     def __str__(self):
         """Retrieves A String."""
