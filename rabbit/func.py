@@ -1525,26 +1525,41 @@ class atom(evalobject):
         """Converts To Nothing."""
         return matrix(0)
     def __eq__(self, other):
-        """Always Is True."""
-        return True
+        """Always Is True For Evaluator Objects."""
+        if hasnum(other):
+            return True
+        else:
+            return False
     def __ne__(self, other):
-        """Always Is True."""
-        return True
+        """Always Is True For Evaluator Objects."""
+        if hasnum(other):
+            return True
+        else:
+            return False
     def __gt__(self, other):
-        """Always Is True."""
-        return True
+        """Always Is True For Evaluator Objects."""
+        if hasnum(other):
+            return True
+        else:
+            return False
     def __lt__(self, other):
-        """Always Is True."""
-        return True
+        """Always Is True For Evaluator Objects."""
+        if hasnum(other):
+            return True
+        else:
+            return False
     def __ge__(self, other):
-        """Always Is True."""
-        return True
+        """Always Is True For Evaluator Objects."""
+        if hasnum(other):
+            return True
+        else:
+            return False
     def __le__(self, other):
-        """Always Is True."""
-        return True
-    def __cmp__(self, other):
-        """Always Is Equal."""
-        return 0
+        """Always Is True For Evaluator Objects."""
+        if hasnum(other):
+            return True
+        else:
+            return False
     def __iadd__(self, other):
         """Always Returns self."""
         return self
