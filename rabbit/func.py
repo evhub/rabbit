@@ -34,7 +34,12 @@ def nonull(inputlist):
 
 def collapse(item):
     """Collapses An Argument."""
-    if isinstance(item, funcfloat):
+    if isinstance(item, strfunc):
+        if item.reqargs > 0:
+            raise ExecutionError("ArgumentError", "Not enough arguments supplied to collapse "+item.e.prepare(item, False, True, True))
+        else:
+            return item.calc()
+    elif isinstance(item, funcfloat):
         return item.calc()
     else:
         return item
