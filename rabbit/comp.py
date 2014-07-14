@@ -31,13 +31,14 @@ class compiler(commandline):
     doshow = False
     compiling = False
 
-    def __init__(self, debugcolor="lightred", prompt=addcolor("Rabbit:", "pink")+" ", nprompt=addcolor(">>>", "pink")+" ", outcolor="cyan", *initializers):
+    def __init__(self, debugcolor="lightred", mainprompt=addcolor("Rabbit:", "pink")+" ", prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", *initializers):
         """Initializes The Command Line Interface."""
         self.app = terminal()
         self.populator()
         self.e.color = debugcolor
+        self.mainprompt = str(mainprompt)
         self.prompt = str(prompt)
-        self.nprompt = str(nprompt)
+        self.moreprompt = str(moreprompt)
         self.color = outcolor
         if initializers == ():
             self.initialize()
@@ -61,7 +62,7 @@ class compiler(commandline):
     def start(self):
         """Runs An Interactive Semi-Compiler Command Line Interface."""
         while self.on:
-            cmd = superformat(raw_input(self.prompt))
+            cmd = superformat(raw_input(self.mainprompt))
             if cmd in ["h", "help"]:
                 self.app.display(addcolor("Valid commands: help (h), interpret (i), compile (c), decompile (d), interactive (n), exit (x)", self.color))
             elif cmd in ["i", "interpret"]:
@@ -71,10 +72,12 @@ class compiler(commandline):
             elif cmd in ["d", "decompile"]:
                 self.run()
             elif cmd in ["n", "interactive"]:
-                cmd = raw_input(self.nprompt)
-                while superformat(cmd) != "exit":
-                    self.handler(cmd)
-                    cmd = raw_input(self.nprompt)
+                on = self.on
+                self.on = True
+                self.cmds = [self.cmd_exit]+self.cmds
+                self.start()
+                self.cmds.pop(0)
+                self.on = on
             elif cmd in ["x", "exit"]:
                 self.on = False
             else:
@@ -82,19 +85,19 @@ class compiler(commandline):
 
     def interp(self):
         """Runs The Interpreter On A Source File."""
-        name = raw_input(self.prompt+addcolor("Evaluate Source File:", self.color)+" ")
+        name = raw_input(self.mainprompt+addcolor("Evaluate Source File:", self.color)+" ")
         if not self.evalfile(name):
             self.app.display(addcolor("<!> IOError: Rabbit could not open file "+name, self.e.color))
 
     def comp(self):
         """Runs The Compiler On A Source File."""
-        name = raw_input(self.prompt+addcolor("Compile Source File:", self.color)+" ")
+        name = raw_input(self.mainprompt+addcolor("Compile Source File:", self.color)+" ")
         if not self.compfile(name, name+".rabbit"):
             self.app.display(addcolor("<!> IOError: Rabbit could not open file "+name, self.e.color))
 
     def run(self):
         """Runs The Decompiler On A Compiled File."""
-        name = raw_input(self.prompt+addcolor("Execute Compiled File:", self.color)+" ")
+        name = raw_input(self.mainprompt+addcolor("Execute Compiled File:", self.color)+" ")
         if not self.decompfile(name):
             self.app.display(addcolor("<!> IOError: Rabbit could not open file "+name, self.e.color))
 

@@ -47,6 +47,7 @@ Import Commands:
     <name> = import <file>
     run <file>
     save <file>"""
+    multiargops = "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"
     messages = []
     ans = [matrix(0)]
     returned = 1

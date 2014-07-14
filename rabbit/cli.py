@@ -26,16 +26,18 @@ from .cmd import *
 
 class commandline(mathbase):
     """The Rabbit Command Line Interface."""
+    relations = {"(":")", "[":"]", "{":"}", '"':'"', "`":"`", "\u201c":"\u201d"}
     on = True
     commands = []
     
-    def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", helpstring=None, outcolor="cyan", debugcolor="lightred", debug=False, *initializers):
+    def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", helpstring=None, outcolor="cyan", debugcolor="lightred", debug=False, *initializers):
         """Initializes The Command Line Interface."""
         self.debug = bool(debug)
         if message:
             message = str(message)
             self.messages.append(message)
         self.prompt = str(prompt)
+        self.moreprompt = str(moreprompt)
         self.app = terminal(message, color=outcolor)
         self.show = self.appshow
         self.populator()
@@ -95,15 +97,38 @@ class commandline(mathbase):
     def start(self):
         """Starts The Command Line Main Loop."""
         while self.on:
-            self.handler(raw_input(self.prompt))
+            old = self.handler(raw_input(self.prompt))
+            while old:
+                old = self.handler(raw_input(self.moreprompt), old)
 
-    def handler(self, original):
+    def handler(self, original, old=None):
         """Handles Raw Input."""
-        self.reset()
         self.commands.append(original)
         cmd = carefulsplit(original, "#", '"`', {"\u201c":"\u201d"})[0]
-        if delspace(cmd) != "":
-            self.process(cmd)
+        if old is not None:
+            whole = old+"\n"+cmd
+        else:
+            whole = cmd
+        if iswhite(whole):
+            return None
+        elif old is not None and not cmd == "":
+            if iswhite(cmd[0]):
+                return whole
+            else:
+                return "( "+old+" )\n ;; "+cmd
+        elif endswithany(basicformat(whole), self.multiargops):
+            return whole
+        else:
+            check = None
+            for x in whole:
+                if check == x:
+                    check = None
+                elif x in self.relations:
+                    check = self.relations[x]
+            if check:
+                return whole
+        self.reset()
+        self.process(whole)
 
     def calc(self, expression):
         """Safely Evaluates An Expression."""
