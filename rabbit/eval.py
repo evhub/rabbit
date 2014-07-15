@@ -860,13 +860,15 @@ Global Operator Precedence List:
                     if not special:
                         doparam = False
                     x = x.split(":", 1)
+                    x[0] = delspace(x[0])
                     if not x[0] or self.isreserved(x[0]):
                         raise ExecutionError("VariableError", "Could not set to invalid personal "+x[0])
                     else:
                         self.info = " <\\"
                         personals[x[0]] = self.calc(x[1])
                     x = x[0]
-                x = delspace(x)
+                else:
+                    x = delspace(x)
                 if doallargs:
                     if not x or self.isreserved(x):
                         raise ExecutionError("VariableError", "Could not set to invalid allargs "+x)
