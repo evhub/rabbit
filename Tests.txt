@@ -354,5 +354,5 @@ assert _ <> 1
 
 # Final Testing:
 assert "All
- done! ?= "All" .. "\n " .. "done!"
+ done!" ?= "All" .. "\n " .. "done!"
 assert "All done!" ?= print("All", "done!")
