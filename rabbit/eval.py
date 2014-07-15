@@ -866,8 +866,7 @@ Global Operator Precedence List:
                         self.info = " <\\"
                         personals[x[0]] = self.calc(x[1])
                     x = x[0]
-                else:
-                    x = delspace(x)
+                x = delspace(x)
                 if doallargs:
                     if not x or self.isreserved(x):
                         raise ExecutionError("VariableError", "Could not set to invalid allargs "+x)
