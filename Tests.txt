@@ -231,7 +231,7 @@ assert crackle pop (15) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",
    x
    ),
   ..
-  ( crackle pop (end, x+1, mod three+1 % 3, mod five+1 % 5)
+  ( crackle pop (end, x+1, (mod three+1) % 3, (mod five+1) % 5)
     @ x < end
     )
 
