@@ -467,7 +467,7 @@ class strcalc(numobject):
                 func = True
                 x = ""
             self.calcstr += x
-        self.calcstr = str(compute('"""'+self.calcstr.replace('"""', '\\"""')+'"""'))
+        self.calcstr = str(compute('"""'+self.calcstr.replace('"', '\\"')+'"""'))
         self.e = e
 
     def getstate(self):
