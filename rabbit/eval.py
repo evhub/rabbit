@@ -847,7 +847,8 @@ Global Operator Precedence List:
                         raise ExecutionError("ArgumentError", "Catch all argument must come last")
                 elif x.startswith("-"):
                     inopt = True
-                    reqargs = len(params)
+                    if reqargs is None:
+                        reqargs = len(params)
                     x = x[1:]
                 elif inopt:
                     raise ExecutionError("ArgumentError", "Cannot have required args after optional args")
