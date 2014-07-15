@@ -124,7 +124,7 @@ Import Commands:
         popup("Info", self.e.forshow(arg), "Output")
 
     def calc(self, expression):
-        """Safely Evaluates An Expression."""
+        """Evaluates An Expression."""
         if self.debug:
             self.e.info = 1
         else:
@@ -132,7 +132,7 @@ Import Commands:
         return self.e.calc(expression)
 
     def test(self, expression):
-        """Safely Tests An Expression."""
+        """Tests An Expression."""
         return self.e.test(expression)
 
     def printcall(self, variables, func=None):
@@ -149,7 +149,7 @@ Import Commands:
             self.show(out)
         else:
             func(out)
-        return out
+        return strcalc(out, self.e)
 
     def showcall(self, variables):
         """Performs show."""
