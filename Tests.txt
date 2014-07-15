@@ -353,5 +353,5 @@ assert (\x,-y:1\x+y):2 ?= 3
 assert _ <> 1
 
 # Final Testing:
-assert "All done!" ?= print("All
- done!")
+assert "All
+ done!" ?= print("All\n", "done!")

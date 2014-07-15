@@ -141,10 +141,10 @@ Import Commands:
         if variables is None or len(variables) == 0:
             out = self.e.prepare(matrix(0), True, False)
         else:
-            out = ""
+            out = []
             for x in variables:
-                out += self.e.prepare(x, True, False)+"\n"
-            out = out[:-1]
+                out.append(self.e.prepare(x, True, False))
+            out = " ".join(out)
         if func is None:
             self.show(out)
         else:
