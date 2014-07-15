@@ -208,7 +208,7 @@ assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
    $ a,as = l
    ) @ len:l
 assert range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop")
- $ crackle pop (x) =
+ $( crackle pop (x) =
     "CracklePop"
         @ div by three & div by five;
     "Crackle"
@@ -218,6 +218,7 @@ assert range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackl
     x
     $ div by three = x%3 ?= 0
     $ div by five = x%5 ?= 0
+ )
 
 # Built-Ins Tests:
 assert a != b					$ def b.x = 2 $ b := copy(a) $ a := { x = 1 }

@@ -851,6 +851,8 @@ class classcalc(cotobject):
 
     def process(self, command):
         """Processes A Command And Puts The Result In The Variables."""
+        command = self.e.namefind(str(command))
+
         returned = self.e.processor.returned
         oldshow = self.e.processor.doshow
         self.e.processor.doshow = False
@@ -859,7 +861,7 @@ class classcalc(cotobject):
 
         self.doset = self.e.setvars(self.variables)
         try:
-            self.e.processor.process(str(command))
+            self.e.processor.process(command)
         finally:
             self.e.setvars(self.doset)
             self.doset = False
