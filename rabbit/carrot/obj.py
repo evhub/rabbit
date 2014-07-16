@@ -27,6 +27,8 @@ try:
 except NameError:
     xrange = range
 
+encoding = "UTF"
+
 try:
     raw_input
 except NameError:
@@ -34,7 +36,7 @@ except NameError:
 else:
     old_input = raw_input
 
-raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode("UTF")
+raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode(encoding)
 
 try:
     unicode
@@ -45,7 +47,7 @@ else:
     str = unicode
 
 old_print = print
-print = lambda *args: old_print(*(map(lambda x: str(x).encode("UTF"), args)))
+print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
 
 def typestr(obj):
     """Formats The Type Of Something Into A String."""

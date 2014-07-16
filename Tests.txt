@@ -351,7 +351,8 @@ assert (\x,y\x+y):1:2 ?= 3
 assert (\x,y\x+y)(1)(2) ?= 3
 assert (\x,-y:1\x+y):2 ?= 3
 assert _ <> 1
-assert { x = 1 } ++ { x = 2 } ?= { x = 1 ;; x = 2 }
+assert { x = 1 } ++ { y = 2 } ?= { x = 1 ;; y = 2 }
+assert (:{ x = 1 ;; x = 2 }).name ?= "RedefinitionError"
 
 # Final Testing:
 assert "All

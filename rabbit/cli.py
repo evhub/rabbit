@@ -26,7 +26,6 @@ from .cmd import *
 
 class commandline(mathbase):
     """The Rabbit Command Line Interface."""
-    relations = {"(":")", "[":"]", "{":"}", '"':'"', "`":"`", "\u201c":"\u201d"}
     on = True
     commands = []
     

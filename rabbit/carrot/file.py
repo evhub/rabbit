@@ -30,7 +30,7 @@ import Tkinter
 
 def openfile(filename, opentype="r+b"):
     """Returns An Open File Object."""
-    return codecs.open(str(filename), str(opentype), encoding="UTF")
+    return codecs.open(str(filename), str(opentype), encoding=encoding)
 
 def writefile(openfile, writer):
     """Sets The Contents Of A File."""

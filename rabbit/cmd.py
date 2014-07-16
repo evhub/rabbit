@@ -48,6 +48,7 @@ Import Commands:
     run <file>
     save <file>"""
     multiargops = "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"
+    relations = {"(":")", "[":"]", "{":"}", '"':'"', "`":"`", "\u201c":"\u201d"}
     messages = []
     ans = [matrix(0)]
     returned = 1
@@ -405,7 +406,7 @@ Import Commands:
             if sides[0].endswith(":"):
                 sides[0] = sides[0][:-1]
                 docalc = True
-            sides[0] = carefulsplit(sides[0], ",", '"`', {"(":")", "[":"]", "{":"}", "\u201c":"\u201d"})
+            sides[0] = carefulsplit(sides[0], ",", closers=self.relations)
             if len(sides[0]) > 1:
                 test = True
                 for x in sides[0]:
