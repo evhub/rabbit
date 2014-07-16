@@ -96,9 +96,12 @@ class commandline(mathbase):
     def start(self):
         """Starts The Command Line Main Loop."""
         while self.on:
-            old = self.handler(raw_input(self.prompt))
-            while old:
-                old = self.handler(raw_input(self.moreprompt), old)
+            try:
+                old = self.handler(raw_input(self.prompt))
+                while old:
+                    old = self.handler(raw_input(self.moreprompt), old)
+            except KeyboardInterrupt as detail:
+                self.app.display(addcolor("\n<!> KeyboardInterrupt: Action has been terminated, to quit type exit", self.e.color))
 
     def handler(self, original, old=None):
         """Handles Raw Input."""

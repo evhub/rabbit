@@ -120,6 +120,8 @@ def catch(function, *args):
         err = ("RuntimeError", detail)
     except AssertionError as detail:
         err = ("AssertionError", detail)
+    except KeyboardInterrupt as detail:
+        err = ("KeyboardInterrupt", detail)
     except ExecutionError as detail:
         err = (detail.name, detail.message, detail.variables)
     else:
