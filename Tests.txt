@@ -355,7 +355,8 @@ assert { x = 1 } ++ { y = 2 } ?= { x = 1 ;; y = 2 }
 assert (:({ x = 1 ;; x = 2 })).name ?= "RedefinitionError"
 assert "All
  done!" ?= "All" ++ "\n " ++ "done!"
-assert (\x\([x])):4 ?= [4]
+assert "All done!" ?= "All "
+		"done!"
 
 # Final Testing:
 assert "All done!" ?= print("All", "done!")
