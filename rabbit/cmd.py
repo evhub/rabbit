@@ -293,7 +293,7 @@ Import Commands:
                 original = basicformat(original)
                 for func in self.cmds:
                     if func(original) is not None:
-                        self.printdebug(":| "+namestr(func).split("_")[-1])
+                        self.printdebug("|: "+namestr(func).split("_")[-1])
                         break
         return True
 

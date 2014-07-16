@@ -153,7 +153,7 @@ Additionally, all the different container objects support various types of opera
 
 Additionally, there are a couple of other, special operations that can be done only with container objects, the syntax for which is:
 ```
-[1,2] .. [3,4]		# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
+[1,2] ++ [3,4]		# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
 (1,2) ** 2			# Repeat (result = (1,2,1,2))
 (1,2,3):2			# Item indexes (result = 3) (left to right, lowest precedence, same as colon for function calls)
 [1,2,3,4]:1			# These work for rows as well (result = 2)
@@ -363,7 +363,7 @@ a,b = (1,2)		# Sets a to 1 and b to 2
 a,b = (1,2,3)	# Sets a to 1 and b to (2,3)
 a,b = 1			# Sets a to 1 and b to none
 smoosh(a) =
- x .. smoosh(xs) @ xs;
+ x ++ smoosh(xs) @ xs;
  x
  $ x,xs = a		# This syntax can be used in with clauses to great effect
 ```
@@ -602,7 +602,7 @@ High-precedence mathematical and functional operators are evaluated at this stag
 ```
 1,2,3~ \x\x   # List looping (result = (1,2,3))
 \x\x+1        # Lambdas (result = \x\(x+1))
-1,2 .. 3,4    # Concatenation (result = (1,2,3,4))
+1,2 ++ 3,4    # Concatenation (result = (1,2,3,4))
 1,2 ** 2      # Repeat (result = (1,2,1,2))
 1,2,3,4       # Lists (result = (1,2,3,4))
 1+2-3         # Addition and subtraction (result = 0)
@@ -650,7 +650,7 @@ show("Hello, world!")     # An alternative method, show will print its argument 
 #### Quick Sort
 ```
 qsort(l) = (
-  qsort:(as~\x\(x@x<=a)) .. a .. qsort:(as~\x\(x@x>a))
+  qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
   $ a,as = l
   ) @ len:l
 ```

@@ -31,7 +31,7 @@ assert (1,2)+(10,20) ?= 11,22
 assert (1,2)*(10,20) ?= 10,40
 assert [1,2]*[10,20] ?= 50
 assert [1,0,0]%[0,1,0] ?= [0,0,1]
-assert [1,2] .. [3,4] ?= [1,2,3,4]
+assert [1,2] ++ [3,4] ?= [1,2,3,4]
 assert (1,2) ** 2 ?= 1,2,1,2
 assert (1,2,3):2 ?= 3
 assert [1,2,3,4]:1 ?= 2
@@ -164,7 +164,7 @@ assert a ?= 1 & b ?= 2,3				$ a,b = 1,2,3
 assert a ?= 1 & ! b						$ a,b = 1
 assert smoosh((1,2),(3,4)) ?= 1,2,3,4
  $ smoosh(a) = (
-  x .. smoosh(xs) @ xs;
+  x ++ smoosh(xs) @ xs;
   x
   $ x,xs = a
   )
@@ -197,14 +197,14 @@ assert max(1,0,9,6,8,3) ?= 9
 assert zip:(1,2):(10,20) ?= (1,10),(2,20)
  $ zip(la, lb) =
   (
-   (a,b), .. zip:as:bs
+   (a,b), ++ zip:as:bs
    $ a,as = la
    $ b,bs = lb
    )
   @ len:la & len:lb
 assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
  $ qsort(l) = (
-   qsort:(as~\x\(x@x<=a)) .. a .. qsort:(as~\x\(x@x>a))
+   qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
    $ a,as = l
    ) @ len:l
 assert range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop")
@@ -230,7 +230,7 @@ assert crackle pop (15) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",
      @ mod five ?= 0;
    x
    ),
-  ..
+  ++
   ( crackle pop (end, x+1, (mod three+1) % 3, (mod five+1) % 5)
     @ x < end
     )
@@ -351,8 +351,9 @@ assert (\x,y\x+y):1:2 ?= 3
 assert (\x,y\x+y)(1)(2) ?= 3
 assert (\x,-y:1\x+y):2 ?= 3
 assert _ <> 1
+assert { x = 1 } ++ { x = 2 } ?= { x = 1 ;; x = 2 }
 
 # Final Testing:
 assert "All
- done!" ?= "All" .. "\n " .. "done!"
+ done!" ?= "All" ++ "\n " ++ "done!"
 assert "All done!" ?= print("All", "done!")

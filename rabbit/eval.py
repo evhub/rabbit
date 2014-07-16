@@ -45,7 +45,7 @@ Global Operator Precedence List:
 
     ~       Applies a list to a function for looping.
     \       Creates a lambda.
-    ..      Performs concatenation.
+    ++      Performs concatenation.
     **      Performs repeat.
     ,       Seperates list elements.
     +-      Performs addition and subtraction.
@@ -712,7 +712,7 @@ Global Operator Precedence List:
         for a in xrange(0, len(top)):
             top[a] = [top[a]]
             if not top[a][0].startswith("\\"):
-                top[a][0] = top[a][0].split("..")
+                top[a][0] = top[a][0].split("++")
                 for c in xrange(0, len(top[a][0])):
                     top[a][0][c] = top[a][0][c].split("**")
                     for d in xrange(0, len(top[a][0][c])):
@@ -723,7 +723,7 @@ Global Operator Precedence List:
                                 top[a][0][c][d][e][f] = top[a][0][c][d][e][f].split("%")
                                 for g in xrange(0, len(top[a][0][c][d][e][f])):
                                     top[a][0][c][d][e][f][g] = splitinplace(top[a][0][c][d][e][f][g].split("*"), "/")
-        value = reassemble(top, ["~", "\\", "..", "**", ",", "+", "%", "*"])
+        value = reassemble(top, ["~", "\\", "++", "**", ",", "+", "%", "*"])
         self.printdebug("=> "+value)
         self.recursion += 1
         out = self.eval_check(self.eval_comp(top), True)
@@ -899,6 +899,7 @@ Global Operator Precedence List:
             dodata = 0
             domultidata = 0
             domatrix = 0
+            doclass = 0
             rowlen = None
             tot = len(items)
             for x in items:
@@ -923,6 +924,8 @@ Global Operator Precedence List:
                     domultidata += 1
                 elif isinstance(x, data):
                     dodata += 1
+                elif isinstance(x, classcalc):
+                    doclass += 1
                 else:
                     domatrix -= 1
                     domultidata -= 1
@@ -972,6 +975,11 @@ Global Operator Precedence List:
                     else:
                         out.append(x)
                 return data(out)
+            elif doclass == len(items):
+                out = classcalc(self)
+                for x in items:
+                    out.extend(x)
+                return out
             else:
                 raise ExecutionError("TypeError", "Could not concatenate items "+repr(items))
 
