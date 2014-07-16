@@ -483,13 +483,13 @@ Global Operator Precedence List:
 
     def calc_top(self, expression):
         """Begins Calculation."""
-        value = self.calc_paren(fullsplit(
-                    self.calc_brack(fullsplit(
-                        self.calc_class(fullsplit(
+        value = self.calc_brack(fullsplit(
+                    self.calc_class(fullsplit(
+                        self.calc_paren(fullsplit(
                             self.calc_string(expression),
-                        "{", "}", 1)),
-                    "[", "]")),
-                "(", ")"))
+                        "(", ")")),
+                    "{", "}", 1)),
+                "[", "]"))
         self.printdebug("| "+self.prepare(value, False, True, True))
         return self.calc_with(value)
 
@@ -511,6 +511,16 @@ Global Operator Precedence List:
                 command += self.wrap(strcalc(item[1], self))
             elif item[0] == "`":
                 command += self.wrap(rawstrcalc(item[1], self))
+        return command
+
+    def calc_paren(self, parenlist):
+        """Evaluates The Parenthetical Part Of An Expression."""
+        command = ""
+        for x in parenlist:
+            if istext(x):
+                command += x
+            else:
+                command += self.wrap(self.calc_paren(x))
         return command
 
     def calc_class(self, curlylist):
@@ -558,16 +568,6 @@ Global Operator Precedence List:
                 else:
                     out = [out]
                 command += self.wrap(rowmatrixlist(out))
-        return command
-
-    def calc_paren(self, parenlist):
-        """Evaluates The Parenthetical Part Of An Expression."""
-        command = ""
-        for x in parenlist:
-            if istext(x):
-                command += x
-            else:
-                command += self.wrap(self.calc_paren(x))
         return command
 
     def calc_with(self, expression):

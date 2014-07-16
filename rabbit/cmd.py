@@ -264,9 +264,11 @@ Import Commands:
         """Processes A Command."""
         inputstring = basicformat(inputstring)
         self.returned = 1
-        self.top = bool(top)
         if inputstring != "":
-            self.saferun(self.doproc, inputstring)
+            if top:
+                self.saferun(self.doproc, inputstring)
+            else:
+                self.doproc(inputstring)
 
     def doproc(self, inputstring):
         """Does The Processing."""

@@ -353,8 +353,9 @@ assert (\x,-y:1\x+y):2 ?= 3
 assert _ <> 1
 assert { x = 1 } ++ { y = 2 } ?= { x = 1 ;; y = 2 }
 assert (:{ x = 1 ;; x = 2 }).name ?= "RedefinitionError"
-
-# Final Testing:
 assert "All
  done!" ?= "All" ++ "\n " ++ "done!"
+assert (\x\([x])):4 ?= [4]
+
+# Final Testing:
 assert "All done!" ?= print("All", "done!")
