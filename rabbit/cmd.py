@@ -162,7 +162,7 @@ class mathbase(safebase):
         """Performs x = import."""
         if variables is None or len(variables) == 0:
             raise ExecutionError("NoneError", "Nothing is not a file name")
-        elif len(variables) == 0:
+        elif len(variables) == 1:
             inputstring = self.e.prepare(variables[0], False, False)
             name = delspace(delspace(inputstring), self.e.reserved)
             try:
@@ -196,7 +196,7 @@ class mathbase(safebase):
         """Performs run."""
         if variables is None or len(variables) == 0:
             raise ExecutionError("NoneError", "Nothing is not a file name")
-        elif len(variables) == 0:
+        elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             if not self.evalfile(original):
                 raise ExecutionError("IOError", "Could not find for run file "+original)
@@ -209,7 +209,7 @@ class mathbase(safebase):
         """Performs save."""
         if variables is None or len(variables) == 0:
             raise ExecutionError("NoneError", "Nothing is not a file name")
-        elif len(variables) == 0:
+        elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             try:
                 writefile(getfile(original[5:], "wb"), strlist(self.box.commands[:-2], "\n"))
