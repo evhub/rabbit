@@ -97,6 +97,13 @@ def makenum(inputobject):
     else:
         return getnum(inputobject)
 
+def makeint(inputobject):
+    """Makes An Object An Integer."""
+    if isnum(inputobject):
+        return int(inputobject)
+    else:
+        return getint(inputobject)
+
 def catch(function, *args):
     """Gets The Errors From A Function."""
     result = None

@@ -133,6 +133,7 @@ Global Operator Precedence List:
             "rev":funcfloat(self.funcs.reversecall, self, "rev"),
             "round":funcfloat(self.funcs.roundcall, self, "round"),
             "num":funcfloat(self.funcs.numcall, self, "num"),
+            "int":funcfloat(self.funcs.intcall, self, "int"),
             "eval":funcfloat(self.funcs.evalcall, self, "eval"),
             "find":funcfloat(self.funcs.findcall, self, "find"),
             "split":funcfloat(self.funcs.splitcall, self, "split"),
@@ -1843,6 +1844,10 @@ class evalfuncs(object):
                 return out
         else:
             return self.numcall([diagmatrixlist(variables)], False)
+
+    def intcall(self, variables):
+        """Performs int."""
+        return self.numcall(variables, func=lambda x: float(makeint(x)))
 
     def realcall(self, variables):
         """Performs Re."""
