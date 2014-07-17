@@ -45,16 +45,6 @@ class compiler(commandline):
         else:
             self.initialize(args=initializers)
 
-    def fresh(self):
-        """Refreshes The Environment."""
-        self.e.fresh()
-        self.e.makevars({
-            "print":funcfloat(self.printcall, self.e, "print"),
-            "show":funcfloat(self.showcall, self.e, "show")
-            })
-        self.commands = []
-        self.makes = []
-
     def show(self, arg, message=None):
         """Prints A Message To The Console."""
         self.app.display(self.e.forshow(arg))
@@ -148,7 +138,6 @@ class compiler(commandline):
             self.pre_cmd
             ]
         self.cmds = [
-            self.cmd_run,
             self.cmd_assert,
             self.cmd_do,
             self.cmd_del,
@@ -158,12 +147,25 @@ class compiler(commandline):
             self.cmd_normal
             ]
         self.set_cmds = [
-            self.set_import,
             self.set_def,
             self.set_normal
             ]
         self.e = evaluator(processor=self, speedy=True)
-        self.fresh()
+        self.fresh(True)
+
+
+    def fresh(self, top=True):
+        """Refreshes The Environment."""
+        if not top:
+            self.e.fresh()
+        self.e.makevars({
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "install":funcfloat(self.installcall, self.e, "install"),
+            "print":funcfloat(self.printcall, self.e, "print"),
+            "show":funcfloat(self.showcall, self.e, "show")
+            })
+        self.commands = []
+        self.makes = []
 
     def pre_cmd(self, inputstring):
         """Evaluates Commands."""

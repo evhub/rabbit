@@ -29,7 +29,7 @@ class commandline(mathbase):
     on = True
     commands = []
     
-    def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", helpstring=None, outcolor="cyan", debugcolor="lightred", debug=False, *initializers):
+    def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", debugcolor="lightred", debug=False, *initializers):
         """Initializes The Command Line Interface."""
         self.debug = bool(debug)
         if message:
@@ -42,8 +42,6 @@ class commandline(mathbase):
         self.populator()
         self.e.color = debugcolor
         self.printdebug(": ON")
-        if helpstring is not None:
-            self.helpstring = str(helpstring)
         if initializers == ():
             self.initialize()
         else:
@@ -52,14 +50,12 @@ class commandline(mathbase):
     def populator(self):
         """Creates An Evaluator And Lists Of Commands."""
         self.pre_cmds = [
-            self.pre_help,
             self.pre_cmd
             ]
         self.cmds = [
+            self.cmd_help,
             self.cmd_debug,
             self.cmd_exit,
-            self.cmd_run,
-            self.cmd_save,
             self.cmd_assert,
             self.cmd_do,
             self.cmd_del,
@@ -69,17 +65,12 @@ class commandline(mathbase):
             self.cmd_normal
             ]
         self.set_cmds = [
-            self.set_import,
             self.set_def,
             self.set_normal
             ]
         self.e = evaluator(processor=self)
-        self.e.makevars({
-            "print":funcfloat(self.printcall, self.e, "print"),
-            "show":funcfloat(self.showcall, self.e, "show"),
-            "ans":funcfloat(self.anscall, self.e, "ans"),
-            "grab":funcfloat(self.grabcall, self.e, "grab")
-            })
+        self.fresh(True)
+        self.genhelp()
 
     def cmd_exit(self, original):
         """Exits The Command Line Interface."""

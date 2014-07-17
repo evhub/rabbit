@@ -26,54 +26,8 @@ from .cmd import *
 
 class grapher(mathbase):
     """Rabbit Graphing Module."""
-    helpstring = """Basic Commands:
-    <command> [;; <command> ;; <command>...]
-    <name> [:]= <expression>
-Expressions:
-    <item>, [<item>, <item>...]
-    <function> [:](<variables>)[:(<variables>):(<variables>)...]
-    <expression> [@<condition>[; <expression>@<condition>; <expression>@<condition>;... <expression>]]
-    "string"
-Console Commands:
-    show <expression>
-    help [string]
-    clear
-Grid Control:
-    render
-        axis
-        ticks
-    origin
-    grid
-    cleargrid
-Window Control:
-    def stretch = <value>
-        def xstretch = <value>
-        def ystretch = <value>
-    def up = <value>
-        def xup = <value>
-        def yup = <value>
-    display
-        center
-Special Functions:
-    sum <function>
-    inv <function>
-        invsum <function>
-    at <list> do <function>
-        atinv <list> do <function>
-    intersect <function> and <function>
-    parametric <x_function> and <y_function>
-    polar <theta_function>
-    scroll <times> do <function>
-Control Commands:
-    def <name> [:]= <expression>
-    do <command>
-    del <variable>
-Import Commands:
-    <name> = import <file>
-    run <file>
-    save <file>"""
 
-    def __init__(self, directory="rabbit/", name="Grapher", width=800, height=600, helpstring=None, debug=False, *initializers):
+    def __init__(self, directory="rabbit/", name="Grapher", width=800, height=600, debug=False, *initializers):
         """Initializes A PythonPlus Grapher."""
         self.debug = bool(debug)
         self.root = Tkinter.Tk()
@@ -308,14 +262,12 @@ Import Commands:
     def populator(self):
         """Populates The Grapher."""
         self.pre_cmds = [
-            self.pre_help,
             self.pre_cmd
             ]
         self.cmds = [
+            self.cmd_help,
             self.cmd_debug,
             self.cmd_clear,
-            self.cmd_run,
-            self.cmd_save,
             self.cmd_assert,
             self.cmd_do,
             self.cmd_del,
@@ -328,12 +280,21 @@ Import Commands:
             self.cmd_normal
             ]
         self.set_cmds = [
-            self.set_import,
             self.set_def,
             self.set_normal
             ]
         self.e = evaluator(processor=self)
+        self.fresh(True)
+        self.genhelp()
+
+    def fresh(self, top=True):
+        """Refreshes The Environment."""
+        if not top:
+            self.e.fresh()
         self.e.makevars({
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "save":funcfloat(self.savecall, self.e, "save"),
+            "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "render":strfunc('proc("cleargrid;;axis;;ticks")', self.e, name="render"),

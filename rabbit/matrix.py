@@ -677,7 +677,7 @@ def domatrixlist(inputlist, converter=float):
         out = diagmatrixlist(inputlist, converter, domatrixlist)
     return out
 
-def diagmatrixlist(inputlist, converter=float, func=None, fake=True):
+def diagmatrixlist(inputlist, converter=float, func=None, fake=True, clean=True):
     """Constructs A Diagonal Matrix From A List."""
     if func is None:
         func = diagmatrixlist
@@ -685,10 +685,11 @@ def diagmatrixlist(inputlist, converter=float, func=None, fake=True):
     for x in xrange(0, len(inputlist)):
         if islist(inputlist[x]):
             inputlist[x] = func(inputlist[x])
-        out.store(x,x, inputlist[x])
+        if not clean or not isnull(inputlist[x]):
+            out.store(x,x, inputlist[x])
     return out
 
-def rowmatrixlist(inputlist, converter=float, func=None, fake=False):
+def rowmatrixlist(inputlist, converter=float, func=None, fake=False, clean=True):
     """Constructs A Row Matrix From A List."""
     if func is None:
         func = rowmatrixlist
@@ -696,7 +697,8 @@ def rowmatrixlist(inputlist, converter=float, func=None, fake=False):
     for x in xrange(0, len(inputlist)):
         if islist(inputlist[x]):
             inputlist[x] = func(inputlist[x])
-        out.store(0,x, inputlist[x])
+        if not clean or not isnull(inputlist[x]):
+            out.store(0,x, inputlist[x])
     return out
 
 def matrixstr(inputstr, converter=float):

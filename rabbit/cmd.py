@@ -27,26 +27,6 @@ from .eval import *
 
 class mathbase(safebase):
     """A Base Class For PythonPlus Evaluators."""
-    helpstring = """Basic Commands:
-    <command> [;; <command> ;; <command>...]
-    <name> [:]= <expression>
-Expressions:
-    <item>, [<item>, <item>...]
-    <function> [:](<variables>)[:(<variables>):(<variables>)...]
-    <expression> [@<condition>[; <expression>@<condition>; <expression>@<condition>;... <expression>]]
-    "string"
-Console Commands:
-    show <expression>
-    help [string]
-    clear
-Control Commands:
-    def <name> [:]= <expression>
-    do <command>
-    del <variable>
-Import Commands:
-    <name> = import <file>
-    run <file>
-    save <file>"""
     multiargops = "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"
     relations = {"(":")", "[":"]", "{":"}", '"':'"', "`":"`", "\u201c":"\u201d"}
     messages = []
@@ -58,7 +38,7 @@ Import Commands:
     top = False
     errorlog = False
 
-    def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, helpstring=None, debug=False, *initializers):
+    def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
         if message:
@@ -71,8 +51,6 @@ Import Commands:
         self.show = self.appshow
         self.populator()
         self.printdebug(": ON")
-        if helpstring is not None:
-            self.helpstring = str(helpstring)
         if initializers == ():
             self.initialize()
         else:
@@ -180,17 +158,77 @@ Import Commands:
             else:
                 return strfloat(out, self.e)
 
+    def installcall(self, variables):
+        """Performs x = import."""
+        if variables is None or len(variables) == 0:
+            raise ExecutionError("NoneError", "Nothing is not a file name")
+        elif len(variables) == 0:
+            inputstring = self.e.prepare(variables[0], False, False)
+            name = delspace(delspace(inputstring), self.e.reserved)
+            try:
+                impclass = dirimport(inputstring).interface
+            except IOError:
+                raise ExecutionError("IOError", "Could not find for install file "+inputstring)
+            else:
+                if iseval(impclass):
+                    return impclass(self)
+                elif hascall(impclass):
+                    return funcfloat(impclass(self).call, self.e, name)
+                else:
+                    try:
+                        impclass.precall
+                    except AttributeError:
+                        try:
+                            impclass.unicall
+                        except AttributeError:
+                            return impclass(self)
+                        else:
+                            return unifunc(impclass(self).unicall, self.e, name)
+                    else:
+                        return usefunc(impclass(self).precall, self.e, name)
+        else:
+            out = []
+            for x in variables:
+                out.append(self.installcall([variables[x]]))
+            return diagmatrixlist(out)
+
+    def runcall(self, original):
+        """Performs run."""
+        if variables is None or len(variables) == 0:
+            raise ExecutionError("NoneError", "Nothing is not a file name")
+        elif len(variables) == 0:
+            original = self.e.prepare(variables[0], False, False)
+            if not self.evalfile(original):
+                raise ExecutionError("IOError", "Could not find for run file "+original)
+        else:
+            for x in variables:
+                self.installcall([variables[x]])
+        return matrix(0)
+
+    def savecall(self, original):
+        """Performs save."""
+        if variables is None or len(variables) == 0:
+            raise ExecutionError("NoneError", "Nothing is not a file name")
+        elif len(variables) == 0:
+            original = self.e.prepare(variables[0], False, False)
+            try:
+                writefile(getfile(original[5:], "wb"), strlist(self.box.commands[:-2], "\n"))
+            except IOError:
+                raise ExecutionError("IOError", "Could not find for save file "+original)
+        else:
+            for x in variables:
+                self.installcall([variables[x]])
+        return matrix(0)
+
     def populator(self):
         """Creates An Evaluator And Lists Of Commands."""
         self.pre_cmds = [
-            self.pre_help,
             self.pre_cmd
             ]
         self.cmds = [
+            self.cmd_help,
             self.cmd_debug,
             self.cmd_clear,
-            self.cmd_run,
-            self.cmd_save,
             self.cmd_assert,
             self.cmd_do,
             self.cmd_del,
@@ -200,17 +238,32 @@ Import Commands:
             self.cmd_normal
             ]
         self.set_cmds = [
-            self.set_import,
             self.set_def,
             self.set_normal
             ]
         self.e = evaluator(processor=self)
+        self.fresh(True)
+        self.genhelp()
+
+    def fresh(self, top=True):
+        """Refreshes The Environment."""
+        if not top:
+            self.e.fresh()
         self.e.makevars({
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "save":funcfloat(self.savecall, self.e, "save"),
+            "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab")
             })
+
+    def genhelp(self):
+        """Generates The helpstring."""
+        self.helpstring = "Commands:"
+        for cmd in self.cmds:
+            self.helpstring += "\n    "+namestr(cmd).split("_")[-1]
 
     def initialize(self, args=()):
         """Runs Any Files Fed To The Constructor."""
@@ -277,18 +330,6 @@ Import Commands:
             if func(inputstring) is not None:
                 return True
 
-    def pre_help(self, inputstring):
-        """Performs help."""
-        if superformat(inputstring).startswith("help"):
-            inputstring = inputstring[4:]
-            if inputstring == "":
-                self.show(self.helpstring, True)
-            elif inputstring[0] == " ":
-                self.show(self.findhelp(basicformat(inputstring)))
-            else:
-                return None
-            return True
-
     def pre_cmd(self, inputstring):
         """Evaluates Commands."""
         for original in carefulsplit(inputstring, ";;", '"`', {"{":"}", "\u201c":"\u201d"}):
@@ -299,6 +340,18 @@ Import Commands:
                         self.printdebug("|: "+namestr(func).split("_")[-1])
                         break
         return True
+
+    def cmd_help(self, inputstring):
+        """Performs help."""
+        if superformat(inputstring).startswith("help"):
+            inputstring = inputstring[4:]
+            if inputstring == "":
+                self.show(self.helpstring, True)
+            elif inputstring[0] == " ":
+                self.show(self.findhelp(basicformat(inputstring)), True)
+            else:
+                return None
+            return True
 
     def cmd_debug(self, original):
         """Controls Debugging."""
@@ -321,21 +374,6 @@ Import Commands:
         """Performs clear."""
         if superformat(original) == "clear":
             self.app.clear()
-            return True
-
-    def cmd_run(self, original):
-        """Performs run."""
-        if superformat(original).startswith("run "):
-            original = original[4:]
-            if not self.evalfile(original):
-                raise ExecutionError("IOError", "Could not find file "+str(original))
-            else:
-                return True
-
-    def cmd_save(self, original):
-        """Performs save."""
-        if superformat(original).startswith("save "):
-            writefile(getfile(original[5:], "wb"), strlist(self.box.commands[:-2], "\n"))
             return True
 
     def cmd_assert(self, original):
@@ -546,32 +584,6 @@ Import Commands:
                 elif x == "{":
                     inside = "}"
             return out and not inside
-
-    def set_import(self, sides):
-        """Performs x = import."""
-        if superformat(sides[1]).startswith("import ") and not self.e.isreserved(sides[0]):
-            sides[1] = sides[1][7:]
-            try:
-                impclass = dirimport(sides[1]).interface
-            except IOError:
-                raise ExecutionError("IOError", "Could not find for import file "+str(sides[1]))
-            else:
-                if iseval(impclass):
-                    return impclass(self)
-                elif hascall(impclass):
-                    return funcfloat(impclass(self).call, self.e, sides[0])
-                else:
-                    try:
-                        impclass.precall
-                    except AttributeError:
-                        try:
-                            impclass.unicall
-                        except AttributeError:
-                            return impclass(self)
-                        else:
-                            return unifunc(impclass(self).unicall, self.e, sides[0])
-                    else:
-                        return usefunc(impclass(self).precall, self.e, sides[0])
 
     def set_def(self, sides):
         """Creates Functions."""

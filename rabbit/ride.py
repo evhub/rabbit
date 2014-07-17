@@ -26,27 +26,8 @@ from .cmd import *
 
 class editor(mathbase):
     """The Rabbit Integrated Development Environment."""
-    helpstring = """Basic Commands:
-    <command> [;; <command> ;; <command>...]
-    <name> [:]= <expression>
-Expressions:
-    <item>, [<item>, <item>...]
-    <function> [:](<variables>)[:(<variables>):(<variables>)...]
-    <expression> [@<condition>[; <expression>@<condition>; <expression>@<condition>;... <expression>]]
-    "string"
-Console Commands:
-    show <expression>
-    help [string]
-Control Commands:
-    def <name> [:]= <expression>
-    do <command>
-    del <variable>
-Import Commands:
-    <name> = import <file>
-    run <file>
-    save <file>"""
 
-    def __init__(self, name="RIDE", tablen=1, width=100, height=40, helpstring=None, refresh=600, debug=False, *initializers):
+    def __init__(self, name="RIDE", tablen=1, width=100, height=40, refresh=600, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
         self.debug_old = self.debug
@@ -86,8 +67,6 @@ Import Commands:
         self.box.colortag("search", highlight="yellow")
         self.populator()
         self.printdebug(": ON")
-        if helpstring is not None:
-            self.helpstring = str(helpstring)
         if initializers == ():
             self.initialize()
         else:
@@ -97,13 +76,10 @@ Import Commands:
     def populator(self):
         """Creates An Evaluator And Lists Of Commands."""
         self.pre_cmds = [
-            self.pre_help,
             self.pre_cmd
             ]
         self.cmds = [
             self.cmd_debug,
-            self.cmd_run,
-            self.cmd_save,
             self.cmd_assert,
             self.cmd_do,
             self.cmd_del,
@@ -113,12 +89,20 @@ Import Commands:
             self.cmd_normal
             ]
         self.set_cmds = [
-            self.set_import,
             self.set_def,
             self.set_normal
             ]
         self.e = evaluator(processor=self)
+        self.fresh(True)
+
+    def fresh(self, top=True):
+        """Refreshes The Environment."""
+        if not top:
+            self.e.fresh()
         self.e.makevars({
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "save":funcfloat(self.savecall, self.e, "save"),
+            "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans")
@@ -356,7 +340,7 @@ Import Commands:
         self.errorlog = {}
         self.returned = 0
         self.ans = [matrix(0)]
-        self.populator()
+        self.fresh()
         self.evaltext(self.box.output())
 
     def check(self):

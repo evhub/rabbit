@@ -231,3 +231,21 @@ def stirling(n):
     """Implements The Stirling Approximation Of The Factorial."""
     n = float(n)
     return n**n*isqrt(2*math.pi*n)/math.e**n
+
+def knuth(a, b, n):
+    """Implements The Knuth Up-Arrow Operator."""
+    a = float(a)
+    b = float(b)
+    n = int(n)
+    if n < 0:
+        raise IndexError("Can't perform Knuth up-arrow with n="+str(n))
+    elif n == 0:
+        return a * b
+    elif b == 0:
+        return 1.0
+    elif n == 1:
+        return a ** b
+    elif int(a) != a or int(b) != b or a < 0 or b < 0:
+        raise ValueError("Knuth up arrow is only defined over the positive integers")
+    else:
+        return knuth(a, knuth(a, b-1.0, n), n-1)
