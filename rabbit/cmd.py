@@ -189,7 +189,7 @@ class mathbase(safebase):
         else:
             out = []
             for x in variables:
-                out.append(self.installcall([variables[x]]))
+                out.append(self.installcall([x]))
             return diagmatrixlist(out)
 
     def runcall(self, original):
@@ -202,7 +202,7 @@ class mathbase(safebase):
                 raise ExecutionError("IOError", "Could not find for run file "+original)
         else:
             for x in variables:
-                self.installcall([variables[x]])
+                self.installcall([x])
         return matrix(0)
 
     def savecall(self, original):
@@ -217,7 +217,7 @@ class mathbase(safebase):
                 raise ExecutionError("IOError", "Could not find for save file "+original)
         else:
             for x in variables:
-                self.installcall([variables[x]])
+                self.installcall([x])
         return matrix(0)
 
     def populator(self):
