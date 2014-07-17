@@ -31,6 +31,7 @@ class mathbase(safebase):
     relations = {"(":")", "[":"]", "{":"}", '"':'"', "`":"`", "\u201c":"\u201d"}
     statements = ["debug", "run", "assert", "do", "show", "del", "def", "make"]
     messages = []
+    commands = []
     ans = [matrix(0)]
     returned = 1
     useclass = None
