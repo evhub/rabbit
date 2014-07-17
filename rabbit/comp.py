@@ -139,6 +139,7 @@ class compiler(commandline):
             ]
         self.cmds = [
             self.cmd_assert,
+            self.cmd_run,
             self.cmd_do,
             self.cmd_del,
             self.cmd_make,
@@ -159,7 +160,6 @@ class compiler(commandline):
         if not top:
             self.e.fresh()
         self.e.makevars({
-            "run":funcfloat(self.runcall, self.e, "run"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show")

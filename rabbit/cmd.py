@@ -192,19 +192,6 @@ class mathbase(safebase):
                 out.append(self.installcall([x]))
             return diagmatrixlist(out)
 
-    def runcall(self, variables):
-        """Performs run."""
-        if variables is None or len(variables) == 0:
-            raise ExecutionError("NoneError", "Nothing is not a file name")
-        elif len(variables) == 1:
-            original = self.e.prepare(variables[0], False, False)
-            if not self.evalfile(original):
-                raise ExecutionError("IOError", "Could not find for run file "+original)
-        else:
-            for x in variables:
-                self.installcall([x])
-        return matrix(0)
-
     def savecall(self, variables):
         """Performs save."""
         if variables is None or len(variables) == 0:
@@ -229,6 +216,7 @@ class mathbase(safebase):
             self.cmd_help,
             self.cmd_debug,
             self.cmd_clear,
+            self.cmd_run,
             self.cmd_assert,
             self.cmd_do,
             self.cmd_del,
@@ -250,7 +238,6 @@ class mathbase(safebase):
         if not top:
             self.e.fresh()
         self.e.makevars({
-            "run":funcfloat(self.runcall, self.e, "run"),
             "save":funcfloat(self.savecall, self.e, "save"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
@@ -356,7 +343,7 @@ class mathbase(safebase):
     def cmd_debug(self, original):
         """Controls Debugging."""
         if superformat(original).startswith("debug"):
-            original = original[5:]
+            original = basicformat(original[5:])
             if original == "":
                 self.setdebug(not self.debug)
             elif original[0] == " ":
@@ -376,10 +363,19 @@ class mathbase(safebase):
             self.app.clear()
             return True
 
+    def cmd_run(self, original):
+        """Performs run."""
+        if superformat(original).startswith("run "):
+            original = basicformat(original[4:])
+            if not self.evalfile(original):
+                raise ExecutionError("IOError", "Could not find file "+str(original))
+            else:
+                return True
+
     def cmd_assert(self, original):
         """Checks For Errors By Asserting That Something Is True."""
         if superformat(original).startswith("assert "):
-            original = original[7:]
+            original = basicformat(original[7:])
             if not self.e.test(original):
                 raise AssertionError("Assertion failed that "+original)
             return True
@@ -395,7 +391,7 @@ class mathbase(safebase):
     def cmd_del(self, original):
         """Deletes A Variable."""
         if superformat(original).startswith("del "):
-            original = original[4:]
+            original = basicformat(original[4:])
             if original in self.e.variables:
                 del self.e.variables[original]
             elif "." in original:

@@ -80,6 +80,7 @@ class editor(mathbase):
             ]
         self.cmds = [
             self.cmd_debug,
+            self.cmd_run,
             self.cmd_assert,
             self.cmd_do,
             self.cmd_del,
@@ -100,7 +101,6 @@ class editor(mathbase):
         if not top:
             self.e.fresh()
         self.e.makevars({
-            "run":funcfloat(self.runcall, self.e, "run"),
             "save":funcfloat(self.savecall, self.e, "save"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
@@ -272,14 +272,12 @@ class editor(mathbase):
                             if test:
                                 statement = test
                         elif iswhite(test):
-                            if statement in ["debug", "run", "save", "assert", "do", "show", "del", "import", "def", "make"]:
+                            if statement in ["debug", "run", "assert", "do", "show", "del", "def", "make"]:
                                 self.box.placetag("statement", point+"-"+str(len(statement)+1)+"c", point+"-1c")
                                 last = ("", point+"-1c")
                             statement = False
                         else:
                             statement += test
-                elif test == "=":
-                    statement = True
                 else:
                     statement = False
                 if normal:

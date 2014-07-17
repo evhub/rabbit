@@ -337,6 +337,7 @@ Statements can vary from interpreter to interpreter, but the ones implemented in
 ```
 debug [on|off]		# Turns verbose debug output on and off
 clear				# Clears the console
+run <filename>		# Runs a Rabbit file
 assert <expression>	# Raises an error if <expression> isn't true
 do <expression>		# Skips over statement evaluation and just does <expression>
 del <variable>		# Manually deletes the variable <variable>
@@ -468,7 +469,6 @@ ans				# Last answer
 grab			# Last line
 install			# Installs a Rabbit mod
 print			# Print string
-run				# Runs a Rabbit file
 save			# Saves to a Rabbit file
 show			# Show string in popup
 

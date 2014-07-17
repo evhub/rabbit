@@ -56,6 +56,7 @@ class commandline(mathbase):
             self.cmd_help,
             self.cmd_debug,
             self.cmd_exit,
+            self.cmd_run,
             self.cmd_assert,
             self.cmd_do,
             self.cmd_del,
