@@ -418,6 +418,7 @@ gamma			# Gamma function
 gcd				# Greatest common denominator
 imag			# Gets the imaginary part
 in				# Contains
+int				# Convert to integer
 iserr			# Whether instanceof error
 join			# Join containers by a delimiter
 lcm				# Least common multiple

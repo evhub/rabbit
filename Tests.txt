@@ -301,6 +301,7 @@ assert real(i) ?= 0
 assert imag(i) ?= 1
 assert except( try: (1/0), "ZeroDivisionError" )
 assert except( try: (1/0), try: (1/0) )
+assert int(1.5) ?= 1
 
 # New Feature Tests:
 assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
