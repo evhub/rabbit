@@ -78,11 +78,20 @@ class commandline(mathbase):
             self.on = False
             return True
 
-    def cmd_save(self, original):
+    def savecall(self, variables):
         """Performs save."""
-        if superformat(original).startswith("save "):
-            writefile(getfile(original[5:], "wb"), strlist(self.commands[:-1], "\n"))
-            return True
+        if variables is None or len(variables) == 0:
+            raise ExecutionError("NoneError", "Nothing is not a file name")
+        elif len(variables) == 1:
+            original = self.e.prepare(variables[0], False, False)
+            try:
+                writefile(getfile(original, "wb"), strlist(self.commands[:-1], "\n"))
+            except IOError:
+                raise ExecutionError("IOError", "Could not find for save file "+original)
+        else:
+            for x in variables:
+                self.installcall([x])
+        return matrix(0)
 
     def start(self):
         """Starts The Command Line Main Loop."""

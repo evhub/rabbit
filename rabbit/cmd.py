@@ -212,7 +212,7 @@ class mathbase(safebase):
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             try:
-                writefile(getfile(original[5:], "wb"), strlist(self.box.commands[:-2], "\n"))
+                writefile(getfile(original, "wb"), strlist(self.box.commands[:-2], "\n"))
             except IOError:
                 raise ExecutionError("IOError", "Could not find for save file "+original)
         else:
