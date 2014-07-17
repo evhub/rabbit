@@ -24,14 +24,6 @@ from .matrix import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def isnull(inputobject):
-    """Determines If The Object Is An Empty Matrix."""
-    return isinstance(inputobject, matrix) and inputobject.y == 0
-
-def nonull(inputlist):
-    """Cleans The Input Of Empty Matrices."""
-    return clean(inputlist, isnull, True)
-
 def collapse(item):
     """Collapses An Argument."""
     if isinstance(item, strfunc):

@@ -677,6 +677,14 @@ def domatrixlist(inputlist, converter=float):
         out = diagmatrixlist(inputlist, converter, domatrixlist)
     return out
 
+def isnull(inputobject):
+    """Determines If The Object Is An Empty Matrix."""
+    return isinstance(inputobject, matrix) and inputobject.y == 0
+
+def nonull(inputlist):
+    """Cleans The Input Of Empty Matrices."""
+    return clean(inputlist, isnull, True)
+
 def diagmatrixlist(inputlist, converter=float, func=None, fake=True, clean=True):
     """Constructs A Diagonal Matrix From A List."""
     if func is None:
