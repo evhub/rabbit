@@ -192,7 +192,7 @@ class mathbase(safebase):
                 out.append(self.installcall([x]))
             return diagmatrixlist(out)
 
-    def runcall(self, original):
+    def runcall(self, variables):
         """Performs run."""
         if variables is None or len(variables) == 0:
             raise ExecutionError("NoneError", "Nothing is not a file name")
@@ -205,7 +205,7 @@ class mathbase(safebase):
                 self.installcall([x])
         return matrix(0)
 
-    def savecall(self, original):
+    def savecall(self, variables):
         """Performs save."""
         if variables is None or len(variables) == 0:
             raise ExecutionError("NoneError", "Nothing is not a file name")
