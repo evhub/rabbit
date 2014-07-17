@@ -359,6 +359,4 @@ assert "All done!" ?= "All "
 		"done!"
 
 # Final Testing:
-assert save("Tests.copy.txt");1
-assert { run("Tests.copy.txt") }
 assert "All done!" ?= print("All", "done!")
