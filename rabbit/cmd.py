@@ -29,6 +29,7 @@ class mathbase(safebase):
     """A Base Class For PythonPlus Evaluators."""
     multiargops = "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"
     relations = {"(":")", "[":"]", "{":"}", '"':'"', "`":"`", "\u201c":"\u201d"}
+    statements = ["debug", "run", "assert", "do", "show", "del", "def", "make"]
     messages = []
     ans = [matrix(0)]
     returned = 1
@@ -199,7 +200,7 @@ class mathbase(safebase):
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             try:
-                writefile(getfile(original, "wb"), strlist(self.box.commands[:-2], "\n"))
+                writefile(getfile(original, "wb"), strlist(self.commands[:-1], "\n"))
             except IOError:
                 raise ExecutionError("IOError", "Could not find for save file "+original)
         else:
@@ -324,7 +325,10 @@ class mathbase(safebase):
                 original = basicformat(original)
                 for func in self.cmds:
                     if func(original) is not None:
-                        self.printdebug("|: "+namestr(func).split("_")[-1])
+                        name = namestr(func).split("_")[-1]
+                        if not name in ["assert", "run"]:
+                            self.commands.append(original)
+                        self.printdebug("|: "+name)
                         break
         return True
 

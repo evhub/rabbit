@@ -27,7 +27,6 @@ from .cmd import *
 class commandline(mathbase):
     """The Rabbit Command Line Interface."""
     on = True
-    commands = []
     
     def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", debugcolor="lightred", debug=False, *initializers):
         """Initializes The Command Line Interface."""
@@ -79,21 +78,6 @@ class commandline(mathbase):
             self.on = False
             return True
 
-    def savecall(self, variables):
-        """Performs save."""
-        if variables is None or len(variables) == 0:
-            raise ExecutionError("NoneError", "Nothing is not a file name")
-        elif len(variables) == 1:
-            original = self.e.prepare(variables[0], False, False)
-            try:
-                writefile(getfile(original, "wb"), strlist(self.commands[:-1], "\n"))
-            except IOError:
-                raise ExecutionError("IOError", "Could not find for save file "+original)
-        else:
-            for x in variables:
-                self.installcall([x])
-        return matrix(0)
-
     def start(self):
         """Starts The Command Line Main Loop."""
         while self.on:
@@ -106,7 +90,6 @@ class commandline(mathbase):
 
     def handler(self, original, old=None):
         """Handles Raw Input."""
-        self.commands.append(original)
         cmd = carefulsplit(original, "#", '"`', {"\u201c":"\u201d"})[0]
         if old is not None:
             whole = old+"\n"+cmd

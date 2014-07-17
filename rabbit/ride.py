@@ -272,7 +272,7 @@ class editor(mathbase):
                             if test:
                                 statement = test
                         elif iswhite(test):
-                            if statement in ["debug", "run", "assert", "do", "show", "del", "def", "make"]:
+                            if statement in self.statements:
                                 self.box.placetag("statement", point+"-"+str(len(statement)+1)+"c", point+"-1c")
                                 last = ("", point+"-1c")
                             statement = False

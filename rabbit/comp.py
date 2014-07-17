@@ -180,7 +180,7 @@ class compiler(commandline):
                                 self.makes.append(original)
                             elif not name in ["assert", "run", "set", "def"]:
                                 self.commands.append(original)
-                        self.printdebug(":| "+name)
+                        self.printdebug("|: "+name)
                         break
 
     def cmd_do(self, original):
