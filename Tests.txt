@@ -207,6 +207,11 @@ assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
    qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
    $ a,as = l
    ) @ len:l
+assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
+ $ qsort(l) = (
+   qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
+   $ a,as = l
+   ) @ l,
 assert range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop")
  $( crackle pop (x) =
     "CracklePop"

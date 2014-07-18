@@ -657,5 +657,5 @@ show("Hello, world!")     # An alternative method, show will print its argument 
 qsort(l) = (
   qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
   $ a,as = l
-  ) @ len:l
+  ) @ l,
 ```
