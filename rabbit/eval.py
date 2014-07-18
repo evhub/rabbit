@@ -1172,7 +1172,8 @@ Global Operator Precedence List:
             else:
                 params = []
                 for x in xrange(1, len(inputlist)):
-                    params.append(self.eval_call(inputlist[x]))
+                    if inputlist[x]:
+                        params.append(self.eval_call(inputlist[x]))
                 item = self.funcfind(inputlist[0])
                 return self.call_colon_set(item, params)
 
@@ -1181,7 +1182,10 @@ Global Operator Precedence List:
         self.overflow = []
         docalc = False
         if isnull(item):
-            raise ExecutionError("NoneError", "Nothing cannot be called")
+            if len(params) == 0:
+                return item
+            else:
+                raise ExecutionError("NoneError", "Nothing cannot be called")
         elif isinstance(item, strcalc):
             item = item.calcstr
             if len(params) == 0:
@@ -1264,7 +1268,7 @@ Global Operator Precedence List:
             self.overflow = params[2:]
         elif isfunc(item):
             value = getcall(item)(params)
-        elif len(params) == 0 or (len(params) == 1 and isnull(params[0])):
+        elif len(params) == 0:
             value = item
         else:
             raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(params) > 1)+" of "+strlist(params, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(item, False, True, True))

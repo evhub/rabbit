@@ -91,6 +91,7 @@ class commandline(mathbase):
     def handler(self, original, old=None):
         """Handles Raw Input."""
         cmd = carefulsplit(original, "#", '"`', {"\u201c":"\u201d"})[0]
+        fcmd = basicformat(cmd)
         if old is not None:
             whole = old+"\n"+cmd
         else:
@@ -102,7 +103,7 @@ class commandline(mathbase):
                 return whole
             else:
                 return "( "+old+" )\n ;; "+cmd
-        elif endswithany(basicformat(whole), self.multiargops):
+        elif fcmd and endswithany(fcmd, self.multiargops):
             return whole
         elif isinside(whole, '"`', {"\u201c":"\u201d"}, {"(":")", "{":"}", "[":"]"}):
             return whole
