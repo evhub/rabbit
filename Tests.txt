@@ -365,5 +365,5 @@ assert {} ?= {{ x := 42 ;; y := "42" }}
 # Final Testing:
 assert save("Tests.save.txt");true
 assert contents ?= read("Tests.save.txt")		$ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
-assert { run Tests.save.txt }
+#assert { run Tests.save.txt }
 assert "All done!" ?= print("All", "done!")

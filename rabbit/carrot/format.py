@@ -362,9 +362,9 @@ def carefulsplit(inputstring, splitstring, holdstrings="", closers={}, counters=
             if hold:
                 if isinstance(hold, tuple):
                     if x == hold[0]:
-                        hold = (x, hold[1]+1)
+                        hold = (hold[0], hold[1]+1)
                     elif x == counters[hold[0]]:
-                        hold = (x, hold[1]-1)
+                        hold = (hold[0], hold[1]-1)
                     if hold[1] <= 0:
                         hold = False
                 elif x == hold:
@@ -386,9 +386,9 @@ def isinside(inputstring, holdstrings="", closers={}, counters={}):
         if hold:
             if isinstance(hold, tuple):
                 if x == hold[0]:
-                    hold = (x, hold[1]+1)
+                    hold = (hold[0], hold[1]+1)
                 elif x == counters[hold[0]]:
-                    hold = (x, hold[1]-1)
+                    hold = (hold[0], hold[1]-1)
                 if hold[1] <= 0:
                     hold = False
             elif x == hold:
