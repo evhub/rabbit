@@ -2270,7 +2270,7 @@ class evalfuncs(object):
         """Reads From A File."""
         if not variables:
              raise ExecutionError("ArgumentError", "Not enough arguments to read")
-        elif len(variables) == 0:
+        elif len(variables) == 1:
             name = self.e.prepare(variables[0], False, False)
             with openfile(name) as f:
                 return strcalc(readfile(f), self.e)
