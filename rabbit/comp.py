@@ -169,7 +169,7 @@ class compiler(commandline):
 
     def pre_cmd(self, inputstring):
         """Evaluates Commands."""
-        for original in carefulsplit(inputstring, ";;", '"`', {"{":"}", "\u201c":"\u201d"}):
+        for original in carefulsplit(inputstring, ";;", '"`', {"\u201c":"\u201d"}, {"{":"}"}):
             if delspace(original) != "":
                 original = basicformat(original)
                 for func in self.cmds:

@@ -28,7 +28,6 @@ from .eval import *
 class mathbase(safebase):
     """A Base Class For PythonPlus Evaluators."""
     multiargops = "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"
-    relations = {"(":")", "[":"]", "{":"}", '"':'"', "`":"`", "\u201c":"\u201d"}
     statements = ["debug", "run", "assert", "do", "show", "del", "def", "make"]
     messages = []
     commands = []
@@ -321,7 +320,7 @@ class mathbase(safebase):
 
     def pre_cmd(self, inputstring):
         """Evaluates Commands."""
-        for original in carefulsplit(inputstring, ";;", '"`', {"{":"}", "\u201c":"\u201d"}):
+        for original in carefulsplit(inputstring, ";;", '"`', {"\u201c":"\u201d"}, {"{":"}"}):
             if delspace(original) != "":
                 original = basicformat(original)
                 for func in self.cmds:
@@ -447,7 +446,7 @@ class mathbase(safebase):
             if sides[0].endswith(":"):
                 sides[0] = sides[0][:-1]
                 docalc = True
-            sides[0] = carefulsplit(sides[0], ",", closers=self.relations)
+            sides[0] = carefulsplit(sides[0], ",", '"`', {"\u201c":"\u201d"}, {"(":")", "{":"}", "[":"]"})
             if len(sides[0]) > 1:
                 test = True
                 for x in sides[0]:
@@ -566,25 +565,10 @@ class mathbase(safebase):
                 funcparts = funcparts[0].split(self.e.parenchar, 1)
                 top = False
         out = funcparts[0] != "" and (not self.e.isreserved(funcparts[0], extra, allowed)) and (len(funcparts) == 1 or funcparts[1].endswith(")"*top or self.e.parenchar))
-        if not out or len(funcparts) == 1:
-            return out
+        if out and len(funcparts) != 1:
+            return not isinside(funcparts[1][:-1], '"`', {"\u201c":"\u201d"}, {"(":")", "{":"}", "[":"]"})
         else:
-            inside = None
-            for x in funcparts[1][:-1]:
-                if inside:
-                    if x == inside:
-                        inside = None
-                elif x in '`"':
-                    inside = x
-                elif x == "\u201c":
-                    inside = "\u201d"
-                elif x == "(":
-                    inside = ")"
-                elif x == "[":
-                    inside = "]"
-                elif x == "{":
-                    inside = "}"
-            return out and not inside
+            return out
 
     def set_def(self, sides):
         """Creates Functions."""

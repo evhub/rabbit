@@ -104,15 +104,8 @@ class commandline(mathbase):
                 return "( "+old+" )\n ;; "+cmd
         elif endswithany(basicformat(whole), self.multiargops):
             return whole
-        else:
-            check = None
-            for x in whole:
-                if check == x:
-                    check = None
-                elif x in self.relations:
-                    check = self.relations[x]
-            if check:
-                return whole
+        elif isinside(whole, '"`', {"\u201c":"\u201d"}, {"(":")", "{":"}", "[":"]"}):
+            return whole
         self.reset()
         self.process(whole)
 

@@ -344,7 +344,7 @@ def splitinplace(inputlist, findstr, reserved="", domod=None):
                 outlist.append(findstr+test[i])
     return outlist
 
-def carefulsplit(inputstring, splitstring, holdstrings='"', closers={}):
+def carefulsplit(inputstring, splitstring, holdstrings="", closers={}, counters={}):
     """Splits A String By Something Not Inside Something Else."""
     out = [""]
     hold = False
@@ -360,16 +360,46 @@ def carefulsplit(inputstring, splitstring, holdstrings='"', closers={}):
                 out[-1] += splitstring[:check]
                 check = 0
             if hold:
-                if x == hold:
-                    hold = not hold
-            else:
-                if x in closers:
-                    hold = closers[x]
-                if x in holdstrings:
-                    hold = x
+                if isinstance(hold, tuple):
+                    if x == hold[0]:
+                        hold = (x, hold[1]+1)
+                    elif x == counters[hold[0]]:
+                        hold = (x, hold[1]-1)
+                    if hold[1] <= 0:
+                        hold = False
+                elif x == hold:
+                    hold = False
+            elif x in counters:
+                hold = (x, 1)
+            elif x in closers:
+                hold = closers[x]
+            elif x in holdstrings:
+                hold = x
             out[-1] += x
     out[-1] += splitstring[:check]
     return out
+
+def isinside(inputstring, holdstrings="", closers={}, counters={}):
+    """Determins Whether An Inputstring Is Currently At The Top Level."""
+    hold = False
+    for x in inputstring:
+        if hold:
+            if isinstance(hold, tuple):
+                if x == hold[0]:
+                    hold = (x, hold[1]+1)
+                elif x == counters[hold[0]]:
+                    hold = (x, hold[1]-1)
+                if hold[1] <= 0:
+                    hold = False
+            elif x == hold:
+                hold = False
+        elif x in counters:
+            hold = (x, 1)
+        elif x in closers:
+            hold = closers[x]
+        elif x in holdstrings:
+            hold = x
+    return bool(hold)
 
 def switchsplit(inputstring, splitstring, otherstring=None):
     """Splits A String By Whenever It Switches From Being In Something To Not In It."""
