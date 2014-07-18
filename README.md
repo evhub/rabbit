@@ -334,14 +334,14 @@ The design of Rabbit is intended to use as few "special words" as possible, but 
 
 Statements can vary from interpreter to interpreter, but the ones implemented in basic Rabbit are:
 ```
-help <statement>	# Shows some help about the statement
-debug [on|off]		# Turns verbose debug output on and off
-run <filename>		# Runs a Rabbit file
 assert <expression>	# Raises an error if <expression> isn't true
-do <expression>		# Skips over statement evaluation and just does <expression>
-del <variable>		# Manually deletes the variable <variable>
-make <definition>	# Tags a definition as pre-compilation
+debug [on|off]		# Turns verbose debug output on and off
 def <definition>	# Performs a definition, even if the variable name is already defined
+del <variable>		# Manually deletes the variable <variable>
+do <expression>		# Skips over statement evaluation and just does <expression>
+help <statement>	# Shows some help about the statement
+make <definition>	# Tags a definition as pre-compilation
+run <filename>		# Runs a Rabbit file
 ```
 
 #### Other Rabbits
@@ -397,7 +397,6 @@ asin			# Arc sine
 atan			# Arc tangent
 calc			# Calculate a string of code
 ceil			# Ceiling function
-clear			# Clear the console
 comb			# Combinations
 connect			# Connects matrices
 cont			# Convert to container
@@ -468,6 +467,7 @@ true			# 1
 
 # Built-In Rabbit Interpreter Functions:
 ans				# Last answer
+clear			# Clear the console
 grab			# Last line
 install			# Installs a Rabbit mod
 print			# Print string
@@ -648,7 +648,7 @@ x | var         # Evaluates variables
 
 #### Hello World
 ```
-print("Hello, world!")    # The convential method, print is a built-in function just for this purpose
+print("Hello, world!")    # The conventional method, print is a built-in function just for this purpose
 show("Hello, world!")     # An alternative method, show will print its argument in a text box
 ```
 
