@@ -216,7 +216,6 @@ class mathbase(safebase):
         self.cmds = [
             self.cmd_help,
             self.cmd_debug,
-            self.cmd_clear,
             self.cmd_run,
             self.cmd_assert,
             self.cmd_do,
@@ -244,7 +243,8 @@ class mathbase(safebase):
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
-            "grab":funcfloat(self.grabcall, self.e, "grab")
+            "grab":funcfloat(self.grabcall, self.e, "grab"),
+            "clear":usefunc(self.app.clear, self.e, "clear", [])
             })
 
     def genhelp(self):
@@ -359,12 +359,6 @@ class mathbase(safebase):
                     raise ExecutionError("StatementError", "Unrecognized debug state of "+original)
             else:
                 return None
-            return True
-
-    def cmd_clear(self, original):
-        """Performs clear."""
-        if superformat(original) == "clear":
-            self.app.clear()
             return True
 
     def cmd_run(self, original):
@@ -597,7 +591,7 @@ class mathbase(safebase):
         test = self.calc(original)
         if test is not None:
             self.ans.append(test)
-            if self.doshow and self.returned == 0:
+            if self.doshow and self.returned == 0 and not isnull(self.ans[-1]):
                 self.show(self.e.prepare(self.ans[-1], True, True))
             return True
 

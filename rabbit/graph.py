@@ -267,7 +267,6 @@ class grapher(mathbase):
         self.cmds = [
             self.cmd_help,
             self.cmd_debug,
-            self.cmd_clear,
             self.cmd_run,
             self.cmd_assert,
             self.cmd_do,
@@ -275,7 +274,15 @@ class grapher(mathbase):
             self.cmd_make,
             self.cmd_def,
 
-            self.cmd_grapher,
+            self.cmd_sum,
+            self.cmd_inv,
+            self.cmd_invsum,
+            self.cmd_at,
+            self.cmd_atinv,
+            self.cmd_intersect,
+            self.cmd_parametric,
+            self.cmd_polar,
+            self.cmd_scroll,
 
             self.cmd_set,
             self.cmd_normal
@@ -297,14 +304,21 @@ class grapher(mathbase):
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
-            "render":strfunc('proc("cleargrid;;axis;;ticks")', self.e, name="render"),
-            "display":strfunc('proc("center;;render")', self.e, name="display"),
+            "clear":usefunc(self.clear, self.e, "clear", []),
+            "cleargrid":usefunc(self.cleargrid, self.e, "cleargrid", []),
+            "center":usefunc(self.center, self.e, "center", []),
+            "grid":usefunc(self.gridrender, self.e, "grid", []),
+            "ticks":usefunc(self.tickrender, self.e, "ticks", []),
+            "axis":usefunc(self.axisrender, self.e, "axis", []),
+            "origin":usefunc(lambda: self.gridpoint(0,0), self.e, "origin", []),
+            "render":strfunc("cleargrid()axis()ticks()", self.e, name="render"),
+            "display":strfunc("center()render()", self.e, name="display"),
             "stretch":1.0,
-            "xstretch":strfunc('exec(val("stretch"))', self.e, name="xstretch"),
-            "ystretch":strfunc('exec(val("stretch"))', self.e, name="ystretch"),
+            "xstretch":"stretch",
+            "ystretch":"stretch",
             "up":1.0,
-            "xup":strfunc('exec(var("up"))', self.e, name="xup"),
-            "yup":strfunc('exec(var("up"))', self.e, name="yup"),
+            "xup":"up",
+            "yup":"up",
             "scroller":"xstretch",
             "interval":"(xstretch+ystretch)*0.005",
             "start":"2*pi-stop",
@@ -339,14 +353,13 @@ class grapher(mathbase):
         self.yup = self.calc("yup")
         self.dumpdebug(True)
 
-    def cmd_clear(self, original):
-        """Processes clear."""
-        if superformat(original) == "clear":
-            self.clear()
-            return True
+    def center(self):
+        """Centers The Origin."""
+        self.e.variables["xup"] = str((self.width/2.0)*self.xstretch)
+        self.e.variables["yup"] = str((self.height/2.0)*self.ystretch)
 
-    def cmd_grapher(self, original):
-        """Processes Graphing Commands."""
+    def cmd_sum(self, original):
+        """Processes A Graphing Command."""
         if superformat(original).startswith("sum "):
             original = original[4:]
             item = self.calc(original)
@@ -354,31 +367,18 @@ class grapher(mathbase):
                 self.temp = 0
                 self.render(lambda x: self.sumcall(item, x))
                 return True
-        if superformat(original) == "center":
-            self.e.variables["xup"] = str((self.width/2.0)*self.xstretch)
-            self.e.variables["yup"] = str((self.height/2.0)*self.ystretch)
-            return True
-        if superformat(original) == "grid":
-            self.gridrender()
-            return True
-        if superformat(original) == "ticks":
-            self.tickrender()
-            return True
-        if superformat(original) == "axis":
-            self.axisrender()
-            return True
-        if superformat(original) == "origin":
-            self.gridpoint(0,0)
-            return True
-        if superformat(original) == "cleargrid":
-            self.cleargrid()
-            return True
+
+    def cmd_inv(self, original):
+        """Processes A Graphing Command."""
         if superformat(original).startswith("inv "):
             original = original[4:]
             item = self.calc(original)
             if not isnull(item):
                 self.swaprender(lambda x: self.call(item, x))
                 return True
+
+    def cmd_invsum(self, original):
+        """Processes A Graphing Command."""
         if superformat(original).startswith("invsum "):
             original = original[7:]
             item = self.calc(original)
@@ -386,6 +386,9 @@ class grapher(mathbase):
                 self.temp = 0
                 self.swaprender(lambda x: self.sumcall(original, x))
                 return True
+
+    def cmd_at(self, original):
+        """Processes A Graphing Command."""
         if superformat(original).startswith("at "):
             original = self.e.find(original[3:])
             atlist = original.split(" do ", 1)
@@ -398,6 +401,9 @@ class grapher(mathbase):
                     for x in atlist[0].getitems():
                         self.atrender(x, lambda x: self.call(atlist[1], x))
                 return True
+
+    def cmd_atinv(self, original):
+        """Processes A Graphing Command."""
         if superformat(original).startswith("atinv "):
             original = self.e.find(original[6:])
             atlist = original.split(" do ", 1)
@@ -410,6 +416,9 @@ class grapher(mathbase):
                     for x in atlist[0].getitems():
                         self.atswaprender(x, lambda x: self.call(atlist[1], x))
                 return True
+
+    def cmd_intersect(self, original):
+        """Processes A Graphing Command."""
         if superformat(original).startswith("intersect "):
             original = self.e.find(original[10:])
             interlist = original.split(" and ", 1)
@@ -418,6 +427,9 @@ class grapher(mathbase):
             if not isnull(interlist[0]) or isnull(interlist[1]):
                 self.intersectrender(lambda x: self.call(interlist[0], x), lambda x: self.call(interlist[1], x))
                 return True
+
+    def cmd_parametric(self, original):
+        """Processes A Graphing Command."""
         if superformat(original).startswith("parametric "):
             original = self.e.find(original[11:])
             paralist = original.split(" and ", 1)
@@ -431,6 +443,9 @@ class grapher(mathbase):
                     self.singlerender(self.call(paralist[0], x), self.call(paralist[1], x))
                     x += inter
                 return True
+
+    def cmd_polar(self, original):
+        """Processes A Graphing Command."""
         if superformat(original).startswith("polar "):
             item = self.calc(original)
             if not isnull(item):
@@ -443,10 +458,13 @@ class grapher(mathbase):
                         self.singlerender(math.cos(angle)*r, math.sin(angle)*r)
                     angle += inter
                 return True
+
+    def cmd_scroll(self, original):
+        """Processes A Graphing Command."""
         if superformat(original).startswith("scroll "):
             original = original[7:]
             forlist = original.split(" do ", 1)
-            self.cmd = "cleargrid;;clear;;xup:=x+0.01*scroller;;"+self.e.find(forlist[1])
+            self.cmd = "cleargrid()clear();;xup:=x+0.01*scroller;;"+self.e.find(forlist[1])
             self.marker = 0
             self.end = int(getnum(self.e.find(forlist[0])))
             self.register(self.scroll, 200)

@@ -576,7 +576,7 @@ class usefunc(funcfloat):
         self.overflow = bool(overflow)
         self.funcstr = str(funcstr)
         if variables is None:
-            self.variables = ["x"]
+            self.variables = []
         else:
             self.variables = variables
         if extras is None:
@@ -616,7 +616,7 @@ class usefunc(funcfloat):
         elif not self.overflow and len(params) > len(self.variables):
             self.e.overflow = params[len(self.variables):]
             params = params[:len(self.variables)]
-        return self.func(*params, **self.getextras())
+        return self.e.frompython(self.func(*params, **self.getextras()))
 
 class unifunc(funcfloat):
     """Universalizes Function Calls."""
@@ -638,7 +638,7 @@ class unifunc(funcfloat):
         """Performs A Universalized Function Call."""
         args = varproc(args)
         if args is None:
-            return strfunc(self.funcstr+":x", self.e, ["x"])
+            return strfunc(self.funcstr+":"+self.otherarg, self.e, [self.otherarg])
         elif islist(args):
             x = args[0]
             if len(args) > 1:
@@ -672,7 +672,7 @@ class makefunc(funcfloat):
         """Calls The Evaluator Function."""
         variables = varproc(variables)
         if variables is None:
-            return strfunc(self.funcstr+":x", self.e, ["x"])
+            return strfunc(self.funcstr+":"+self.otherarg, self.e, [self.otherarg])
         elif len(variables) == 0:
             return matrix(0)
         elif len(variables) == 1:

@@ -1198,12 +1198,9 @@ Global Operator Precedence List:
         elif isinstance(item, classcalc) and not isinstance(item, instancecalc):
             if len(params) == 0:
                 value = item.toinstance()
-            elif len(params) == 1:
-                value = item.calc(self.prepare(params[0], False, False))
             else:
-                value = item.copy()
-                value.store(params[0], params[1])
-                self.overflow = params[2:]
+                self.overflow = params[1:]
+                value = item.calc(self.prepare(params[0], False, False))
         elif hasmatrix(item):
             item = getmatrix(item)
             if len(params) == 0:
@@ -1346,7 +1343,7 @@ Global Operator Precedence List:
                 value = values[0]
                 for x in xrange(1, len(values)):
                     value *= values[x]
-            self.printdebug(self.prepare(value)+" (<) "+temp)
+            self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
             self.recursion -= 1
             return value
 
@@ -1513,6 +1510,22 @@ Global Operator Precedence List:
         out = self.variables.copy()
         if classcalc.selfvar in out:
             del out[classcalc.selfvar]
+        return out
+
+    def frompython(self, item):
+        """Converts A Python Object To A Rabbit Object."""
+        if item is None:
+            out = matrix(0)
+        elif hasnum(item):
+            out = item
+        elif istext(item):
+            out = strcalc(item, self)
+        elif islist(item):
+            out = diagmatrixlist(item, func=self.frompython)
+        elif isfunc(item):
+            out = item
+        else:
+            raise TypeError("Cannot convert non-evaluatour result type "+typestr(item))
         return out
 
 class evalfuncs(object):

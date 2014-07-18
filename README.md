@@ -249,7 +249,6 @@ a := { x = 1 ;; x := x+1 }	# Remember, any valid top-level command is valid insi
 a.x + 1						# This will retrieve x from the class and add 1 to it (result = 3)
 a:"x+1"						# Same as above--this will evaluate "x+1" in the namespace of the class (result = 3)
 a.z = 5						# Sets z to 5 inside the class
-a:"z":5						# Same as above--this will set "z" in the class to 5 (result = { x = 2 ;; z = 5 })
 a + { z = 5 }				# Same as above--class addition like this is the best method for inheritance (result = { x = 2 ;; z = 5 })
 ```
 
@@ -337,7 +336,6 @@ Statements can vary from interpreter to interpreter, but the ones implemented in
 ```
 help <statement>	# Shows some help about the statement
 debug [on|off]		# Turns verbose debug output on and off
-clear				# Clears the console
 run <filename>		# Runs a Rabbit file
 assert <expression>	# Raises an error if <expression> isn't true
 do <expression>		# Skips over statement evaluation and just does <expression>
@@ -399,6 +397,7 @@ asin			# Arc sine
 atan			# Arc tangent
 calc			# Calculate a string of code
 ceil			# Ceiling function
+clear			# Clear the console
 comb			# Combinations
 connect			# Connects matrices
 cont			# Convert to container

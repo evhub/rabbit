@@ -72,6 +72,19 @@ class commandline(mathbase):
         self.fresh(True)
         self.genhelp()
 
+    def fresh(self, top=True):
+        """Refreshes The Environment."""
+        if not top:
+            self.e.fresh()
+        self.e.makevars({
+            "save":funcfloat(self.savecall, self.e, "save"),
+            "install":funcfloat(self.installcall, self.e, "install"),
+            "print":funcfloat(self.printcall, self.e, "print"),
+            "show":funcfloat(self.showcall, self.e, "show"),
+            "ans":funcfloat(self.anscall, self.e, "ans"),
+            "grab":funcfloat(self.grabcall, self.e, "grab")
+            })
+
     def cmd_exit(self, original):
         """Exits The Command Line Interface."""
         if superformat(original) == "exit":
