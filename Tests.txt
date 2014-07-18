@@ -360,6 +360,7 @@ assert "All
 assert "All done!" ?= "All "
 		"done!"
 assert "\\n1" ?= "\\n"+1
+assert {} ?= {{ x := 42 ;; y := "42" }}
 
 # Final Testing:
 assert save("Tests.save.txt");true
