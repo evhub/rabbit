@@ -201,12 +201,12 @@ class mathbase(safebase):
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             try:
-                writefile(getfile(original, "wb"), strlist(self.commands[:-1], "\n"))
+                writefile(getfile(original, "wb"), strlist(self.commands, "\n"))
             except IOError:
                 raise ExecutionError("IOError", "Could not find for save file "+original)
         else:
             for x in variables:
-                self.installcall([x])
+                self.savecall([x])
         return matrix(0)
 
     def populator(self):
@@ -327,7 +327,7 @@ class mathbase(safebase):
                 for func in self.cmds:
                     if func(original) is not None:
                         name = namestr(func).split("_")[-1]
-                        if not name in ["assert", "run"]:
+                        if name != "run":
                             self.commands.append(original)
                         self.printdebug("|: "+name)
                         break

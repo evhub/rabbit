@@ -436,6 +436,7 @@ prod			# Product of items
 rad				# Radians
 raise			# Raise an error
 range			# Create a range
+read			# Read from a file
 real			# Gets the real part
 replace			# Replace an item with an item
 repr			# Get representation
@@ -454,6 +455,7 @@ tan				# Tangent
 to				# Convert to specified type
 type			# Get type of item
 val				# The value of a variable
+write			# Write to a file
 
 # Built-In Base Rabbit Variables:
 e				# Euler's number

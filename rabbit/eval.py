@@ -120,7 +120,7 @@ Global Operator Precedence List:
             "calc":funcfloat(self.funcs.docalc, self, "calc"),
             "proc":funcfloat(self.funcs.cmdcall, self, "proc"),
             "fold":funcfloat(self.funcs.foldcall, self, "fold"),
-            "row":funcfloat(self.funcs.brackcall, self, "row"),
+            "row":funcfloat(rowmatrixlist, self, "row"),
             "list":funcfloat(self.funcs.listcall, self, "list"),
             "matrix":funcfloat(self.funcs.matrixcall, self, "matrix"),
             "cont":funcfloat(self.funcs.getmatrixcall, self, "cont"),
@@ -157,6 +157,8 @@ Global Operator Precedence List:
             "except":funcfloat(self.funcs.exceptcall, self, "except"),
             "real":funcfloat(self.funcs.realcall, self, "real"),
             "imag":funcfloat(self.funcs.imagcall, self, "imag"),
+            "read":funcfloat(self.funcs.readcall, self, "read"),
+            "write":funcfloat(self.funcs.writecall, self, "write"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "floor":usefunc(math.floor, self, "floor", ["x"]),
             "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
@@ -1563,7 +1565,7 @@ class evalfuncs(object):
     def instanceofcall(self, variables):
         """Determines Whether Something Is An Instance Of Something Else."""
         if not variables:
-            return matrix(0)
+            raise ExecutionError("ArgumentError", "Not enough arguments to from")
         else:
             if isinstance(variables[0], classcalc):
                 for x in xrange(1, len(variables)):
@@ -1578,18 +1580,15 @@ class evalfuncs(object):
 
     def iserrcall(self, variables):
         """Determines Whether Something Is An Error."""
-        if variables is None:
-            return matrix(0)
-        else:
-            for item in variables:
-                if not (isinstance(item, instancecalc) and item.tryget(self.e.errorvar)):
-                    return 0.0
-            return 1.0
+        for item in variables:
+            if not (isinstance(item, instancecalc) and item.tryget(self.e.errorvar)):
+                return 0.0
+        return 1.0
 
     def getvalcall(self, variables):
         """Calculates A Variable Without Changing It."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to val")
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
@@ -1605,7 +1604,7 @@ class evalfuncs(object):
     def getvarcall(self, variables):
         """Gets The Value Of A Variable."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to var")
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
@@ -1618,17 +1617,10 @@ class evalfuncs(object):
                 out.append(self.getvarcall([x]))
             return diagmatrixlist(out)
 
-    def brackcall(self, variables):
-        """Evaluates Brackets."""
-        if variables is None:
-            return matrix(0)
-        else:
-            return rowmatrixlist(variables)
-
     def copycall(self, variables):
         """Makes Copies Of Items."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to copy")
         elif len(variables) == 1:
             if iseval(variables[0]):
                 return variables[0].copy()
@@ -1643,7 +1635,7 @@ class evalfuncs(object):
     def getmatrixcall(self, variables):
         """Converts To Matrices."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to cont")
         elif len(variables) == 1:
             return getmatrix(variables[0])
         else:
@@ -1655,7 +1647,7 @@ class evalfuncs(object):
     def matrixcall(self, variables):
         """Constructs A Matrix."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to matrix")
         else:
             tomatrix = []
             for x in variables:
@@ -1670,7 +1662,7 @@ class evalfuncs(object):
     def detcall(self, variables):
         """Returns The Determinant Of The Matrix."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to det")
         elif len(variables) == 1 and isinstance(variables[0], matrix):
             return variables[0].det()
         else:
@@ -1682,7 +1674,7 @@ class evalfuncs(object):
     def listcall(self, variables):
         """Constructs A Matrix List."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to list")
         elif len(variables) == 1:
             if isinstance(variables[0], matrix):
                 if variables[0].onlyrow():
@@ -1698,36 +1690,30 @@ class evalfuncs(object):
 
     def sumcall(self, variables):
         """Finds A Sum."""
-        if variables is None:
-            return matrix(0)
-        else:
-            value = 0.0
-            for x in variables:
-                x = collapse(x)
-                if ismatrix(x):
-                    value += self.sumcall(getmatrix(x).items())
-                else:
-                    value += x
-            return value
+        value = 0.0
+        for x in variables:
+            x = collapse(x)
+            if ismatrix(x):
+                value += self.sumcall(getmatrix(x).items())
+            else:
+                value += x
+        return value
 
     def prodcall(self, variables):
         """Finds A Product."""
-        if variables is None:
-            return matrix(0)
-        else:
-            value = 1.0
-            for x in variables:
-                x = collapse(x)
-                if ismatrix(x):
-                    value *= self.prodcall(getmatrix(x).getitems())
-                else:
-                    value *= x
-            return value
+        value = 1.0
+        for x in variables:
+            x = collapse(x)
+            if ismatrix(x):
+                value *= self.prodcall(getmatrix(x).getitems())
+            else:
+                value *= x
+        return value
 
     def connectcall(self, variables):
         """Connects Variables."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to connect")
         else:
             if isinstance(variables[0], matrix):
                 keep = True
@@ -1770,42 +1756,33 @@ class evalfuncs(object):
 
     def mergecall(self, variables):
         """Merges Variables."""
-        if not variables:
-            return matrix(0)
-        else:
-            return diagmatrixlist(merge(variables))
+        return diagmatrixlist(merge(variables))
 
     def sizecall(self, variables):
         """Finds A Size."""
-        if variables is None:
-            return matrix(0)
-        else:
-            return totlen(diagmatrixlist(variables))
+        return totlen(diagmatrixlist(variables))
 
     def lencall(self, variables):
         """Finds A Length."""
-        if variables is None:
-            return matrix(0)
-        else:
-            tot = 0.0
-            for x in variables:
+        tot = 0.0
+        for x in variables:
+            try:
+                x.getlen
+            except AttributeError:
                 try:
-                    x.getlen
-                except AttributeError:
-                    try:
-                        test = len(x)
-                    except:
-                        tot += 1.0
-                    else:
-                        tot += float(test)
+                    test = len(x)
+                except:
+                    tot += 1.0
                 else:
-                    tot += float(x.getlen())
-            return tot
+                    tot += float(test)
+            else:
+                tot += float(x.getlen())
+        return tot
 
     def rangecall(self, variables):
         """Constructs A Range."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to range")
         elif len(variables) == 1:
             return rangematrix(0.0, collapse(variables[0]))
         elif len(variables) == 2:
@@ -1815,9 +1792,7 @@ class evalfuncs(object):
 
     def roundcall(self, variables):
         """Performs round."""
-        if variables is None:
-            return matrix(0)
-        elif len(variables) == 0:
+        if not variables:
             return 0.0
         elif len(variables) == 1:
             return round(getnum(variables[0]))
@@ -1826,9 +1801,7 @@ class evalfuncs(object):
 
     def numcall(self, variables, new=True, func=makenum):
         """Performs float."""
-        if variables is None:
-            return matrix(0)
-        elif len(variables) == 0:
+        if not variables:
             return 0.0
         elif len(variables) == 1:
             try:
@@ -1855,9 +1828,7 @@ class evalfuncs(object):
 
     def imagcall(self, variables, new=True):
         """Performs Im."""
-        if variables is None:
-            return matrix(0)
-        elif len(variables) == 0:
+        if not variables:
             return complex(0.0, 1.0)
         elif len(variables) == 1:
             try:
@@ -1876,87 +1847,81 @@ class evalfuncs(object):
 
     def splitcall(self, variables):
         """Performs split."""
-        if variables is None:
+        variables[0] = collapse(variables[0])
+        items = []
+        for x in xrange(1, len(variables)):
+            items.append(collapse(variables[x]))
+        if isinstance(variables[0], strcalc):
+            out = self.splitcall([getmatrix(variables[0])]+items)
+            if isinstance(out, matrix) and out.onlydiag():
+                new = []
+                for x in out.getitems():
+                    if isinstance(x, matrix) and x.onlydiag():
+                        temp = ""
+                        for y in x.getitems():
+                            temp += self.e.prepare(y, True, False)
+                        new.append(rawstrcalc(temp, self))
+                    else:
+                        new.append(x)
+                return new
+            else:
+                return out
+        elif hasmatrix(variables[0]):
+            out = [[]]
+            for x in getmatrix(variables[0]).getitems():
+                if x in items:
+                    out.append([])
+                else:
+                    out[-1].append(x)
+            return diagmatrixlist(out)
+        elif variables[0] in items:
             return matrix(0)
         else:
-            variables[0] = collapse(variables[0])
-            items = []
-            for x in xrange(1, len(variables)):
-                items.append(collapse(variables[x]))
-            if isinstance(variables[0], strcalc):
-                out = self.splitcall([getmatrix(variables[0])]+items)
-                if isinstance(out, matrix) and out.onlydiag():
-                    new = []
-                    for x in out.getitems():
-                        if isinstance(x, matrix) and x.onlydiag():
-                            temp = ""
-                            for y in x.getitems():
-                                temp += self.e.prepare(y, True, False)
-                            new.append(rawstrcalc(temp, self))
-                        else:
-                            new.append(x)
-                    return new
-                else:
-                    return out
-            elif hasmatrix(variables[0]):
-                out = [[]]
-                for x in getmatrix(variables[0]).getitems():
-                    if x in items:
-                        out.append([])
-                    else:
-                        out[-1].append(x)
-                return diagmatrixlist(out)
-            elif variables[0] in items:
-                return matrix(0)
-            else:
-                return variables[0]
+            return variables[0]
 
     def replacecall(self, variables):
         """Performs replace."""
-        if variables is None:
-            return matrix(0)
-        else:
-            variables[0] = collapse(variables[0])
-            pairs = {}
-            for x in xrange(1, len(variables)):
-                if x%2 == 1:
-                    temp = collapse(variables[x])
-                else:
-                    pairs[temp] = variables[x]
-            if isinstance(variables[0], strcalc):
-                items = [getmatrix(variables[0])]
-                for k,v in pairs.items():
-                    items.append(k)
-                    items.append(v)
-                out = self.replacecall(items)
-                if isinstance(out, matrix) and out.onlydiag():
-                    new = ""
-                    for x in out.getitems():
-                        new += self.e.prepare(x, True, False)
-                    return rawstrcalc(new, self)
-                else:
-                    return out
-            elif ismatrix(variables[0]):
-                variables[0] = getmatrix(variables[0])
-                keys = []
-                values = []
-                for k,v in pairs.items():
-                    keys.append(k)
-                    values.append(v)
-                if variables[0].onlydiag():
-                    for x in xrange(0, variables[0].lendiag()):
-                        temp = variables[0].retrieve(x)
-                        if temp in keys:
-                            variables[0].store(x,x, values[keys.index(temp)])
-                else:
-                    for y,x in variables[0].coords():
-                        temp = variables[0].retrieve(y,x)
-                        if temp in keys:
-                            variables[0].store(y,x, values[keys.index(temp)])
+        variables[0] = collapse(variables[0])
+        pairs = {}
+        for x in xrange(1, len(variables)):
+            if x%2 == 1:
+                temp = collapse(variables[x])
             else:
-                while variables[0] in pairs:
-                    variables[0] = pairs[variables[0]]
-            return variables[0]
+                pairs[temp] = variables[x]
+        if isinstance(variables[0], strcalc):
+            items = [getmatrix(variables[0])]
+            for k,v in pairs.items():
+                items.append(k)
+                items.append(v)
+            out = self.replacecall(items)
+            if isinstance(out, matrix) and out.onlydiag():
+                new = ""
+                for x in out.getitems():
+                    new += self.e.prepare(x, True, False)
+                return rawstrcalc(new, self)
+            else:
+                return out
+        elif ismatrix(variables[0]):
+            variables[0] = getmatrix(variables[0])
+            keys = []
+            values = []
+            for k,v in pairs.items():
+                keys.append(k)
+                values.append(v)
+            if variables[0].onlydiag():
+                for x in xrange(0, variables[0].lendiag()):
+                    temp = variables[0].retrieve(x)
+                    if temp in keys:
+                        variables[0].store(x,x, values[keys.index(temp)])
+            else:
+                for y,x in variables[0].coords():
+                    temp = variables[0].retrieve(y,x)
+                    if temp in keys:
+                        variables[0].store(y,x, values[keys.index(temp)])
+        else:
+            while variables[0] in pairs:
+                variables[0] = pairs[variables[0]]
+        return variables[0]
 
     def sortcall(self, variables):
         """Performs sort."""
@@ -2006,9 +1971,7 @@ class evalfuncs(object):
 
     def containscall(self, variables):
         """Performs contains."""
-        if variables is None:
-            return matrix(0)
-        elif len(variables) > 1:
+        if variables:
             variables[0] = collapse(variables[0])
             if isinstance(variables[0], (matrix, strcalc, data, multidata)):
                 for x in xrange(1, len(variables)):
@@ -2022,9 +1985,7 @@ class evalfuncs(object):
 
     def typecall(self, variables):
         """Finds Types."""
-        if variables is None:
-            return matrix(0)
-        elif len(variables) == 0:
+        if len(variables) == 0:
             return self.e.typecalc(matrix(0))
         elif len(variables) == 1:
             return self.e.typecalc(variables[0])
@@ -2037,7 +1998,7 @@ class evalfuncs(object):
     def tocall(self, variables, varstrings="xyzwpqrabchjklmnABCFGHJKMNOQRTUVWXYZ"):
         """Returns A Converter Function."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to to")
         elif len(variables) == 1:
             if isinstance(variables[0], (strcalc, funcfloat)):
                 variables[0] = self.typestr(variables[0])
@@ -2087,29 +2048,21 @@ class evalfuncs(object):
 
     def strcall(self, variables):
         """Finds A String."""
-        if variables is None:
-            return matrix(0)
-        else:
-            out = ""
-            for x in variables:
-                out += self.e.prepare(x, True, False)
-            return rawstrcalc(out, self.e)
+        out = ""
+        for x in variables:
+            out += self.e.prepare(x, True, False)
+        return rawstrcalc(out, self.e)
 
     def reprcall(self, variables):
         """Finds A Representation."""
-        if variables is None:
-            return matrix(0)
-        else:
-            out = ""
-            for x in variables:
-                out += self.e.prepare(x, False, True)
-            return rawstrcalc(out, self.e)
+        out = ""
+        for x in variables:
+            out += self.e.prepare(x, False, True)
+        return rawstrcalc(out, self.e)
 
     def joincall(self, variables):
         """Joins Variables By A Delimiter."""
-        if variables is None:
-            return matrix(0)
-        elif len(variables) < 2:
+        if len(variables) < 2:
             return rawstrcalc("", self.e)
         else:
             delim = self.e.prepare(variables[0], True, False)
@@ -2125,8 +2078,8 @@ class evalfuncs(object):
 
     def abscall(self, variables):
         """Performs abs."""
-        if variables is None:
-            return matrix(0)
+        if not variables:
+             raise ExecutionError("ArgumentError", "Not enough arguments to abs")
         elif len(variables) == 1:
             return abs(variables[0])
         else:
@@ -2134,9 +2087,7 @@ class evalfuncs(object):
 
     def datacall(self, variables):
         """Performs data."""
-        if variables is None:
-            return matrix(0)
-        elif len(variables) == 1 and isinstance(variables[0], data):
+        if len(variables) == 1 and isinstance(variables[0], data):
             return variables[0]
         elif len(variables) == 1:
             return datamatrix(variables[0])
@@ -2149,9 +2100,7 @@ class evalfuncs(object):
 
     def fractcall(self, variables, dosimp=False):
         """Performs frac."""
-        if variables is None:
-            return matrix(0)
-        elif len(variables) == 0:
+        if not variables:
             return fraction()
         elif len(variables) == 1:
             if isinstance(variables[0], fraction):
@@ -2170,51 +2119,41 @@ class evalfuncs(object):
 
     def simpcall(self, variables):
         """Simplifies Fractions."""
-        if variables is None:
-            return matrix(0)
-        else:
-            out = self.fractcall(variables, True)
-            out.simplify()
+        out = self.fractcall(variables, True)
+        out.simplify()
         return out
 
     def docalc(self, variables):
         """Performs calc."""
-        if variables is None:
-            return matrix(0)
+        out = []
+        for x in variables:
+            out.append(self.e.calc(self.e.prepare(x, False, False)))
+        if len(out) == 1:
+            return out[0]
         else:
-            out = []
-            for x in variables:
-                out.append(self.e.calc(self.e.prepare(x, False, False)))
-            if len(out) == 1:
-                return out[0]
-            else:
-                return diagmatrixlist(out)
+            return diagmatrixlist(out)
 
     def evalcall(self, variables):
         """Performs eval."""
-        if variables is None:
-            return matrix(0)
+        out = []
+        e = self.e.new()
+        for x in variables:
+            out.append(e.calc(self.e.prepare(x, False, False)))
+        if len(out) == 1:
+            return out[0]
         else:
-            out = []
-            e = self.e.new()
-            for x in variables:
-                out.append(e.calc(self.e.prepare(x, False, False)))
-            if len(out) == 1:
-                return out[0]
-            else:
-                return diagmatrixlist(out)
+            return diagmatrixlist(out)
 
     def cmdcall(self, variables):
         """Performs proc."""
-        if variables is not None:
-            for item in variables:
-                self.e.processor.process(self.e.prepare(item, False, False))
+        for item in variables:
+            self.e.processor.process(self.e.prepare(item, False, False))
         return matrix(0)
 
     def foldcall(self, variables, func=None, overflow=True):
         """Folds A Function Over A Matrix."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to fold")
         elif len(variables) == 1:
             return getcall(self.e.funcfind(variables[0]))(self.e.variables)
         else:
@@ -2250,7 +2189,7 @@ class evalfuncs(object):
     def derivcall(self, variables):
         """Returns The nth Derivative Of A Function."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to D")
         else:
             n = 1
             varname = self.e.varname
@@ -2279,7 +2218,7 @@ class evalfuncs(object):
     def integcall(self, variables):
         """Returns The Integral Of A Function."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to S")
         else:
             varname = self.e.varname
             accuracy = 0.0001
@@ -2302,7 +2241,7 @@ class evalfuncs(object):
     def randcall(self, variables):
         """Returns A Random Number Generator Object."""
         if not variables:
-            return matrix(0)
+             raise ExecutionError("ArgumentError", "Not enough arguments to d")
         else:
             stop = getnum(variables[0])
             key = None
@@ -2310,3 +2249,33 @@ class evalfuncs(object):
                 key = self.e.prepare(variables[1], True, False)
                 self.e.overflow = variables[2:]
             return rollfunc(stop, self.e, key)
+
+    def writecall(self, variables):
+        """Writes To A File."""
+        if not variables:
+             raise ExecutionError("ArgumentError", "Not enough arguments to write")
+        elif len(variables) < 3:
+            name = self.e.prepare(variables[0], False, False)
+            if len(variables) == 1:
+                writer = ""
+            else:
+                writer = self.e.prepare(variables[1], False, False)
+            with openfile(name, "wb") as f:
+                writefile(f, writer)
+            return matrix(0)
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to write")
+
+    def readcall(self, variables):
+        """Reads From A File."""
+        if not variables:
+             raise ExecutionError("ArgumentError", "Not enough arguments to read")
+        elif len(variables) == 0:
+            name = self.e.prepare(variables[0], False, False)
+            with openfile(name) as f:
+                return strcalc(readfile(f), self.e)
+        else:
+            out = []
+            for x in variables:
+                out.append(self.readcall([x]))
+            return diagmatrixlist(out)
