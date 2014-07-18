@@ -130,7 +130,7 @@ class mathbase(safebase):
             self.show(out)
         else:
             func(out)
-        return strcalc(out, self.e)
+        return rawstrcalc(out, self.e)
 
     def showcall(self, variables):
         """Performs show."""
@@ -149,14 +149,14 @@ class mathbase(safebase):
         if variables is None or len(variables) == 0:
             out = self.app.get().split("\n")[-1]
             if out in self.messages:
-                return strcalc(out, self.e)
+                return rawstrcalc(out, self.e)
             else:
                 return strfloat(out, self.e)
         else:
             self.e.overflow = variables[1:]
             out = self.app.getlines()[getint(variables[0])]
             if out in self.messages:
-                return strcalc(out, self.e)
+                return rawstrcalc(out, self.e)
             else:
                 return strfloat(out, self.e)
 
@@ -670,7 +670,7 @@ class mathbase(safebase):
             elif name == "strfunc":
                 value = strfunc(args[0], self.e, args[1], self.devariables(args[2]), args[3], args[4], args[5])
             elif name == "strcalc":
-                value = strcalc(args[0], self.e)
+                value = rawstrcalc(args[0], self.e)
             elif name == "derivfunc":
                 value = derivfunc(args[0], args[1], args[2], args[3], self.e, args[4], args[5], args[6])
             elif name == "integfunc":

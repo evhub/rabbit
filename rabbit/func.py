@@ -468,7 +468,7 @@ class strcalc(numobject):
 
     def copy(self):
         """Returns A Copy Of The Evaluator String."""
-        return strcalc(self.calcstr, self.e)
+        return rawstrcalc(self.calcstr, self.e)
 
     def __float__(self):
         """Attempts To Get A Float."""

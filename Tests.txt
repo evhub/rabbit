@@ -359,6 +359,7 @@ assert "All
  done!" ?= "All" ++ "\n " ++ "done!"
 assert "All done!" ?= "All "
 		"done!"
+assert "\\n1" ?= "\\n"+1
 
 # Final Testing:
 assert save("Tests.save.txt");true

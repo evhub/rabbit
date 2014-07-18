@@ -1609,7 +1609,7 @@ class evalfuncs(object):
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
-                return strcalc(self.e.prepare(self.e.variables[original], True, True), self.e)
+                return rawstrcalc(self.e.prepare(self.e.variables[original], True, True), self.e)
             else:
                 return matrix(0)
         else:
@@ -2274,7 +2274,7 @@ class evalfuncs(object):
         elif len(variables) == 1:
             name = self.e.prepare(variables[0], False, False)
             with openfile(name) as f:
-                return strcalc(readfile(f), self.e)
+                return rawstrcalc(readfile(f), self.e)
         else:
             out = []
             for x in variables:
