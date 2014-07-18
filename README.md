@@ -335,6 +335,7 @@ The design of Rabbit is intended to use as few "special words" as possible, but 
 
 Statements can vary from interpreter to interpreter, but the ones implemented in basic Rabbit are:
 ```
+help <statement>	# Shows some help about the statement
 debug [on|off]		# Turns verbose debug output on and off
 clear				# Clears the console
 run <filename>		# Runs a Rabbit file
