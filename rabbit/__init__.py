@@ -38,7 +38,7 @@ File List:
 
     data (func, carrot.stats) : Utilities for managing statistical data.
 
-    eval (data, fraction) : Utilities for implementing the Rabbit language.
+    eval (data, fraction, carrot.file) : Utilities for implementing the Rabbit language.
 
     cmd (eval, carrot.app) : The standard Rabbit language interpreter.
 

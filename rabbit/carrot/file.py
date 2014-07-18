@@ -32,15 +32,15 @@ def openfile(filename, opentype="r+b"):
     """Returns An Open File Object."""
     return codecs.open(str(filename), str(opentype), encoding=encoding)
 
-def writefile(openfile, writer):
+def writefile(openedfile, writer):
     """Sets The Contents Of A File."""
-    openfile.seek(0)
-    openfile.truncate()
-    openfile.write(str(writer))
+    openedfile.seek(0)
+    openedfile.truncate()
+    openedfile.write(str(writer))
 
-def readfile(openfile):
+def readfile(openedfile):
     """Reads The Contents Of A File."""
-    return str(openfile.read())
+    return str(openedfile.read())
 
 def createfile(filename, opentype="r+b"):
     """Creates A File And Returns An Open File Object For It."""

@@ -20,6 +20,7 @@ from __future__ import with_statement, absolute_import, print_function, unicode_
 
 from .data import *
 from .fraction import *
+from .carrot.file import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
