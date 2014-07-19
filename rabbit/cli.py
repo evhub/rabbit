@@ -121,7 +121,7 @@ class commandline(mathbase):
         elif isinside(whole, '"`', {"\u201c":"\u201d"}, {"(":")", "{":"}", "[":"]"}):
             return whole
         self.reset()
-        self.process(whole)
+        self.process(whole, True)
 
     def calc(self, expression):
         """Safely Evaluates An Expression."""
