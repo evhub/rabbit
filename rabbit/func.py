@@ -919,9 +919,8 @@ class classcalc(cotobject):
     def getitem(self, test):
         """Retrieves An Item At The Base Level."""
         if istext(self.variables[test]):
-            return self.calc(self.variables[test])
-        else:
-            return self.variables[test]
+            self.store(test, self.calc(self.variables[test]))
+        return self.variables[test]
 
     def retrieve(self, key):
         """Retrieves An Item."""
@@ -973,9 +972,16 @@ class classcalc(cotobject):
         del out[self.selfvar]
         return out
 
+    def calcall(self):
+        """Calculates All Strings."""
+        for item in self.variables:
+            self.getitem(item)
+
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, classcalc):
+            self.calcall()
+            other.calcall()
             return self.variables[self.selfvar] is other.variables[self.selfvar] or self.getvars() == other.getvars()
         else:
             return False
@@ -983,6 +989,8 @@ class classcalc(cotobject):
     def __cmp__(self, other):
         """Performs Comparison."""
         if isinstance(other, classcalc):
+            self.calcall()
+            other.calcall()
             return cmp(self.variables, other.variables)
         else:
             raise ExecutionError("TypeError", "Classes can only be compared with other classes")
@@ -1000,6 +1008,8 @@ class classcalc(cotobject):
     def __ge__(self, other):
         """Determines If Subset."""
         if isinstance(other, classcalc):
+            self.calcall()
+            other.calcall()
             for item in other.variables:
                 if not item in self.variables:
                     return False

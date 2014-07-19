@@ -378,6 +378,7 @@ assert () ?= f:		$ f() = ()
 assert 7625597484987 ?= 3^^3
 assert (:({}()+1)).name ?= "TypeError"
 assert (:({}()>1)).name ?= "TypeError"
+assert { x = 1 } ?= { x := 1 }
 
 # Final Testing:
 assert save("Tests.save.txt");true
