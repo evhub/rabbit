@@ -105,6 +105,8 @@ nothing := {
  __repr__(self) = `\nil`
  __len__(self) = 0
  __bool__(self) = 0
+ __rep__(self, other) = [self]**other
+ __rrep__(self, other) = ()
  }
 nil := nothing()
 assert type(nil) ?= "nil"
@@ -132,6 +134,8 @@ assert str(nil) ?= "nil"
 assert repr(nil) ?= `\nil`
 assert len(nil) ?= 0
 assert (?nil) ?= 0
+assert nil**2 ?= [nil,nil]
+assert 2**nil ?= ()
 
 # Multi-Line Tests:
 assert # A mid-line comment
