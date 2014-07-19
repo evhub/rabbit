@@ -1000,8 +1000,8 @@ Global Operator Precedence List:
             out = self.eval_list(inputlist[0])
             row = False
             for x in xrange(1, len(inputlist)):
-                num = getint(self.eval_list(inputlist[x]))
                 done = False
+                num = getint(self.eval_list(inputlist[x]))
                 if hasattr(out, "op_repeat"):
                     try:
                         test = out.op_repeat(num)
@@ -1010,7 +1010,7 @@ Global Operator Precedence List:
                     if test is not NotImplemented:
                         out = test
                         done = True
-                if hasattr(num, "rop_repeat"):
+                if not done and hasattr(num, "rop_repeat"):
                     try:
                         test = out.rop_repeat(out)
                     except NotImplementedError:
