@@ -1012,7 +1012,7 @@ Global Operator Precedence List:
                         done = True
                 if not done and hasattr(num, "rop_repeat"):
                     try:
-                        test = out.rop_repeat(out)
+                        test = num.rop_repeat(out)
                     except NotImplementedError:
                         test = NotImplemented
                     if test is not NotImplemented:
