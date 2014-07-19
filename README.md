@@ -397,6 +397,7 @@ asin			# Arc sine
 atan			# Arc tangent
 calc			# Calculate a string of code
 ceil			# Ceiling function
+class			# Convert to class
 comb			# Combinations
 connect			# Connects matrices
 cont			# Convert to container

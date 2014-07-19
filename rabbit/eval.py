@@ -153,6 +153,7 @@ Global Operator Precedence List:
             "simp":funcfloat(self.funcs.simpcall, self, "simp"),
             "from":funcfloat(self.funcs.instanceofcall, self, "from"),
             "iserr":funcfloat(self.funcs.iserrcall, self, "iserr"),
+            "class":funcfloat(self.funcs.classcall, self, "class"),
             "var":funcfloat(self.funcs.getvarcall, self, "var"),
             "val":funcfloat(self.funcs.getvalcall, self, "val"),
             "raise":funcfloat(self.funcs.raisecall, self, "raise"),
@@ -1644,6 +1645,19 @@ class evalfuncs(object):
             if not (isinstance(item, instancecalc) and item.tryget(self.e.errorvar)):
                 return 0.0
         return 1.0
+
+    def classcall(self, variables):
+        """Converts To A Class."""
+        if not variables:
+            return classcalc(self.e)
+        else:
+            if isinstance(variables[0], instancecalc):
+                self.e.overflow = variables[1:]
+                return variables[0].toclass()
+            elif isinstance(variables[0], classcalc):
+                return variables[0]
+            else:
+                raise ExecutionError("ArgumentError", "Cannot convert non-class to class")
 
     def getvalcall(self, variables):
         """Calculates A Variable Without Changing It."""
