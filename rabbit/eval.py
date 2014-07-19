@@ -1020,7 +1020,7 @@ Global Operator Precedence List:
                     elif hasmatrix(arg):
                         params.extend(getmatrix(arg).getitems())
                     else:
-                        raise ExecutionError("TypeError", "Could not remove from class item "+self.e.prepare(arg, False, True, True))
+                        raise ExecutionError("TypeError", "Could not remove from class item "+self.prepare(arg, False, True, True))
             elif isinstance(item, matrix):
                 if item.onlyrow() or item.onlydiag():
                     if item.onlydiag():
@@ -1046,7 +1046,7 @@ Global Operator Precedence List:
                             raise ExecutionError("TypeError", "Can only remove matrices from matrices")
             elif isinstance(item, strcalc):
                 for arg in params:
-                    arg = self.e.prepare(arg, True, False)
+                    arg = self.prepare(arg, True, False)
                     pos = item.calcstr.find(arg)
                     if pos >= 0:
                         item.calcstr = item.calcstr[:pos]+item.calcstr[pos+len(arg):]
@@ -1070,7 +1070,7 @@ Global Operator Precedence List:
                     if arg in item.units:
                         item.units.remove(arg)
             else:
-                raise ExecutionError("TypeError", "Could not remove from item "+self.e.prepare(item, False, True, True))
+                raise ExecutionError("TypeError", "Could not remove from item "+self.prepare(item, False, True, True))
         return item
 
     def eval_repeat(self, inputlist):
