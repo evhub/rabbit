@@ -1191,7 +1191,7 @@ class instancecalc(numobject, classcalc):
         check_sub = self.tryget("__sub__")
         if check_sub:
             return self.domethod(check_sub, -other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for addition")
+        raise ExecutionError("TypeError", "Insufficient methods defined for addition")
 
     def __isub__(self, other):
         """Performs Subtraction."""
@@ -1201,7 +1201,7 @@ class instancecalc(numobject, classcalc):
         check_add = self.tryget("__add__")
         if check_add:
             return self.domethod(check_add, -other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for subtraction")
+        raise ExecutionError("TypeError", "Insufficient methods defined for subtraction")
 
     def __imul__(self, other):
         """Performs Multiplication."""
@@ -1217,7 +1217,7 @@ class instancecalc(numobject, classcalc):
                     self += self
             except ExecutionError:
                 pass
-        raise ExecutionError("ClassError", "Insufficient methods defined for multiplication")
+        raise ExecutionError("TypeError", "Insufficient methods defined for multiplication")
 
     def __idiv__(self, other):
         """Performs Division."""
@@ -1234,7 +1234,7 @@ class instancecalc(numobject, classcalc):
                     self += self
             except ExecutionError:
                 pass
-        raise ExecutionError("ClassError", "Insufficient methods defined for division")
+        raise ExecutionError("TypeError", "Insufficient methods defined for division")
 
     def __imod__(self, other):
         """Performs Moduluo."""
@@ -1249,7 +1249,7 @@ class instancecalc(numobject, classcalc):
                 result = float(self/other)
                 self = (result-int(result))*other
             except ExecutionError:
-            raise ExecutionError("ClassError", "Insufficient methods defined for modulus")
+                raise ExecutionError("TypeError", "Insufficient methods defined for modulus")
         return self
 
     def __ipow__(self, other):
@@ -1263,28 +1263,28 @@ class instancecalc(numobject, classcalc):
                     self *= self
             except ExecutionError:
                 pass
-        raise ExecutionError("ClassError", "Insufficient methods defined for exponentiation")
+        raise ExecutionError("TypeError", "Insufficient methods defined for exponentiation")
 
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         check_rdiv = self.tryget("__rdiv__")
         if check_rdiv:
             return self.domethod(check_rdiv, other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for division")
+        raise ExecutionError("TypeError", "Insufficient methods defined for division")
 
     def __rmod__(self, other):
         """Performs Reverse Modulo."""
         check_rmod = self.tryget("__rmod__")
         if check_rmod:
             return self.domethod(check_rmod, other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for reverse modulus")
+        raise ExecutionError("TypeError", "Insufficient methods defined for reverse modulus")
 
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         check_rpow = self.tryget("__rpow__")
         if check_rpow:
             return self.domethod(check_rpow, other)
-        raise ExecutionError("ClassError", "Insufficient methods defined for reverse exponentiation")
+        raise ExecutionError("TypeError", "Insufficient methods defined for reverse exponentiation")
 
     def __float__(self):
         """Retrieves A Float."""
@@ -1299,7 +1299,7 @@ class instancecalc(numobject, classcalc):
         check_num = self.tryget("__num__")
         if check_num:
             return self.domethod(check_num)
-        raise ExecutionError("ClassError", "Insufficient methods defined for conversion to number")
+        raise ExecutionError("TypeError", "Insufficient methods defined for conversion to number")
 
     def __abs__(self):
         """Performs Absolute Value."""
@@ -1398,7 +1398,7 @@ class instancecalc(numobject, classcalc):
                 check_eq = self.tryget("__eq__")
                 if check_eq:
                     return self.domethod(check_ge, other) and not self.domethod(check_eq, other)
-            return NotImplemented
+            raise ExecutionError("TypeError", "Insufficient methods defined for greater than")
 
     def __lt__(self, other):
         """Performs Less Than."""
@@ -1419,7 +1419,7 @@ class instancecalc(numobject, classcalc):
                 check_eq = self.tryget("__eq__")
                 if check_eq:
                     return self.domethod(check_le, other) and not self.domethod(check_eq, other)
-            return NotImplemented
+            raise ExecutionError("TypeError", "Insufficient methods defined for less than")
 
     def __ge__(self, other):
         """Performs Greater Than Or Equal."""
@@ -1440,7 +1440,7 @@ class instancecalc(numobject, classcalc):
                 check_eq = self.tryget("__eq__")
                 if check_eq:
                     return self.domethod(check_gt, other) or self.domethod(check_eq, other)
-            return NotImplemented
+            raise ExecutionError("TypeError", "Insufficient methods defined for greater than or equal")
 
     def __le__(self, other):
         """Performs Less Than Or Equal."""
@@ -1461,7 +1461,7 @@ class instancecalc(numobject, classcalc):
                 check_eq = self.tryget("__eq__")
                 if check_eq:
                     return self.domethod(check_lt, other) or self.domethod(check_eq, other)
-            return NotImplemented
+            raise ExecutionError("TypeError", "Insufficient methods defined for less than or equal")
 
     def __str__(self):
         """Retrieves A String."""

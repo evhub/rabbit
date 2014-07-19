@@ -374,6 +374,8 @@ assert "\\n1" ?= "\\n"+1
 assert {} ?= {{ x := 42 ;; y := "42" }}
 assert () ?= f:		$ f() = ()
 assert 7625597484987 ?= 3^^3
+assert (:({}()+1)).name ?= "TypeError"
+assert (:({}()>1)).name ?= "TypeError"
 
 # Final Testing:
 assert save("Tests.save.txt");true
