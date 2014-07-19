@@ -25,6 +25,10 @@ import math
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+def succ(x=0.0):
+    """Calculates The Successor Number."""
+    return 1.0+x
+
 def gcd(a, b):
     """Calculates The Greatest Common Denominator Of Two Numbers."""
     if not a:

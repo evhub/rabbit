@@ -200,7 +200,7 @@ Global Operator Precedence List:
             "lcm":usefunc(lcm, self, "lcm", ["x", "y"]),
             "perm":usefunc(perm, self, "perm", ["n", "k"]),
             "comb":usefunc(comb, self, "comb", ["n", "k"]),
-            "'":usefunc(lambda x=0.0: x+1.0, self, "'", ["x"]),
+            "'":usefunc(succ, self, "'", ["x"]),
             "i":complex(0.0, 1.0),
             "e":math.e,
             "pi":math.pi,
