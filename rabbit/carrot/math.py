@@ -107,9 +107,6 @@ def primefactor(checknumber):
 
 def roots(a, b, c):
     """Determines The Real Roots Of A Quadratic."""
-    a = float(a)
-    b = float(b)
-    c = float(c)
     discriminant = b*b-4.0*a*c
     if discriminant < 0:
         return None, None
@@ -120,9 +117,6 @@ def roots(a, b, c):
 
 def iroots(a, b, c):
     """Determines The Complex Roots Of A Quadratic."""
-    a = float(a)
-    b = float(b)
-    c = float(c)
     discriminant = b*b-4.0*a*c
     if discriminant == 0:
         return -b/(2.0*a), None
@@ -131,20 +125,15 @@ def iroots(a, b, c):
 
 def perm(n, k):
     """Determines The Possible Number Of Permutations In n Choose k."""
-    n = float(n)
-    k = float(k)
     return float(factorial(n))/float(factorial(n-k))
 
 def comb(n, k):
     """Determines The Possible Number Of Combinations In n Choose k."""
-    n = float(n)
-    k = float(k)
     return perm(n,k)/float(factorial(k))
 
 def deriv(func, x, n=1, accuracy=0.0001, scaledown=1.25):
     """Finds The nth Derivative Of A Function At x."""
     n = int(n)
-    x = float(x)
     if n <= 0:
         return func(x)
     else:
@@ -154,8 +143,6 @@ def deriv(func, x, n=1, accuracy=0.0001, scaledown=1.25):
 
 def defint(func, start, stop, accuracy=0.0001, strict=False):
     """Finds The Definite Integral Of A Function From start To stop."""
-    start = float(start)
-    stop = float(stop)
     accuracy = float(accuracy)
     if strict:
         step = accuracy
@@ -186,7 +173,6 @@ def Bnum(n):
 def Bpoly(n, x):
     """Calculates The nth Second Bernouli Polynomial."""
     n = int(n)
-    x = float(x)
     out = 0.0
     for k in xrange(0, n+1):
         out += comb(n,k)*Bnum(n-k)*x**float(k)
@@ -195,13 +181,10 @@ def Bpoly(n, x):
 def PBpoly(n, x):
     """Calculates The nth Second Periodic Bernouli Polynomial."""
     n = int(n)
-    x = float(x)
     return Bpoly(n, x-math.floor(x))
 
 def eulermaclaurin(func, start, stop, p=2, R=True, accuracy=0.0001, scaledown=1.25):
     """Calculates The Error Of The Strict Definite Integral Approximation With An Accuracy Of 1."""
-    start = float(start)
-    stop = float(stop)
     p = int(p)
     out = 0.0
     for k in xrange(2, p+1):
@@ -221,21 +204,17 @@ def factorial(x):
 
 def gamma(n, accuracy=0.00000001, stop=None):
     """Implements The Gamma Function Over The Positive Numbers."""
-    n = float(n)
     accuracy = float(accuracy)
     if stop is None:
-        stop = -n*math.log(accuracy**(1/n)/n)/math.log(2.0)
+        stop = -n*math.log(accuracy**(1.0/n)/n)/math.log(2.0)
     return defint(lambda x: x**(n-1.0)*math.e**(-1.0*x), 0.0, stop)
 
 def stirling(n):
     """Implements The Stirling Approximation Of The Factorial."""
-    n = float(n)
     return n**n*isqrt(2*math.pi*n)/math.e**n
 
 def knuth(a, b, n):
     """Implements The Knuth Up-Arrow Operator."""
-    a = float(a)
-    b = float(b)
     n = int(n)
     if n < 0:
         raise IndexError("Can't perform Knuth up-arrow with n="+str(n))

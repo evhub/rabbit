@@ -72,6 +72,7 @@ Global Operator Precedence List:
     recursion = 0
     overflow = []
     count = 0
+    laxnull = True
 
     def __init__(self, variables=None, processor=None, color=None, speedy=False, maxrecursion=10):
         """Initializes The Evaluator."""
@@ -335,7 +336,10 @@ Global Operator Precedence List:
                 out = self.prepare(getmatrix(item), top, bottom, indebug, maxrecursion)
         elif isinstance(item, matrix):
             if item.y == 0:
-                out = "()"
+                if self.laxnull:
+                    out = "()"
+                else:
+                    out = "none"
             elif item.onlydiag():
                 out = "("
                 for x in item.getdiag():
@@ -1119,7 +1123,10 @@ Global Operator Precedence List:
     def call_none(self, inputstring):
         """Evaluates A Null."""
         if inputstring == "":
-            return matrix(0)
+            if self.laxnull:
+                return matrix(0)
+            else:
+                raise ExecutionError("NoneError", "Cannot evaluate the empty string")
 
     def call_lambda(self, inputstring):
         """Wraps Lambda Evaluation."""
@@ -1149,8 +1156,18 @@ Global Operator Precedence List:
         if "^" in inputstring:
             inputlist = inputstring.split("^")
             value = 1.0
+            level = 1
             for x in reversed(xrange(0, len(inputlist))):
-                value = self.eval_call(inputlist[x])**value
+                item = inputlist[x]
+                if item:
+                    value = knuth(self.eval_call(item), value, level)
+                    level = 1
+                else:
+                    if x == 0 or x == len(inputlist)-1:
+                        value = knuth(self.eval_call(""), value, level)
+                        level = 1
+                    else:
+                        level += 1
             return value
 
     def call_colon(self, inputstring):

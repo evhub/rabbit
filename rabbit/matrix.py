@@ -341,16 +341,17 @@ class matrix(mctobject):
 
     def newrow(self, rowlist):
         """Appends A New Row."""
-        if islist(rowlist[0]):
-            for row in rowlist:
-                self.newrow(row)
-        elif len(rowlist) == self.x:
-            for x in xrange(0, len(rowlist)):
-                rowlist[x] = self.prepare(rowlist[x])
-            self.a.append(rowlist)
-            self.y += 1
-        else:
-            raise IndexError("Unequal matrix row lengths for newrow of "+str(self.x)+" and "+str(len(rowlist)))
+        if len(rowlist) > 0:
+            if islist(rowlist[0]):
+                for row in rowlist:
+                    self.newrow(row)
+            elif len(rowlist) == self.x:
+                for x in xrange(0, len(rowlist)):
+                    rowlist[x] = self.prepare(rowlist[x])
+                self.a.append(rowlist)
+                self.y += 1
+            else:
+                raise IndexError("Unequal matrix row lengths for newrow of "+str(self.x)+" and "+str(len(rowlist)))
 
     def delrow(self, y):
         """Deletes A Row."""
@@ -381,14 +382,17 @@ class matrix(mctobject):
     def cross(self, other):
         """Finds The Cross Product With Another Matrix."""
         if self.x == other.x:
-            cross = self.copy()
-            for row in other.a:
-                cross.newrow(row)
-            cross.newrow([self.prepare(1.0)]*cross.x)
-            out = cross.new(1)
-            for x in xrange(0, out.x):
-                out.store(0,x, cross.minor(cross.y-1, x).det())
-            return out
+            if self.x == 0:
+                return other
+            else:
+                cross = self.copy()
+                for row in other.a:
+                    cross.newrow(row)
+                cross.newrow([self.prepare(1.0)]*cross.x)
+                out = cross.new(1)
+                for x in xrange(0, out.x):
+                    out.store(0,x, cross.minor(cross.y-1, x).det())
+                return out
         else:
             raise IndexError("Matrix cross product invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
 

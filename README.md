@@ -63,7 +63,7 @@ Math in rabbit is very similar to in any other programming language. Rabbit's ma
 3-5		# Subtraction (result = -2) (evaluated left to right, highest precedence)
 2*3		# Multiplication (result = 6) (evaluated left to right, medium precedence)
 1/2		# Division (result = 0.5) (evaluated left to right, medium precedence)
-3^2		# Exponentiation (result = 9) (evaluated right to left, low precedence)
+3^2		# Exponentiation / Knuth Up-Arrow (result = 9) (evaluated right to left, low precedence)
 8%3		# Modulo / Remainder (result = 2) (evaluated left to right, high precedence)
 ```
 
