@@ -47,6 +47,7 @@ Global Operator Precedence List:
     ~       Applies a list to a function for looping.
     \       Creates a lambda.
     ++      Performs concatenation.
+    --      Performs removal.
     **      Performs repeat.
     ,       Seperates list elements.
     +-      Performs addition and subtraction.
@@ -199,6 +200,7 @@ Global Operator Precedence List:
             "lcm":usefunc(lcm, self, "lcm", ["x", "y"]),
             "perm":usefunc(perm, self, "perm", ["n", "k"]),
             "comb":usefunc(comb, self, "comb", ["n", "k"]),
+            "'":usefunc(lambda x=0.0: x+1.0, self, "'", ["x"]),
             "i":complex(0.0, 1.0),
             "e":math.e,
             "pi":math.pi,
@@ -723,16 +725,18 @@ Global Operator Precedence List:
             if not top[a][0].startswith("\\"):
                 top[a][0] = top[a][0].split("++")
                 for c in xrange(0, len(top[a][0])):
-                    top[a][0][c] = top[a][0][c].split("**")
+                    top[a][0][c] = top[a][0][c].split("--")
                     for d in xrange(0, len(top[a][0][c])):
-                        top[a][0][c][d] = top[a][0][c][d].split(",")
+                        top[a][0][c][d] = top[a][0][c][d].split("**")
                         for e in xrange(0, len(top[a][0][c][d])):
-                            top[a][0][c][d][e] = splitinplace(top[a][0][c][d][e].split("+"), "-", "%/*^:", 2)
+                            top[a][0][c][d][e] = top[a][0][c][d][e].split(",")
                             for f in xrange(0, len(top[a][0][c][d][e])):
-                                top[a][0][c][d][e][f] = top[a][0][c][d][e][f].split("%")
+                                top[a][0][c][d][e][f] = splitinplace(top[a][0][c][d][e][f].split("+"), "-", "%/*^:", 2)
                                 for g in xrange(0, len(top[a][0][c][d][e][f])):
-                                    top[a][0][c][d][e][f][g] = splitinplace(top[a][0][c][d][e][f][g].split("*"), "/")
-        value = reassemble(top, ["~", "\\", "++", "**", ",", "+", "%", "*"])
+                                    top[a][0][c][d][e][f][g] = top[a][0][c][d][e][f][g].split("%")
+                                    for h in xrange(0, len(top[a][0][c][d][e][f][g])):
+                                        top[a][0][c][d][e][f][g][h] = splitinplace(top[a][0][c][d][e][f][g][h].split("*"), "/")
+        value = reassemble(top, ["~", "\\", "++", "--", "**", ",", "+", "%", "*"])
         self.printdebug("=> "+value)
         self.recursion += 1
         out = self.eval_check(self.eval_comp(top), True)
@@ -894,7 +898,7 @@ Global Operator Precedence List:
         """Performs Concatenation."""
         items = []
         for item in inputlist:
-            item = self.eval_repeat(item)
+            item = self.eval_remove(item)
             if not isnull(item):
                 items.append(item)
         if len(items) == 0:
@@ -992,13 +996,89 @@ Global Operator Precedence List:
             else:
                 raise ExecutionError("TypeError", "Could not concatenate items "+repr(items))
 
+    def eval_remove(self, inputlist):
+        """Performs Removal."""
+        item = self.eval_repeat(inputlist[0])
+        if len(inputlist) > 1:
+            params = []
+            for x in xrange(1, len(inputlist)):
+                params.append(self.eval_repeat(inputlist[x]))
+            item = item.copy()
+            if isinstance(item, classcalc):
+                item.calcall()
+                while len(params) > 0:
+                    arg = params.pop(0)
+                    if isinstance(arg, strcalc):
+                        arg = str(arg)
+                        if arg in item.variables:
+                            item.remove(arg)
+                    elif isinstance(arg, classcalc):
+                        arg.calcall()
+                        for k,v in arg.getvars().items():
+                            if k in item.variables and item.variables[k] == v:
+                                item.remove(k)
+                    elif hasmatrix(arg):
+                        params.extend(getmatrix(arg).getitems())
+                    else:
+                        raise ExecutionError("TypeError", "Could not remove from class item "+self.e.prepare(arg, False, True, True))
+            elif isinstance(item, matrix):
+                if item.onlyrow() or item.onlydiag():
+                    if item.onlydiag():
+                        row = False
+                    else:
+                        row = True
+                    items = item.getitems()
+                    for arg in params:
+                        if arg in items:
+                            items.remove(arg)
+                    if row:
+                        item = rowmatrixlist(items)
+                    else:
+                        item = diagmatrixlist(items)
+                else:
+                    for arg in params:
+                        if isinstance(arg, matrix):
+                            for row in arg.a:
+                                if row in item.a:
+                                    item.a.remove(row)
+                                    item.y -= 1
+                        else:
+                            raise ExecutionError("TypeError", "Can only remove matrices from matrices")
+            elif isinstance(item, strcalc):
+                for arg in params:
+                    arg = self.e.prepare(arg, True, False)
+                    pos = item.calcstr.find(arg)
+                    if pos >= 0:
+                        item.calcstr = item.calcstr[:pos]+item.calcstr[pos+len(arg):]
+            elif isinstance(item, multidata):
+                for arg in params:
+                    if isinstance(arg, matrix):
+                        arg = arg.getitems()
+                        if len(arg) == 2:
+                            if arg[0] in item.x.units:
+                                index = item.x.units.index(arg[0])
+                                if item.y.units[index] == arg[1]:
+                                    item.x.units.pop(index)
+                                    item.y.units.pop(index)
+                        else:
+                            raise ExecutionError("TypeError", "Can only remove matrix pairs from multidata")
+                    elif arg in item.x.units:
+                        item.y.units.pop(item.x.units.index(arg))
+                        item.x.units.remove(arg)
+            elif isinstance(item, data):
+                for arg in params:
+                    if arg in item.units:
+                        item.units.remove(arg)
+            else:
+                raise ExecutionError("TypeError", "Could not remove from item "+self.e.prepare(item, False, True, True))
+        return item
+
     def eval_repeat(self, inputlist):
         """Evaluates Repeats."""
         if len(inputlist) == 1:
             return self.eval_list(inputlist[0])
         else:
             out = self.eval_list(inputlist[0])
-            row = False
             for x in xrange(1, len(inputlist)):
                 done = False
                 num = self.eval_list(inputlist[x])
@@ -1019,7 +1099,9 @@ Global Operator Precedence List:
                         out = test
                         done = True
                 if isinstance(out, matrix) and (out.onlyrow() or out.onlydiag()):
-                    if out.onlyrow():
+                    if out.onlydiag():
+                        row = False
+                    else:
                         row = True
                     out = out.getitems()
                 if not done:
@@ -1246,6 +1328,15 @@ Global Operator Precedence List:
             else:
                 self.overflow = params[1:]
                 value = item.calc(self.prepare(params[0], False, False))
+        elif isinstance(item, multidata):
+            if len(params) == 0:
+                value = item.x.units[0]
+            else:
+                self.overflow = params[1:]
+                if params[0] in item.x.units:
+                    value = item.y.units[item.x.units.index(params[0])]
+                else:
+                    value = matrix(0)
         elif hasmatrix(item):
             item = getmatrix(item)
             if len(params) == 0:

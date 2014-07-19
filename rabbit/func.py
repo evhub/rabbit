@@ -894,7 +894,7 @@ class classcalc(cotobject):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
         if test == self.selfvar:
-            raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined.")
+            raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined")
         elif bypass:
             self.variables[test] = value
         elif self.e.isreserved(test):
@@ -925,7 +925,9 @@ class classcalc(cotobject):
     def retrieve(self, key):
         """Retrieves An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if not self.e.isreserved(test):
+        if test == self.selfvar:
+            raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined")
+        elif not self.e.isreserved(test):
             if test in self.variables:
                 return self.getitem(test)
             else:

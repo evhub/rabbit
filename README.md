@@ -154,6 +154,7 @@ Additionally, all the different container objects support various types of opera
 Additionally, there are a couple of other, special operations that can be done only with container objects, the syntax for which is:
 ```
 [1,2] ++ [3,4]		# Concatenation (result = [1,2,3,4]) (left to right, high precedence)
+[1,2] -- 1			# Removal (result = [2])
 (1,2) ** 2			# Repeat (result = (1,2,1,2))
 (1,2,3):2			# Item indexes (result = 3) (left to right, lowest precedence, same as colon for function calls)
 [1,2,3,4]:1			# These work for rows as well (result = 2)
@@ -389,6 +390,7 @@ applyplus(__) = __~\x\(x+1)
 Rabbit comes with a lot of built-in functions. We'll list all of them below, but this list might not always stay updated. An updated list should always be able to be compiled by looking at eval.py and cmd.py. The different built-in Rabbit functions are:
 ```
 # Built-In Base Rabbit Functions:
+'				# Successor
 D				# Derivative
 S				# Definite integral
 abs				# Absolute value
@@ -609,6 +611,7 @@ High-precedence mathematical and functional operators are evaluated at this stag
 1,2,3~ \x\x   # List looping (result = (1,2,3))
 \x\x+1        # Lambdas (result = \x\(x+1))
 1,2 ++ 3,4    # Concatenation (result = (1,2,3,4))
+1,2 -- 1      # Removal (result = (2,))
 1,2 ** 2      # Repeat (result = (1,2,1,2))
 1,2,3,4       # Lists (result = (1,2,3,4))
 1+2-3         # Addition and subtraction (result = 0)

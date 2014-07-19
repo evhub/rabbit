@@ -32,6 +32,7 @@ assert (1,2)*(10,20) ?= 10,40
 assert [1,2]*[10,20] ?= 50
 assert [1,0,0]%[0,1,0] ?= [0,0,1]
 assert [1,2] ++ [3,4] ?= [1,2,3,4]
+assert [2] ?= [1,2] -- 1
 assert (1,2) ** 2 ?= 1,2,1,2
 assert (1,2,3):2 ?= 3
 assert [1,2,3,4]:1 ?= 2
@@ -180,6 +181,17 @@ assert f.g(2) ?= 9						$ f(x) = x^2 $ g(x) = x+1
 assert applyplus(0,-2) ?= 1,-1			$ applyplus(__) = __~\x\(x+1)
 assert (x $ x = 1) ?= 1
 
+# Expression Tests:
+assert (1,2,3) ?= 1,2,3~ \x\x
+assert \x\(x+1) ?= \x\x+1
+assert (1,2,3,4) ?= 1,2 ++ 3,4
+assert (2,) ?= 1,2 -- 1
+assert (1,2,1,2) ?= 1,2 ** 2
+assert (1,2,3,4) ?= 1,2,3,4
+assert 0 ?= 1+2-3
+assert 0 ?= 6 % 3
+assert 2.4 ?= 3*4/5
+
 # Complex Tests:
 assert mod:3:2 ?= 1
  $ mod(x,y) = (xy+-1*floor:(xy))*y $ xy = x/y
@@ -315,6 +327,7 @@ assert except( try: (1/0), try: (1/0) )
 assert int(1.5) ?= 1
 assert class({}()) ?= {}
 assert type(class({}())) ?= "class"
+assert '1 ?= 2
 
 # New Feature Tests:
 assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
@@ -379,6 +392,10 @@ assert 7625597484987 ?= 3^^3
 assert (:({}()+1)).name ?= "TypeError"
 assert (:({}()>1)).name ?= "TypeError"
 assert { x = 1 } ?= { x := 1 }
+assert {} ?= { x := 1 } -- { x = 1 }
+assert { x = 1 } ?= { x = 1 } -- { x = 2 }
+assert "abcd" -- "bc" ?= "ad"
+assert (data:(data:(1,2,3)):(data:(5,6,7))):2 ?= 6
 
 # Final Testing:
 assert save("Tests.save.txt");true
