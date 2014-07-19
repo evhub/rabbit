@@ -999,10 +999,6 @@ Global Operator Precedence List:
         else:
             out = self.eval_list(inputlist[0])
             row = False
-            if isinstance(out, matrix) and (out.onlyrow() or out.onlydiag()):
-                if out.onlyrow():
-                    row = True
-                out = out.getitems()
             for x in xrange(1, len(inputlist)):
                 num = getint(self.eval_list(inputlist[x]))
                 done = False
@@ -1022,6 +1018,10 @@ Global Operator Precedence List:
                     if test is not NotImplemented:
                         out = test
                         done = True
+                if isinstance(out, matrix) and (out.onlyrow() or out.onlydiag()):
+                    if out.onlyrow():
+                        row = True
+                    out = out.getitems()
                 if not done and islist(out):
                     if num < 0:
                         out = out[::-1]*(-num)
