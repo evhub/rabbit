@@ -985,9 +985,9 @@ Global Operator Precedence List:
                         out.append(x)
                 return data(out)
             elif doclass == len(items):
-                out = classcalc(self)
-                for x in items:
-                    out.extend(x)
+                out = items[0].copy()
+                for x in xrange(1, len(items)):
+                    out.extend(items[x])
                 return out
             else:
                 raise ExecutionError("TypeError", "Could not concatenate items "+repr(items))
