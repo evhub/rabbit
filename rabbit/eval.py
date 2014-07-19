@@ -997,7 +997,10 @@ Global Operator Precedence List:
             return self.eval_list(inputlist[0])
         else:
             out = self.eval_list(inputlist[0])
-            if isinstance(out, matrix) and out.onlydiag():
+            row = False
+            if isinstance(out, matrix) and (out.onlyrow() or out.onlydiag()):
+                if out.onlyrow():
+                    row = True
                 out = out.getitems()
             for x in xrange(1, len(inputlist)):
                 num = getint(self.eval_list(inputlist[x]))
@@ -1028,7 +1031,10 @@ Global Operator Precedence List:
                     out = [out]*abs(num)
                     done = True
             if islist(out):
-                return diagmatrixlist(out)
+                if row:
+                    return rowmatrixlist(out)
+                else:
+                    return diagmatrixlist(out)
             else:
                 return out
 
