@@ -1519,6 +1519,22 @@ class instancecalc(numobject, classcalc):
         else:
             return strcalc("instance", self.e)
 
+    def op_repeat(self, other):
+        """Performs **."""
+        item = self.tryget("__rep__")
+        if item:
+            return self.domethod(item, other)
+        else:
+            return NotImplemented
+
+    def op_repeat(self, other):
+        """Performs **."""
+        item = self.tryget("__rrep__")
+        if item:
+            return self.domethod(item, other)
+        else:
+            return NotImplemented
+
 class atom(evalobject):
     """Implements Atoms."""
     def getstate(self):

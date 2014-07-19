@@ -1001,13 +1001,32 @@ Global Operator Precedence List:
                 out = out.getitems()
             for x in xrange(1, len(inputlist)):
                 num = getint(self.eval_list(inputlist[x]))
-                if islist(out):
+                done = False
+                if hasattr(out, "op_repeat"):
+                    try:
+                        test = out.op_repeat(num)
+                    except NotImplementedError:
+                        test = NotImplemented
+                    if test is not NotImplemented:
+                        out = test
+                        done = True
+                if hasattr(num, "rop_repeat"):
+                    try:
+                        test = out.rop_repeat(out)
+                    except NotImplementedError:
+                        test = NotImplemented
+                    if test is not NotImplemented:
+                        out = test
+                        done = True
+                if not done and islist(out):
                     if num < 0:
                         out = out[::-1]*(-num)
                     else:
                         out *= num
-                else:
+                    done = True
+                if not done:
                     out = [out]*abs(num)
+                    done = True
             if islist(out):
                 return diagmatrixlist(out)
             else:
