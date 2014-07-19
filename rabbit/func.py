@@ -1527,7 +1527,7 @@ class instancecalc(numobject, classcalc):
         else:
             return NotImplemented
 
-    def op_repeat(self, other):
+    def rop_repeat(self, other):
         """Performs **."""
         item = self.tryget("__rrep__")
         if item:

@@ -1001,7 +1001,7 @@ Global Operator Precedence List:
             row = False
             for x in xrange(1, len(inputlist)):
                 done = False
-                num = getint(self.eval_list(inputlist[x]))
+                num = self.eval_list(inputlist[x])
                 if hasattr(out, "op_repeat"):
                     try:
                         test = out.op_repeat(num)
@@ -1022,15 +1022,17 @@ Global Operator Precedence List:
                     if out.onlyrow():
                         row = True
                     out = out.getitems()
-                if not done and islist(out):
-                    if num < 0:
-                        out = out[::-1]*(-num)
-                    else:
-                        out *= num
-                    done = True
                 if not done:
-                    out = [out]*abs(num)
-                    done = True
+                    num = getint(num)
+                    if islist(out):
+                        if num < 0:
+                            out = out[::-1]*(-num)
+                        else:
+                            out *= num
+                        done = True
+                    else:
+                        out = [out]*abs(num)
+                        done = True
             if islist(out):
                 if row:
                     return rowmatrixlist(out)
