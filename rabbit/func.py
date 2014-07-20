@@ -851,12 +851,13 @@ class classcalc(cotobject):
         oldclass = self.e.processor.useclass
         self.e.processor.useclass = self.selfvar
 
+        oldset = self.doset
         self.doset = self.e.setvars(self.variables)
         try:
             self.e.processor.process(command)
         finally:
             self.e.setvars(self.doset)
-            self.doset = False
+            self.doset = oldset
 
             self.e.processor.useclass = oldclass
             self.e.processor.doshow = oldshow
@@ -867,13 +868,14 @@ class classcalc(cotobject):
         oldclass = self.e.processor.useclass
         self.e.processor.useclass = self.selfvar
 
+        oldset = self.doset
         self.doset = self.e.setvars(self.variables)
         self.e.info = " | class"
         try:
             out = self.e.calc(inputstring)
         finally:
             self.e.setvars(self.doset)
-            self.doset = False
+            self.doset = oldset
 
             self.e.processor.useclass = oldclass
         return out
