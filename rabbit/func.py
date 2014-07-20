@@ -839,13 +839,7 @@ class classcalc(cotobject):
 
     def copy(self):
         """Copies The Class."""
-        newvars = {}
-        for k,v in self.getvars().items():
-            if hasattr(v, "copy"):
-                newvars[k] = v.copy()
-            else:
-                newvars[k] = v
-        return classcalc(self.e, newvars)
+        return classcalc(self.e, getcopy(self.getvars()))
 
     def process(self, command):
         """Processes A Command And Puts The Result In The Variables."""
@@ -1080,13 +1074,7 @@ class instancecalc(numobject, classcalc):
 
     def copy(self):
         """Copies The Instance."""
-        newvars = {}
-        for k,v in self.getvars().items():
-            if hasattr(v, "copy"):
-                newvars[k] = v.copy()
-            else:
-                newvars[k] = v
-        return instancecalc(self.e, newvars, self.parent)
+        return instancecalc(self.e, getcopy(self.getvars()), self.parent)
 
     def getparent(self):
         """Reconstructs The Parent Class."""

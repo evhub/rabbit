@@ -102,6 +102,20 @@ def makeint(inputobject):
     else:
         return getint(inputobject)
 
+def getcopy(inputobject):
+    """Copies The Object If It Has A copy Method."""
+    if hasattr(inputobject, "copy"):
+        return inputobject.copy()
+    elif islist(inputobject):
+        return map(getcopy, inputobject[:])
+    elif isinstance(inputobject, dict):
+        out = {}
+        for k,v in inputobject.items():
+            out[getcopy(k)] = getcopy(v)
+        return out
+    else:
+        return inputobject
+
 def catch(function, *args):
     """Gets The Errors From A Function."""
     result = None

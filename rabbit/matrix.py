@@ -71,10 +71,7 @@ class matrix(mctobject):
         out = self.new(fake=fake)
         for y,x in self.coords():
             item = self.retrieve(y,x)
-            if hasattr(item, "copy"):
-                out.store(y,x, item.copy())
-            else:
-                out.store(y,x, item)
+            out.store(y,x, getcopy(item))
         return out
 
     def calc(self):

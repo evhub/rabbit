@@ -1003,7 +1003,7 @@ Global Operator Precedence List:
             params = []
             for x in xrange(1, len(inputlist)):
                 params.append(self.eval_repeat(inputlist[x]))
-            item = item.copy()
+            item = getcopy(item)
             if isinstance(item, classcalc):
                 item.calcall()
                 while len(params) > 0:
@@ -1108,12 +1108,12 @@ Global Operator Precedence List:
                     num = getint(num)
                     if islist(out):
                         if num < 0:
-                            out = out[::-1]*(-num)
+                            out = out[::-1] * (-num)
                         else:
-                            out *= num
+                            out = out * num
                         done = True
                     else:
-                        out = [out]*abs(num)
+                        out = [out] * abs(num)
                         done = True
             if islist(out):
                 if row:
@@ -1151,14 +1151,14 @@ Global Operator Precedence List:
                 if isnull(value):
                     value = item
                 elif not isnull(item):
-                    value += item
+                    value = value + item
             return value
 
     def eval_mod(self, inputlist):
         """Evaluates The Modulus Part Of An Expression."""
         value = self.eval_mul(inputlist[0])
         for x in xrange(1, len(inputlist)):
-            value %= self.eval_mul(inputlist[x])
+            value = value % self.eval_mul(inputlist[x])
         return value
 
     def eval_mul(self, inputlist):
@@ -1172,7 +1172,7 @@ Global Operator Precedence List:
                 if isnull(value):
                     value = item
                 elif not isnull(item):
-                    value *= item
+                    value = value * item
             return value
 
     def eval_call(self, inputstring):
@@ -1300,7 +1300,7 @@ Global Operator Precedence List:
                 params = []
                 for x in xrange(1, len(inputlist)):
                     if inputlist[x]:
-                        params.append(self.eval_call(inputlist[x]))
+                        params.append(getcopy(self.eval_call(inputlist[x])))
                 item = self.funcfind(inputlist[0])
                 return self.call_colon_set(item, params)
 
@@ -1457,9 +1457,9 @@ Global Operator Precedence List:
                     item = self.eval_call(l[0])
                 self.overflow = []
                 for x in xrange(1, len(l)):
-                    arg = self.eval_call(l[x])
+                    arg = getcopy(self.eval_call(l[x]))
                     if not isfunc(item):
-                        item *= arg
+                        item = item * arg
                     elif isinstance(arg, matrix) and arg.onlydiag():
                         args = arg.getdiag()
                         if isinstance(item, (strfunc, usefunc)) and item.overflow and len(args) > len(item.variables):
@@ -1478,7 +1478,7 @@ Global Operator Precedence List:
             else:
                 value = values[0]
                 for x in xrange(1, len(values)):
-                    value *= values[x]
+                    value = value * values[x]
             self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
             self.recursion -= 1
             return value
