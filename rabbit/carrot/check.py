@@ -106,7 +106,7 @@ def getcopy(inputobject):
     """Copies The Object If It Has A copy Method."""
     if hasattr(inputobject, "copy"):
         return inputobject.copy()
-    elif islist(inputobject):
+    elif isinstance(inputobject, list):
         return map(getcopy, inputobject[:])
     elif isinstance(inputobject, dict):
         out = {}
