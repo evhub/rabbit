@@ -982,9 +982,12 @@ class classcalc(cotobject):
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, classcalc):
-            self.calcall()
-            other.calcall()
-            return self.variables[self.selfvar] is other.variables[self.selfvar] or self.getvars() == other.getvars()
+            if self.variables[self.selfvar] is other.variables[self.selfvar]:
+                return True
+            else:
+                self.calcall()
+                other.calcall()
+                return self.getvars() == other.getvars()
         else:
             return False
 
