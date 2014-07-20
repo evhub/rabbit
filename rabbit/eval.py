@@ -502,7 +502,7 @@ Global Operator Precedence List:
                     "{", "}", 1)),
                 "[", "]"))
         self.printdebug("| "+self.prepare(value, False, True, True))
-        return self.calc_with(delspace(value))
+        return self.calc_with(value)
 
     def wrap(self, item):
         """Wraps An Item In Parentheses."""
@@ -585,7 +585,7 @@ Global Operator Precedence List:
         """Evaluates With Clauses."""
         inputlist = expression.split("$")
         if len(inputlist) == 1:
-            return self.calc_pieces(inputlist[0])
+            return self.calc_pieces(delspace(inputlist[0]))
         else:
             inputlist.reverse()
             item = inputlist.pop()
