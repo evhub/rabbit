@@ -114,3 +114,25 @@ def curry(func, arg, key=None):
             kwargs[str(key)] = arg
         return func(*args, **kwargs)
     return _func
+
+class memoize(object):
+    """A Memoized Function."""
+    memo = ([], [])
+    def __init__(self, func):
+        """Creates The Memoized Function."""
+        self.func = func
+    def call(self, *args, **kwargs):
+        """Calls The Memoized Function."""
+        key = (args, kwargs)
+        index = None
+        for x in xrange(0, len(self.memo[0])):
+            if self.memo[0][x] == key:
+                index = x
+                break
+        if index is None:
+            out = self.func(*args, **kwargs)
+            self.memo[0].append(key)
+            self.memo[1].append(out)
+        else:
+            out = self.memo[1][index]
+        return out

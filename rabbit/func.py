@@ -87,10 +87,13 @@ class funcfloat(numobject):
     otherarg = "__other__"
     reqargs = -1
 
-    def __init__(self, func, e, funcstr="func", reqargs=None):
+    def __init__(self, func, e, funcstr="func", reqargs=None, memo=False):
         """Constructs The Float Function."""
         self.funcstr = str(funcstr)
-        self.func = func
+        if memo:
+            self.func = memoize(func).call
+        else:
+            self.func = func
         if reqargs is not None:
             self.reqargs = reqargs
         self.e = e
@@ -101,7 +104,7 @@ class funcfloat(numobject):
 
     def copy(self):
         """Returns A Copy Of The Float Function."""
-        return funcfloat(self.func, self.e, self.funcstr)
+        return funcfloat(self.func, self.e, self.funcstr, self.reqargs)
 
     def calc(self):
         """Calculates The Float Function."""
