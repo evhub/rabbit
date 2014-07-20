@@ -574,7 +574,7 @@ f(x) @ x>=0     # Conditions
 ```
 >>> x+1 <--------   # The arrows after the command indicate that it's top-level
 >>> f(x) | source   # Begins evaluating a command (source denotes who ordered the evaluation)
-| f`0`              # Shows the result of parentheses evaluation (everything inside a paren becomes `number`)
+| f§0§              # Shows the result of parentheses evaluation (everything inside a paren becomes §number§)
 2 <<< x+1           # Shown the result when a command has finished evaluating
 ```
 
