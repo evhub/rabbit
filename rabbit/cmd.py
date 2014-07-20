@@ -247,8 +247,17 @@ class mathbase(safebase):
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "clear":usefunc(self.app.clear, self.e, "clear", [])
+            "clear":usefunc(self.clear, self.e, "clear", [])
             })
+
+    def clear(self):
+        """Clears The Console."""
+        self.returned = 1
+        self.app.clear()
+
+    def setreturned(self, value=1):
+        """Sets returned."""
+        self.returned = value
 
     def genhelp(self):
         """Generates The helpstring."""
@@ -607,11 +616,7 @@ class mathbase(safebase):
 
     def call(self, item, value, varname="x"):
         """Evaluates An Item With A Value."""
-        out = self.e.call(item, value, varname)
-        if out is None:
-            raise ExecutionError("NoneError", "Nothing to call")
-        else:
-            return out
+        return self.e.call(item, value, varname)
 
     def getstates(self, variables):
         """Compiles Variables."""

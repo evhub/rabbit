@@ -1580,9 +1580,7 @@ Global Operator Precedence List:
         """Evaluates An Item With A Value."""
         if varname is None:
             varname = self.varname
-        if isnull(item):
-            return None
-        elif istext(item):
+        if istext(item):
             oldvars = self.setvars({varname: value})
             try:
                 out = self.calc(item)

@@ -111,12 +111,14 @@ class grapher(mathbase):
 
     def clear(self):
         """Clears The Graph."""
+        self.returned = 1
         for x in self.identifiers:
             self.app.clear(x)
         self.identifiers = []
 
     def cleargrid(self):
         """Clears The Grid."""
+        self.returned = 1
         for x in self.grid:
             self.app.clear(x)
         self.grid = []
@@ -216,6 +218,7 @@ class grapher(mathbase):
 
     def gridrender(self):
         """Renders The Grid."""
+        self.returned = 1
         xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
         test = 0
         for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch)):
@@ -230,6 +233,7 @@ class grapher(mathbase):
 
     def tickrender(self):
         """Renders Axis Ticks."""
+        self.returned = 1
         xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
         xstart, ystart = self.xup*xgrid, self.height-(self.yup*ygrid)
         test = 0
@@ -245,6 +249,7 @@ class grapher(mathbase):
 
     def axisrender(self):
         """Renders The Axis."""
+        self.returned = 1
         xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
         xstart, ystart = self.xup*xgrid, self.height-(self.yup*ygrid)
         for x in xrange(0, self.width+1):
@@ -310,7 +315,8 @@ class grapher(mathbase):
             "grid":usefunc(self.gridrender, self.e, "grid", []),
             "ticks":usefunc(self.tickrender, self.e, "ticks", []),
             "axis":usefunc(self.axisrender, self.e, "axis", []),
-            "origin":usefunc(lambda: self.gridpoint(0,0), self.e, "origin", []),
+            "origin":usefunc(self.origin, self.e, "origin", []),
+            "return":usefunc(self.setreturned, self.e, "return", []),
             "render":strfunc("cleargrid()axis()ticks()", self.e, name="render"),
             "display":strfunc("center()render()", self.e, name="display"),
             "stretch":1.0,
@@ -355,8 +361,14 @@ class grapher(mathbase):
 
     def center(self):
         """Centers The Origin."""
+        self.returned = 1
         self.e.variables["xup"] = str((self.width/2.0)*self.xstretch)
         self.e.variables["yup"] = str((self.height/2.0)*self.ystretch)
+
+    def origin(self):
+        """Plots The Origin."""
+        self.returned = 1
+        self.gridpoint(0,0)
 
     def cmd_sum(self, original):
         """Processes A Graphing Command."""
