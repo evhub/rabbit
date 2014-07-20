@@ -28,7 +28,7 @@ import re
 
 def basicformat(inputstring, leading=True, tailing=True):
     """Performs Basic Formatting On A String."""
-    out = str(inputstring).replace("\t", "    ")
+    out = str(inputstring)
     if leading:
         out = out.lstrip()
     if tailing:

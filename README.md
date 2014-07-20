@@ -561,10 +561,10 @@ The third stage is top-level operator evaluation. This stage, and all following 
 
 All different types of parentheses as well as conditionals are evaluated at this stage. In order, the different operators evaluated are:
 ```
-"hello, world"  # Strings (after this step whitespace is eliminated)
-{ x = 1 }       # Classes
-[1, 2, 3]       # Matrix rows
+"hello, world"  # Strings
 (x+2)*2         # Parentheses
+{ x = 1 }       # Classes
+[1, 2, 3]       # Matrix rows (after this step whitespace is eliminated)
 x $ x = 1		# With clauses (result = 1)
 f(x); g(x)      # Conditionals
 f(x) @ x>=0     # Conditions

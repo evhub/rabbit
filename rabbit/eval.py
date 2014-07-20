@@ -497,12 +497,12 @@ Global Operator Precedence List:
         value = self.calc_brack(fullsplit(
                     self.calc_class(fullsplit(
                         self.calc_paren(fullsplit(
-                            self.calc_string(expression),
+                            self.calc_string(expression).replace("\t","    "),
                         "(", ")")),
                     "{", "}", 1)),
                 "[", "]"))
         self.printdebug("| "+self.prepare(value, False, True, True))
-        return self.calc_with(value)
+        return self.calc_with(delspace(value))
 
     def wrap(self, item):
         """Wraps An Item In Parentheses."""
@@ -585,14 +585,14 @@ Global Operator Precedence List:
         """Evaluates With Clauses."""
         inputlist = expression.split("$")
         if len(inputlist) == 1:
-            return self.calc_pieces(delspace(inputlist[0]))
+            return self.calc_pieces(inputlist[0])
         else:
             inputlist.reverse()
             item = inputlist.pop()
             withclass = classcalc(self)
             for x in inputlist:
                 withclass.process(x)
-            return withclass.calc(delspace(item))
+            return withclass.calc(item)
 
     def calc_pieces(self, expression):
         """Evaluates Piecewise Expressions."""
