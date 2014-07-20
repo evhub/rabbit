@@ -115,7 +115,7 @@ class mathbase(safebase):
         """Tests An Expression."""
         info = " <<| Test"
         if not self.debug:
-            info += " | Traceback
+            info += " | Traceback"
         return self.e.test(expression, info)
 
     def printcall(self, variables, func=None):
