@@ -125,5 +125,8 @@ class commandline(mathbase):
 
     def calc(self, expression):
         """Safely Evaluates An Expression."""
-        self.e.info = " <<--"
-        return self.saferun(self.e.calc, expression)
+        if self.debug:
+            self.e.info = " <<--"
+        else:
+            self.e.info = " <<| Traceback"
+        return self.e.calc(expression)
