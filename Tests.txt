@@ -401,5 +401,5 @@ assert [6] ?= [1, "a", 5, 6] -- 5 -- "a" -- 1
 # Final Testing:
 assert save("Tests.save.txt");true
 assert contents ?= read("Tests.save.txt")		$ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
-assert { nothing = nothing } ?= { run Tests.save.txt }
+assert { nothing = nothing ;; nil = nil } ?= { run Tests.save.txt }
 assert "All done!" ?= print("All", "done!")
