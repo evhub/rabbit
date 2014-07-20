@@ -473,9 +473,9 @@ Global Operator Precedence List:
             raise ExecutionError("DisplayError", "Unable to display "+repr(item))
         return str(out)
 
-    def test(self, equation):
+    def test(self, equation, info=" | test"):
         """Evaluates A Boolean Expression."""
-        self.info = " | test"
+        self.info = info
         return bool(self.calc(equation))
 
     def calc(self, expression):

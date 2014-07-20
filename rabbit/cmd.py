@@ -113,7 +113,10 @@ class mathbase(safebase):
 
     def test(self, expression):
         """Tests An Expression."""
-        return self.e.test(expression)
+        info = " <<| Test"
+        if not self.debug:
+            info += " | Traceback
+        return self.e.test(expression, info)
 
     def printcall(self, variables, func=None):
         """Performs print."""
