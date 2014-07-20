@@ -397,6 +397,7 @@ assert { x = 1 } ?= { x = 1 } -- { x = 2 }
 assert "abcd" -- "bc" ?= "ad"
 assert (data:(data:(1,2,3)):(data:(5,6,7))):2 ?= 6
 assert [6] ?= [1, "a", 5, 6] -- 5 -- "a" -- 1
+assert {} ?= a				$ a + { x = 1 } $ a := {}
 
 # Final Testing:
 assert save("Tests.save.txt");true

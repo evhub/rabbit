@@ -70,7 +70,11 @@ class matrix(mctobject):
         """Creates A Copy Of The Matrix."""
         out = self.new(fake=fake)
         for y,x in self.coords():
-            out.store(y,x, self.retrieve(y,x))
+            item = self.retrieve(y,x)
+            if hasattr(item, "copy"):
+                out.store(y,x, item.copy())
+            else:
+                out.store(y,x, item)
         return out
 
     def calc(self):

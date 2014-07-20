@@ -839,7 +839,15 @@ class classcalc(cotobject):
 
     def copy(self):
         """Copies The Class."""
-        return classcalc(self.e, self.getvars())
+        newvars = {}
+        for k,v in self.getvars().items():
+            if hasattr(v, "copy"):
+                newvars[k] = v.copy()
+            else:
+                newvars[k] = v
+        out = classcalc(self.e, newvars)
+        out.doset = self.doset
+        return out
 
     def process(self, command):
         """Processes A Command And Puts The Result In The Variables."""
