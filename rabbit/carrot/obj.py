@@ -107,8 +107,10 @@ def isnum(inputobject):
 
 def curry(func, arg, key=None):
     """Returns A Function With A Curried Argument."""
-    if key is None:
-        return lambda *args: func(arg, *args)
-    else:
-        key = str(key)
-        return lambda *args: func(*args, **{key:arg})
+    def _func(*args, **kwargs):
+        if key is None:
+            args = (arg,) + args
+        else:
+            kwargs[str(key)] = arg
+        return func(*args, **kwargs)
+    return _func

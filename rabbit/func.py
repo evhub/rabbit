@@ -26,13 +26,11 @@ from .matrix import *
 
 def collapse(item):
     """Collapses An Argument."""
-    if isinstance(item, strfunc):
+    if isinstance(item, funcfloat):
         if item.reqargs > 0:
             raise ExecutionError("ArgumentError", "Not enough arguments supplied to collapse "+item.e.prepare(item, False, True, True))
         else:
             return item.calc()
-    elif isinstance(item, funcfloat):
-        return item.calc()
     else:
         return item
 
@@ -87,11 +85,14 @@ class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
     allargs = "__"
     otherarg = "__other__"
+    reqargs = -1
 
-    def __init__(self, func, e, funcstr="func"):
+    def __init__(self, func, e, funcstr="func", reqargs=None):
         """Constructs The Float Function."""
         self.funcstr = str(funcstr)
         self.func = func
+        if reqargs is not None:
+            self.reqargs = reqargs
         self.e = e
 
     def getstate(self):
@@ -111,8 +112,20 @@ class funcfloat(numobject):
         variables = varproc(variables)
         if variables is None:
             return self
+        elif len(variables) < self.reqargs:
+            out = self.copy()
+            for arg in variables:
+                out.curry(arg)
+            return out
         else:
+            if self.reqargs > 0:
+                variables, self.e.overflow = variables[:reqargs], variables[reqargs:]
             return self.func(variables)
+
+    def curry(self, arg):
+        """Curries An Argument."""
+        self.func = curry(self.func, arg)
+        self.reqargs -= 1
 
     def __repr__(self):
         """Returns A String Representation."""
@@ -191,7 +204,6 @@ class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
     lexical = True
     autoarg = "__auto__"
-    reqargs = -1
 
     def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None, reqargs=None):
         """Creates A Callable String Function."""
