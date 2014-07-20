@@ -307,18 +307,18 @@ class mathbase(safebase):
         self.returned = 1
         if inputstring != "":
             if top:
-                self.saferun(self.doproc, inputstring)
+                self.saferun(self.doproc, inputstring, True)
             else:
                 self.doproc(inputstring)
 
-    def doproc(self, inputstring):
+    def doproc(self, inputstring, top=False):
         """Does The Processing."""
         inputstring = str(inputstring)
         for func in self.pre_cmds:
-            if func(inputstring) is not None:
+            if func(inputstring, top) is not None:
                 return True
 
-    def pre_cmd(self, inputstring):
+    def pre_cmd(self, inputstring, top=False):
         """Evaluates Commands."""
         for original in carefulsplit(inputstring, ";;", '"`', {"\u201c":"\u201d"}, {"{":"}"}):
             if delspace(original) != "":
@@ -326,7 +326,7 @@ class mathbase(safebase):
                 for func in self.cmds:
                     if func(original) is not None:
                         name = namestr(func).split("_")[-1]
-                        if name != "run":
+                        if top and name != "run":
                             self.commands.append(original)
                         self.printdebug("|: "+name)
                         break

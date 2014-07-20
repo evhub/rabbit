@@ -167,7 +167,7 @@ class compiler(commandline):
         self.commands = []
         self.makes = []
 
-    def pre_cmd(self, inputstring):
+    def pre_cmd(self, inputstring, top=False):
         """Evaluates Commands."""
         for original in carefulsplit(inputstring, ";;", '"`', {"\u201c":"\u201d"}, {"{":"}"}):
             if delspace(original) != "":
@@ -175,7 +175,7 @@ class compiler(commandline):
                 for func in self.cmds:
                     if func(original) is not None:
                         name = namestr(func).split("_")[-1]
-                        if self.compiling and self.top:
+                        if top and self.compiling:
                             if name == "make":
                                 self.makes.append(original)
                             elif not name in ["assert", "run", "set", "def"]:
