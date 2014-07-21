@@ -317,6 +317,8 @@ nothing := {
  __repr__(self) = `\nil`
  __len__(self) = 0
  __bool__(self) = 0
+ __rep__(self, other) = [self]**other
+ __rrep__(self, other) = ()
  }
 nil := nothing()
 ```
