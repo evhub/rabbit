@@ -1184,10 +1184,7 @@ class instancecalc(numobject, classcalc):
             else:
                 self.e.overflow = params
                 value = item
-            if isinstance(value, instancecalc):
-                return value
-            else:
-                raise ExecutionError("ClassError", "The class's __init__ method returned the non-class object "+self.e.prepare(value, False, True, True))
+            return value
         else:
             return self
 
