@@ -353,10 +353,10 @@ class grapher(mathbase):
         """Sets The Rendering Variables."""
         self.dumpdebug(True)
         self.e.recursion = 0
-        self.xstretch = self.calc("xstretch")*0.01
-        self.ystretch = self.calc("ystretch")*0.01
-        self.xup = self.calc("xup")
-        self.yup = self.calc("yup")
+        self.xstretch = self.e.funcfind("xstretch")*0.01
+        self.ystretch = self.e.funcfind("ystretch")*0.01
+        self.xup = self.e.funcfind("xup")
+        self.yup = self.e.funcfind("yup")
         self.dumpdebug(True)
 
     def center(self):
@@ -448,9 +448,9 @@ class grapher(mathbase):
             paralist[0] = self.calc(paralist[0])
             paralist[1] = self.calc(paralist[1])
             if not isnull(paralist[0]) or isnull(paralist[1]):
-                stop = self.calc("stop")
-                x = self.self.calc("start")
-                inter = self.calc("interval")
+                stop = self.e.funcfind("stop")
+                x = self.e.funcfind("start")
+                inter = self.e.funcfind("interval")
                 while x <= stop:
                     self.singlerender(self.call(paralist[0], x), self.call(paralist[1], x))
                     x += inter
@@ -461,9 +461,9 @@ class grapher(mathbase):
         if superformat(original).startswith("polar "):
             item = self.calc(original)
             if not isnull(item):
-                angle = self.calc("start")
-                inter = self.calc("interval")
-                stop = self.calc("stop")
+                angle = self.e.funcfind("start")
+                inter = self.e.funcfind("interval")
+                stop = self.e.funcfind("stop")
                 while angle < stop:
                     r = self.call(item, angle)
                     if r is not None:
@@ -496,8 +496,8 @@ class grapher(mathbase):
             if isinstance(item, strcalc):
                 self.show(self.e.prepare(item, True, True))
             elif isinstance(item, data):
+                base = self.e.funcfind("base")
                 for x in item.items():
-                    base = self.calc("base")
                     self.pointrender(self.call(x, base), base)
             elif isinstance(item, multidata):
                 for x,y in item.items():
@@ -509,19 +509,20 @@ class grapher(mathbase):
             self.returned = 1
         return True
 
-    def matrixrender(self, inputmatrix):
+    def matrixrender(self, inputmatrix, base=None):
         """Renders A Matrix."""
         temp = inputmatrix.getitems()
         if len(temp) == 2 and not (isinstance(temp[0], matrix) or isinstance(temp[1], matrix)):
             self.pointrender(temp[0], self.call(temp[1], temp[0]))
             return True
         elif len(temp) > 0:
+            if base is None:
+                base = self.e.funcfind("base")
             out = False
             for x in temp:
                 if isinstance(x, matrix):
-                    out = self.matrixrender(x) or out
+                    out = self.matrixrender(x, base) or out
                 else:
-                    base = self.calc("base")
                     self.pointrender(self.call(x, base), base)
             return out
         return False
