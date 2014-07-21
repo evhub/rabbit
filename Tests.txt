@@ -231,7 +231,7 @@ assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
    $ a,as = l
    ) @ l,
 assert range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop")
- $( crackle pop (x) =
+ $ crackle pop (x) = (
     "CracklePop"
         @ div by three & div by five;
     "Crackle"
@@ -398,6 +398,7 @@ assert "abcd" -- "bc" ?= "ad"
 assert (data:(data:(1,2,3)):(data:(5,6,7))):2 ?= 6
 assert [6] ?= [1, "a", 5, 6] -- 5 -- "a" -- 1
 assert {} ?= a				$ a + { x = 1 } $ a := {}
+assert 1 ?= a				$ ( a = 1 )
 
 # Final Testing:
 assert save("Tests.save.txt");true
