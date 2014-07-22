@@ -91,6 +91,7 @@ class funcfloat(numobject):
 
     def __init__(self, func, e, funcstr=None, reqargs=None, memo=None):
         """Constructs The Float Function."""
+        self.e = e
         if funcstr:
             self.funcstr = str(funcstr)
         else:
@@ -102,7 +103,6 @@ class funcfloat(numobject):
         self.base_func = func
         if reqargs is not None:
             self.reqargs = reqargs
-        self.e = e
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -253,6 +253,7 @@ class strfunc(funcfloat):
 
     def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None, reqargs=None, memo=None):
         """Creates A Callable String Function."""
+        self.e = e
         self.funcstr = self.e.namefind(str(funcstr))
         if name:
             self.name = str(name)
@@ -280,7 +281,6 @@ class strfunc(funcfloat):
             self.reqargs = len(self.variables)
         else:
             self.reqargs = reqargs
-        self.e = e
         if self.lexical:
             self.snapshot = self.e.variables.copy()
         else:
@@ -444,6 +444,7 @@ class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
     def __init__(self, funcstr, e, variables=[], personals=None, check=True, name=None, overflow=None, allargs=None, reqargs=None):
         """Initializes The String Float."""
+        self.e = e
         if name:
             self.name = str(name)
         else:
@@ -467,7 +468,6 @@ class strfloat(strfunc):
         else:
             self.reqargs = reqargs
         funcstr = self.e.namefind(str(funcstr))
-        self.e = e
         if check:
             test = self.e.find(funcstr, True, False)
         if check and isinstance(test, strfunc):
@@ -510,6 +510,7 @@ class strcalc(numobject):
 
     def __init__(self, calcstr, e):
         """Initializes An Evaluator String."""
+        self.e = e
         self.calcstr = ""
         func = False
         for x in str(calcstr):
@@ -528,7 +529,6 @@ class strcalc(numobject):
                 x = ""
             self.calcstr += x
         self.calcstr = str(compute('"""'+self.calcstr.replace('"', '\\"')+'"""'))
-        self.e = e
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -634,13 +634,14 @@ class rawstrcalc(strcalc):
     """A Raw Evaluator String."""
     def __init__(self, calcstr, e):
         """Initializes A Raw Evaluator String."""
-        self.calcstr = str(calcstr)
         self.e = e
+        self.calcstr = str(calcstr)
 
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
     def __init__(self, func, e, funcstr=None, variables=None, extras=None, overflow=True, evalinclude=False, memo=None):
         """Creates A Callable Function."""
+        self.e = e
         if funcstr:
             self.funcstr = str(funcstr)
         else:
@@ -659,7 +660,6 @@ class usefunc(funcfloat):
         else:
             self.memo = memo
         self.base_func = func
-        self.e = e
         self.evalinclude = evalinclude
 
     def getstate(self):
@@ -704,13 +704,13 @@ class unifunc(funcfloat):
     """Universalizes Function Calls."""
     def __init__(self, precall, e, funcstr=None):
         """Constructs The Universalizer."""
+        self.e = e
         if funcstr:
             self.funcstr = str(funcstr)
         else:
             self.funcstr = self.autoarg
         self.store = []
         self.precall = precall
-        self.e = e
 
     def copy(self):
         """Copies The Universalizer Function."""
@@ -739,6 +739,7 @@ class makefunc(funcfloat):
     """Creates A Normal Single-Variable Evaluator Function."""
     def __init__(self, func, e, funcstr=None, memo=None):
         """Initializes The Evaluator Function."""
+        self.e = e
         if funcstr:
             self.funcstr = str(funcstr)
         else:
@@ -748,7 +749,6 @@ class makefunc(funcfloat):
         else:
             self.memo = memo
         self.base_func = func
-        self.e = e
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -831,6 +831,7 @@ class derivfunc(derivbase, strfunc):
     """Implements A Derivative Function."""
     def __init__(self, funcstr, n, accuracy, scaledown, e, varname="x", personals=None, name=None, memo=None):
         """Creates The Derivative Function."""
+        self.e = e
         if name:
             self.name = str(name)
         else:
@@ -849,7 +850,6 @@ class derivfunc(derivbase, strfunc):
         else:
             self.personals = dict(personals)
         self.overflow = True
-        self.e = e
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -863,6 +863,7 @@ class integfunc(integbase, strfunc):
     """Implements An Integral Function."""
     def __init__(self, funcstr, accuracy, e, varname="x", personals=None, name=None, memo=None):
         """Creates The Integral Function."""
+        self.e = e
         if name:
             self.name = str(name)
         else:
@@ -879,7 +880,6 @@ class integfunc(integbase, strfunc):
         else:
             self.personals = dict(personals)
         self.overflow = True
-        self.e = e
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -893,6 +893,7 @@ class derivfuncfloat(derivbase, funcfloat):
     """Implements A Derivative Function Of A Fake Function."""
     def __init__(self, func, n, accuracy, scaledown, e, funcstr=None, memo=None):
         """Creates The Derivative Function."""
+        self.e = e
         self.n = int(n)
         self.accuracy = float(accuracy)
         self.scaledown = float(scaledown)
@@ -905,7 +906,6 @@ class derivfuncfloat(derivbase, funcfloat):
         else:
             self.memo = memo
         self.other_func = func
-        self.e = e
 
     def copy(self):
         """Returns A Copy Of The Derivative Float Function."""
@@ -922,6 +922,7 @@ class integfuncfloat(integbase, funcfloat):
     """Implements An Integral Function Of A Fake Function."""
     def __init__(self, func, accuracy, e, funcstr=None, memo=None):
         """Creates The Integral Float Function."""
+        self.e = e
         self.accuracy = float(accuracy)
         if funcstr:
             self.funcstr = str(funcstr)
@@ -932,7 +933,6 @@ class integfuncfloat(integbase, funcfloat):
         else:
             self.memo = memo
         self.other_func = func
-        self.e = e
 
     def copy(self):
         """Returns A Copy Of The Integral Function."""
@@ -1752,6 +1752,7 @@ class rollfunc(strfunc):
     """Implements A Random Number Generator Object."""
     def __init__(self, stop, e, key=None, varname="times", name=None):
         """Creates The Random Number Generator."""
+        self.e = e
         self.gen = random(key)
         self.stop = float(stop)
         self.funcstr = str(self.stop)
@@ -1760,7 +1761,6 @@ class rollfunc(strfunc):
             self.name = str(name)
         else:
             self.name = self.autoarg
-        self.e = e
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
