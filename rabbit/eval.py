@@ -163,6 +163,7 @@ Global Operator Precedence List:
             "imag":funcfloat(self.funcs.imagcall, self, "imag"),
             "read":funcfloat(self.funcs.readcall, self, "read"),
             "write":funcfloat(self.funcs.writecall, self, "write"),
+            "det":funcfloat(self.funcs.detcall, self, "det"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "floor":usefunc(math.floor, self, "floor", ["x"]),
             "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
@@ -178,7 +179,12 @@ Global Operator Precedence List:
             "deg":usefunc(math.degrees, self, "deg", ["x"]),
             "rad":usefunc(math.radians, self, "rad", ["x"]),
             "fact":usefunc(factorial, self, "fact", ["x"]),
-            "det":funcfloat(self.funcs.detcall, self, "det"),
+            "gamma":usefunc(gamma, self, "gamma", ["x"]),
+            "gcd":usefunc(gcd, self, "gcd", ["x", "y"]),
+            "lcm":usefunc(lcm, self, "lcm", ["x", "y"]),
+            "perm":usefunc(perm, self, "perm", ["n", "k"]),
+            "comb":usefunc(comb, self, "comb", ["n", "k"]),
+            "'":usefunc(succ, self, "'", ["x"]),
             "stats": classcalc(self, {
                 "normdist":usefunc(normdist, self, "normdist", ["x", "mean", "stdev"]),
                 "binomP":usefunc(binomP, self, "binomP", ["n", "p", "x"]),
@@ -195,12 +201,7 @@ Global Operator Precedence List:
                 "chisqP":usefunc(chisqP, self, "chisqP", ["x", "df"], evalinclude="e"),
                 "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], evalinclude="e")
                 }),
-            "gamma":usefunc(gamma, self, "gamma", ["x"]),
-            "gcd":usefunc(gcd, self, "gcd", ["x", "y"]),
-            "lcm":usefunc(lcm, self, "lcm", ["x", "y"]),
-            "perm":usefunc(perm, self, "perm", ["n", "k"]),
-            "comb":usefunc(comb, self, "comb", ["n", "k"]),
-            "'":usefunc(succ, self, "'", ["x"]),
+            "done":usefunc(self.processor.setreturned, self, "done", ["state"]),
             "i":complex(0.0, 1.0),
             "e":math.e,
             "pi":math.pi,
@@ -1756,6 +1757,7 @@ class evalfuncs(object):
              raise ExecutionError("ArgumentError", "Not enough arguments to val")
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
+            self.e.processor.setreturned()
             if original in self.e.variables:
                 return self.e.funcfind(original)
             else:
@@ -1763,7 +1765,7 @@ class evalfuncs(object):
         else:
             out = []
             for x in variables:
-                out.append(self.getvarcall([x]))
+                out.append(self.getvalcall([x]))
             return diagmatrixlist(out)
 
     def getvarcall(self, variables):
@@ -1772,6 +1774,7 @@ class evalfuncs(object):
              raise ExecutionError("ArgumentError", "Not enough arguments to var")
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
+            self.e.processor.setreturned()
             if original in self.e.variables:
                 return rawstrcalc(self.e.prepare(self.e.variables[original], True, True), self.e)
             else:
@@ -2419,12 +2422,12 @@ class evalfuncs(object):
         """Writes To A File."""
         if not variables:
              raise ExecutionError("ArgumentError", "Not enough arguments to write")
-        elif len(variables) < 3:
             name = self.e.prepare(variables[0], False, False)
             if len(variables) == 1:
                 writer = ""
             else:
                 writer = self.e.prepare(variables[1], False, False)
+            self.e.processor.setreturned()
             with openfile(name, "wb") as f:
                 writefile(f, writer)
             return matrix(0)
@@ -2437,6 +2440,7 @@ class evalfuncs(object):
              raise ExecutionError("ArgumentError", "Not enough arguments to read")
         elif len(variables) == 1:
             name = self.e.prepare(variables[0], False, False)
+            self.e.processor.setreturned()
             with openfile(name) as f:
                 return rawstrcalc(readfile(f), self.e)
         else:

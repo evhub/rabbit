@@ -124,7 +124,6 @@ class mathbase(safebase):
 
     def printcall(self, variables, func=None):
         """Performs print."""
-        self.returned = 1
         if variables is None or len(variables) == 0:
             out = self.e.prepare(matrix(0), True, False)
         else:
@@ -136,6 +135,7 @@ class mathbase(safebase):
             self.show(out)
         else:
             func(out)
+        self.setreturned()
         return rawstrcalc(out, self.e)
 
     def showcall(self, variables):
@@ -178,6 +178,7 @@ class mathbase(safebase):
             except IOError:
                 raise ExecutionError("IOError", "Could not find for install file "+inputstring)
             else:
+                self.setreturned()
                 if iseval(impclass):
                     return impclass(self)
                 elif hascall(impclass):
@@ -210,6 +211,8 @@ class mathbase(safebase):
                 writefile(getfile(original, "wb"), strlist(self.commands, "\n"))
             except IOError:
                 raise ExecutionError("IOError", "Could not find for save file "+original)
+            else:
+                self.setreturned()
         else:
             for x in variables:
                 self.savecall([x])
@@ -251,18 +254,17 @@ class mathbase(safebase):
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "return":usefunc(self.setreturned, self.e, "return", []),
             "clear":usefunc(self.clear, self.e, "clear", [])
             })
 
+    def setreturned(self, value=True):
+        """Sets returned."""
+        self.returned = bool(value)
+
     def clear(self):
         """Clears The Console."""
-        self.returned = 1
         self.app.clear()
-
-    def setreturned(self, value=1):
-        """Sets returned."""
-        self.returned = value
+        self.setreturned()
 
     def genhelp(self):
         """Generates The helpstring."""
@@ -321,7 +323,6 @@ class mathbase(safebase):
     def process(self, inputstring, top=False):
         """Processes A Command."""
         inputstring = basicformat(inputstring)
-        self.returned = 1
         if inputstring != "":
             if top:
                 self.saferun(self.doproc, inputstring, True)
@@ -359,6 +360,7 @@ class mathbase(safebase):
                 self.show(self.findhelp(basicformat(inputstring)), True)
             else:
                 return None
+            self.setreturned()
             return True
 
     def cmd_debug(self, original):
@@ -376,6 +378,7 @@ class mathbase(safebase):
                     raise ExecutionError("StatementError", "Unrecognized debug state of "+original)
             else:
                 return None
+            self.setreturned()
             return True
 
     def cmd_run(self, original):
@@ -385,6 +388,7 @@ class mathbase(safebase):
             if not self.evalfile(original):
                 raise ExecutionError("IOError", "Could not find file "+str(original))
             else:
+                self.setreturned()
                 return True
 
     def cmd_assert(self, original):
@@ -443,6 +447,7 @@ class mathbase(safebase):
             test = self.cmd_set(original[4:])
             self.redef = False
             if test:
+                self.setreturned()
                 return test
             else:
                 raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)

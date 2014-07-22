@@ -112,43 +112,44 @@ class grapher(mathbase):
 
     def clear(self):
         """Clears The Graph."""
-        self.returned = 1
         for x in self.identifiers:
             self.app.clear(x)
         self.identifiers = []
+        self.setreturned()
 
     def cleargrid(self):
         """Clears The Grid."""
-        self.returned = 1
+        self.setreturned()
         for x in self.grid:
             self.app.clear(x)
         self.grid = []
+        self.setreturned()
 
     def render(self, function):
         """Renders A Function."""
         testx = -1.0*self.xup
-        self.returned = 0
+        sself.setreturned(False)
         for x in xrange(0, self.width/self.xsize+1):
             testy = self.saferun(function, testx)
-            if self.returned == 1:
+            if self.returned:
                 break
             elif testy is not None and testy != matrix(0):
                 self.singlerender(testx, testy)
             testx += self.xstretch
-        self.returned = 1
+        self.setreturned()
 
     def swaprender(self, function):
         """Renders The Inverse Of A Function."""
         testy = -1.0*self.yup
-        self.returned = 0
+        self.setreturned(False)
         for y in xrange(0, self.height/self.ysize+1):
             testx = self.saferun(function, testy)
-            if self.returned == 1:
+            if self.returned:
                 break
             elif testx is not None and testx != matrix(0):
                 self.singlerender(testx, testy)
             testy += self.xstretch
-        self.returned = 1
+        self.setreturned()
 
     def atrender(self, x, function):
         """Renders A Function At A Point."""
@@ -192,13 +193,13 @@ class grapher(mathbase):
     def intersectrender(self, f, g):
         """Renders The Intersection Of Two Functions."""
         testx = -1.0*self.xup
-        self.returned = 0
+        self.setreturned(False)
         for x in xrange(0, self.width/self.xsize+1):
             fy = self.saferun(f, testx)
             fnew = self.convert(testx, fy)
             gy = self.saferun(g, testx)
             gnew = self.convert(testx, gy)
-            if self.returned == 1:
+            if self.returned:
                 break
             elif fnew and gnew:
                 newx, fnewy = fnew
@@ -215,11 +216,10 @@ class grapher(mathbase):
                 newx, newy = gnew
                 self.dorender(newx, newy)
             testx += self.xstretch
-        self.returned = 1
+        self.setreturned()
 
     def gridrender(self):
         """Renders The Grid."""
-        self.returned = 1
         xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
         test = 0
         for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch)):
@@ -231,10 +231,10 @@ class grapher(mathbase):
             test += ygrid
             for x in xrange(0, self.width+1):
                 self.dorender(x, test, True)
+        self.setreturned()
 
     def tickrender(self):
         """Renders Axis Ticks."""
-        self.returned = 1
         xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
         xstart, ystart = self.xup*xgrid, self.height-(self.yup*ygrid)
         test = 0
@@ -247,16 +247,17 @@ class grapher(mathbase):
             test += ygrid
             for x in xrange(-2, 3):
                 self.dorender(x+xstart, test, True)
+        self.setreturned()
 
     def axisrender(self):
         """Renders The Axis."""
-        self.returned = 1
         xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
         xstart, ystart = self.xup*xgrid, self.height-(self.yup*ygrid)
         for x in xrange(0, self.width+1):
             self.dorender(x, ystart, True)
         for y in xrange(0, self.height+1):
             self.dorender(xstart, y, True)
+        self.setreturned()
 
     def scroll(self):
         """Advances The Scroll."""
@@ -310,7 +311,6 @@ class grapher(mathbase):
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
-            "return":usefunc(self.setreturned, self.e, "return", []),
             "clear":usefunc(self.clear, self.e, "clear", []),
             "cleargrid":usefunc(self.cleargrid, self.e, "cleargrid", []),
             "center":usefunc(self.center, self.e, "center", []),
@@ -362,14 +362,14 @@ class grapher(mathbase):
 
     def center(self):
         """Centers The Origin."""
-        self.returned = 1
         self.e.variables["xup"] = str((self.width/2.0)*self.xstretch)
         self.e.variables["yup"] = str((self.height/2.0)*self.ystretch)
+        self.setreturned()
 
     def origin(self):
         """Plots The Origin."""
-        self.returned = 1
         self.gridpoint(0,0)
+        self.setreturned()
 
     def cmd_sum(self, original):
         """Processes A Graphing Command."""
@@ -379,7 +379,8 @@ class grapher(mathbase):
             if not isnull(item):
                 self.temp = 0
                 self.render(lambda x: self.sumcall(item, x))
-                return True
+            self.setreturned()
+            return True
 
     def cmd_inv(self, original):
         """Processes A Graphing Command."""
@@ -388,7 +389,8 @@ class grapher(mathbase):
             item = self.calc(original)
             if not isnull(item):
                 self.swaprender(lambda x: self.call(item, x))
-                return True
+            self.setreturned()
+            return True
 
     def cmd_invsum(self, original):
         """Processes A Graphing Command."""
@@ -398,7 +400,8 @@ class grapher(mathbase):
             if not isnull(item):
                 self.temp = 0
                 self.swaprender(lambda x: self.sumcall(original, x))
-                return True
+            self.setreturned()
+            return True
 
     def cmd_at(self, original):
         """Processes A Graphing Command."""
@@ -413,7 +416,8 @@ class grapher(mathbase):
                 else:
                     for x in atlist[0].getitems():
                         self.atrender(x, lambda x: self.call(atlist[1], x))
-                return True
+            self.setreturned()
+            return True
 
     def cmd_atinv(self, original):
         """Processes A Graphing Command."""
@@ -428,7 +432,8 @@ class grapher(mathbase):
                 else:
                     for x in atlist[0].getitems():
                         self.atswaprender(x, lambda x: self.call(atlist[1], x))
-                return True
+            self.setreturned()
+            return True
 
     def cmd_intersect(self, original):
         """Processes A Graphing Command."""
@@ -439,7 +444,8 @@ class grapher(mathbase):
             interlist[1] = self.calc(interlist[1])
             if not isnull(interlist[0]) or isnull(interlist[1]):
                 self.intersectrender(lambda x: self.call(interlist[0], x), lambda x: self.call(interlist[1], x))
-                return True
+            self.setreturned()
+            return True
 
     def cmd_parametric(self, original):
         """Processes A Graphing Command."""
@@ -455,7 +461,8 @@ class grapher(mathbase):
                 while x <= stop:
                     self.singlerender(self.call(paralist[0], x), self.call(paralist[1], x))
                     x += inter
-                return True
+            self.setreturned()
+            return True
 
     def cmd_polar(self, original):
         """Processes A Graphing Command."""
@@ -470,7 +477,8 @@ class grapher(mathbase):
                     if r is not None:
                         self.singlerender(math.cos(angle)*r, math.sin(angle)*r)
                     angle += inter
-                return True
+            self.setreturned()
+            return True
 
     def cmd_scroll(self, original):
         """Processes A Graphing Command."""
@@ -481,6 +489,7 @@ class grapher(mathbase):
             self.marker = 0
             self.end = int(getnum(self.e.find(forlist[0])))
             self.register(self.scroll, 200)
+            self.setreturned()
             return True
 
     def cmd_do(self, original):
@@ -506,6 +515,7 @@ class grapher(mathbase):
                 self.matrixrender(item)
             else:
                 self.render(lambda x: self.call(item, x))
+            self.setreturned()
         return True
 
     def matrixrender(self, inputmatrix, base=None):

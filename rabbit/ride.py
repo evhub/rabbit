@@ -106,8 +106,7 @@ class editor(mathbase):
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
-            "ans":funcfloat(self.anscall, self.e, "ans"),
-            "return":usefunc(self.setreturned, self.e, "return", [])
+            "ans":funcfloat(self.anscall, self.e, "ans")
             })
 
     def handle(self, func):
@@ -337,9 +336,7 @@ class editor(mathbase):
     def run(self):
         """Runs The Module."""
         self.setdebug(self.debug_old)
-        self.errorlog = {}
-        self.returned = 0
-        self.ans = [matrix(0)]
+        self.startup()
         self.fresh()
         self.evaltext(self.box.output())
 

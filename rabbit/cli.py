@@ -83,14 +83,14 @@ class commandline(mathbase):
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
-            "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "return":usefunc(self.setreturned, self.e, "return", [])
+            "grab":funcfloat(self.grabcall, self.e, "grab")
             })
 
     def cmd_exit(self, original):
         """Exits The Command Line Interface."""
         if superformat(original) == "exit":
             self.on = False
+            self.setreturned()
             return True
 
     def start(self):

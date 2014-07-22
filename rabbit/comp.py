@@ -163,8 +163,7 @@ class compiler(commandline):
         self.e.makevars({
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
-            "show":funcfloat(self.showcall, self.e, "show"),
-            "return":usefunc(self.setreturned, self.e, "return", [])
+            "show":funcfloat(self.showcall, self.e, "show")
             })
         self.commands = []
         self.makes = []
@@ -194,7 +193,6 @@ class compiler(commandline):
 
     def cmd_normal(self, original):
         """Evaluates Functions."""
-        self.returned = 0
         test = self.calc(original)
         if test is not None:
             return True

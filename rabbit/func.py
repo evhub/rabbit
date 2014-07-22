@@ -136,11 +136,11 @@ class funcfloat(numobject):
                 return self.memo[arghash]
             elif self.memoize:
                 returned = self.e.processor.returned
-                self.e.processor.returned = 0
+                self.e.processor.setreturned(False)
                 out = self.base_func(*args, **kwargs)
-                if self.e.processor.returned == 0:
+                if not self.e.processor.returned:
                     self.memo[arghash] = out
-                self.e.processor.returned = returned
+                self.e.processor.setreturned(returned)
                 return out
         return self.base_func(*args, **kwargs)
 
@@ -949,7 +949,6 @@ class classcalc(cotobject):
         """Processes A Command And Puts The Result In The Variables."""
         command = self.e.namefind(basicformat(command))
 
-        returned = self.e.processor.returned
         oldshow = self.e.processor.doshow
         self.e.processor.doshow = False
         oldclass = self.e.processor.useclass
@@ -965,7 +964,6 @@ class classcalc(cotobject):
 
             self.e.processor.useclass = oldclass
             self.e.processor.doshow = oldshow
-            self.e.processor.returned = returned
 
     def calc(self, inputstring):
         """Calculates A String In The Environment Of The Class."""
@@ -1762,6 +1760,7 @@ class rollfunc(strfunc):
     def calc(self, m=1.0):
         """Generates A Random Number."""
         stop = self.stop*m
+        self.e.processor.setreturned()
         if stop > 1 and stop == int(stop):
             return 1+self.gen.chooseint(int(stop))
         else:
