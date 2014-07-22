@@ -240,10 +240,10 @@ class funcfloat(numobject):
 
     def __eq__(self, other):
         """Performs ==."""
-        if isinstance(other, funcfloat):
-            return self.func == other.func
-        elif isinstance(other, strfunc):
+        if isinstance(other, strfunc):
             return other == self
+        elif isinstance(other, funcfloat):
+            return self.base_func == other.base_func
         else:
             return False
 
@@ -253,7 +253,7 @@ class strfunc(funcfloat):
 
     def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None, reqargs=None, memo=None):
         """Creates A Callable String Function."""
-        self.funcstr = str(funcstr)
+        self.funcstr = self.e.namefind(str(funcstr))
         if name:
             self.name = str(name)
         else:
@@ -434,9 +434,9 @@ class strfunc(funcfloat):
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, strfunc):
-            return self.e.namefind(self.funcstr) == other.e.namefind(other.funcstr) and self.variables == other.variables and self.personals == other.personals and self.overflow == other.overflow
+            return self.funcstr == other.funcstr and self.variables == other.variables and self.personals == other.personals and self.overflow == other.overflow
         elif isinstance(other, funcfloat):
-            return self.e.namefind(self.funcstr) == other.funcstr
+            return self.funcstr == other.funcstr
         else:
             return False
 
@@ -466,6 +466,7 @@ class strfloat(strfunc):
             self.reqargs = len(variables)
         else:
             self.reqargs = reqargs
+        funcstr = self.e.namefind(str(funcstr))
         self.e = e
         if check:
             test = self.e.find(funcstr, True, False)
@@ -493,7 +494,7 @@ class strfloat(strfunc):
             if self.lexical:
                 self.snapshot.extend(self.e.variables)
         else:
-            self.funcstr = str(funcstr)
+            self.funcstr = funcstr
             self.overflow = overflow
             self.variables = variables
             self.personals = personals
