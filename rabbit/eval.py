@@ -1585,10 +1585,12 @@ Global Operator Precedence List:
 
     def finding(self, key, follow=False):
         """Performs String Finding."""
-        out = self.namefind(key, follow)
-        if istext(out) and out in self.variables:
-            if follow or istext(self.variables[out]):
-                out = self.variables[out]
+        if istext(key):
+            out = self.namefind(key, follow)
+        else:
+            out = key
+        if istext(out) and out in self.variables and (follow or istext(self.variables[out])):
+            out = self.variables[out]
         return out
 
     def condense(self):
