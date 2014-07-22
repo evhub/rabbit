@@ -111,7 +111,7 @@ Global Operator Precedence List:
 
     def fresh(self):
         """Resets The Variables To Their Defaults."""
-        self.parens = {}
+        self.parens = []
         self.variables = {
             "error":classcalc(self, {
                 self.errorvar: 1.0
@@ -204,6 +204,7 @@ Global Operator Precedence List:
                 "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], evalinclude="e")
                 }),
             "done":usefunc(self.processor.setreturned, self, "done", ["state"]),
+            "is":usefunc(self.iseq, self, "is", ["x", "y"]),
             "i":complex(0.0, 1.0),
             "e":math.e,
             "pi":math.pi,
@@ -247,7 +248,7 @@ Global Operator Precedence List:
 
     def makeparens(self, parens):
         """Forcibly Stores Parens."""
-        self.parens.update(parens)
+        self.parens = parens
 
     def setvars(self, newvars):
         """Sets New Variables."""
@@ -518,12 +519,11 @@ Global Operator Precedence List:
 
     def wrap(self, item):
         """Wraps An Item In Parentheses."""
-        for k,v in self.parens.items():
-            if self.iseq(v, item):
-                return k
-        indexstr = self.parenchar+str(self.count)+self.parenchar
-        self.count += 1
-        self.parens[indexstr] = item
+        for x in xrange(0, len(self.parens)):
+            if self.iseq(self.parens[x], item):
+                return self.parenchar+str(x)+self.parenchar
+        indexstr = self.parenchar+str(len(self.parens))+self.parenchar
+        self.parens.append(item)
         return indexstr
 
     def calc_string(self, expression):
@@ -828,7 +828,7 @@ Global Operator Precedence List:
             inputstring = inputlist[0]
             out = inputstring[1:].split("\\", 1)
             if len(out) == 1:
-                test = self.find(out[0], True, False)
+                test = self.find(out[0], True)
                 if isinstance(test, funcfloat):
                     return test
                 elif hascall(test):
@@ -1237,7 +1237,7 @@ Global Operator Precedence List:
     def call_var(self, inputstring):
         """Checks If Variable."""
         if inputstring in self.variables:
-            item, key = self.getfind(inputstring, True, False)
+            item, key = self.getfind(inputstring, True)
             if istext(item):
                 self.info = " | var"
                 value = self.calc(str(item))
@@ -1251,16 +1251,17 @@ Global Operator Precedence List:
 
     def call_parenvar(self, inputstring):
         """Checks If Parentheses."""
-        if inputstring in self.parens:
-            item = self.find(inputstring, True, False)
-            if istext(item):
-                self.info = " | parenvar"
-                value = self.calc(str(item))
-            elif self.convertable(item):
-                value = item
-            else:
-                value = getcall(item)(None)
-            return value
+        if inputstring.startswith(self.parenchar) and inputstring.endswith(self.parenchar):
+            item = self.namefind(inputstring, True)
+            if item is not inputstring:
+                if istext(item):
+                    self.info = " | parenvar"
+                    value = self.calc(str(item))
+                elif self.convertable(item):
+                    value = item
+                else:
+                    value = getcall(item)(None)
+                return value
 
     def call_none(self, inputstring):
         """Evaluates A Null."""
@@ -1456,16 +1457,7 @@ Global Operator Precedence List:
             for x in xrange(0, len(templist)):
                 if x%2 == 1:
                     if templist[x]:
-                        name = self.parenchar+templist[x]+self.parenchar
-                        if not name in self.parens:
-                            num = int(self.eval_call(templist[x]))
-                            if num < 0:
-                                num += self.count
-                            name = self.parenchar+str(num)+self.parenchar
-                        if name in self.parens:
-                            feed.append(name)
-                        else:
-                            raise ExecutionError("VariableError", "Could not find parentheses "+name)
+                        feed.append(self.namefind(self.parenchar+templist[x]+self.parenchar))
                         last = True
                     else:
                         last = False
@@ -1536,21 +1528,24 @@ Global Operator Precedence List:
         """Returns Argument."""
         return inputstring
 
-    def namefind(self, varname):
+    def namefind(self, varname, follow=False):
         """Finds A Name."""
         while varname.startswith(self.parenchar) and varname.endswith(self.parenchar):
             checknum = varname[1:-1]
-            if checknum in self.parens:
-                num = int(collapse(self.funcfind(self.parens[checknum])))
+            if checknum in self.variables:
+                num = getint(collapse(self.funcfind(checknum)))
             elif isreal(checknum) is not None:
                 num = getint(checknum)
             else:
                 break
             if num < 0:
-                num += self.count
-            key = self.parenchar+str(num)+self.parenchar
-            if istext(self.parens[key]):
-                varname = self.parens[key]
+                num += len(self.parens)
+            if num < 0 or num => len(inputlist):
+                raise ExecutionError("VariableError", "Could not find parentheses "+self.parenchar+str(num)+self.parenchar)
+            elif istext(self.parens[num]):
+                varname = self.parens[num]
+            elif follow:
+                return self.parens[num]
             else:
                 break
         return varname
@@ -1575,7 +1570,7 @@ Global Operator Precedence List:
         out, _ = self.getfind(*args, **kwargs)
         return out
 
-    def getfind(self, key, follow=False, destroy=False):
+    def getfind(self, key, follow=False):
         """Finds A String."""
         old = ""
         if istext(key):
@@ -1585,26 +1580,21 @@ Global Operator Precedence List:
         while not self.iseq(old, new):
             key = old
             old = new
-            new = self.finding(old, follow, destroy)
+            new = self.finding(old, follow)
         return new, key
 
-    def finding(self, key, follow=False, destroy=False):
+    def finding(self, key, follow=False):
         """Performs String Finding."""
-        out = key
-        if key in self.variables:
-            if follow or istext(self.variables[key]) or (destroy and isinstance(self.variables[key], strcalc)):
-                out = self.variables[key]
-        elif key in self.parens:
-            if follow or istext(self.parens[key]) or (destroy and isinstance(self.parens[key], strcalc)):
-                out = self.parens[key]
-        if destroy and isinstance(out, strcalc):
-            out = str(out)
+        out = self.namefind(key, follow)
+        if istext(out) and out in self.variables:
+            if follow or istext(self.variables[out]):
+                out = self.variables[out]
         return out
 
     def condense(self):
         """Simplifies Variable Hierarchies."""
         for x in self.variables:
-            self.variables[x] = self.find(x, True, False)
+            self.variables[x] = self.find(x, True)
 
     def isreserved(self, expression, extra="", allowed=""):
         """Determines If An Expression Contains Reserved Characters."""

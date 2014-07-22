@@ -418,7 +418,7 @@ class mathbase(safebase):
             elif "." in original:
                 test = original.split(".")
                 item = test.pop()
-                useclass = self.e.find(test[0], True, False)
+                useclass = self.e.find(test[0], True)
                 if isinstance(useclass, classcalc):
                     last = useclass
                     for x in xrange(1, len(test)):
@@ -525,7 +525,7 @@ class mathbase(safebase):
                     if self.e.isreserved(classlist[x]):
                         return False
                 sides[0] = classlist.pop()
-                useclass = self.e.find(classlist[0], True, False)
+                useclass = self.e.find(classlist[0], True)
                 if isinstance(useclass, classcalc):
                     for x in xrange(1, len(classlist)):
                         last = useclass
@@ -702,6 +702,13 @@ class mathbase(safebase):
         out = {}
         for k,v in variables.items():
             out[k] = self.deitem(v)
+        return out
+
+    def delist(self, inputlist):
+        """Decompiles A List."""
+        out = []
+        for x in inputlist:
+            out.append(self.deitem(x))
         return out
 
 if __name__ == "__main__":

@@ -415,7 +415,7 @@ class strfunc(funcfloat):
 
     def find(self):
         """Simplifies The Function String."""
-        self.funcstr = self.e.find(self.funcstr, False, False)
+        self.funcstr = self.e.find(self.funcstr, False)
 
     def getvars(self):
         """Returns The Original Variable List."""
