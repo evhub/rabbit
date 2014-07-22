@@ -638,7 +638,7 @@ class mathbase(safebase):
         if hasattr(item, "getstate"):
             return item.getstate()
         else:
-            return ittem
+            return item
 
     def deitem(self, item):
         """Decompiles An Item."""
