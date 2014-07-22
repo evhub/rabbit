@@ -93,6 +93,7 @@ Global Operator Precedence List:
             self.makevars(variables)
         self.calls = [
             self.call_var,
+            self.call_parenvar,
             self.call_none,
             self.call_lambda,
             self.call_neg,
@@ -1187,7 +1188,6 @@ Global Operator Precedence List:
 
     def eval_call(self, inputstring):
         """Evaluates A Variable."""
-        inputstring = self.namefind(inputstring)
         self.printdebug("-> "+inputstring)
         self.recursion += 1
         for func in self.calls:
@@ -1226,6 +1226,10 @@ Global Operator Precedence List:
             else:
                 raise ExecutionError("VariableError", "Unable to process "+str(value))
 
+    def convertable(self, item):
+        """Determines If An Item Can Be Converted By eval_check."""
+        return hasnum(item) or islist(item) or isinstance(item, bool) or item is None
+
     def call_var(self, inputstring):
         """Checks If Variable."""
         if inputstring in self.variables:
@@ -1233,12 +1237,25 @@ Global Operator Precedence List:
             if istext(item):
                 self.info = " | var"
                 value = self.calc(str(item))
-            elif hasnum(item) or islist(item):
+            elif self.convertable(item):
                 value = item
             else:
                 value = getcall(item)(None)
             if not self.isreserved(key):
                 self.variables[key] = value
+            return value
+
+    def call_parenvar(self, inputstring):
+        """Checks If Parentheses."""
+        if inputstring in self.parens:
+            item = self.find(inputstring)
+            if istext(item):
+                self.info = " | parenvar"
+                value = self.calc(str(item))
+            elif self.convertable(item):
+                value = item
+            else:
+                value = getcall(item)(None)
             return value
 
     def call_none(self, inputstring):
@@ -1573,6 +1590,9 @@ Global Operator Precedence List:
         if key in self.variables:
             if follow or istext(self.variables[key]) or (destroy and isinstance(self.variables[key], strcalc)):
                 out = self.variables[key]
+        elif key in self.parens:
+            if follow or istext(self.parens[key]) or (destroy and isinstance(self.parens[key], strcalc)):
+                out = self.parens[key]
         if destroy and isinstance(out, strcalc):
             out = str(out)
         return out
