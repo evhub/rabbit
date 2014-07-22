@@ -41,6 +41,8 @@ class compiler(commandline):
         self.prompt = str(prompt)
         self.moreprompt = str(moreprompt)
         self.color = outcolor
+        self.cli_start = self.start
+        self.start = self.comp_start
         if initializers == ():
             self.initialize()
         else:
@@ -50,7 +52,7 @@ class compiler(commandline):
         """Prints A Message To The Console."""
         self.app.display(self.e.forshow(arg))
 
-    def start(self):
+    def comp_start(self):
         """Runs An Interactive Semi-Compiler Command Line Interface."""
         while self.on:
             cmd = superformat(raw_input(self.mainprompt))
@@ -66,7 +68,7 @@ class compiler(commandline):
                 on = self.on
                 self.on = True
                 self.cmds = [self.cmd_exit]+self.cmds
-                self.start()
+                self.cli_start()
                 self.cmds.pop(0)
                 self.on = on
             elif cmd in ["x", "exit"]:
