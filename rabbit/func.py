@@ -1042,9 +1042,7 @@ class classcalc(cotobject):
     def retrieve(self, key):
         """Retrieves An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if test == self.selfvar:
-            raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined")
-        elif not self.e.isreserved(test):
+        if not self.e.isreserved(test):
             if test in self.variables:
                 return self.getitem(test)
             else:
@@ -1242,6 +1240,14 @@ class instancecalc(numobject, classcalc):
         else:
             raise ExecutionError("ClassError", "Methods must have self as their first argument")
 
+    def getitem(self, test):
+        """Retrieves An Item At The Base Level."""
+        if istext(self.variables[test]):
+            self.store(test, self.calc(self.variables[test]))
+        if isinstance(self.variables[test], strfunc):
+            self.selfcurry(self.variables[test])
+        return self.variables[test]
+
     def retrieve(self, key):
         """Retrieves An Item."""
         test = delspace(self.e.prepare(key, False, False))
@@ -1252,8 +1258,6 @@ class instancecalc(numobject, classcalc):
                 out = self.domethod(self.getitem("__get__"), strcalc(test, self.e))
             else:
                 raise ExecutionError("ClassError", "Could not find "+test+" in the class")
-            if isinstance(out, strfunc):
-                self.selfcurry(out)
             return out
         else:
             raise ExecutionError("ClassError", "Invalid class key of "+test)
@@ -1264,6 +1268,8 @@ class instancecalc(numobject, classcalc):
         if test == self.selfvar:
             raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined.")
         elif bypass:
+            if isinstance(value, strfunc):
+                self.selfcurry(value)
             self.variables[test] = value
         elif self.e.isreserved(test):
             raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))

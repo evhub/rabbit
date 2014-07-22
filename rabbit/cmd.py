@@ -390,6 +390,7 @@ class mathbase(safebase):
                 raise ExecutionError("IOError", "Could not find file "+str(original))
             else:
                 self.setreturned()
+                self.dumpdebug(True)
                 return True
 
     def cmd_assert(self, original):
