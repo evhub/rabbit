@@ -30,6 +30,7 @@ class editor(mathbase):
     def __init__(self, name="RIDE", tablen=1, width=100, height=40, refresh=600, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
+        self.startup()
         self.debug_old = self.debug
         self.root = Tkinter.Tk()
         self.root.title(str(name))
@@ -105,7 +106,8 @@ class editor(mathbase):
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
-            "ans":funcfloat(self.anscall, self.e, "ans")
+            "ans":funcfloat(self.anscall, self.e, "ans"),
+            "return":usefunc(self.setreturned, self.e, "return", [])
             })
 
     def handle(self, func):

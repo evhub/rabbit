@@ -115,13 +115,13 @@ def curry(func, arg, key=None):
         return func(*args, **kwargs)
     return _func
 
-class memoize(object):
+class memoizer(object):
     """A Memoized Function."""
-    memo = ([], [])
     def __init__(self, func):
         """Creates The Memoized Function."""
+        self.memo = [[], []]
         self.func = func
-    def call(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs):
         """Calls The Memoized Function."""
         key = (args, kwargs)
         index = None

@@ -30,6 +30,7 @@ class grapher(mathbase):
     def __init__(self, directory="rabbit/", name="Grapher", width=800, height=600, debug=False, *initializers):
         """Initializes A PythonPlus Grapher."""
         self.debug = bool(debug)
+        self.startup()
         self.root = Tkinter.Tk()
         self.root.title(str(name))
         self.show = self.popshow
@@ -309,6 +310,7 @@ class grapher(mathbase):
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
+            "return":usefunc(self.setreturned, self.e, "return", []),
             "clear":usefunc(self.clear, self.e, "clear", []),
             "cleargrid":usefunc(self.cleargrid, self.e, "cleargrid", []),
             "center":usefunc(self.center, self.e, "center", []),
@@ -316,7 +318,6 @@ class grapher(mathbase):
             "ticks":usefunc(self.tickrender, self.e, "ticks", []),
             "axis":usefunc(self.axisrender, self.e, "axis", []),
             "origin":usefunc(self.origin, self.e, "origin", []),
-            "return":usefunc(self.setreturned, self.e, "return", []),
             "render":strfunc("cleargrid()axis()ticks()", self.e, name="render"),
             "display":strfunc("center()render()", self.e, name="display"),
             "stretch":1.0,
@@ -490,9 +491,8 @@ class grapher(mathbase):
 
     def cmd_normal(self, original):
         """Graphs Normal Entries."""
-        self.returned = 0
         item = self.calc(original)
-        if self.returned == 0 and not isnull(item):
+        if not isnull(item):
             if isinstance(item, strcalc):
                 self.show(self.e.prepare(item, True, True))
             elif isinstance(item, data):
@@ -506,7 +506,6 @@ class grapher(mathbase):
                 self.matrixrender(item)
             else:
                 self.render(lambda x: self.call(item, x))
-            self.returned = 1
         return True
 
     def matrixrender(self, inputmatrix, base=None):

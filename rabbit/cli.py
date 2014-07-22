@@ -31,6 +31,7 @@ class commandline(mathbase):
     def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", debugcolor="lightred", debug=False, *initializers):
         """Initializes The Command Line Interface."""
         self.debug = bool(debug)
+        self.startup()
         if message:
             message = str(message)
             self.messages.append(message)
@@ -82,7 +83,8 @@ class commandline(mathbase):
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
-            "grab":funcfloat(self.grabcall, self.e, "grab")
+            "grab":funcfloat(self.grabcall, self.e, "grab"),
+            "return":usefunc(self.setreturned, self.e, "return", [])
             })
 
     def cmd_exit(self, original):

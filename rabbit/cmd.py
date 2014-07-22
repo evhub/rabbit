@@ -29,9 +29,6 @@ class mathbase(safebase):
     """A Base Class For PythonPlus Evaluators."""
     multiargops = "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"
     statements = ["debug", "run", "assert", "do", "show", "del", "def", "make"]
-    messages = []
-    commands = []
-    ans = [matrix(0)]
     returned = 1
     useclass = None
     redef = False
@@ -39,9 +36,16 @@ class mathbase(safebase):
     top = False
     errorlog = False
 
+    def startup(self):
+        """Initializes Containers."""
+        self.messages = []
+        self.commands = []
+        self.ans = [matrix(0)]
+
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
         self.debug = bool(debug)
+        self.startup()
         if message:
             message = str(message)
             self.messages.append(message)
@@ -247,6 +251,7 @@ class mathbase(safebase):
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab"),
+            "return":usefunc(self.setreturned, self.e, "return", []),
             "clear":usefunc(self.clear, self.e, "clear", [])
             })
 
@@ -599,11 +604,10 @@ class mathbase(safebase):
 
     def cmd_normal(self, original):
         """Evaluates Functions."""
-        self.returned = 0
         test = self.calc(original)
         if test is not None:
             self.ans.append(test)
-            if self.doshow and self.returned == 0 and not isnull(self.ans[-1]):
+            if self.doshow and not isnull(self.ans[-1]):
                 self.show(self.e.prepare(self.ans[-1], True, True))
             return True
 
@@ -618,18 +622,23 @@ class mathbase(safebase):
         """Evaluates An Item With A Value."""
         return self.e.call(item, value, varname)
 
+    def liststate(self, inputlist):
+        """Compiles A List."""
+        return tuple(map(self.itemstate, inputlist))
+
     def getstates(self, variables):
         """Compiles Variables."""
         out = {}
         for k,v in variables.items():
-            try:
-                v.getstate
-            except AttributeError:
-                value = v
-            else:
-                value = v.getstate()
-            out[k] = value
+            out[k] = self.itemstate(v)
         return out
+
+    def itemstate(self, item):
+        """Gets The State Of An Item."""
+        if hasattr(item, "getstate"):
+            return item.getstate()
+        else:
+            return ittem
 
     def deitem(self, item):
         """Decompiles An Item."""
@@ -654,19 +663,21 @@ class mathbase(safebase):
                     for x in xrange(0, len(args[0][y])):
                         value.store(y,x, self.deitem(args[0][y][x]))
             elif name == "strfunc":
-                value = strfunc(args[0], self.e, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6])
+                value = strfunc(args[0], self.e, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], self.devariables(args[7]))
             elif name == "strcalc":
                 value = rawstrcalc(args[0], self.e)
             elif name == "derivfunc":
-                value = derivfunc(args[0], args[1], args[2], args[3], self.e, args[4], args[5], args[6])
+                value = derivfunc(args[0], args[1], args[2], args[3], self.e, args[4], args[5], args[6], self.devariables(args[7]))
             elif name == "integfunc":
-                value = integfunc(args[0], args[1], self.e, args[2], args[3], args[4])
+                value = integfunc(args[0], args[1], self.e, args[2], args[3], args[4], self.devariables(args[5]))
             elif name == "usefunc":
-                value = usefunc(args[0], self.e, args[1], args[2], args[3], args[4], args[5])
+                value = usefunc(args[0], self.e, args[1], args[2], args[3], args[4], args[5], self.devariables(args[6]))
             elif name == "classcalc":
                 value = classcalc(self.e, self.devariables(args[0]))
             elif name == "instancecalc":
                 value = instancecalc(self.e, self.devariables(args[0]), self.devariables(args[1]))
+            elif name == "makefunc":
+                value = makefunc(args[0], self.e, args[1], self.devariables(args[2]))
             elif name == "find":
                 tofind = str(args[0])
                 if tofind in self.e.variables:

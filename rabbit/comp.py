@@ -33,6 +33,7 @@ class compiler(commandline):
 
     def __init__(self, debugcolor="lightred", mainprompt=addcolor("Rabbit:", "pink")+" ", prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", *initializers):
         """Initializes The Command Line Interface."""
+        self.startup()
         self.app = terminal()
         self.populator()
         self.e.color = debugcolor
@@ -162,7 +163,8 @@ class compiler(commandline):
         self.e.makevars({
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
-            "show":funcfloat(self.showcall, self.e, "show")
+            "show":funcfloat(self.showcall, self.e, "show"),
+            "return":usefunc(self.setreturned, self.e, "return", [])
             })
         self.commands = []
         self.makes = []
