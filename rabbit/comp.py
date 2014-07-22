@@ -203,8 +203,8 @@ class compiler(commandline):
         out = cPickle.dumps({
             "commands": self.commands,
             "makes": self.makes,
-            "variables": self.getstates(self.e.variables),
-            "parens": self.liststate(self.e.parens)
+            "variables": self.e.getstates(self.e.variables),
+            "parens": self.e.liststate(self.e.parens)
             }, protocol=int(protocol))
         self.fresh()
         return out
@@ -214,4 +214,4 @@ class compiler(commandline):
         out = cPickle.loads(inputstring)
         for command in out["makes"]:
             self.calc(command)
-        return out["commands"], self.devariables(out["variables"]), self.delist(out["parens"])
+        return out["commands"], self.e.devariables(out["variables"]), self.e.delist(out["parens"])
