@@ -1457,7 +1457,7 @@ Global Operator Precedence List:
             for x in xrange(0, len(templist)):
                 if x%2 == 1:
                     if templist[x]:
-                        feed.append(self.namefind(self.parenchar+templist[x]+self.parenchar))
+                        feed.append(self.parenchar+templist[x]+self.parenchar)
                         last = True
                     else:
                         last = False
