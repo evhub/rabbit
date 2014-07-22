@@ -512,10 +512,14 @@ Global Operator Precedence List:
         self.printdebug("| "+self.prepare(value, False, True, True))
         return self.calc_with(value)
 
+    def iseq(self, a, b):
+        """Determines Whether Two Evaluator Objects Are Really Equal."""
+        return self.processor.itemstate(a) == self.processor.itemstate(b)
+
     def wrap(self, item):
         """Wraps An Item In Parentheses."""
         for k,v in self.parens.items():
-            if iseq(v, item):
+            if self.iseq(v, item):
                 return k
         indexstr = self.parenchar+str(self.count)+self.parenchar
         self.count += 1
@@ -1578,7 +1582,7 @@ Global Operator Precedence List:
             new = basicformat(key)
         else:
             new = key
-        while not iseq(old, new):
+        while not self.iseq(old, new):
             key = old
             old = new
             new = self.finding(old, follow, destroy)

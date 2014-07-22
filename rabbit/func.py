@@ -1465,8 +1465,6 @@ class instancecalc(numobject, classcalc):
         """Performs Equal."""
         if not hasnum(other):
             return False
-        elif self is other:
-            return True
         else:
             check_eq = self.tryget("__eq__")
             if check_eq:
@@ -1493,8 +1491,6 @@ class instancecalc(numobject, classcalc):
         """Performs Not Equal."""
         if not hasnum(other):
             return True
-        elif self is other:
-            return False
         else:
             check_ne = self.tryget("__ne__")
             if check_ne:
