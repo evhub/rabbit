@@ -130,19 +130,19 @@ class funcfloat(numobject):
 
     def func(self, *args, **kwargs):
         """Calls The Memoized Function."""
-        arghash = (self.keyhash(args), self.keyhash(kwargs))
-        if arghash in self.memo:
-            return self.memo[arghash]
-        elif not self.memoize:
-            return self.base_func(*args, **kwargs)
-        else:
-            returned = self.processor.returned
-            self.processor.returned = 0
-            out = self.base_func(*args, **kwargs)
-            if self.processor.returned == 0:
-                self.memo[arghash] = out
-            self.processor.returned = returned
-            return out
+        if self.memoize is not None:
+            arghash = (self.keyhash(args), self.keyhash(kwargs))
+            if arghash in self.memo:
+                return self.memo[arghash]
+            elif self.memoize:
+                returned = self.e.processor.returned
+                self.e.processor.returned = 0
+                out = self.base_func(*args, **kwargs)
+                if self.e.processor.returned == 0:
+                    self.memo[arghash] = out
+                self.e.processor.returned = returned
+                return out
+        return self.base_func(*args, **kwargs)
 
     def calc(self, variables=None):
         """Calculates The Float Function."""
