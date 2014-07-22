@@ -110,7 +110,7 @@ class funcfloat(numobject):
 
     def hashify(self, item):
         """Recursively Converts Dicts And Lists To Tuples."""
-        if isinstance(item, list):
+        if isinstance(item, (list, tuple)):
             return ("l", tuple(map(self.hashify, item)))
         elif isinstance(item, dict):
             return ("d", tuple(item.keys()), self.hashify(item.values()))
@@ -120,10 +120,10 @@ class funcfloat(numobject):
     def keyhash(self, args):
         """Creates An Argument Hash."""
         if isinstance(args, (tuple, list)):
-            out = tuple(self.e.processor.liststate(args))
+            out = self.e.processor.liststate(args)
         elif isinstance(args, dict):
             item = self.e.processor.getstates(args)
-            out = (tuple(item.keys()), tuple(item.values()))
+            out = (item.keys(), item.values())
         else:
             out = self.e.processor.itemstate(args)
         return self.hashify(out)
