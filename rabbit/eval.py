@@ -110,6 +110,7 @@ Global Operator Precedence List:
 
     def fresh(self):
         """Resets The Variables To Their Defaults."""
+        self.parens = {}
         self.variables = {
             "error":classcalc(self, {
                 self.errorvar: 1.0
@@ -241,8 +242,11 @@ Global Operator Precedence List:
 
     def makevars(self, variables):
         """Forcibly Stores Variables."""
-        for k,v in variables.items():
-            self.variables[k] = v
+        self.variables.update(variables)
+
+    def makeparens(self, parens):
+        """Forcibly Stores Parens."""
+        self.parens.update(parens)
 
     def setvars(self, newvars):
         """Sets New Variables."""
@@ -509,9 +513,12 @@ Global Operator Precedence List:
 
     def wrap(self, item):
         """Wraps An Item In Parentheses."""
+        for k,v in self.parens.items():
+            if iseq(v, item):
+                return k
         indexstr = self.parenchar+str(self.count)+self.parenchar
         self.count += 1
-        self.variables[indexstr] = item
+        self.parens[indexstr] = item
         return indexstr
 
     def calc_string(self, expression):
@@ -1180,6 +1187,7 @@ Global Operator Precedence List:
 
     def eval_call(self, inputstring):
         """Evaluates A Variable."""
+        inputstring = self.namefind(inputstring)
         self.printdebug("-> "+inputstring)
         self.recursion += 1
         for func in self.calls:
@@ -1511,8 +1519,8 @@ Global Operator Precedence List:
         """Finds A Name."""
         while varname.startswith(self.parenchar) and varname.endswith(self.parenchar):
             checknum = varname[1:-1]
-            if checknum in self.variables:
-                num = int(collapse(self.funcfind(self.variables[checknum])))
+            if checknum in self.parens:
+                num = int(collapse(self.funcfind(self.parens[checknum])))
             elif isreal(checknum) is not None:
                 num = getint(checknum)
             else:
@@ -1520,8 +1528,8 @@ Global Operator Precedence List:
             if num < 0:
                 num += self.count
             key = self.parenchar+str(num)+self.parenchar
-            if istext(self.variables[key]):
-                varname = self.variables[key]
+            if istext(self.parens[key]):
+                varname = self.parens[key]
             else:
                 break
         return varname
@@ -1553,7 +1561,7 @@ Global Operator Precedence List:
             new = basicformat(key)
         else:
             new = key
-        while old != new:
+        while not iseq(old, new):
             key = old
             old = new
             new = self.finding(old, follow, destroy)

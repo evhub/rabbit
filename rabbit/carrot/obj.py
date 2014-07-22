@@ -105,6 +105,10 @@ def isnum(inputobject):
     """Determines If An Object Is A Number."""
     return isinstance(inputobject, (float, int, long, complex))
 
+def iseq(a, b):
+    """Determines Whether Two Objects Are Really Equal."""
+    return type(a) is type(b) and (a is b or a == b)
+
 def curry(func, arg, key=None):
     """Returns A Function With A Curried Argument."""
     def _func(*args, **kwargs):

@@ -107,8 +107,9 @@ class compiler(commandline):
         """Decompiles Text."""
         compiling = self.compiling
         self.compiling = False
-        commands, variables = self.disassemble(inputstring)
+        commands, variables, parens = self.disassemble(inputstring)
         self.e.makevars(variables)
+        self.e.makeparens(parens)
         for command in commands:
             self.calc(command)
         self.compiling = compiling
@@ -202,7 +203,8 @@ class compiler(commandline):
         out = cPickle.dumps({
             "commands": self.commands,
             "makes": self.makes,
-            "variables": self.getstates(self.e.variables)
+            "variables": self.getstates(self.e.variables),
+            "parens": self.getstates(self.e.parens)
             }, protocol=int(protocol))
         self.fresh()
         return out
@@ -212,4 +214,4 @@ class compiler(commandline):
         out = cPickle.loads(inputstring)
         for command in out["makes"]:
             self.calc(command)
-        return out["commands"], self.devariables(out["variables"])
+        return out["commands"], self.devariables(out["variables"]), self.devariables(out["parens"])
