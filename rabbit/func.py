@@ -810,7 +810,7 @@ class integbase(derivbase):
             self.e.overflow = variables[2:]
             return self.func(float(variables[0]), float(variables[1]))
 
-    def base_func(arg1, arg2):
+    def base_func(self, arg1, arg2):
         """The Base Integral Function."""
         return defint(self.calc, arg1, arg2, self.accuracy)
 
