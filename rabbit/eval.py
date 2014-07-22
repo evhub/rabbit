@@ -417,7 +417,9 @@ Global Operator Precedence List:
                 out += "D:"
             variables = item.getvars()
             personals = item.getpers()
-            out += "\\"+strlist(variables,",")+","
+            out += "\\"+strlist(variables,",")
+            if len(variables) > 0:
+                out += ","
             for x,y in personals.items():
                 out += str(x)+":("
                 if maxrecursion <= 0 and isinstance(y, classcalc):
@@ -426,7 +428,7 @@ Global Operator Precedence List:
                     out += self.prepare(y, False, bottom, indebug, maxrecursion-1)
                 out += "),"
             out = out[:-1]
-            if len(variables) != 0:
+            if len(variables) > 0 or len(personals) > 0:
                 out += "\\"
             test = self.prepare(item.funcstr, False, bottom, indebug, maxrecursion)
             if self.isreserved(test, allowed=string.digits):

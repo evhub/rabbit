@@ -176,7 +176,7 @@ class funcfloat(numobject):
 
     def __repr__(self):
         """Returns A String Representation."""
-        return "("+self.funcstr+")"
+        return "\\("+self.funcstr+")"
 
     def __str__(self):
         """Retrieves The Function String."""
@@ -243,7 +243,7 @@ class funcfloat(numobject):
         if isinstance(other, strfunc):
             return other == self
         elif isinstance(other, funcfloat):
-            return self.base_func == other.base_func
+            return self.base_func == other.base_func and self.reqargs == other.reqargs
         else:
             return False
 
@@ -434,7 +434,7 @@ class strfunc(funcfloat):
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, strfunc):
-            return self.funcstr == other.funcstr and self.variables == other.variables and self.personals == other.personals and self.overflow == other.overflow
+            return self.funcstr == other.funcstr and self.variables == other.variables and self.personals == other.personals and self.overflow == other.overflow and self.reqargs == other.reqargs
         elif isinstance(other, funcfloat):
             return self.funcstr == other.funcstr
         else:
@@ -1222,11 +1222,11 @@ class instancecalc(numobject, classcalc):
     def domethod(self, item, args=[]):
         """Calls A Method Function."""
         if isfunc(item):
-            if not islist(args):
+            if not islist(args) and args is not None:
                 args = [args]
             if isinstance(item, strfunc):
                 self.selfcurry(item)
-                if item.overflow and len(args) > len(item.variables):
+                if item.overflow and args is not None and len(args) > len(item.variables):
                     args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
             return getcall(item)(args)
         else:
@@ -1294,11 +1294,14 @@ class instancecalc(numobject, classcalc):
 
     def call(self, variables):
         """Calls The Function."""
-        func = self.tryget("__call__")
-        if func is None:
-            raise ExecutionError("ClassError", "The class being called has no __call__ method")
+        if variables is None:
+            return self
         else:
-            return self.domethod(func, variables)
+            func = self.tryget("__call__")
+            if func is None:
+                raise ExecutionError("ClassError", "The class being called has no __call__ method")
+            else:
+                return self.domethod(func, varproc(variables))
 
     def ismatrix(self):
         """Determines Whether The Class Can Be A Matrix."""

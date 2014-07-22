@@ -117,7 +117,7 @@ class commandline(mathbase):
             if iswhite(cmd[0]):
                 return whole
             else:
-                return "( "+old+" )\n ;; "+cmd
+                return old+"\n;;\n"+cmd
         elif fcmd and endswithany(fcmd, self.multiargops):
             return whole
         elif isinside(whole, '"`', {"\u201c":"\u201d"}, {"(":")", "{":"}", "[":"]"}):
