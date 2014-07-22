@@ -329,7 +329,7 @@ assert int(1.5) ?= 1
 assert class({}()) ?= {}
 assert type(class({}())) ?= "class"
 assert '1 ?= 2
-assert is:"a":"a" & is(5,5)
+assert is:"a":"a" & is(5,5,5)
 
 # New Feature Tests:
 assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1

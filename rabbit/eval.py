@@ -166,6 +166,7 @@ Global Operator Precedence List:
             "read":funcfloat(self.funcs.readcall, self, "read"),
             "write":funcfloat(self.funcs.writecall, self, "write"),
             "det":funcfloat(self.funcs.detcall, self, "det"),
+            "is":funcfloat(self.funcs.iseqcall, self, "is"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "floor":usefunc(math.floor, self, "floor", ["x"]),
             "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
@@ -204,7 +205,6 @@ Global Operator Precedence List:
                 "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], evalinclude="e")
                 }),
             "done":usefunc(self.processor.setreturned, self, "done", ["state"]),
-            "is":usefunc(self.iseq, self, "is", ["x", "y"]),
             "i":complex(0.0, 1.0),
             "e":math.e,
             "pi":math.pi,
@@ -1782,6 +1782,17 @@ class evalfuncs(object):
     def __init__(self, e):
         """Initializes The Functions."""
         self.e = e
+
+    def iseqcall(self, variables):
+        """Determins Whether All Arguments Are Equal."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to is")
+        else:
+            out = True
+            last = variables[0]
+            for x in xrange(1, len(variables)):
+                out = out and iseq(last, variables[x])
+            return out
 
     def envcall(self, variables):
         """Retrieves A Class Of The Global Environment."""
