@@ -85,12 +85,16 @@ class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
     memoize = True
     allargs = "__"
+    autoarg = "__auto__"
     otherarg = "__other__"
     reqargs = -1
 
-    def __init__(self, func, e, funcstr="func", reqargs=None, memo=None):
+    def __init__(self, func, e, funcstr=None, reqargs=None, memo=None):
         """Constructs The Float Function."""
-        self.funcstr = str(funcstr)
+        if funcstr:
+            self.funcstr = str(funcstr)
+        else:
+            self.funcstr = self.autoarg
         if memo is None:
             self.memo = {}
         else:
@@ -246,7 +250,6 @@ class funcfloat(numobject):
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
     lexical = True
-    autoarg = "__auto__"
 
     def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None, reqargs=None, memo=None):
         """Creates A Callable String Function."""
@@ -635,10 +638,13 @@ class rawstrcalc(strcalc):
 
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
-    def __init__(self, func, e, funcstr="func", variables=None, extras=None, overflow=True, evalinclude=False, memo=None):
+    def __init__(self, func, e, funcstr=None, variables=None, extras=None, overflow=True, evalinclude=False, memo=None):
         """Creates A Callable Function."""
+        if funcstr:
+            self.funcstr = str(funcstr)
+        else:
+            self.funcstr = self.autoarg
         self.overflow = bool(overflow)
-        self.funcstr = str(funcstr)
         if variables is None:
             self.variables = []
         else:
@@ -657,7 +663,10 @@ class usefunc(funcfloat):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("usefunc", self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.evalinclude, self.e.processor.getstates(self.memo))
+        if typestr(self.base_func) == "instancemethod":
+            return ("find", self.funcstr)
+        else:
+            return ("usefunc", self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.evalinclude, self.e.processor.getstates(self.memo))
 
     def copy(self):
         """Copies The Function."""
@@ -742,7 +751,10 @@ class makefunc(funcfloat):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("makefunc", self.base_func, self.funcstr, self.e.processor.getstates(self.memo))
+        if typestr(self.base_func) == "instancemethod":
+            return ("find", self.funcstr)
+        else:
+            return ("makefunc", self.base_func, self.funcstr, self.e.processor.getstates(self.memo))
 
     def copy(self):
         """Copies The Evaluator Function."""
