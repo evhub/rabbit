@@ -485,7 +485,7 @@ class strfloat(strfunc):
             self.reqargs = reqargs
         funcstr = self.e.namefind(str(funcstr))
         if check:
-            test = self.e.find(funcstr, True, False)
+            test = self.e.find(funcstr, True)
         if check and isinstance(test, strfunc):
             self.funcstr = test.funcstr
             self.overflow = overflow and test.overflow
