@@ -624,7 +624,7 @@ class mathbase(safebase):
 
     def liststate(self, inputlist):
         """Compiles A List."""
-        return tuple(map(self.itemstate, inputlist))
+        return map(self.itemstate, inputlist)
 
     def getstates(self, variables):
         """Compiles Variables."""

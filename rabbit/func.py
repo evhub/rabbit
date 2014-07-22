@@ -83,6 +83,7 @@ def varproc(variables):
 
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
+    memoize = True
     allargs = "__"
     otherarg = "__other__"
     reqargs = -1
@@ -107,21 +108,33 @@ class funcfloat(numobject):
         """Returns A Copy Of The Float Function."""
         return funcfloat(self.base_func, self.e, self.funcstr, self.reqargs, self.memo)
 
+    def hashify(self, item):
+        """Recursively Converts Dicts And Lists To Tuples."""
+        if isinstance(item, list):
+            return ("l", tuple(map(self.hashify, item)))
+        elif isinstance(item, dict):
+            return ("d", tuple(item.keys()), self.hashify(item.values()))
+        else:
+            return ("x", item)
+
     def keyhash(self, args):
         """Creates An Argument Hash."""
         if isinstance(args, (tuple, list)):
-            return self.e.processor.liststate(args)
+            out = tuple(self.e.processor.liststate(args))
         elif isinstance(args, dict):
-            out = self.e.processor.getstates(args)
-            return (tuple(out.keys()), tuple(out.values()))
+            item = self.e.processor.getstates(args)
+            out = (tuple(item.keys()), tuple(item.values()))
         else:
-            return self.e.processor.itemstate(args)
+            out = self.e.processor.itemstate(args)
+        return self.hashify(out)
 
     def func(self, *args, **kwargs):
         """Calls The Memoized Function."""
         arghash = (self.keyhash(args), self.keyhash(kwargs))
         if arghash in self.memo:
             return self.memo[arghash]
+        elif not self.memoize:
+            return self.base_func(*args, **kwargs)
         else:
             returned = self.processor.returned
             self.processor.returned = 0
