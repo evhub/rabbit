@@ -139,6 +139,7 @@ assert nil**2 ?= [nil,nil]
 assert 2**nil ?= ()
 assert {} ++ { x = 1 } ?= { x = 1 }
 assert type({}() ++ { x = 1 }) ?= "instance"
+assert { nothing := nothing ;; nil := nil } ?= { nil := nil ;; nothing := nothing }
 
 # Multi-Line Tests:
 assert # A mid-line comment

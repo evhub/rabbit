@@ -320,7 +320,7 @@ Global Operator Precedence List:
                     elif maxrecursion <= 0 and isinstance(v, classcalc):
                         out += self.speedyprep(v, False, bottom, indebug, maxrecursion)
                     else:
-                        out += self.prepare(v, False, bottom, indebug, maxrecursion-1)
+                        out += self.prepare(v, False, True, indebug, maxrecursion-1)
                 if top:
                     out += "\n"
                 else:
@@ -425,12 +425,12 @@ Global Operator Precedence List:
                 if maxrecursion <= 0 and isinstance(y, classcalc):
                     out += self.speedyprep(y, False, bottom, indebug, maxrecursion)
                 else:
-                    out += self.prepare(y, False, bottom, indebug, maxrecursion-1)
+                    out += self.prepare(y, False, True, indebug, maxrecursion-1)
                 out += "),"
             out = out[:-1]
             if len(variables) > 0 or len(personals) > 0:
                 out += "\\"
-            test = self.prepare(item.funcstr, False, bottom, indebug, maxrecursion)
+            test = self.prepare(item.funcstr, False, True, indebug, maxrecursion)
             if self.isreserved(test, allowed=string.digits):
                 out += "("+test+")"
             else:
@@ -448,7 +448,7 @@ Global Operator Precedence List:
                     out = "S:"
                 else:
                     out = "D:"
-                out += self.prepare(item.func, False, bottom, indebug, maxrecursion)
+                out += self.prepare(item.other_func, False, bottom, indebug, maxrecursion)
                 try:
                     item.n
                 except AttributeError:
