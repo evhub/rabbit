@@ -1540,7 +1540,7 @@ Global Operator Precedence List:
                 break
             if num < 0:
                 num += len(self.parens)
-            if num < 0 or num => len(inputlist):
+            if num < 0 or num >= len(inputlist):
                 raise ExecutionError("VariableError", "Could not find parentheses "+self.parenchar+str(num)+self.parenchar)
             elif istext(self.parens[num]):
                 varname = self.parens[num]
