@@ -139,6 +139,8 @@ def catch(function, *args):
         err = ("RuntimeError", detail)
     except AssertionError as detail:
         err = ("AssertionError", detail)
+    except IOError as detail:
+        err = ("IOError", detail)
     except KeyboardInterrupt as detail:
         err = ("KeyboardInterrupt", "Action has been terminated")
     except ExecutionError as detail:
