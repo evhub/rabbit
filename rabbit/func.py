@@ -934,7 +934,7 @@ class classcalc(cotobject):
 
     def process(self, command):
         """Processes A Command And Puts The Result In The Variables."""
-        command = self.e.namefind(str(command))
+        command = self.e.namefind(basicformat(command))
 
         returned = self.e.processor.returned
         oldshow = self.e.processor.doshow
