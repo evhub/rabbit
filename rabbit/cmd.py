@@ -366,10 +366,11 @@ class mathbase(safebase):
     def cmd_debug(self, original):
         """Controls Debugging."""
         if superformat(original).startswith("debug"):
-            original = basicformat(original[5:])
+            original = original[5:]
             if original == "":
                 self.setdebug(not self.debug)
             elif original[0] == " ":
+                original = basicformat(original)
                 if formatisyes(original):
                     self.setdebug(True)
                 elif formatisno(original):
