@@ -249,6 +249,7 @@ class funcfloat(numobject):
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
+    method = None
     lexical = True
 
     def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None, reqargs=None, memo=None):
@@ -288,7 +289,11 @@ class strfunc(funcfloat):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("strfunc", self.funcstr, self.variables, self.e.processor.getstates(self.getpers()), self.name, self.overflow, self.allargs, self.reqargs, self.e.processor.getstates(self.memo))
+        if self.method:
+            memo = None
+        else:
+            memo = self.e.processor.getstates(self.memo)
+        return ("strfunc", self.funcstr, self.variables, self.e.processor.getstates(self.getpers()), self.name, self.overflow, self.allargs, self.reqargs, memo)
 
     def copy(self):
         """Copies The String Function."""
@@ -427,9 +432,20 @@ class strfunc(funcfloat):
     def getpers(self):
         """Returns The Modified Personals List."""
         out = self.personals.copy()
-        if classcalc.selfvar in out:
-            del out[classcalc.selfvar]
+        if self.method and self.method in out:
+            del out[self.method]
         return out
+
+    def curryself(self, other):
+        """Curries Self Into The Function."""
+        self.method = self.method or other.selfvar
+        if self.method in self.personals:
+            self.personals[self.method] = other
+        elif len(self.variables) > 0:
+            self.personals[self.method] = other
+            self.curry(self.method)
+        else:
+            raise ExecutionError("ClassError", "Methods must have self as their first argument")
 
     def __eq__(self, other):
         """Performs ==."""
@@ -1223,29 +1239,19 @@ class instancecalc(numobject, classcalc):
             if not islist(args) and args is not None:
                 args = [args]
             if isinstance(item, strfunc):
-                self.selfcurry(item)
+                item.curryself(self)
                 if item.overflow and args is not None and len(args) > len(item.variables):
                     args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
             return getcall(item)(args)
         else:
             return item
 
-    def selfcurry(self, out):
-        """Curries Self Into The Function."""
-        if self.selfvar in out.personals:
-            out.personals[self.selfvar] = self
-        elif len(out.variables) > 0:
-            out.personals[self.selfvar] = self
-            out.curry(self.selfvar)
-        else:
-            raise ExecutionError("ClassError", "Methods must have self as their first argument")
-
     def getitem(self, test):
         """Retrieves An Item At The Base Level."""
         if istext(self.variables[test]):
             self.store(test, self.calc(self.variables[test]))
         if isinstance(self.variables[test], strfunc):
-            self.selfcurry(self.variables[test])
+            self.variables[test].curryself(self)
         return self.variables[test]
 
     def retrieve(self, key):
@@ -1269,13 +1275,13 @@ class instancecalc(numobject, classcalc):
             raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined.")
         elif bypass:
             if isinstance(value, strfunc):
-                self.selfcurry(value)
+                value.curryself(self)
             self.variables[test] = value
         elif self.e.isreserved(test):
             raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
         else:
             if isinstance(value, strfunc):
-                self.selfcurry(value)
+                value.curryself(self)
             self.variables[test] = value
             if self.doset:
                 self.doset[test] = haskey(self.e.variables, test)
