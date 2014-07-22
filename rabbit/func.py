@@ -110,12 +110,12 @@ class funcfloat(numobject):
 
     def hashify(self, item):
         """Recursively Converts Dicts And Lists To Tuples."""
-        if isinstance(item, (list, tuple)):
-            return ("l", tuple(map(self.hashify, item)))
+        if isinstance(item, (tuple, list)):
+            return tuple(map(self.hashify, item)
         elif isinstance(item, dict):
-            return ("d", tuple(item.keys()), self.hashify(item.values()))
+            return (tuple(item.keys()), self.hashify(item.values()))
         else:
-            return ("x", item)
+            return item
 
     def keyhash(self, args):
         """Creates An Argument Hash."""
