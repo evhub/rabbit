@@ -1513,7 +1513,7 @@ Global Operator Precedence List:
             checknum = varname[1:-1]
             if checknum in self.variables:
                 num = int(collapse(self.funcfind(self.variables[checknum])))
-            elif isreal(check) is not None:
+            elif isreal(checknum) is not None:
                 num = getint(checknum)
             else:
                 break
