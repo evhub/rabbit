@@ -661,7 +661,7 @@ class usefunc(funcfloat):
 
     def copy(self):
         """Copies The Function."""
-        return usefunc(self.func, self.e, self.funcstr, self.variables, self.extras, self.overflow, self.evalinclude, self.memo)
+        return usefunc(self.base_func, self.e, self.funcstr, self.variables, self.extras, self.overflow, self.evalinclude, self.memo)
 
     def getextras(self):
         """Retrieves Extras."""
