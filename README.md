@@ -411,6 +411,7 @@ d				# Random number dice
 data			# Create data
 deg				# Degrees
 det				# Determinant
+effect			# Prevents memoization
 env				# Get the global environment
 eval			# Calculates a string of code in a fresh environment
 except			# Excepts only particular errors

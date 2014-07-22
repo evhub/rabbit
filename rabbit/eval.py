@@ -204,7 +204,7 @@ Global Operator Precedence List:
                 "chisqP":usefunc(chisqP, self, "chisqP", ["x", "df"], evalinclude="e"),
                 "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], evalinclude="e")
                 }),
-            "done":usefunc(self.processor.setreturned, self, "done", ["state"]),
+            "effect":usefunc(self.processor.setreturned, self, "effect", ["state"]),
             "i":complex(0.0, 1.0),
             "e":math.e,
             "pi":math.pi,
