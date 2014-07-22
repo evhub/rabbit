@@ -1248,7 +1248,7 @@ Global Operator Precedence List:
     def call_parenvar(self, inputstring):
         """Checks If Parentheses."""
         if inputstring in self.parens:
-            item = self.find(inputstring)
+            item = self.find(inputstring, True, False)
             if istext(item):
                 self.info = " | parenvar"
                 value = self.calc(str(item))
