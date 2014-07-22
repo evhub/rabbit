@@ -1754,7 +1754,7 @@ class evalfuncs(object):
     def getvalcall(self, variables):
         """Calculates A Variable Without Changing It."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to val")
+            raise ExecutionError("ArgumentError", "Not enough arguments to val")
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             self.e.processor.setreturned()
@@ -1771,7 +1771,7 @@ class evalfuncs(object):
     def getvarcall(self, variables):
         """Gets The Value Of A Variable."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to var")
+            raise ExecutionError("ArgumentError", "Not enough arguments to var")
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             self.e.processor.setreturned()
@@ -1788,7 +1788,7 @@ class evalfuncs(object):
     def copycall(self, variables):
         """Makes Copies Of Items."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to copy")
+            raise ExecutionError("ArgumentError", "Not enough arguments to copy")
         elif len(variables) == 1:
             if iseval(variables[0]):
                 return variables[0].copy()
@@ -1803,7 +1803,7 @@ class evalfuncs(object):
     def getmatrixcall(self, variables):
         """Converts To Matrices."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to cont")
+            raise ExecutionError("ArgumentError", "Not enough arguments to cont")
         elif len(variables) == 1:
             return getmatrix(variables[0])
         else:
@@ -1815,7 +1815,7 @@ class evalfuncs(object):
     def matrixcall(self, variables):
         """Constructs A Matrix."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to matrix")
+            raise ExecutionError("ArgumentError", "Not enough arguments to matrix")
         else:
             tomatrix = []
             for x in variables:
@@ -1830,7 +1830,7 @@ class evalfuncs(object):
     def detcall(self, variables):
         """Returns The Determinant Of The Matrix."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to det")
+            raise ExecutionError("ArgumentError", "Not enough arguments to det")
         elif len(variables) == 1 and isinstance(variables[0], matrix):
             return variables[0].det()
         else:
@@ -1842,7 +1842,7 @@ class evalfuncs(object):
     def listcall(self, variables):
         """Constructs A Matrix List."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to list")
+            raise ExecutionError("ArgumentError", "Not enough arguments to list")
         elif len(variables) == 1:
             if isinstance(variables[0], matrix):
                 if variables[0].onlyrow():
@@ -1881,7 +1881,7 @@ class evalfuncs(object):
     def connectcall(self, variables):
         """Connects Variables."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to connect")
+            raise ExecutionError("ArgumentError", "Not enough arguments to connect")
         else:
             if isinstance(variables[0], matrix):
                 keep = True
@@ -1950,7 +1950,7 @@ class evalfuncs(object):
     def rangecall(self, variables):
         """Constructs A Range."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to range")
+            raise ExecutionError("ArgumentError", "Not enough arguments to range")
         elif len(variables) == 1:
             return rangematrix(0.0, collapse(variables[0]))
         elif len(variables) == 2:
@@ -2166,7 +2166,7 @@ class evalfuncs(object):
     def tocall(self, variables, varstrings="xyzwpqrabchjklmnABCFGHJKMNOQRTUVWXYZ"):
         """Returns A Converter Function."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to to")
+            raise ExecutionError("ArgumentError", "Not enough arguments to to")
         elif len(variables) == 1:
             if isinstance(variables[0], (strcalc, funcfloat)):
                 variables[0] = self.typestr(variables[0])
@@ -2247,7 +2247,7 @@ class evalfuncs(object):
     def abscall(self, variables):
         """Performs abs."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to abs")
+            raise ExecutionError("ArgumentError", "Not enough arguments to abs")
         elif len(variables) == 1:
             return abs(variables[0])
         else:
@@ -2321,7 +2321,7 @@ class evalfuncs(object):
     def foldcall(self, variables, func=None, overflow=True):
         """Folds A Function Over A Matrix."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to fold")
+            raise ExecutionError("ArgumentError", "Not enough arguments to fold")
         elif len(variables) == 1:
             return getcall(self.e.funcfind(variables[0]))(self.e.variables)
         else:
@@ -2357,7 +2357,7 @@ class evalfuncs(object):
     def derivcall(self, variables):
         """Returns The nth Derivative Of A Function."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to D")
+            raise ExecutionError("ArgumentError", "Not enough arguments to D")
         else:
             n = 1
             varname = self.e.varname
@@ -2386,7 +2386,7 @@ class evalfuncs(object):
     def integcall(self, variables):
         """Returns The Integral Of A Function."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to S")
+            raise ExecutionError("ArgumentError", "Not enough arguments to S")
         else:
             varname = self.e.varname
             accuracy = 0.0001
@@ -2409,7 +2409,7 @@ class evalfuncs(object):
     def randcall(self, variables):
         """Returns A Random Number Generator Object."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to d")
+            raise ExecutionError("ArgumentError", "Not enough arguments to d")
         else:
             stop = getnum(variables[0])
             key = None
@@ -2421,7 +2421,8 @@ class evalfuncs(object):
     def writecall(self, variables):
         """Writes To A File."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to write")
+            raise ExecutionError("ArgumentError", "Not enough arguments to write")
+        elif len(variables) == 2:
             name = self.e.prepare(variables[0], False, False)
             if len(variables) == 1:
                 writer = ""
@@ -2437,7 +2438,7 @@ class evalfuncs(object):
     def readcall(self, variables):
         """Reads From A File."""
         if not variables:
-             raise ExecutionError("ArgumentError", "Not enough arguments to read")
+            raise ExecutionError("ArgumentError", "Not enough arguments to read")
         elif len(variables) == 1:
             name = self.e.prepare(variables[0], False, False)
             self.e.processor.setreturned()
