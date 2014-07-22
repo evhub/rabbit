@@ -1453,12 +1453,12 @@ Global Operator Precedence List:
                 if x%2 == 1:
                     if templist[x]:
                         name = self.parenchar+templist[x]+self.parenchar
-                        if not name in self.variables:
+                        if not name in self.parens:
                             num = int(self.eval_call(templist[x]))
                             if num < 0:
                                 num += self.count
                             name = self.parenchar+str(num)+self.parenchar
-                        if name in self.variables:
+                        if name in self.parens:
                             feed.append(name)
                         else:
                             raise ExecutionError("VariableError", "Could not find parentheses "+name)
