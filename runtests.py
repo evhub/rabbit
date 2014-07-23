@@ -18,6 +18,7 @@
 
 from __future__ import with_statement, absolute_import, print_function, unicode_literals
 from rabbit.all import *
+import cProfile
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
@@ -26,6 +27,6 @@ from rabbit.all import *
 if __name__ == "__main__":
     multiprocessing.freeze_support()
     main = commandline(addcolor("Running Tests...", "magenta"))
-    main.evalfile("Tests.txt")
+    cProfile.run('main.evalfile("Tests.txt")', "Stats.save.txt")
     print(addcolor("Tests Complete.", "blue"))
     main.start()
