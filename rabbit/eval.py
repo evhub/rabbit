@@ -66,7 +66,8 @@ Global Operator Precedence List:
     varname = "x"
     trynames = ["", "try"]
     parenchar = "\xa7"
-    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`\u2260\u2264\u2265\u201c\u201d'+parenchar
+    aliases = {"\u2264":"<=", "\u2265":">="}
+    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`\u2260\u201c\u201d'+parenchar+"".join(aliases.keys())
     errorvar = "__error__"
     debuglog = []
     info = ""
@@ -600,7 +601,7 @@ Global Operator Precedence List:
         """Evaluates With Clauses."""
         inputlist = expression.split("$")
         if len(inputlist) == 1:
-            return self.calc_pieces(delspace(inputlist[0]))
+            return self.calc_pieces(self.calc_format(inputlist[0]))
         else:
             inputlist.reverse()
             item = inputlist.pop()
@@ -608,6 +609,10 @@ Global Operator Precedence List:
             for x in inputlist:
                 withclass.process(x)
             return withclass.calc(item)
+
+    def calc_format(self, expression):
+        """Formats Expressions."""
+        return replaceall(delspace(expression), self.aliases)
 
     def calc_pieces(self, expression):
         """Evaluates Piecewise Expressions."""
@@ -685,16 +690,18 @@ Global Operator Precedence List:
         else:
             for x in xrange(0, len(inputlist)):
                 if madeof(inputlist[x], bools):
-                    inputlist[x] = inputlist[x].replace("\u2264", "<=").replace("\u2265", ">=")
+                    inputlist[x] = inputlist[x]
                     args = []
                     if x == 0:
                         args.append(matrix(0))
                     else:
-                        args.append(self.calc_eval(inputlist[x-1]))
+                        inputlist[x-1] = self.calc_eval(inputlist[x-1])
+                        args.append(inputlist[x-1])
                     if x == len(inputlist)-1:
                         args.append(matrix(0))
                     else:
-                        args.append(self.calc_eval(inputlist[x+1]))
+                        inputlist[x+1] = self.calc_eval(inputlist[x+1])
+                        args.append(inputlist[x+1])
                     out = False
                     haseq = False
                     hasgt = False

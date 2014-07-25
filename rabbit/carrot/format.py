@@ -443,3 +443,12 @@ def eithersplit(inputstring, holdstrings, closers={}):
     if inside:
         raise ExecutionError("SyntaxError", "Unmatched token "+out[-1][0])
     return out
+
+def replaceall(inputstring, replaces={}):
+    """Replaces All replaces In A String."""
+    def _replace(x):
+        if x in replaces:
+            return replaces[x]
+        else:
+            return x
+    return strlist(inputstring, "", _replace)
