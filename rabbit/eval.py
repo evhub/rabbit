@@ -689,8 +689,7 @@ Global Operator Precedence List:
             return self.calc_eval(inputlist[0])
         else:
             for x in xrange(0, len(inputlist)):
-                if madeof(inputlist[x], bools):
-                    inputlist[x] = inputlist[x]
+                if istext(inputlist[x]) and madeof(inputlist[x], bools):
                     args = []
                     if x == 0:
                         args.append(matrix(0))
