@@ -694,12 +694,14 @@ Global Operator Precedence List:
                     if x == 0:
                         args.append(matrix(0))
                     else:
-                        inputlist[x-1] = self.calc_eval(inputlist[x-1])
+                        if istext(inputlist[x-1]):
+                            inputlist[x-1] = self.calc_eval(inputlist[x-1])
                         args.append(inputlist[x-1])
                     if x == len(inputlist)-1:
                         args.append(matrix(0))
                     else:
-                        inputlist[x+1] = self.calc_eval(inputlist[x+1])
+                        if istext(inputlist[x+1]):
+                            inputlist[x+1] = self.calc_eval(inputlist[x+1])
                         args.append(inputlist[x+1])
                     out = False
                     haseq = False
