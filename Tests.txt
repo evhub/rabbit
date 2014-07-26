@@ -333,6 +333,7 @@ assert is:"a":"a" & is(5,5,5)
 assert 0 ?= ¬1
 assert 0.5 ?= ½
 assert " " ?= ␠
+assert 5E6 ?= 5 000 000
 
 # New Feature Tests:
 assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
