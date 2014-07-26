@@ -394,6 +394,7 @@ Rabbit comes with a lot of built-in functions. We'll list all of them below, but
 # Built-In Base Rabbit Functions:
 '				# Successor
 D				# Derivative
+E				# Scientific notation
 S				# Definite integral
 abs				# Absolute value
 acos			# Arc cosine
@@ -497,22 +498,6 @@ stats			# Contains statistical functions
 	FP			# F distribution probability integral
 	Fdist		# F distribution
 	Feq			# F distribution equation
-
-# Built-In Rabbit Unicode Aliases:
-ø = none
-∞ = inf
-∑ = sum
-π = pi
-√ = sqrt
-∫ = S
-Γ = gamma
-∏ = prod
-∈ = in
-∉ = \__\!∈(__)
-∋ = \__\∈(rev(__))
-∌ = \__\!∋(__)
-∛ = \x\x^(1/3)
-∜ = \x\sqrt(sqrt(x))
 ```
 
 #### More Rabbits?

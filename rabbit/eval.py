@@ -67,7 +67,19 @@ Global Operator Precedence List:
     trynames = ["", "try"]
     bools = "<>=!?\u2260"
     parenchar = "\xa7"
-    aliases = {"\u2264":"<=", "\u2265":">="}
+    aliases = {
+        "\xac":"!",
+        "\xf7":"/",
+        "\xd7":"*",
+        "\xb7":"*",
+        "\u22c5":"*",
+        "\u2264":"<=",
+        "\u2265":">=",
+        "\u2227":"&",
+        "\u2228":"|",
+        "\u22c0":"&",
+        "\u22c1":"|"
+        }
     reserved = string.digits + bools + ':;@~+-*^%/&|"()[]{}\\,.$`\u201c\u201d' + parenchar + "".join(aliases.keys())
     errorvar = "__error__"
     debuglog = []
@@ -190,6 +202,7 @@ Global Operator Precedence List:
             "perm":usefunc(perm, self, "perm", ["n", "k"]),
             "comb":usefunc(comb, self, "comb", ["n", "k"]),
             "'":usefunc(succ, self, "'", ["x"]),
+            "E":usefunc(E10, self, "E", ["x"]),
             "stats": classcalc(self, {
                 "normdist":usefunc(normdist, self, "normdist", ["x", "mean", "stdev"]),
                 "binomP":usefunc(binomP, self, "binomP", ["n", "p", "x"]),
@@ -224,14 +237,55 @@ Global Operator Precedence List:
             "\u222b" : "S",
             "\u0393" : "gamma",
             "\u220f" : "prod",
-            "\u2208" : "in"
+            "\u2208" : "in",
+            "\u230a" : "min",
+            "\u2308" : "max",
+            "\xbd" : 0.5,
+            "\xbc" : 0.25,
+            "\xbe" : 0.75,
+            "\u2400" : rawstrcalc("\x00", self),
+            "\u2401" : rawstrcalc("\x01", self),
+            "\u2402" : rawstrcalc("\x02", self),
+            "\u2403" : rawstrcalc("\x03", self),
+            "\u2404" : rawstrcalc("\x04", self),
+            "\u2405" : rawstrcalc("\x05", self),
+            "\u2406" : rawstrcalc("\x06", self),
+            "\u2407" : rawstrcalc("\x07", self),
+            "\u2408" : rawstrcalc("\x08", self),
+            "\u2409" : rawstrcalc("\x09", self),
+            "\u240a" : rawstrcalc("\n", self),
+            "\u240b" : rawstrcalc("\x0b", self),
+            "\u240c" : rawstrcalc("\x0c", self),
+            "\u240d" : rawstrcalc("\r", self),
+            "\u240e" : rawstrcalc("\x0e", self),
+            "\u240f" : rawstrcalc("\x0f", self),
+            "\u2410" : rawstrcalc("\x10", self),
+            "\u2411" : rawstrcalc("\x11", self),
+            "\u2412" : rawstrcalc("\x12", self),
+            "\u2413" : rawstrcalc("\x13", self),
+            "\u2414" : rawstrcalc("\x14", self),
+            "\u2415" : rawstrcalc("\x15", self),
+            "\u2416" : rawstrcalc("\x16", self),
+            "\u2417" : rawstrcalc("\x17", self),
+            "\u2418" : rawstrcalc("\x18", self),
+            "\u2419" : rawstrcalc("\x19", self),
+            "\u241a" : rawstrcalc("\x1a", self),
+            "\u241b" : rawstrcalc("\x1b", self),
+            "\u241c" : rawstrcalc("\x1c", self),
+            "\u241d" : rawstrcalc("\x1d", self),
+            "\u241e" : rawstrcalc("\x1e", self),
+            "\u241f" : rawstrcalc("\x1f", self),
+            "\u2420" : rawstrcalc(" ", self),
+            "\u2421" : rawstrcalc("\x21", self)
             }
         self.variables.update({
             "\u2209" : strfunc("!\u2208(__)", self, [], name="\u2209", overflow=False),
             "\u220b" : strfunc("\u2208(rev(__))", self, [], name="\u220b", overflow=False),
             "\u220c" : strfunc("!\u220b(__)", self, [], name="\u220c", overflow=False),
             "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
-            "\u221c" : strfunc("sqrt(sqrt(x))", self, ["x"], name="\u221c")
+            "\u221c" : strfunc("sqrt(sqrt(x))", self, ["x"], name="\u221c"),
+            "\u222c" : strfunc("S(S(f,++args),++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
+            "\u222d" : strfunc("S(S(S(f,++args),++args),++args)", self, ["f", "args"], reqargs=1, name="\u222d")
             })
 
     def printdebug(self, message):

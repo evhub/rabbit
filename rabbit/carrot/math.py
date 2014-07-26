@@ -232,3 +232,7 @@ def knuth(a, b, n):
         raise ValueError("Knuth up arrow is only defined over the positive integers")
     else:
         return knuth(a, knuth(a, b-1.0, n), n-1)
+
+def E10(x):
+    """Implements 1e(x)."""
+    return 10.0**x
