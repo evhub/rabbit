@@ -65,9 +65,10 @@ Global Operator Precedence List:
     normal  Evaluates numbers."""
     varname = "x"
     trynames = ["", "try"]
+    bools = "<>=!?\u2260"
     parenchar = "\xa7"
     aliases = {"\u2264":"<=", "\u2265":">="}
-    reserved = string.digits+':;@~+-*^%/&|><!"=()[]{}\\,?.$`\u2260\u201c\u201d'+parenchar+"".join(aliases.keys())
+    reserved = string.digits + bools + ':;@~+-*^%/&|"()[]{}\\,.$`\u201c\u201d' + parenchar + "".join(aliases.keys())
     errorvar = "__error__"
     debuglog = []
     info = ""
@@ -680,16 +681,16 @@ Global Operator Precedence List:
         else:
             return self.bool_eq(inputstring)
 
-    def bool_eq(self, inputstring, place=16, bools="<>=!?\u2260\u2264\u2265"):
+    def bool_eq(self, inputstring):
         """Evaluates The Equation Part Of A Boolean Expression."""
-        inputlist = switchsplit(inputstring, bools)
+        inputlist = switchsplit(inputstring, self.bools)
         if len(inputlist) == 0:
             return matrix(0)
         elif len(inputlist) == 1:
             return self.calc_eval(inputlist[0])
         else:
             for x in xrange(0, len(inputlist)):
-                if istext(inputlist[x]) and madeof(inputlist[x], bools):
+                if istext(inputlist[x]) and madeof(inputlist[x], self.bools):
                     args = []
                     if x == 0:
                         args.append(matrix(0))
@@ -754,7 +755,7 @@ Global Operator Precedence List:
                         for e in xrange(0, len(top[a][0][c][d])):
                             top[a][0][c][d][e] = top[a][0][c][d][e].split(",")
                             for f in xrange(0, len(top[a][0][c][d][e])):
-                                top[a][0][c][d][e][f] = splitinplace(top[a][0][c][d][e][f].split("+"), "-", "%/*^:", 2)
+                                top[a][0][c][d][e][f] = splitinplace(top[a][0][c][d][e][f].split("+"), "-", "%/*^:\\", 2)
                                 for g in xrange(0, len(top[a][0][c][d][e][f])):
                                     top[a][0][c][d][e][f][g] = top[a][0][c][d][e][f][g].split("%")
                                     for h in xrange(0, len(top[a][0][c][d][e][f][g])):
