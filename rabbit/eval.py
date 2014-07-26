@@ -1192,6 +1192,7 @@ Global Operator Precedence List:
                         done = True
                     else:
                         out = [out] * abs(num)
+                        row = False
                         done = True
             if islist(out):
                 if row:
