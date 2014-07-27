@@ -1518,7 +1518,7 @@ Global Operator Precedence List:
 
     def call_paren(self, inputstring):
         """Evaluates Parentheses."""
-        inputstring = strlist(switchsplit(inputstring, string.digits, notstring=self.parenchar), self.parenchar*2)        
+        inputstring = strlist(switchsplit(inputstring, string.digits, notstring=self.reserved), self.parenchar*2)        
         if self.parenchar in inputstring:
             self.printdebug("(|) "+inputstring) 
             templist = inputstring.split(self.parenchar)
