@@ -407,7 +407,7 @@ assert {} ?= a				$ a + { x = 1 } $ a := {}
 assert 1 ?= a				$ ( a = 1 )
 assert f(5) ?= f(5)			$ f(x) = x+1
 assert "a"**3 ?= "a","a","a"
-assert (5/5): ?= 25
+assert (5\5): ?= 25
 assert 2π ?= 2*pi
 
 # Final Testing:
