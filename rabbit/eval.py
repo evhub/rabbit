@@ -1576,9 +1576,9 @@ Global Operator Precedence List:
         if "\\" in inputstring:
             parts = inputstring.split("\\", 1)
             if len(parts) <= 1:
-                return self.eval_lambda([parts[0]])
+                return self.eval_lambda(["\\"+parts[0]])
             else:
-                return self.eval_lambda([parts[1]])*self.eval_call(parts[0])
+                return self.eval_lambda(["\\"+parts[1]])*self.eval_call(parts[0])
 
     def call_method(self, inputstring):
         """Returns Method Instances."""
