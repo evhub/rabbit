@@ -83,6 +83,7 @@ def varproc(variables):
 
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
+    overflow = True
     memoize = True
     allargs = "__"
     autoarg = "__auto__"
@@ -865,7 +866,6 @@ class derivfunc(derivbase, strfunc):
             self.personals = {}
         else:
             self.personals = dict(personals)
-        self.overflow = True
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -895,7 +895,6 @@ class integfunc(integbase, strfunc):
             self.personals = {}
         else:
             self.personals = dict(personals)
-        self.overflow = True
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
