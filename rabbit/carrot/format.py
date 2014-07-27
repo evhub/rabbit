@@ -401,14 +401,14 @@ def isinside(inputstring, holdstrings="", closers={}, counters={}):
             hold = x
     return bool(hold)
 
-def switchsplit(inputstring, splitstring, otherstring=None):
+def switchsplit(inputstring, splitstring, otherstring=None, notstring=None):
     """Splits A String By Whenever It Switches From Being In Something To Not In It."""
     out = [""]
     old = -1
     for x in inputstring:
         if x in splitstring:
             new = 1
-        elif not x in splitstring and (not otherstring or x in otherstring):
+        elif not x in splitstring and (not otherstring or x in otherstring) and (not notstring or x not in notstring):
             new = 0
         else:
             new = -1

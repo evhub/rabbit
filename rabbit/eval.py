@@ -489,9 +489,8 @@ Global Operator Precedence List:
                 else:
                     out += self.prepare(y, False, True, indebug, maxrecursion-1)
                 out += "),"
-            out = out[:-1]
             if len(variables) > 0 or len(personals) > 0:
-                out += "\\"
+                out = out[:-1]+"\\"
             test = self.prepare(item.funcstr, False, True, indebug, maxrecursion)
             if self.isreserved(test, allowed=string.digits):
                 out += "("+test+")"
@@ -571,7 +570,7 @@ Global Operator Precedence List:
 
     def iseq(self, a, b):
         """Determines Whether Two Evaluator Objects Are Really Equal."""
-        return self.itemstate(a) == self.itemstate(b)
+        return type(a) is type(b) and self.itemstate(a) == self.itemstate(b)
 
     def wrap(self, item):
         """Wraps An Item In Parentheses."""
@@ -1337,8 +1336,12 @@ Global Operator Precedence List:
 
     def call_lambda(self, inputstring):
         """Wraps Lambda Evaluation."""
-        if inputstring.startswith("\\"):
-            return self.eval_lambda([inputstring])
+        if "\\" in inputstring:
+            parts = inputstring.split("\\", 1)
+            if len(parts) <= 1:
+                return self.eval_lambda([parts[0]])
+            else:
+                return self.eval_lambda([parts[1]])*self.eval_call(parts[0])
 
     def call_neg(self, inputstring):
         """Evaluates -."""
@@ -1348,6 +1351,8 @@ Global Operator Precedence List:
                 return -1.0
             else:
                 return -1.0*item
+        elif "-" in inputstring:
+            raise SyntaxError("Invalid - sign")
 
     def call_reciproc(self, inputstring):
         """Evaluates /."""
@@ -1357,6 +1362,8 @@ Global Operator Precedence List:
                 return item
             else:
                 return reciprocal(item)
+        elif "/" in inputstring:
+            raise SyntaxError("Invalid / sign")
 
     def call_exp(self, inputstring):
         """Evaluates The Exponential Part Of An Expression."""
@@ -1511,7 +1518,7 @@ Global Operator Precedence List:
 
     def call_paren(self, inputstring):
         """Evaluates Parentheses."""
-        inputstring = strlist(switchsplit(inputstring, string.digits, [x for x in string.printable if not self.isreserved(x)]), self.parenchar*2)        
+        inputstring = strlist(switchsplit(inputstring, string.digits, notstring=self.parenchar), self.parenchar*2)        
         if self.parenchar in inputstring:
             self.printdebug("(|) "+inputstring) 
             templist = inputstring.split(self.parenchar)

@@ -83,7 +83,7 @@ def varproc(variables):
 
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
-    overflow = True
+    overflow = False
     memoize = True
     allargs = "__"
     autoarg = "__auto__"
@@ -1760,13 +1760,16 @@ class atom(evalobject):
 
 class rollfunc(strfunc):
     """Implements A Random Number Generator Object."""
-    def __init__(self, stop, e, key=None, varname="times", name=None):
+    variables = ["__times__"]
+
+    def __init__(self, stop, e, key=None, name=None, counter=None):
         """Creates The Random Number Generator."""
         self.e = e
         self.gen = random(key)
+        if counter is not None:
+            self.gen.counter = int(counter)
         self.stop = float(stop)
         self.funcstr = str(self.stop)
-        self.variables = [str(varname)]
         if name:
             self.name = str(name)
         else:
@@ -1774,11 +1777,11 @@ class rollfunc(strfunc):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("rollfunc", self.stop, self.gen.key, self.variables[0], self.name)
+        return ("rollfunc", self.stop, self.gen.key, self.name, self.gen.counter)
 
     def copy(self):
         """Copies The Random Number Generator."""
-        return rollfunc(self.stop, self.e, self.gen.key, self.variables[0], self.name)
+        return rollfunc(self.stop, self.e, self.gen.key, self.name, self.gen.counter)
 
     def calc(self, m=1.0):
         """Generates A Random Number."""
@@ -1821,10 +1824,15 @@ class rollfunc(strfunc):
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfunc(self.name+":(("+self.e.prepare(other, False, True)+")*"+self.variables[0]+")", self.e, self.variables, {self.name:self, self.variables[0]:1.0}, reqargs=0)
+            return strfunc(self.name+":("+self.otherarg+"*"+self.variables[0]+")", self.e, self.variables, {self.name:self, self.variables[0]:1.0, self.otherarg:other}, reqargs=0)
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
-        out = self.copy()
-        out *= other
-        return out
+        return self*other
+
+    def __eq__(self, other):
+        """Performs Equals."""
+        if isinstance(other, rollfunc):
+            return self.stop == other.stop and self.name == other.name and self.gen.key == other.gen.key and self.gen.counter == other.gen.counter
+        else:
+            return False
