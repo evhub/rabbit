@@ -115,6 +115,7 @@ Global Operator Precedence List:
             self.call_exp,
             self.call_colon,
             self.call_paren,
+            self.call_lambdacoeff,
             self.call_method,
             self.call_normal
             ]
@@ -1336,12 +1337,8 @@ Global Operator Precedence List:
 
     def call_lambda(self, inputstring):
         """Wraps Lambda Evaluation."""
-        if "\\" in inputstring:
-            parts = inputstring.split("\\", 1)
-            if len(parts) <= 1:
-                return self.eval_lambda([parts[0]])
-            else:
-                return self.eval_lambda([parts[1]])*self.eval_call(parts[0])
+        if inputstring.startswith("\\"):
+            return self.eval_lambda([inputstring])
 
     def call_neg(self, inputstring):
         """Evaluates -."""
@@ -1577,6 +1574,15 @@ Global Operator Precedence List:
             self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
             self.recursion -= 1
             return value
+
+    def call_lambdacoeff(self, inputstring):
+        """Evaluates Lambda Coefficients."""
+        if "\\" in inputstring:
+            parts = inputstring.split("\\", 1)
+            if len(parts) <= 1:
+                return self.eval_lambda([parts[0]])
+            else:
+                return self.eval_lambda([parts[1]])*self.eval_call(parts[0])
 
     def call_method(self, inputstring):
         """Returns Method Instances."""
