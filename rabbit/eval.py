@@ -1348,8 +1348,6 @@ Global Operator Precedence List:
                 return -1.0
             else:
                 return -1.0*item
-        elif "-" in inputstring:
-            raise SyntaxError("Invalid - sign")
 
     def call_reciproc(self, inputstring):
         """Evaluates /."""
@@ -1359,8 +1357,6 @@ Global Operator Precedence List:
                 return item
             else:
                 return reciprocal(item)
-        elif "/" in inputstring:
-            raise SyntaxError("Invalid / sign")
 
     def call_exp(self, inputstring):
         """Evaluates The Exponential Part Of An Expression."""
