@@ -116,11 +116,11 @@ def getcopy(inputobject):
     else:
         return inputobject
 
-def catch(function, *args):
+def catch(function, *args, **kwargs):
     """Gets The Errors From A Function."""
     result = None
     try:
-        result = function(*args)
+        result = function(*args, **kwargs)
     except ZeroDivisionError as detail:
         err = ("ZeroDivisionError", detail)
     except ValueError as detail:
@@ -141,10 +141,16 @@ def catch(function, *args):
         err = ("AssertionError", detail)
     except IOError as detail:
         err = ("IOError", detail)
+    except SyntaxError as detail:
+        err = ("SyntaxError", detail)
+    except EOFError as detail:
+        err = ("EOFError", detail or "Action has been terminated")
     except KeyboardInterrupt as detail:
-        err = ("KeyboardInterrupt", "Action has been terminated")
+        err = ("KeyboardInterrupt", detail or "Action has been terminated")
     except ExecutionError as detail:
         err = (detail.name, detail.message, detail.variables)
+    except:
+        err = ("Error", "An error occured")
     else:
         err = None
     return result, err
