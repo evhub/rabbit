@@ -103,7 +103,7 @@ class commandline(mathbase):
             except KeyboardInterrupt as detail:
                 self.app.display(addcolor("\n<!> KeyboardInterrupt: Action has been terminated, to quit type exit", self.e.color))
             except EOFError as detail:
-                self.app.display(addcolor("\n<!> EOFError: Program has been terminated", self.e.color))
+                self.app.display(addcolor("\n<!> EOFInterrupt: Program has been terminated", self.e.color))
                 self.cmd_exit("exit")
 
     def handler(self, original, old=None):
