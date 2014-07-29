@@ -27,7 +27,7 @@ from .cmd import *
 class grapher(mathbase):
     """Rabbit Graphing Module."""
 
-    def __init__(self, directory="rabbit/", name="Grapher", width=800, height=600, debug=False, *initializers):
+    def __init__(self, directory=None, name="Grapher", width=800, height=600, debug=False, *initializers):
         """Initializes A PythonPlus Grapher."""
         self.debug = bool(debug)
         self.startup()
@@ -40,9 +40,17 @@ class grapher(mathbase):
         self.box = entry(self.root)
         rootbind(self.root)
         self.box.dobind(self.handler)
-        directory = str(directory)
+        if directory is None:
+            try:
+                __file__
+            except:
+                directory = ""
+            else:
+                directory = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+        else:
+            directory = str(directory)
         try:
-            self.pixel = openphoto(directory+"Pixel.gif")
+            self.pixel = openphoto(os.path.join(directory, "Pixel.gif"))
         except:
             go = False
             while not go:
