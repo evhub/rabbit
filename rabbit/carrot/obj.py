@@ -49,6 +49,10 @@ else:
 old_print = print
 print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
 
+def tostr(obj):
+    """Converts An Object Into A String."""
+    return str(obj, encoding=encoding)
+
 def typestr(obj):
     """Formats The Type Of Something Into A String."""
     return str(type(obj)).split("'")[1]
@@ -80,7 +84,7 @@ def getcall(func):
 
 def istext(inputobject):
     """Determines If An Object Is A String."""
-    return isinstance(inputobject, (str, unicode, old_str))
+    return isinstance(inputobject, (str, old_str))
 
 def urepr(inputobject):
     """Returns A Pre-Unicode Representation."""

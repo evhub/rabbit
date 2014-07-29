@@ -1790,7 +1790,7 @@ class rollfunc(strfunc):
         if stop > 1 and stop == int(stop):
             return 1+self.gen.chooseint(int(stop))
         else:
-            return 1.0+self.gen.choosefloat(float(stop))
+            return self.gen.choosefloat(float(stop))
 
     def call(self, variables):
         """Generates Random Numbers."""
@@ -1804,9 +1804,7 @@ class rollfunc(strfunc):
         elif ismatrix(variables[0]):
             out = variables[0].code(lambda x: self.call([x]))
         else:
-            out = 0.0
-            for x in xrange(0, int(variables[0])):
-                out += self.calc()
+            out = self.calc(int(variables[0]))
             if variables[0] > int(variables[0]):
                 out += self.calc(variables[0]-int(variables[0]))
         return out

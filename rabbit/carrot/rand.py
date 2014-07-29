@@ -34,9 +34,9 @@ class random(object):
         """Initializes The Random Number Generator."""
         self.debug = bool(debug)
         if key is None:
-            self.key = os.urandom(16)
+            self.key = hashlib.md5(os.urandom(16)).hexdigest()
         else:
-            self.key = hashlib.md5(key).digest()
+            self.key = old_str(key)
         self.basestate = hashlib.md5(self.key)
         self.counter = 0
         self.bitstore = ""
@@ -60,7 +60,7 @@ class random(object):
 
     def getraw(self, times=1):
         """Returns A Random String Of Length 16."""
-        rawstring = ""
+        rawstring = old_str()
         for x in xrange(0, int(times)):
             self.advance()
             rawstring += self.state.digest()
