@@ -40,7 +40,12 @@ def writefile(openedfile, writer):
 
 def readfile(openedfile):
     """Reads The Contents Of A File."""
-    return str(openedfile.read())
+    openedfile.seek(0)
+    out = openedfile.read()
+    if isinstance(out, old_str):
+        return tostr(out)
+    else:
+        return str(out)
 
 def createfile(filename, opentype="r+b"):
     """Creates A File And Returns An Open File Object For It."""
