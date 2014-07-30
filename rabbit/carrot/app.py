@@ -533,6 +533,7 @@ class serverbase(base):
                 out = self.c.retrieve(a, self.root.update)
         except IOError:
             self.disconnect()
+            raise
         else:
             return out
 
@@ -545,5 +546,6 @@ class serverbase(base):
                 out = self.c.getitems(a, self.root.update)
         except IOError:
             self.disconnect()
+            raise
         else:
             return out
