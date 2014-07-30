@@ -410,7 +410,7 @@ assert f(5) ?= f(5)			$ f(x) = x+1
 assert "a"**3 ?= "a","a","a"
 assert (5\5): ?= 25
 assert 2π ?= 2*pi
-assert sum( ( range(0,20) ~ \x\(3d6:) ) ~~ \(x,y)\(x!=y) ) != 0
+#assert sum( ( range(0,20) ~ \x\(3d6:) ) ~~ \(x,y)\(x!=y) ) != 0
 
 # Final Testing:
 assert save("Tests.save.txt");true
