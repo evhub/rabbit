@@ -154,7 +154,7 @@ class editor(mathbase):
                 space -= self.tablen
         if instring:
             space += self.tablen
-        elif space <= 0 and endswithany(basicformat(last), self.multiargops):
+        elif space <= 0 and endswithany(basicformat(last), self.e.multiargops):
             space = self.tablen
         insert = " "*space
         if instring:

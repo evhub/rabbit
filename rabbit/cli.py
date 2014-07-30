@@ -121,7 +121,7 @@ class commandline(mathbase):
                 return whole
             else:
                 return old+"\n;;\n"+cmd
-        elif fcmd and endswithany(fcmd, self.multiargops):
+        elif fcmd and endswithany(fcmd, self.e.multiargops):
             return whole
         elif isinside(whole, '"`', {"\u201c":"\u201d"}, {"(":")", "{":"}", "[":"]"}):
             return whole

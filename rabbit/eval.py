@@ -80,7 +80,13 @@ Global Operator Precedence List:
         "\u22c0":"&",
         "\u22c1":"|"
         }
-    reserved = string.digits + bools + ':;@~+-*^%/&|"()[]{}\\,.$`\u201c\u201d' + parenchar + "".join(aliases.keys())
+    groupers = {
+        "(":")",
+        "{":"}",
+        "[":"]"
+        }
+    multiargops = bools + ":*+-%/^@~\\|&;.,$\u201c" + "".join(groupers.keys()) + "".join(aliases.keys())
+    reserved = string.digits + multiargops + '")]}`\u201d' + "".join(groupers.values()) + parenchar
     errorvar = "__error__"
     debuglog = []
     info = ""

@@ -27,7 +27,6 @@ from .eval import *
 
 class mathbase(safebase):
     """A Base Class For PythonPlus Evaluators."""
-    multiargops = "=:*+-%/^@~\\|&;<>.,([{$!?\u2260\u2264\u2265"
     statements = ["debug", "run", "assert", "do", "show", "del", "def", "make"]
     returned = 1
     useclass = None
