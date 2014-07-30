@@ -26,7 +26,7 @@ from .eval import *
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class mathbase(safebase):
-    """A Base Class For PythonPlus Evaluators."""
+    """A Base Class For Rabbit Evaluators."""
     statements = ["debug", "run", "assert", "do", "show", "del", "def", "make"]
     returned = 1
     useclass = None
@@ -42,7 +42,7 @@ class mathbase(safebase):
         self.ans = [matrix(0)]
 
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, debug=False, *initializers):
-        """Initializes A PythonPlus Evaluator"""
+        """Initializes A PythonPlus Evaluator."""
         self.debug = bool(debug)
         self.startup()
         if message:
@@ -463,7 +463,7 @@ class mathbase(safebase):
             if sides[0].endswith(":"):
                 sides[0] = sides[0][:-1]
                 docalc = True
-            sides[0] = carefulsplit(sides[0], ",", '"`', {"\u201c":"\u201d"}, {"(":")", "{":"}", "[":"]"})
+            sides[0] = carefulsplit(sides[0], ",", '"`', {"\u201c":"\u201d"}, self.e.groupers)
             if len(sides[0]) > 1:
                 test = True
                 for x in sides[0]:
@@ -583,7 +583,7 @@ class mathbase(safebase):
                 top = False
         out = funcparts[0] != "" and (not self.e.isreserved(funcparts[0], extra, allowed)) and (len(funcparts) == 1 or funcparts[1].endswith(")"*top or self.e.parenchar))
         if out and len(funcparts) != 1:
-            return not isinside(funcparts[1][:-1], '"`', {"\u201c":"\u201d"}, {"(":")", "{":"}", "[":"]"})
+            return not isinside(funcparts[1][:-1], '"`', {"\u201c":"\u201d"}, self.e.groupers)
         else:
             return out
 

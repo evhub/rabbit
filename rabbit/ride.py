@@ -148,9 +148,9 @@ class editor(mathbase):
                 instring = x
             elif x == "\u201c":
                 instring = "\u201d"
-            elif x in ["(", "[", "{"]:
+            elif x in self.e.groupers.keys():
                 space += self.tablen
-            elif x in [")", "]", "}"]:
+            elif x in self.e.groupers.values():
                 space -= self.tablen
         if instring:
             space += self.tablen

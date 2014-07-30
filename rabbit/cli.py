@@ -119,11 +119,13 @@ class commandline(mathbase):
         elif old is not None and not cmd == "":
             if iswhite(cmd[0]):
                 return whole
+            elif isinside(old, '"`', {"\u201c":"\u201d"}, self.e.groupers):
+                return 'raise("SyntaxError", "Unmatched tokens in "+ ' + self.e.prepare(rawstrcalc(old, self.e), False, True) + ' )\n;;\n'+cmd
             else:
                 return old+"\n;;\n"+cmd
         elif fcmd and endswithany(fcmd, self.e.multiargops):
             return whole
-        elif isinside(whole, '"`', {"\u201c":"\u201d"}, {"(":")", "{":"}", "[":"]"}):
+        elif isinside(whole, '"`', {"\u201c":"\u201d"}, self.e.groupers):
             return whole
         self.reset()
         self.process(whole, True)
