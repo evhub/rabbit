@@ -656,7 +656,7 @@ class rawstrcalc(strcalc):
 
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
-    def __init__(self, func, e, funcstr=None, variables=None, extras=None, overflow=True, evalinclude=False, memo=None):
+    def __init__(self, func, e, funcstr=None, variables=None, extras=None, overflow=True, reqargs=None, evalinclude=False, memo=None):
         """Creates A Callable Function."""
         self.e = e
         if funcstr:
@@ -672,6 +672,8 @@ class usefunc(funcfloat):
             self.extras = {}
         else:
             self.extras = dict(extras)
+        if reqargs is not None:
+            self.reqargs = reqargs
         if memo is None:
             self.memo = {}
         else:
@@ -684,11 +686,11 @@ class usefunc(funcfloat):
         if typestr(self.base_func) == "instancemethod":
             return ("find", self.funcstr)
         else:
-            return ("usefunc", self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.evalinclude, self.e.getstates(self.memo))
+            return ("usefunc", self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.e.getstates(self.memo))
 
     def copy(self):
         """Copies The Function."""
-        return usefunc(self.base_func, self.e, self.funcstr, self.variables, self.extras, self.overflow, self.evalinclude, self.memo)
+        return usefunc(self.base_func, self.e, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memo)
 
     def getextras(self):
         """Retrieves Extras."""
@@ -707,7 +709,7 @@ class usefunc(funcfloat):
         params = varproc(params)
         if params is None:
             return strfunc(self.funcstr+":"+strlist(self.variables,":"), self.e, self.variables)
-        elif len(params) < len(self.variables):
+        elif len(params) < self.reqargs:
             out = self.copy()
             for arg in params:
                 out.curry(arg)

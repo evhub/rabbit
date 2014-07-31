@@ -335,6 +335,8 @@ assert 0 ?= ¬1
 assert 0.5 ?= ½
 assert " " ?= ␠
 assert 5E6 ?= 5 000 000
+assert 123 ?= paren() $ (123)
+assert parens() != parens()
 
 # New Feature Tests:
 assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
@@ -410,7 +412,6 @@ assert f(5) ?= f(5)			$ f(x) = x+1
 assert "a"**3 ?= "a","a","a"
 assert (5\5): ?= 25
 assert 2π ?= 2*pi
-#assert sum( ( range(0,20) ~ \x\(3d6:) ) ~~ \(x,y)\(x!=y) ) != 0
 
 # Final Testing:
 assert save("Tests.save.txt");true

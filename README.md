@@ -437,6 +437,8 @@ log				# Base 10 logarithm
 matrix			# Convert to or create matrix
 merge			# Merge containers
 num				# Convert to number
+paren			# Paren by index
+parens			# List of all parens
 perm			# Permutations
 proc			# Execute an interpreter command
 prod			# Product of items

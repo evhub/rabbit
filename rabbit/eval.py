@@ -183,6 +183,8 @@ Global Operator Precedence List:
             "class":funcfloat(self.funcs.classcall, self, "class"),
             "var":funcfloat(self.funcs.getvarcall, self, "var"),
             "val":funcfloat(self.funcs.getvalcall, self, "val"),
+            "paren":funcfloat(self.funcs.getparenvarcall, self, "paren"),
+            "parens":funcfloat(self.funcs.getparenscall, self, "parens"),
             "raise":funcfloat(self.funcs.raisecall, self, "raise"),
             "except":funcfloat(self.funcs.exceptcall, self, "except"),
             "real":funcfloat(self.funcs.realcall, self, "real"),
@@ -229,7 +231,7 @@ Global Operator Precedence List:
                 "chisqP":usefunc(chisqP, self, "chisqP", ["x", "df"], evalinclude="e"),
                 "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], evalinclude="e")
                 }),
-            "effect":usefunc(self.processor.setreturned, self, "effect", ["state"]),
+            "effect":usefunc(self.processor.setreturned, self, "effect", []),
             "i":complex(0.0, 1.0),
             "e":math.e,
             "pi":math.pi,
@@ -250,6 +252,7 @@ Global Operator Precedence List:
             "\u2208" : "in",
             "\u230a" : "min",
             "\u2308" : "max",
+            "\xb0" : "deg",
             "\xbd" : 0.5,
             "\xbc" : 0.25,
             "\xbe" : 0.75,
@@ -1615,7 +1618,7 @@ Global Operator Precedence List:
         while varname.startswith(self.parenchar) and varname.endswith(self.parenchar):
             checknum = varname[1:-1]
             if checknum in self.variables:
-                num = getint(collapse(self.funcfind(checknum)))
+                num = getint(self.funcfind(checknum))
             elif isreal(checknum) is not None:
                 num = getint(checknum)
             else:
@@ -1826,7 +1829,7 @@ Global Operator Precedence List:
             elif name == "integfunc":
                 value = integfunc(args[0], args[1], self, args[2], args[3], args[4], self.devariables(args[5]))
             elif name == "usefunc":
-                value = usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], self.devariables(args[6]))
+                value = usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], self.devariables(args[7]))
             elif name == "classcalc":
                 value = classcalc(self, self.devariables(args[0]))
             elif name == "instancecalc":
@@ -1880,6 +1883,7 @@ class evalfuncs(object):
         """Retrieves A Class Of The Global Environment."""
         if variables:
             self.e.overflow = variables
+        self.e.setreturned()
         return classcalc(self.e, self.e.getvars())
 
     def raisecall(self, variables):
@@ -1973,6 +1977,35 @@ class evalfuncs(object):
             out = []
             for x in variables:
                 out.append(self.getvalcall([x]))
+            return diagmatrixlist(out)
+
+    def getparenscall(self, variables):
+        """Retreives A List Of Parentheses."""
+        if variables:
+            self.e.overflow = variables
+        out = []
+        self.e.processor.setreturned()
+        for paren in self.e.parens:
+            out.append(rawstrcalc(self.e.prepare(paren, True, True), self.e))
+        return diagmatrixlist(out)
+
+    def getparenvarcall(self, variables):
+        """Gets The Value Of A Paren."""
+        if not variables:
+            variables = [-1]
+        if len(variables) == 1:
+            original = getint(variables[0])
+            if original < 0:
+                original += len(self.e.parens)
+            self.e.processor.setreturned()
+            if 0 < original and original < self.e.parens:
+                return rawstrcalc(self.e.prepare(self.e.parens[original], True, True), self.e)
+            else:
+                return matrix(0)
+        else:
+            out = []
+            for x in variables:
+                out.append(self.getparenvarcall([x]))
             return diagmatrixlist(out)
 
     def getvarcall(self, variables):
@@ -2623,6 +2656,7 @@ class evalfuncs(object):
             if len(variables) > 1:
                 key = self.e.prepare(variables[1], True, False)
                 self.e.overflow = variables[2:]
+            self.e.processor.setreturned()
             return rollfunc(stop, self.e, key)
 
     def writecall(self, variables):
