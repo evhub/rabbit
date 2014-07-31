@@ -1806,9 +1806,8 @@ class rollfunc(strfunc):
         """Copies The Random Number Generator."""
         return rollfunc(self.stop, self.e, self.gen.key, self.name, self.gen.counter)
 
-    def calc(self, m=1.0):
+    def calc(self, stop=1):
         """Generates A Random Number."""
-        stop = self.stop*m
         self.e.processor.setreturned()
         if stop > 1 and stop == int(stop):
             return 1+self.gen.chooseint(int(stop))
@@ -1827,9 +1826,10 @@ class rollfunc(strfunc):
         elif ismatrix(variables[0]):
             out = variables[0].code(lambda x: self.call([x]))
         else:
-            out = self.calc(int(variables[0]))
-            if variables[0] > int(variables[0]):
-                out += self.calc(variables[0]-int(variables[0]))
+            stop = getnum(self.stop*variables[0])
+            out = self.calc(int(stop))
+            if stop > int(stop):
+                out += self.calc(stop-int(stop))
         return out
 
     def __float__(self):
