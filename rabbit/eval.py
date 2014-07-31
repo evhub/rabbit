@@ -1821,21 +1821,21 @@ Global Operator Precedence List:
                     for x in xrange(0, len(args[0][y])):
                         value.store(y,x, self.deitem(args[0][y][x]))
             elif name == "strfunc":
-                value = strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], self.devariables(args[7]))
+                value = strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]))
             elif name == "strcalc":
                 value = rawstrcalc(args[0], self)
             elif name == "derivfunc":
-                value = derivfunc(args[0], args[1], args[2], args[3], self, args[4], args[5], args[6], self.devariables(args[7]))
+                value = derivfunc(args[0], args[1], args[2], args[3], self, args[4], args[5], args[6], args[7], self.devariables(args[8]))
             elif name == "integfunc":
                 value = integfunc(args[0], args[1], self, args[2], args[3], args[4], self.devariables(args[5]))
             elif name == "usefunc":
-                value = usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], self.devariables(args[7]))
+                value = usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]))
             elif name == "classcalc":
                 value = classcalc(self, self.devariables(args[0]))
             elif name == "instancecalc":
                 value = instancecalc(self, self.devariables(args[0]), self.devariables(args[1]))
             elif name == "makefunc":
-                value = makefunc(args[0], self, args[1], self.devariables(args[2]))
+                value = makefunc(args[0], self, args[1], args[2], self.devariables(args[3]))
             elif name == "find":
                 tofind = str(args[0])
                 if tofind in self.variables:
