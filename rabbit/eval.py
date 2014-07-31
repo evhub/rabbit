@@ -1883,7 +1883,7 @@ class evalfuncs(object):
         """Retrieves A Class Of The Global Environment."""
         if variables:
             self.e.overflow = variables
-        self.e.setreturned()
+        self.e.processor.setreturned()
         return classcalc(self.e, self.e.getvars())
 
     def raisecall(self, variables):

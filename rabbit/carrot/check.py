@@ -149,8 +149,8 @@ def catch(function, *args, **kwargs):
         err = ("KeyboardInterrupt", detail or "Action has been terminated")
     except ExecutionError as detail:
         err = (detail.name, detail.message, detail.variables)
-    except:
-        err = ("Error", "An error occured")
+    except Exception as detail:
+        err = ("Error", detail or "An error occured")
     else:
         err = None
     return result, err

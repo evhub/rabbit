@@ -147,7 +147,7 @@ class funcfloat(numobject):
             self.e.processor.setreturned(False)
             out = self.base_func(*args, **kwargs)
             if not self.e.processor.returned:
-                if arhash is None:
+                if arghash is None:
                     arghash = (self.keyhash(args), self.keyhash(kwargs))
                 self.memo[arghash] = out
             self.e.processor.setreturned(returned)
