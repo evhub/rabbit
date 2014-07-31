@@ -27,13 +27,9 @@ from .eval import *
 
 class mathbase(safebase):
     """A Base Class For Rabbit Evaluators."""
-    statements = ["debug", "run", "assert", "do", "show", "del", "def", "make"]
-    returned = 1
-    useclass = None
-    redef = False
     doshow = True
-    top = False
     errorlog = False
+    info = None
 
     def startup(self):
         """Initializes Containers."""
@@ -81,7 +77,7 @@ class mathbase(safebase):
         if variables is not None:
             self.e.recursion += 1
             for k,v in variables.items():
-                self.printdebug(str(k)+" = "+str(v))
+                self.printdebug(str(k)+" = "+self.e.prepare(v, True, True, True))
             self.e.recursion -= 1
         self.dumpdebug()
 
@@ -106,20 +102,234 @@ class mathbase(safebase):
         """Displays Something In A Popup."""
         popup("Info", self.e.forshow(arg), "Output")
 
-    def calc(self, expression):
-        """Evaluates An Expression."""
-        if self.debug:
-            self.e.info = 1
-        else:
-            self.e.info = " <<| Traceback"
-        return self.e.calc(expression)
+    def populator(self):
+        """Creates An Evaluator And Lists Of Commands."""
+        self.e = evaluator(processor=self)
+        self.fresh(True)
 
-    def test(self, expression):
-        """Tests An Expression."""
-        info = " <<| Test"
-        if not self.debug:
-            info += " | Traceback"
-        return self.e.test(expression, info)
+    def fresh(self, top=True):
+        """Refreshes The Environment."""
+        if not top:
+            self.e.fresh()
+        self.e.makevars({
+            "debug":funcfloat(self.debugcall, self.e, "debug"),
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "assert":funcfloat(self.assertcall, self.e, "assert"),
+            "del":funcfloat(self.delcall, self.e, "del"),
+            "make":funcfloat(self.makecall, self.e, "make"),
+            "def":funcfloat(self.defcall, self.e, "def"),
+            "save":funcfloat(self.savecall, self.e, "save"),
+            "install":funcfloat(self.installcall, self.e, "install"),
+            "print":funcfloat(self.printcall, self.e, "print"),
+            "show":funcfloat(self.showcall, self.e, "show"),
+            "ans":funcfloat(self.anscall, self.e, "ans"),
+            "grab":funcfloat(self.grabcall, self.e, "grab"),
+            "clear":usefunc(self.clear, self.e, "clear", [])
+            })
+
+    def clear(self):
+        """Clears The Console."""
+        self.app.clear()
+        self.e.setreturned()
+
+    def initialize(self, args=()):
+        """Runs Any Files Fed To The Constructor."""
+        if istext(args):
+            self.evalfile(args)
+        else:
+            for x in args:
+                self.initialize(x)
+
+    def reset(self):
+        """Resets Top Variables."""
+        self.dumpdebug(True)
+        self.e.recursion = 0
+
+    def handler(self, event=None):
+        """Handles A Return Event."""
+        self.reset()
+        original = self.box.output()
+        cmd = self.e.outersplit(original, "#", {})[0]
+        if delspace(cmd) == "":
+            if len(self.box.commands) > 1:
+                self.process(self.box.commands[-2])
+        else:
+            self.box.add(original)
+            self.process(cmd)
+
+    def evalfile(self, name):
+        """Runs A File."""
+        try:
+            tempfile = openfile(name, "rb")
+        except IOError:
+            return False
+        else:
+            self.evaltext(readfile(tempfile))
+            tempfile.close()
+            return True
+
+    def evaltext(self, inputstring):
+        """Runs Text."""
+        cmdlist = inputstring.splitlines()
+        x = 0
+        while x < len(cmdlist):
+            self.reset()
+            cmdlist[x] = self.e.outersplit(cmdlist[x], "#", {})[0]
+            while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or iswhite(cmdlist[x+1][0])):
+                cmdlist[x] += "\n"+self.e.outersplit(cmdlist.pop(x+1), "#", {})[0]
+            self.process(cmdlist[x])
+            x += 1
+
+    def process(self, inputstring):
+        """Processes A Command."""
+        inputstring = basicformat(inputstring)
+        if inputstring != "":
+            if self.debug:
+                info = self.info
+            else:
+                info = " <<| Traceback"
+            self.saferun(self.e.process, inputstring, info, self.normcommand)
+
+    def addcommand(self, inputsring):
+        """Adds A Command To The Commands."""
+        self.commands.append(inputstring)
+
+    def normcommand(self, test):
+        """Does The Processing."""
+        if not isnull(test):
+            self.ans.append(test)
+            if self.doshow:
+                self.show(self.e.prepare(self.ans[-1], True, True))
+                self.e.setreturned()
+
+    def debugcall(self, variables):
+        """Controls Debugging."""
+        if not variables:
+            out = not self.debug
+        elif len(variables) == 1:
+            if isinstance(variables[0], strcalc):
+                original = str(variables[0])
+                if formatisyes(original):
+                    out = True
+                elif formatisno(original):
+                    out = False
+                else:
+                    raise ValueError("Unrecognized debug state of "+original)
+            else:
+                out = bool(variables[0])
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to debug")
+        self.e.setreturned()
+        self.setdebug(out)
+        return float(out)
+
+    def runcall(self, variables):
+        """Performs run."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to run")
+        elif len(variables) == 1:
+            if isinstance(variables[0], codestr):
+                original = str(variables[0])
+                if not self.evalfile(original):
+                    raise ExecutionError("IOError", "Could not find file "+str(original))
+                else:
+                    self.e.setspawned()
+                    self.dumpdebug(True)
+            else:
+                raise ExecutionError("StatementError", "Can only call run as a statement")
+        else:
+            for arg in variables:
+                self.runcall([arg])
+        return matrix(0)
+
+    def assertcall(self, variables):
+        """Checks For Errors By Asserting That Something Is True."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Assertion failed that nothing")
+        elif len(variables) == 1:
+            if isinstance(variables[0], codestr):
+                original = str(variables[0])
+                out = self.e.calc(original, "| assert")
+            else:
+                original = self.e.prepare(variables[0], True, True, True)
+                out = variables[0]
+        else:
+            for arg in variables:
+                self.assertcall([arg])
+            out = 1.0
+        test = bool(out)
+        if test:
+            return out
+        else:
+            raise ExecutionError("AssertionError", "Assertion failed that "+original, {"Result":out})
+
+    def delcall(self, variables):
+        """Deletes A Variable."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to del")
+        elif len(variables) == 1:
+            original = self.e.prepare(variables[0], False, False)
+            if original in self.e.variables:
+                del self.e.variables[original]
+            elif "." in original:
+                test = original.split(".")
+                item = test.pop()
+                useclass = self.e.find(test[0], True)
+                if isinstance(useclass, classcalc):
+                    last = useclass
+                    for x in xrange(1, len(test)):
+                        useclass = useclass.retrieve(test[x])
+                        if not isinstance(useclass, classcalc):
+                            raise ExecutionError("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
+                else:
+                    raise ExecutionError("VariableError", "Could not find class "+test[0])
+                useclass.remove(item)
+            else:
+                raise ExecutionError("VariableError", "Could not find "+original)
+            self.e.setreturned()
+            self.printdebug("< "+original+" >")
+        else:
+            for arg in variables:
+                self.delcall([arg])
+        return matrix(0)
+
+    def makecall(self, variables):
+        """Sets A Variable."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to make")
+        elif len(variables) == 1:
+            if isinstance(variables[0], codestr):
+                original = str(variables[0])
+                test = self.e.cmd_set(original)
+                if test is None:
+                    raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
+                else:
+                    return test
+            else:
+                raise ExecutionError("StatementError", "Can only call make as a statement")
+        else:
+            for arg in variables:
+                self.makecall([arg])
+        return matrix(0)
+
+    def defcall(self, original):
+        """Defines A Variable."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to def")
+        elif len(variables) == 1:
+            original = self.e.prepare(variables[0], True, True)
+            self.redef = True
+            test = self.e.cmd_set(original)
+            self.redef = False
+            if test:
+                self.e.setreturned()
+                return test
+            else:
+                raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
+        else:
+            for arg in variables:
+                self.defcall([arg])
+        return matrix(0)
 
     def printcall(self, variables, func=None):
         """Performs print."""
@@ -134,7 +344,7 @@ class mathbase(safebase):
             self.show(out)
         else:
             func(out)
-        self.setreturned()
+        self.e.setreturned()
         return rawstrcalc(out, self.e)
 
     def showcall(self, variables):
@@ -177,7 +387,7 @@ class mathbase(safebase):
             except IOError:
                 raise ExecutionError("IOError", "Could not find for install file "+inputstring)
             else:
-                self.setreturned()
+                self.e.setreturned()
                 if iseval(impclass):
                     return impclass(self)
                 elif hascall(impclass):
@@ -211,416 +421,16 @@ class mathbase(safebase):
             except IOError:
                 raise ExecutionError("IOError", "Could not find for save file "+original)
             else:
-                self.setreturned()
+                self.e.setreturned()
         else:
             for x in variables:
                 self.savecall([x])
         return matrix(0)
 
-    def populator(self):
-        """Creates An Evaluator And Lists Of Commands."""
-        self.pre_cmds = [
-            self.pre_cmd
-            ]
-        self.cmds = [
-            self.cmd_help,
-            self.cmd_debug,
-            self.cmd_run,
-            self.cmd_assert,
-            self.cmd_do,
-            self.cmd_del,
-            self.cmd_make,
-            self.cmd_def,
-            self.cmd_set,
-            self.cmd_normal
-            ]
-        self.set_cmds = [
-            self.set_def,
-            self.set_normal
-            ]
-        self.e = evaluator(processor=self)
-        self.fresh(True)
-        self.genhelp()
-
-    def fresh(self, top=True):
-        """Refreshes The Environment."""
-        if not top:
-            self.e.fresh()
-        self.e.makevars({
-            "save":funcfloat(self.savecall, self.e, "save"),
-            "install":funcfloat(self.installcall, self.e, "install"),
-            "print":funcfloat(self.printcall, self.e, "print"),
-            "show":funcfloat(self.showcall, self.e, "show"),
-            "ans":funcfloat(self.anscall, self.e, "ans"),
-            "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "clear":usefunc(self.clear, self.e, "clear", [])
-            })
-
-    def setreturned(self, value=True):
-        """Sets returned."""
-        self.returned = bool(value)
-
-    def clear(self):
-        """Clears The Console."""
-        self.app.clear()
-        self.setreturned()
-
-    def genhelp(self):
-        """Generates The helpstring."""
-        self.helpstring = "Commands:"
-        for cmd in self.cmds:
-            self.helpstring += "\n    "+namestr(cmd).split("_")[-1]
-
-    def initialize(self, args=()):
-        """Runs Any Files Fed To The Constructor."""
-        if istext(args):
-            self.evalfile(args)
-        else:
-            for x in args:
-                self.initialize(x)
-
-    def reset(self):
-        """Resets Top Variables."""
-        self.dumpdebug(True)
-        self.e.recursion = 0
-
-    def handler(self, event=None):
-        """Handles A Return Event."""
-        self.reset()
-        original = self.box.output()
-        cmd = carefulsplit(original, "#", '"`', {"\u201c":"\u201d"})[0]
-        if delspace(cmd) == "":
-            if len(self.box.commands) > 1:
-                self.process(self.box.commands[-2], True)
-        else:
-            self.box.add(original)
-            self.process(cmd, True)
-
-    def evalfile(self, name):
-        """Runs A File."""
-        try:
-            tempfile = openfile(name, "rb")
-        except IOError:
-            return False
-        else:
-            self.evaltext(readfile(tempfile))
-            tempfile.close()
-            return True
-
-    def evaltext(self, inputstring):
-        """Runs Text."""
-        cmdlist = inputstring.splitlines()
-        x = 0
-        while x < len(cmdlist):
-            self.reset()
-            cmdlist[x] = carefulsplit(cmdlist[x], "#", '"`', {"\u201c":"\u201d"})[0]
-            while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or iswhite(cmdlist[x+1][0])):
-                cmdlist[x] += "\n"+carefulsplit(cmdlist.pop(x+1), "#", '"`', {"\u201c":"\u201d"})[0]
-            self.process(cmdlist[x], True)
-            x += 1
-
-    def process(self, inputstring, top=False):
-        """Processes A Command."""
-        inputstring = basicformat(inputstring)
-        if inputstring != "":
-            if top:
-                self.saferun(self.doproc, inputstring, True)
-            else:
-                self.doproc(inputstring)
-
-    def doproc(self, inputstring, top=False):
-        """Does The Processing."""
-        inputstring = str(inputstring)
-        for func in self.pre_cmds:
-            if func(inputstring, top) is not None:
-                return True
-
-    def pre_cmd(self, inputstring, top=False):
-        """Evaluates Commands."""
-        for original in carefulsplit(inputstring, ";;", '"`', {"\u201c":"\u201d"}, {"{":"}"}):
-            if delspace(original) != "":
-                original = basicformat(original)
-                for func in self.cmds:
-                    if func(original) is not None:
-                        name = namestr(func).split("_")[-1]
-                        if top and name != "run":
-                            self.commands.append(original)
-                        self.printdebug("|: "+name)
-                        break
-        return True
-
-    def cmd_help(self, inputstring):
-        """Performs help."""
-        if superformat(inputstring).startswith("help"):
-            inputstring = inputstring[4:]
-            if inputstring == "":
-                self.show(self.helpstring, True)
-            elif inputstring[0] == " ":
-                self.show(self.findhelp(basicformat(inputstring)), True)
-            else:
-                return None
-            self.setreturned()
-            return True
-
-    def cmd_debug(self, original):
-        """Controls Debugging."""
-        if superformat(original).startswith("debug"):
-            original = original[5:]
-            if original == "":
-                self.setdebug(not self.debug)
-            elif original[0] == " ":
-                original = basicformat(original)
-                if formatisyes(original):
-                    self.setdebug(True)
-                elif formatisno(original):
-                    self.setdebug(False)
-                else:
-                    raise ExecutionError("StatementError", "Unrecognized debug state of "+original)
-            else:
-                return None
-            self.setreturned()
-            return True
-
-    def cmd_run(self, original):
-        """Performs run."""
-        if superformat(original).startswith("run "):
-            original = basicformat(original[4:])
-            if not self.evalfile(original):
-                raise ExecutionError("IOError", "Could not find file "+str(original))
-            else:
-                self.setreturned()
-                self.dumpdebug(True)
-                return True
-
-    def cmd_assert(self, original):
-        """Checks For Errors By Asserting That Something Is True."""
-        if superformat(original).startswith("assert "):
-            original = basicformat(original[7:])
-            if not self.e.test(original):
-                raise AssertionError("Assertion failed that "+original)
-            return True
-
-    def cmd_do(self, original):
-        """Evaluates Functions Silently."""
-        if superformat(original).startswith("do "):
-            test = self.calc(original[3:])
-            if test is not None and not isnull(test):
-                self.ans.append(test)
-            return True
-
-    def cmd_del(self, original):
-        """Deletes A Variable."""
-        if superformat(original).startswith("del "):
-            original = basicformat(original[4:])
-            if original in self.e.variables:
-                del self.e.variables[original]
-            elif "." in original:
-                test = original.split(".")
-                item = test.pop()
-                useclass = self.e.find(test[0], True)
-                if isinstance(useclass, classcalc):
-                    last = useclass
-                    for x in xrange(1, len(test)):
-                        useclass = useclass.retrieve(test[x])
-                        if not isinstance(useclass, classcalc):
-                            raise ExecutionError("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
-                else:
-                    raise ExecutionError("VariableError", "Could not find class "+test[0])
-                useclass.remove(item)
-            else:
-                raise ExecutionError("VariableError", "Could not find "+original)
-            self.printdebug("< "+original+" >")
-            return True
-
-    def cmd_make(self, original):
-        """Sets A Variable."""
-        if superformat(original).startswith("make "):
-            test = self.cmd_set(original[5:])
-            if test:
-                return test
-            else:
-                raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
-
-    def cmd_def(self, original):
-        """Defines A Variable."""
-        if superformat(original).startswith("def "):
-            self.redef = True
-            test = self.cmd_set(original[4:])
-            self.redef = False
-            if test:
-                self.setreturned()
-                return test
-            else:
-                raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
-
-    def cmd_set(self, original):
-        """Evaluates Definition Commands."""
-        if "=" in original:
-            sides = original.split("=", 1)
-            sides[0] = basicformat(sides[0])
-            sides[1] = basicformat(sides[1])
-            docalc = False
-            if sides[0].endswith(":"):
-                sides[0] = sides[0][:-1]
-                docalc = True
-            sides[0] = carefulsplit(sides[0], ",", '"`', {"\u201c":"\u201d"}, self.e.groupers)
-            if len(sides[0]) > 1:
-                test = True
-                for x in sides[0]:
-                    test = test and self.readytofunc(x)
-                if test:
-                    sides[1] = self.calc(sides[1])
-                    func = diagmatrixlist
-                    if isinstance(sides[1], matrix):
-                        if sides[1].onlydiag():
-                            sides[1] = sides[1].getitems()
-                        else:
-                            sides[1] = sides[1].items()
-                            func = rowmatrixlist
-                    elif isinstance(sides[1], strcalc):
-                        sides[1] = sides[1].tomatrix().getitems()
-                        func = None
-                    else:
-                        sides[1] = [sides[1]]
-                    for x in xrange(0, len(sides[0])):
-                        if x == len(sides[0])-1:
-                            toset = sides[1][x:]
-                        else:
-                            toset = sides[1][x:x+1]
-                        if len(toset) == 0:
-                            toset = matrix(0)
-                        elif len(toset) == 1:
-                            toset = toset[0]
-                        elif func is not None:
-                            toset = func(toset)
-                        else:
-                            itemlist = toset
-                            toset = itemlist.pop(0)
-                            for item in itemlist:
-                                toset += item
-                        if not self.cmd_set_do([sides[0][x], self.e.wrap(toset)], docalc):
-                            raise ExecutionError("VariableError", "Could not multi-set to invalid variable "+sides[0][x])
-                    return True
-            else:
-                sides[0] = sides[0][0]
-                return self.cmd_set_do(sides, docalc)
-                
-    def cmd_set_do(self, sides, docalc):
-        """Performs The Definition Command."""
-        sides[0] = sides[0].split("(", 1)
-        if len(sides[0]) > 1:
-            sides[0] = delspace(sides[0][0])+"("+sides[0][1]
-        else:
-            sides[0] = delspace(sides[0][0])
-        if self.readytofunc(sides[0], allowed="."):
-            useclass = None
-            if self.useclass:
-                classlist = [self.useclass]
-            else:
-                classlist = []
-            if "." in sides[0]:
-                classlist += sides[0].split(".")
-                for x in xrange(0, len(classlist)-1):
-                    if self.e.isreserved(classlist[x]):
-                        return False
-                sides[0] = classlist.pop()
-                useclass = self.e.find(classlist[0], True)
-                if isinstance(useclass, classcalc):
-                    for x in xrange(1, len(classlist)):
-                        last = useclass
-                        useclass = useclass.retrieve(classlist[x])
-                        if not isinstance(useclass, classcalc):
-                            if istext(useclass) and len(classlist) == x+1:
-                                sides[1] = "( "+useclass+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
-                                sides[0] = classlist[x]
-                                useclass = last
-                                classlist = classlist[:x]
-                                docalc = False
-                                break
-                            else:
-                                raise ExecutionError("ClassError", "Could not set "+classlist[x]+" in "+self.e.prepare(last, False, True, True))
-                elif classlist[0] in self.e.variables and istext(self.e.variables[classlist[0]]) and len(classlist) == 1:
-                    sides[1] = "( "+self.e.variables[classlist[0]]+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
-                    sides[0] = classlist[0]
-                    useclass = None
-                    classlist = []
-                    docalc = False
-                else:
-                    raise ExecutionError("VariableError", "Could not find class "+self.e.prepare(classlist[0], False, True, True))
-            elif self.useclass:
-                useclass = self.e.funcfind(self.useclass)
-            sides[1] = basicformat(sides[1])
-            for func in self.set_cmds:
-                value = func(sides)
-                if value is not None:
-                    if not isinstance(value, tuple):
-                        value = sides[0], value
-                    self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.e.prepare(value[1], False, True, True))
-                    if useclass is None:
-                        if not self.redef and value[0] in self.e.variables:
-                            raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
-                        else:
-                            if docalc:
-                                self.e.variables[value[0]] = self.trycalc(value[1])
-                            else:
-                                self.e.variables[value[0]] = value[1]
-                    else:
-                        if not self.redef and value[0] in useclass.variables:
-                            raise ExecutionError("RedefinitionError", "The attribute "+value[0]+" already exists")
-                        else:
-                            if docalc:
-                                useclass.store(value[0], self.trycalc(value[1]))
-                            else:
-                                useclass.store(value[0], value[1])
-                    return True
-
-    def readytofunc(self, expression, extra="", allowed=""):
-        """Determines If An Expression Could Be Turned Into A Function."""
-        funcparts = expression.split("(", 1)
-        top = True
-        if len(funcparts) == 1 and self.e.parenchar in funcparts[0]:
-                funcparts = funcparts[0].split(self.e.parenchar, 1)
-                top = False
-        out = funcparts[0] != "" and (not self.e.isreserved(funcparts[0], extra, allowed)) and (len(funcparts) == 1 or funcparts[1].endswith(")"*top or self.e.parenchar))
-        if out and len(funcparts) != 1:
-            return not isinside(funcparts[1][:-1], '"`', {"\u201c":"\u201d"}, self.e.groupers)
-        else:
-            return out
-
-    def set_def(self, sides):
-        """Creates Functions."""
-        top = None
-        if "(" in sides[0] and sides[0].endswith(")"):
-            top = True
-        elif self.e.parenchar in sides[0] and sides[0].endswith(self.e.parenchar):
-            top = False
-        if top is not None:
-            if top:
-                sides[0] = sides[0][:-1].split("(", 1)
-            else:
-                sides[0] = sides[0].split(self.e.parenchar, 1)
-                sides[0][1] = self.e.namefind(self.e.parenchar+sides[0][1])
-            params, personals, allargs, reqargs = self.e.eval_set(sides[0][1].split(","))
-            return (sides[0][0], strfunc(sides[1], self.e, params, personals, allargs=allargs, reqargs=reqargs))
-
-    def set_normal(self, sides):
-        """Performs =."""
-        if not self.e.isreserved(sides[0]):
-            return sides[1]
-
-    def cmd_normal(self, original):
-        """Evaluates Functions."""
-        test = self.calc(original)
-        if test is not None:
-            self.ans.append(test)
-            if self.doshow and not isnull(self.ans[-1]):
-                self.show(self.e.prepare(self.ans[-1], True, True))
-            return True
-
     def trycalc(self, inputobject):
         """Attempts To Calculate A Variable."""
         if istext(inputobject):
-            return self.calc(inputobject)
+            return self.e.calc(inputobject)
         else:
             return inputobject
 

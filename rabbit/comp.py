@@ -30,6 +30,7 @@ class compiler(commandline):
     debug = False
     doshow = False
     compiling = False
+    normcommand = lambda: None
 
     def __init__(self, debugcolor="lightred", mainprompt=addcolor("Rabbit:", "pink")+" ", prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", *initializers):
         """Initializes The Command Line Interface."""
@@ -37,6 +38,7 @@ class compiler(commandline):
         self.app = terminal()
         self.populator()
         self.e.color = debugcolor
+        self.e.proc_set = self.proc_set
         self.mainprompt = str(mainprompt)
         self.prompt = str(prompt)
         self.moreprompt = str(moreprompt)
@@ -136,34 +138,16 @@ class compiler(commandline):
         self.compiling = compiling
         return self.assemble()
 
-    def populator(self):
-        """Creates An Evaluator And Lists Of Commands."""
-        self.pre_cmds = [
-            self.pre_cmd
-            ]
-        self.cmds = [
-            self.cmd_assert,
-            self.cmd_run,
-            self.cmd_do,
-            self.cmd_del,
-            self.cmd_make,
-            self.cmd_def,
-            self.cmd_set,
-            self.cmd_normal
-            ]
-        self.set_cmds = [
-            self.set_def,
-            self.set_normal
-            ]
-        self.e = evaluator(processor=self, speedy=True)
-        self.fresh(True)
-
-
     def fresh(self, top=True):
         """Refreshes The Environment."""
         if not top:
             self.e.fresh()
         self.e.makevars({
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "del":funcfloat(self.delcall, self.e, "del"),
+            "make":funcfloat(self.makecall, self.e, "make"),
+            "assert":funcfloat(self.comp_assertcall, self.e, "assert"),
+            "def":funcfloat(self.comp_defcall, self.e, "def"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show")
@@ -171,34 +155,46 @@ class compiler(commandline):
         self.commands = []
         self.makes = []
 
-    def pre_cmd(self, inputstring, top=False):
-        """Evaluates Commands."""
-        for original in carefulsplit(inputstring, ";;", '"`', {"\u201c":"\u201d"}, {"{":"}"}):
-            if delspace(original) != "":
-                original = basicformat(original)
-                for func in self.cmds:
-                    if func(original) is not None:
-                        name = namestr(func).split("_")[-1]
-                        if top and self.compiling:
-                            if name == "make":
-                                self.makes.append(original)
-                            elif not name in ["assert", "run", "set", "def"]:
-                                self.commands.append(original)
-                        self.printdebug("|: "+name)
-                        break
+    def comp_assertcall(self, variables):
+        """Wrapper around assertcall."""
+        out = self.assertcall(variables)
+        self.e.setspawned()
+        return out
 
-    def cmd_do(self, original):
-        """Evaluates Functions Silently."""
-        if superformat(original).startswith("do "):
-            original = original[3:]
-            self.calc(original)
-            return True
+    def comp_defcall(self, variables):
+        """Wrapper around defcall."""
+        out = self.defcall(variables)
+        self.e.setspawned()
+        return out
 
-    def cmd_normal(self, original):
-        """Evaluates Functions."""
-        test = self.calc(original)
-        if test is not None:
-            return True
+    def proc_set(self, inputstring):
+        """Replaces self.e.proc_set."""
+        if self.e.cmd_set(inputstring):
+            self.e.setspawned()
+            return matrix(0)
+        else:
+            return self.e.proc_calc(inputstring)
+
+    def makecall(self, variables):
+        """Adds To Make Commands."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to make")
+        elif len(variables) == 1:
+            if isinstance(variables[0], codestr):
+                original = str(variables[0])
+                test = self.e.cmd_set(original)
+                if test is None:
+                    raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
+                else:
+                    self.makes.append(original)
+                    self.e.setspawned()
+                    return test
+            else:
+                raise ExecutionError("StatementError", "Can only call make as a statement")
+        else:
+            for arg in variables:
+                self.makecall([arg])
+        return matrix(0)
 
     def assemble(self, protocol=0):
         """Compiles Code."""

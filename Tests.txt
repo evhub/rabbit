@@ -1,81 +1,81 @@
 # Boolean Operator Tests:
-assert 1 ?= 1
-assert ? 1 ?= 1
-assert ! 1 ?= 2
-assert 1 >=< 2
-assert 1 < 2 <= 2
-assert 2 !< 1
-assert 1 ≠ 2
-assert (?5) ?= 1
-assert (!5) ?= 0
-assert 1 & 2 > 1
-assert 1 <= 0 | 1
-assert 1 @ 2 > 1
-assert 0 @ 4 ! 4; 1
+assert :: 1 ?= 1
+assert :: ? 1 ?= 1
+assert :: ! 1 ?= 2
+assert :: 1 >=< 2
+assert :: 1 < 2 <= 2
+assert :: 2 !< 1
+assert :: 1 ≠ 2
+assert :: (?5) ?= 1
+assert :: (!5) ?= 0
+assert :: 1 & 2 > 1
+assert :: 1 <= 0 | 1
+assert :: 1 @ 2 > 1
+assert :: 0 @ 4 ! 4; 1
 
 # Math Tests:
-assert 1+1 ?= 2
-assert 3-5 ?= -2
-assert 2*3 ?= 6
-assert 1/2 ?= 0.5
-assert 3^2 ?= 9
-assert 8%3 ?= 2
-assert 1+2-3 ?= 0
-assert 3*4/5 ?= 2.4
+assert :: 1+1 ?= 2
+assert :: 3-5 ?= -2
+assert :: 2*3 ?= 6
+assert :: 1/2 ?= 0.5
+assert :: 3^2 ?= 9
+assert :: 8%3 ?= 2
+assert :: 1+2-3 ?= 0
+assert :: 3*4/5 ?= 2.4
 
 # Matrix Tests:
-assert 1,2,3 ?= (1,2,3)
-assert (1,2,3)*2 ?= 2,4,6
-assert (1,2,3)+10 ?= 11,12,13
-assert (1,2)+(10,20) ?= 11,22
-assert (1,2)*(10,20) ?= 10,40
-assert [1,2]*[10,20] ?= 50
-assert [1,0,0]%[0,1,0] ?= [0,0,1]
-assert [1,2] ++ [3,4] ?= [1,2,3,4]
-assert [2] ?= [1,2] -- 1
-assert (1,2) ** 2 ?= 1,2,1,2
-assert (1,2,3):2 ?= 3
-assert [1,2,3,4]:1 ?= 2
-assert (1,2,3):0:2 ?= 1,2
+assert :: 1,2,3 ?= (1,2,3)
+assert :: (1,2,3)*2 ?= 2,4,6
+assert :: (1,2,3)+10 ?= 11,12,13
+assert :: (1,2)+(10,20) ?= 11,22
+assert :: (1,2)*(10,20) ?= 10,40
+assert :: [1,2]*[10,20] ?= 50
+assert :: [1,0,0]%[0,1,0] ?= [0,0,1]
+assert :: [1,2] ++ [3,4] ?= [1,2,3,4]
+assert :: [2] ?= [1,2] -- 1
+assert :: (1,2) ** 2 ?= 1,2,1,2
+assert :: (1,2,3):2 ?= 3
+assert :: [1,2,3,4]:1 ?= 2
+assert :: (1,2,3):0:2 ?= 1,2
 
 # Variable Setting Tests:
-assert x ?= 1			$ x = 1
-assert x ?= 1			$ x := 1
-assert 2(x) ?= 2		$ x = 1
-assert 2x ?= 2			$ x = 1
+assert :: x ?= 1			$ x = 1
+assert :: x ?= 1			$ x := 1
+assert :: 2(x) ?= 2		$ x = 1
+assert :: 2x ?= 2			$ x = 1
 
 # Function Tests:
-assert t()+1 ?= t:+1 ?= 2							$ t() = 1
-assert f(2,)*3 ?= f:2*3 ?= f(2)*3 ?= 9				$ f(x) = x+1
-assert g(2,3)-5 ?= g:2:3-5 ?= 7						$ g(x,y) = 2*x*y
-assert add(a) ?= 6									$ a = 1,2,3 $ add(x,y,z) = x+y+z
-assert plusone(1,2,3) ?= 2,3,4						$ plusone(l) = l+1
-assert \1 ?= one									$ one() = 1
-assert (\x\x+1):5 ?= (\x\(x+1)):5 ?= 6
-assert (\(x,y)\(x+y))(1,2) ?= 3
-assert (\(-x:1)\x): ?= 1
-assert gen_func:2:5 ?= 1							$ gen_func(n) = \x\(x%n)
-assert gen_func:2:5 ?= 1							$ gen_func(n) = \x,n:n\(x%n)
-assert inlist[1,2,3] ?= [1,2,3],					$ inlist(l) = l,
+assert :: t()+1 ?= t:+1 ?= 2							$ t() = 1
+assert :: f(2,)*3 ?= f:2*3 ?= f(2)*3 ?= 9				$ f(x) = x+1
+assert :: g(2,3)-5 ?= g:2:3-5 ?= 7						$ g(x,y) = 2*x*y
+assert :: add(a) ?= 6									$ a = 1,2,3 $ add(x,y,z) = x+y+z
+assert :: plusone(1,2,3) ?= 2,3,4						$ plusone(l) = l+1
+assert :: \1 ?= one									$ one() = 1
+assert :: (\x\x+1):5 ?= (\x\(x+1)):5 ?= 6
+assert :: (\(x,y)\(x+y))(1,2) ?= 3
+assert :: (\(-x:1)\x): ?= 1
+assert :: gen_func:2:5 ?= 1							$ gen_func(n) = \x\(x%n)
+assert :: gen_func:2:5 ?= 1							$ gen_func(n) = \x,n:n\(x%n)
+assert :: inlist[1,2,3] ?= [1,2,3],					$ inlist(l) = l,
 
 # String Tests:
-assert "hello, "+"world" ?= "hello, world"
-assert "Answer: "+1 ?= "Answer: 1"
-assert "hello"*2 ?= "hellohello"
-assert "01234":2 ?= "2"
-assert "01234":1:3 ?= "12"
-assert a"b" ?= "ab"									$ a(x) = "a"+x
+assert :: "hello, "+"world" ?= "hello, world"
+assert :: "Answer: "+1 ?= "Answer: 1"
+assert :: "hello"*2 ?= "hellohello"
+assert :: "01234":2 ?= "2"
+assert :: "01234":1:3 ?= "12"
+assert :: a"b" ?= "ab"									$ a(x) = "a"+x
 
 # Class Tests:
-assert { x = 1 } ?= { x = 1 }
-assert { x = 1 } != { x = 2 }
-assert { y = 2 ;; x = 1 }.y ?= 2
-assert a.x ?= 1										$ a = { x = 1 }
-assert a.x ?= 1										$ a := { x = 1 }
-assert a.f(2) ?= a.f:2 ?= 3							$ a = { f(x) = x+1 }
-assert a:"x+1" ?= 2									$ a = { x = 1 }
-assert b ?= { z = 5 }								$ b = a + {z=5} $ a = {}
-assert { x = 1 } + { z = 5 } ?= { x = 1 ;; z = 5 }
+assert :: { x = 1 } ?= { x = 1 }
+assert :: { x = 1 } != { x = 2 }
+assert :: { y = 2 ;; x = 1 }.y ?= 2
+assert :: a.x ?= 1										$ a = { x = 1 }
+assert :: a.x ?= 1										$ a := { x = 1 }
+assert :: a.f(2) ?= a.f:2 ?= 3							$ a = { f(x) = x+1 }
+assert :: a:"x+1" ?= 2									$ a = { x = 1 }
+assert :: b ?= { z = 5 }								$ b = a + {z=5} $ a = {}
+assert :: { x = 1 } + { z = 5 } ?= { x = 1 ;; z = 5 }
 
 # Instance Tests:
 nothing := {
@@ -110,67 +110,67 @@ nothing := {
  __rrep__(self, other) = ()
  }
 nil := nothing()
-assert type(nil) ?= "nil"
-assert nil.thing ?= "thing"
-assert nil(1,2) ?= 1,2
-assert cont(nil) ?= []
-assert nil+1 ?= 1 ?= 1+nil
-assert nil-1 ?= -1 ?= -(1-nil)
-assert nil*1 ?= 0 ?= 1*nil
-assert nil/1 ?= 0
-assert (:(1/nil)).name ?= "ZeroDivisionError"
-assert nil%1 ?= 0
-assert (:(1%nil)).name ?= "ZeroDivisionError"
-assert nil^1 ?= 0
-assert 1^nil ?= 1
-assert nil ?= 0 ?= nil
-assert nil != 1 != nil
-assert nil > -1 < nil
-assert nil < 1 > nil
-assert nil >= -.5 <= nil
-assert nil <= .5 >= nil
-assert num(nil) ?= 0
-assert abs(nil) ?= 0
-assert str(nil) ?= "nil"
-assert repr(nil) ?= `\nil`
-assert len(nil) ?= 0
-assert (?nil) ?= 0
-assert nil**2 ?= [nil,nil]
-assert 2**nil ?= ()
-assert {} ++ { x = 1 } ?= { x = 1 }
-assert type({}() ++ { x = 1 }) ?= "instance"
-assert { nothing := nothing ;; nil := nil } ?= { nil := nil ;; nothing := nothing }
+assert :: type(nil) ?= "nil"
+assert :: nil.thing ?= "thing"
+assert :: nil(1,2) ?= 1,2
+assert :: cont(nil) ?= []
+assert :: nil+1 ?= 1 ?= 1+nil
+assert :: nil-1 ?= -1 ?= -(1-nil)
+assert :: nil*1 ?= 0 ?= 1*nil
+assert :: nil/1 ?= 0
+assert :: (:(1/nil)).name ?= "ZeroDivisionError"
+assert :: nil%1 ?= 0
+assert :: (:(1%nil)).name ?= "ZeroDivisionError"
+assert :: nil^1 ?= 0
+assert :: 1^nil ?= 1
+assert :: nil ?= 0 ?= nil
+assert :: nil != 1 != nil
+assert :: nil > -1 < nil
+assert :: nil < 1 > nil
+assert :: nil >= -.5 <= nil
+assert :: nil <= .5 >= nil
+assert :: num(nil) ?= 0
+assert :: abs(nil) ?= 0
+assert :: str(nil) ?= "nil"
+assert :: repr(nil) ?= `\nil`
+assert :: len(nil) ?= 0
+assert :: (?nil) ?= 0
+assert :: nil**2 ?= [nil,nil]
+assert :: 2**nil ?= ()
+assert :: {} ++ { x = 1 } ?= { x = 1 }
+assert :: type({}() ++ { x = 1 }) ?= "instance"
+assert :: { nothing := nothing ;; nil := nil } ?= { nil := nil ;; nothing := nothing }
 
 # Multi-Line Tests:
-assert # A mid-line comment
+assert :: # A mid-line comment
  1 ?= 1
-assert f(-2) ?= 1/2
+assert :: f(-2) ?= 1/2
  $ f(x) =
   x+1 @ x>0;
   -1/x
-assert a.f(1) ?= 1
+assert :: a.f(1) ?= 1
  $ a = {
   f(x) = x
   x = 1
   }
 
 # With Clause Tests:
-assert f(1.5) ?= 5			$ f(x) = (gx*floor(gx) $ gx = g(x)) $ g(x) = x+1
-assert f(1.5) ?= 5			$ f(x) = { g(x) = x+1 ;; gx = g(x) } : "gx*floor(gx)"
-assert g(4) ?= 6			$ g(x) = (m(z) $ z = x^2 $ m(z) = z%10)
-assert g(4) ?= 6			$ g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
+assert :: f(1.5) ?= 5			$ f(x) = (gx*floor(gx) $ gx = g(x)) $ g(x) = x+1
+assert :: f(1.5) ?= 5			$ f(x) = { g(x) = x+1 ;; gx = g(x) } : "gx*floor(gx)"
+assert :: g(4) ?= 6			$ g(x) = (m(z) $ z = x^2 $ m(z) = z%10)
+assert :: g(4) ?= 6			$ g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
 
 # Loop Tests:
-assert 1,2,3~ \x\x ?= 1,2,3
-assert 1,2,3,4~~ \(x,y)\(x+y) ?= 3,7
-assert 10,20~ 1,2~ \(x,y)\(x+y) ?= (11,12),(21,22)
+assert :: 1,2,3~ \x\x ?= 1,2,3
+assert :: 1,2,3,4~~ \(x,y)\(x+y) ?= 3,7
+assert :: 10,20~ 1,2~ \(x,y)\(x+y) ?= (11,12),(21,22)
 
 # Multi-Set Tests:
-assert a,b ?= 1,2						$ a,b = 1,2
-assert a ?= 1 & b ?= 2					$ a,b = 1,2
-assert a ?= 1 & b ?= 2,3				$ a,b = 1,2,3
-assert a ?= 1 & ! b						$ a,b = 1
-assert smoosh((1,2),(3,4)) ?= 1,2,3,4
+assert :: a,b ?= 1,2						$ a,b = 1,2
+assert :: a ?= 1 & b ?= 2					$ a,b = 1,2
+assert :: a ?= 1 & b ?= 2,3				$ a,b = 1,2,3
+assert :: a ?= 1 & ! b						$ a,b = 1
+assert :: smoosh((1,2),(3,4)) ?= 1,2,3,4
  $ smoosh(a) = (
   x ++ smoosh(xs) @ xs;
   x
@@ -178,32 +178,32 @@ assert smoosh((1,2),(3,4)) ?= 1,2,3,4
   )
 
 # Miscellaneous Tests:
-assert f.g(2) ?= 9						$ f(x) = x^2 $ g(x) = x+1
-assert applyplus(0,-2) ?= 1,-1			$ applyplus(__) = __~\x\(x+1)
-assert (x $ x = 1) ?= 1
+assert :: f.g(2) ?= 9						$ f(x) = x^2 $ g(x) = x+1
+assert :: applyplus(0,-2) ?= 1,-1			$ applyplus(__) = __~\x\(x+1)
+assert :: (x $ x = 1) ?= 1
 
 # Expression Tests:
-assert (1,2,3) ?= 1,2,3~ \x\x
-assert \x\(x+1) ?= \x\x+1
-assert (1,2,3,4) ?= 1,2 ++ 3,4
-assert (2,) ?= 1,2 -- 1
-assert (1,2,1,2) ?= 1,2 ** 2
-assert (1,2,3,4) ?= 1,2,3,4
-assert 0 ?= 1+2-3
-assert 0 ?= 6 % 3
-assert 2.4 ?= 3*4/5
+assert :: (1,2,3) ?= 1,2,3~ \x\x
+assert :: \x\(x+1) ?= \x\x+1
+assert :: (1,2,3,4) ?= 1,2 ++ 3,4
+assert :: (2,) ?= 1,2 -- 1
+assert :: (1,2,1,2) ?= 1,2 ** 2
+assert :: (1,2,3,4) ?= 1,2,3,4
+assert :: 0 ?= 1+2-3
+assert :: 0 ?= 6 % 3
+assert :: 2.4 ?= 3*4/5
 
 # Complex Tests:
-assert mod:3:2 ?= 1
+assert :: mod:3:2 ?= 1
  $ mod(x,y) = (xy+-1*floor:(xy))*y $ xy = x/y
-assert slope:(\x\x):1:2 ?= 1
+assert :: slope:(\x\x):1:2 ?= 1
  $ slope(f, a,b) = (f:b+-f:a)/(b+-a)
-assert parts:(1,2,3,4) ?= 1,(2,3,4)
+assert :: parts:(1,2,3,4) ?= 1,(2,3,4)
  $ parts(l) = (
   a,as
   $ a,as = l
  )
-assert max(1,0,9,6,8,3) ?= 9
+assert :: max(1,0,9,6,8,3) ?= 9
  $ max(l) = (
   (
    a @ a > maxtail;
@@ -213,7 +213,7 @@ assert max(1,0,9,6,8,3) ?= 9
   a
   $ a,as = l
  )
-assert zip:(1,2):(10,20) ?= (1,10),(2,20)
+assert :: zip:(1,2):(10,20) ?= (1,10),(2,20)
  $ zip(la, lb) =
   (
    (a,b), ++ zip:as:bs
@@ -221,17 +221,17 @@ assert zip:(1,2):(10,20) ?= (1,10),(2,20)
    $ b,bs = lb
    )
   @ len:la & len:lb
-assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
+assert :: qsort(9,0,6,3,8) ?= 0,3,6,8,9
  $ qsort(l) = (
    qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
    $ a,as = l
    ) @ len:l
-assert qsort(9,0,6,3,8) ?= 0,3,6,8,9
+assert :: qsort(9,0,6,3,8) ?= 0,3,6,8,9
  $ qsort(l) = (
    qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
    $ a,as = l
    ) @ l,
-assert range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop")
+assert :: range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop")
  $ crackle pop (x) = (
     "CracklePop"
         @ div by three & div by five;
@@ -243,7 +243,7 @@ assert range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackl
     $ div by three = x%3 ?= 0
     $ div by five = x%5 ?= 0
  )
-assert crackle pop (15) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop")
+assert :: crackle pop (15) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop")
  $ crackle pop (end, -x:1, -mod three:1, -mod five:1) =
   (
    "CracklePop"
@@ -258,108 +258,108 @@ assert crackle pop (15) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",
   ( crackle pop (end, x+1, (mod three+1) % 3, (mod five+1) % 5)
     @ x < end
     )
-assert sum( 2**20~~ \(x,y)\(x!=y) ) ?= 0
+assert :: sum( 2**20~~ \(x,y)\(x!=y) ) ?= 0
 
 # Built-Ins Tests:
-assert a != b					$ def b.x = 2 $ b := copy(a) $ a := { x = 1 }
-assert type:(1,2,3) ?= "list"
-assert num"1" ?= 1
-assert (to:"num"):"1" ?= 1
-assert str:"a" ?= "a"
-assert repr:"a" ?= "\'a\'"
-assert calc:"1" ?= 1
-assert fold:\(x,y)\(x+y):(1,2,3) ?= 6
-assert (D:\x\x):0 ?= 1
-assert 1.999 < (S:\x\x):0:2 < 2.001
-assert row(1,2,3) ?= [1,2,3]
-assert list[1,2,3] ?= 1,2,3
-assert matrix:[1,2]:[3,4]+1 ?= matrix:[2,3]:[4,5]
-assert cont:"abc" ?= "a","b","c"
-assert det:(matrix:[1,2]:[3,4]) ?= -2
-assert sum(2,2,3) ?= 7
-assert prod(2,2,3) ?= 12
-assert join:",":[1,2] ?= "1,2"
-assert connect:[1,2]:[3,4] ?= matrix:[1,2]:[3,4]
-assert merge:(1,(2,2)):(3,4) ?= 1,2,2,3,4
-assert sort(1,0,9,5) ?= 0,1,5,9
-assert rev(1,2,3) ?= 3,2,1
-assert round(1.5) ?= 2
-assert eval:\1 ?= 1
-assert find:"a":(0,1,"a",3,4) ?= 2
-assert split:"abcde":"c" ?= "ab","de"
-assert replace:"abc":"b":"" ?= "ac"
-assert in:(0,1,2,3):2
-assert range(1,6,2) ?= 1,3,5
-assert len:(0,0,(0,0)) ?= 3
-assert size:(0,(0,0),0) ?= 4
-assert abs([3,4]) ?= 5
-assert cont:(data:(1,2,3)) ?= 1,2,3
-assert frac:1:2 ?= 0.5
-assert simp:2:4 ?= frac:1:2
-assert 2 <= 2d6: <= 12
-assert floor:1.5 ?= ceil:0.5 ?= 1
-assert log(100) ?= 2
-assert ln(e) ?= 1
-assert sqrt(2) ?= 2^0.5
-assert sqrt(-1) ?= i
-assert tan(0) ?= 0
-assert 0 <= sin(pi) <= 10^-15
-assert cos(0) ?= 1
-assert atan(0) ?= 0
-assert asin(0) ?= 0
-assert acos(1) ?= 0
-assert deg:(rad:180) ?= 180
-assert fact:3 ?= 6
-assert gcd:8:6 ?= 2
-assert lcm:4:6 ?= 12
-assert perm:5:2 ?= 20
-assert comb:4:2 ?= 6
-assert env().a ?= a ?= 2		$ a = 2
-assert iserr(error())
-assert iserr(:raise())
-assert from(error, error())
-assert from(error, :raise())
-assert var:"a" ?= "b"			$ a = b
-assert a ?= 5					$ proc("a = 5")
-assert num(i) ?= i
-assert real(i) ?= 0
-assert imag(i) ?= 1
-assert except( try: (1/0), "ZeroDivisionError" )
-assert except( try: (1/0), try: (1/0) )
-assert int(1.5) ?= 1
-assert class({}()) ?= {}
-assert type(class({}())) ?= "class"
-assert '1 ?= 2
-assert is:"a":"a" & is(5,5,5)
-assert 0 ?= ¬1
-assert 0.5 ?= ½
-assert " " ?= ␠
-assert 5E6 ?= 5 000 000
-assert paren() ?= parens():-1	$ (123)
+assert :: a != b					$ (def :: b.x = 2) $ b := copy(a) $ a := { x = 1 }
+assert :: type:(1,2,3) ?= "list"
+assert :: num"1" ?= 1
+assert :: (to:"num"):"1" ?= 1
+assert :: str:"a" ?= "a"
+assert :: repr:"a" ?= "\'a\'"
+assert :: calc:"1" ?= 1
+assert :: fold:\(x,y)\(x+y):(1,2,3) ?= 6
+assert :: (D:\x\x):0 ?= 1
+assert :: 1.999 < (S:\x\x):0:2 < 2.001
+assert :: row(1,2,3) ?= [1,2,3]
+assert :: list[1,2,3] ?= 1,2,3
+assert :: matrix:[1,2]:[3,4]+1 ?= matrix:[2,3]:[4,5]
+assert :: cont:"abc" ?= "a","b","c"
+assert :: det:(matrix:[1,2]:[3,4]) ?= -2
+assert :: sum(2,2,3) ?= 7
+assert :: prod(2,2,3) ?= 12
+assert :: join:",":[1,2] ?= "1,2"
+assert :: connect:[1,2]:[3,4] ?= matrix:[1,2]:[3,4]
+assert :: merge:(1,(2,2)):(3,4) ?= 1,2,2,3,4
+assert :: sort(1,0,9,5) ?= 0,1,5,9
+assert :: rev(1,2,3) ?= 3,2,1
+assert :: round(1.5) ?= 2
+assert :: eval:\1 ?= 1
+assert :: find:"a":(0,1,"a",3,4) ?= 2
+assert :: split:"abcde":"c" ?= "ab","de"
+assert :: replace:"abc":"b":"" ?= "ac"
+assert :: in:(0,1,2,3):2
+assert :: range(1,6,2) ?= 1,3,5
+assert :: len:(0,0,(0,0)) ?= 3
+assert :: size:(0,(0,0),0) ?= 4
+assert :: abs([3,4]) ?= 5
+assert :: cont:(data:(1,2,3)) ?= 1,2,3
+assert :: frac:1:2 ?= 0.5
+assert :: simp:2:4 ?= frac:1:2
+assert :: 2 <= 2d6: <= 12
+assert :: floor:1.5 ?= ceil:0.5 ?= 1
+assert :: log(100) ?= 2
+assert :: ln(e) ?= 1
+assert :: sqrt(2) ?= 2^0.5
+assert :: sqrt(-1) ?= i
+assert :: tan(0) ?= 0
+assert :: 0 <= sin(pi) <= 10^-15
+assert :: cos(0) ?= 1
+assert :: atan(0) ?= 0
+assert :: asin(0) ?= 0
+assert :: acos(1) ?= 0
+assert :: deg:(rad:180) ?= 180
+assert :: fact:3 ?= 6
+assert :: gcd:8:6 ?= 2
+assert :: lcm:4:6 ?= 12
+assert :: perm:5:2 ?= 20
+assert :: comb:4:2 ?= 6
+assert :: env().a ?= a ?= 2		$ a = 2
+assert :: iserr(error())
+assert :: iserr(:raise())
+assert :: from(error, error())
+assert :: from(error, :raise())
+assert :: var:"a" ?= "b"			$ a = b
+assert :: a ?= 5					$ proc("a = 5")
+assert :: num(i) ?= i
+assert :: real(i) ?= 0
+assert :: imag(i) ?= 1
+assert :: except( try: (1/0), "ZeroDivisionError" )
+assert :: except( try: (1/0), try: (1/0) )
+assert :: int(1.5) ?= 1
+assert :: class({}()) ?= {}
+assert :: type(class({}())) ?= "class"
+assert :: '1 ?= 2
+assert :: is:"a":"a" & is(5,5,5)
+assert :: 0 ?= ¬1
+assert :: 0.5 ?= ½
+assert :: " " ?= ␠
+assert :: 5E6 ?= 5 000 000
+assert :: paren() ?= parens():-1	$ (123)
 
 # New Feature Tests:
-assert f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
-assert f() ?= 5, & f(1) ?= 1,				$ f(*l:(5,)) = l
-assert a ?= 1 & b ?= [2,3]					$ a,b = [1,2,3]
-assert a ?= "a" & b ?= "bc"					$ a,b = "abc"
-assert "∑" ?= "\u2211"
-assert π ?= pi
-assert "\'\\'\\n#" ?= `"\'\n#`
-assert :(1) ?= 1
-assert {x=1}~\x\x ?= "x",
-assert {x=1 ;; y=2} ?= {
+assert :: f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
+assert :: f() ?= 5, & f(1) ?= 1,				$ f(*l:(5,)) = l
+assert :: a ?= 1 & b ?= [2,3]					$ a,b = [1,2,3]
+assert :: a ?= "a" & b ?= "bc"					$ a,b = "abc"
+assert :: "∑" ?= "\u2211"
+assert :: π ?= pi
+assert :: "\'\\'\\n#" ?= `"\'\n#`
+assert :: :(1) ?= 1
+assert :: {x=1}~\x\x ?= "x",
+assert :: {x=1 ;; y=2} ?= {
    x = 1
   
    y =
     2
  }
-assert {x=1 ;; y=2} > {x=1}
-assert ! {x=1 ;; y=2} > {z=1}
-assert {x=1} >= {x=1}
-assert {x=1} <= {x=1}
-assert iserr(try:raise())
-assert :except( :(1/0) ) ?= :(1/0)
-assert :raise( ComplicatedError() ) ?= ComplicatedError()
+assert :: {x=1 ;; y=2} > {x=1}
+assert :: ! {x=1 ;; y=2} > {z=1}
+assert :: {x=1} >= {x=1}
+assert :: {x=1} <= {x=1}
+assert :: iserr(try:raise())
+assert :: :except( :(1/0) ) ?= :(1/0)
+assert :: :raise( ComplicatedError() ) ?= ComplicatedError()
 	$ ComplicatedError := error + {
 									name := "ComplicatedError"
 									message := "A complicated error occurred"
@@ -367,55 +367,55 @@ assert :raise( ComplicatedError() ) ?= ComplicatedError()
 										top := true
 										}
 									}
-assert ∛:27 ?= 3 ?= (\x\x^(1/3)):27
-assert ∜:16 ?= 2 ?= (\x\sqrt(sqrt(x))):16
-assert 3 ?= ((\x\x)+1):2
-assert 3 ?= (1+\x\x):2
-assert 4 ?= ((\x\x)*2):2
-assert 4 ?= (2*\x\x):2
-assert 8 ?= ((\x\x)^3):2
-assert 9 ?= (3^\x\x):2
-assert (\y\x+y):2 ?= 5		$ x = 3
-assert (\x:5\x*y)() ?= 10	$ y = 2 $ x = 2
-assert (:1:1).name ?= "ArgumentError"
-assert iserr:{__error__ = true}()
-assert [_, _] ?= [1, 2]
-assert (_, _) != (1, 2, 3)
-assert _ + _ ?= _
-assert ((\x,y\x+y):1):2 ?= 3
-assert (\x,y\x+y):1:2 ?= 3
-assert (\x,y\x+y)(1)(2) ?= 3
-assert (\x,-y:1\x+y):2 ?= 3
-assert _ <> 1
-assert { x = 1 } ++ { y = 2 } ?= { x = 1 ;; y = 2 }
-assert (:({ x = 1 ;; x = 2 })).name ?= "RedefinitionError"
-assert "All
+assert :: ∛:27 ?= 3 ?= (\x\x^(1/3)):27
+assert :: ∜:16 ?= 2 ?= (\x\sqrt(sqrt(x))):16
+assert :: 3 ?= ((\x\x)+1):2
+assert :: 3 ?= (1+\x\x):2
+assert :: 4 ?= ((\x\x)*2):2
+assert :: 4 ?= (2*\x\x):2
+assert :: 8 ?= ((\x\x)^3):2
+assert :: 9 ?= (3^\x\x):2
+assert :: (\y\x+y):2 ?= 5		$ x = 3
+assert :: (\x:5\x*y)() ?= 10	$ y = 2 $ x = 2
+assert :: (:1:1).name ?= "ArgumentError"
+assert :: iserr:{__error__ = true}()
+assert :: [_, _] ?= [1, 2]
+assert :: (_, _) != (1, 2, 3)
+assert :: _ + _ ?= _
+assert :: ((\x,y\x+y):1):2 ?= 3
+assert :: (\x,y\x+y):1:2 ?= 3
+assert :: (\x,y\x+y)(1)(2) ?= 3
+assert :: (\x,-y:1\x+y):2 ?= 3
+assert :: _ <> 1
+assert :: { x = 1 } ++ { y = 2 } ?= { x = 1 ;; y = 2 }
+assert :: (:({ x = 1 ;; x = 2 })).name ?= "RedefinitionError"
+assert :: "All
  done!" ?= "All" ++ "\n " ++ "done!"
-assert "All done!" ?= "All "
+assert :: "All done!" ?= "All "
 		"done!"
-assert "\\n1" ?= "\\n"+1
-assert {} ?= {{ x := 42 ;; y := "42" }}
-assert () ?= f:		$ f() = ()
-assert 7625597484987 ?= 3^^3
-assert (:({}()+1)).name ?= "TypeError"
-assert (:({}()>1)).name ?= "TypeError"
-assert { x = 1 } ?= { x := 1 }
-assert {} ?= { x := 1 } -- { x = 1 }
-assert { x = 1 } ?= { x = 1 } -- { x = 2 }
-assert "abcd" -- "bc" ?= "ad"
-assert (data:(data:(1,2,3)):(data:(5,6,7))):2 ?= 6
-assert [6] ?= [1, "a", 5, 6] -- 5 -- "a" -- 1
-assert {} ?= a				$ a + { x = 1 } $ a := {}
-assert 1 ?= a				$ ( a = 1 )
-assert f(5) ?= f(5)			$ f(x) = x+1
-assert "a"**3 ?= "a","a","a"
-assert (5\5): ?= 25
-assert 2π ?= 2*pi
-assert is("abc", `abc`)
+assert :: "\\n1" ?= "\\n"+1
+assert :: {} ?= {{ x := 42 ;; y := "42" }}
+assert :: () ?= f:		$ f() = ()
+assert :: 7625597484987 ?= 3^^3
+assert :: (:({}()+1)).name ?= "TypeError"
+assert :: (:({}()>1)).name ?= "TypeError"
+assert :: { x = 1 } ?= { x := 1 }
+assert :: {} ?= { x := 1 } -- { x = 1 }
+assert :: { x = 1 } ?= { x = 1 } -- { x = 2 }
+assert :: "abcd" -- "bc" ?= "ad"
+assert :: (data:(data:(1,2,3)):(data:(5,6,7))):2 ?= 6
+assert :: [6] ?= [1, "a", 5, 6] -- 5 -- "a" -- 1
+assert :: {} ?= a				$ a + { x = 1 } $ a := {}
+assert :: 1 ?= a				$ ( a = 1 )
+assert :: f(5) ?= f(5)			$ f(x) = x+1
+assert :: "a"**3 ?= "a","a","a"
+assert :: (5\5): ?= 25
+assert :: 2π ?= 2*pi
+assert :: is("abc", `abc`)
 
 # Final Testing:
-assert save("Tests.save.txt");true
-assert contents ?= read("Tests.save.txt")		$ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
-assert { nothing := nothing ;; nil := nil } ?= { run Tests.save.txt }
-assert "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
-assert printdone() ?= printdone()				$ printdone() = print("    Message sent.")
+assert :: save("Tests.save.txt");true
+assert :: contents ?= read("Tests.save.txt")		$ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
+assert :: { nothing := nothing ;; nil := nil } ?= { run Tests.save.txt }
+assert :: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
+assert :: printdone() ?= printdone()				$ printdone() = print("    Message sent.")

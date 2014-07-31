@@ -64,7 +64,6 @@ class editor(mathbase):
         self.box.colortag("digit", "darkgrey")
         self.box.colortag("builtin", "purple")
         self.box.colortag("stringmod", "green")
-        self.box.colortag("statement", "magenta")
         self.box.colortag("search", highlight="yellow")
         self.populator()
         self.printdebug(": ON")
@@ -74,34 +73,17 @@ class editor(mathbase):
             self.initialize(args=initializers)
         self.register(lambda: self.endfile(True), self.refresh)
 
-    def populator(self):
-        """Creates An Evaluator And Lists Of Commands."""
-        self.pre_cmds = [
-            self.pre_cmd
-            ]
-        self.cmds = [
-            self.cmd_debug,
-            self.cmd_run,
-            self.cmd_assert,
-            self.cmd_do,
-            self.cmd_del,
-            self.cmd_make,
-            self.cmd_def,
-            self.cmd_set,
-            self.cmd_normal
-            ]
-        self.set_cmds = [
-            self.set_def,
-            self.set_normal
-            ]
-        self.e = evaluator(processor=self)
-        self.fresh(True)
-
     def fresh(self, top=True):
         """Refreshes The Environment."""
         if not top:
             self.e.fresh()
         self.e.makevars({
+            "debug":funcfloat(self.debugcall, self.e, "debug"),
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "assert":funcfloat(self.assertcall, self.e, "assert"),
+            "del":funcfloat(self.delcall, self.e, "del"),
+            "make":funcfloat(self.makecall, self.e, "make"),
+            "def":funcfloat(self.defcall, self.e, "def"),
             "save":funcfloat(self.savecall, self.e, "save"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
@@ -184,7 +166,6 @@ class editor(mathbase):
         self.box.remtag("digit", start, end)
         self.box.remtag("builtin", start, end)
         self.box.remtag("stringmod", start, end)
-        self.box.remtag("statement", start, end)
 
     def endsearch(self):
         """Clears Search Highlighting."""
@@ -198,7 +179,6 @@ class editor(mathbase):
         incomment = False
         decimal = False
         strmod = False
-        statement = True
         last = ("", "1.0")
         for l in xrange(0, len(linelist)):
             incomment = False
@@ -218,7 +198,6 @@ class editor(mathbase):
                     instring = False
                     decimal = False
                     strmod = False
-                    statement = True
                     last = ("", point+"-1c")
                 normal = False
                 if incomment:
@@ -267,20 +246,6 @@ class editor(mathbase):
                         decimal = False
                 elif not self.e.isreserved(test):
                     normal = True
-                    if statement:
-                        if not istext(statement):
-                            test = delspace(test)
-                            if test:
-                                statement = test
-                        elif iswhite(test):
-                            if statement in self.statements:
-                                self.box.placetag("statement", point+"-"+str(len(statement)+1)+"c", point+"-1c")
-                                last = ("", point+"-1c")
-                            statement = False
-                        else:
-                            statement += test
-                else:
-                    statement = False
                 if normal:
                     if last[0] == "":
                         last = (delspace(test), point+"-1c")

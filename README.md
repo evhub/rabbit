@@ -333,18 +333,18 @@ Sometimes, errors will occur in your code. Not to fret, Rabbit will show you exa
 
 #### Rabbits Make Statements
 
-The design of Rabbit is intended to use as few "special words" as possible, but there are some that are used. The syntax for these is always kept consistent: they can only be used wherever a top-level call is being made, and their syntax is like that of a commandline function.
+The design of Rabbit is intended to use as few "special words" as possible, so what would be "special words" in other languages are just functions in Rabbit.
+
+To call these special functions, the syntax is always kept consistent: they can only be used wherever a top-level call is being made, and their syntax is exactly like colon syntax, except with two colons instead of one.
 
 Statements can vary from interpreter to interpreter, but the ones implemented in basic Rabbit are:
 ```
-assert <expression>	# Raises an error if <expression> isn't true
-debug [on|off]		# Turns verbose debug output on and off
-def <definition>	# Performs a definition, even if the variable name is already defined
-del <variable>		# Manually deletes the variable <variable>
-do <expression>		# Skips over statement evaluation and just does <expression>
-help <statement>	# Shows some help about the statement
-make <definition>	# Tags a definition as pre-compilation
-run <filename>		# Runs a Rabbit file
+assert :: <expression>	# Raises an error if <expression> isn't true
+debug :: [on|off]		# Turns verbose debug output on and off
+def :: <definition>		# Performs a definition, even if the variable name is already defined
+del :: <variable>		# Manually deletes the variable <variable>
+make :: <definition>	# Tags a definition as pre-compilation
+run :: <filename>		# Runs a Rabbit file
 ```
 
 #### Other Rabbits

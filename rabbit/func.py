@@ -143,14 +143,14 @@ class funcfloat(numobject):
             if arghash in self.memo:
                 return self.memo[arghash]
         if self.memoize:
-            returned = self.e.processor.returned
-            self.e.processor.setreturned(False)
+            returned = self.e.returned
+            self.e.setreturned(False)
             out = self.base_func(*args, **kwargs)
-            if not self.e.processor.returned:
+            if not self.e.returned:
                 if arghash is None:
                     arghash = (self.keyhash(args), self.keyhash(kwargs))
                 self.memo[arghash] = out
-            self.e.processor.setreturned(returned)
+            self.e.setreturned(returned or self.e.returned)
             return out
         return self.base_func(*args, **kwargs)
 
@@ -180,9 +180,17 @@ class funcfloat(numobject):
         self.func = curry(self.func, arg)
         self.reqargs -= 1
 
+    def __float__(self):
+        """Retrieves A Float."""
+        return float(self.calc())
+
+    def __int__(self):
+        """Retrieves An Integer."""
+        return int(self.calc())
+
     def __repr__(self):
         """Returns A String Representation."""
-        return "\\("+self.funcstr+")"
+        return "\\"+self.funcstr
 
     def __str__(self):
         """Retrieves The Function String."""
@@ -319,7 +327,7 @@ class strfunc(funcfloat):
         variables.update(personals)
         oldvars = self.e.setvars(variables)
         try:
-            out = self.e.calc(self.funcstr)
+            out = self.e.calc(self.funcstr, " \\>")
         finally:
             self.e.setvars(oldvars)
         return out
@@ -344,7 +352,6 @@ class strfunc(funcfloat):
             for k in self.personals:
                 if (not k in items) or isnull(items[k]):
                     items[k] = self.personals[k]
-            self.e.info = " \\>"
             out = self.calc(items)
             return out
 
@@ -352,18 +359,6 @@ class strfunc(funcfloat):
         """Curries An Argument."""
         self.personals[self.variables.pop(0)] = arg
         self.reqargs -= 1
-
-    def __float__(self):
-        """Retrieves A Float."""
-        if self.e.debug:
-            self.e.info = " | float"
-        return float(self.calc())
-
-    def __int__(self):
-        """Retrieves An Integer."""
-        if self.e.debug:
-            self.e.info = " | int"
-        return int(self.calc())
 
     def __iadd__(self, other):
         """Performs Addition."""
@@ -662,6 +657,12 @@ class rawstrcalc(strcalc):
         self.e = e
         self.calcstr = str(calcstr)
 
+class codestr(rawstrcalc):
+    """A Code Evaluator String."""
+    def __repr__(self):
+        """Gets A Representation Of The Code String."""
+        return "::"+str(self)
+
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
     def __init__(self, func, e, funcstr=None, variables=None, extras=None, overflow=True, reqargs=None, evalinclude=False, memoize=None, memo=None):
@@ -819,9 +820,8 @@ class derivbase(object):
             items[self.variables[0]] = float(x)
             items[self.allargs] = matrix(1,1, x, fake=True)
             oldvars = self.e.setvars(items)
-            self.e.info = " \\>"
             try:
-                out = self.e.calc(self.funcstr)
+                out = self.e.calc(self.funcstr, " \\>")
             finally:
                 self.e.setvars(oldvars)
             return out
@@ -997,39 +997,23 @@ class classcalc(cotobject):
 
     def process(self, command):
         """Processes A Command And Puts The Result In The Variables."""
-        command = self.e.namefind(basicformat(command))
+        self.calc(command, self.e.process)
 
-        oldshow = self.e.processor.doshow
-        self.e.processor.doshow = False
-        oldclass = self.e.processor.useclass
-        self.e.processor.useclass = self.selfvar
-
-        oldset = self.doset
-        self.doset = self.e.setvars(self.variables)
-        try:
-            self.e.processor.process(command)
-        finally:
-            self.e.setvars(self.doset)
-            self.doset = oldset
-
-            self.e.processor.useclass = oldclass
-            self.e.processor.doshow = oldshow
-
-    def calc(self, inputstring):
+    def calc(self, command, func=None):
         """Calculates A String In The Environment Of The Class."""
-        oldclass = self.e.processor.useclass
-        self.e.processor.useclass = self.selfvar
-
+        if func is None:
+            func = self.e.calc
+        command = self.e.namefind(basicformat(command))
+        oldclass = self.e.useclass
+        self.e.useclass = self.selfvar
         oldset = self.doset
         self.doset = self.e.setvars(self.variables)
-        self.e.info = " | class"
         try:
-            out = self.e.calc(inputstring)
+            out = func(command, " | class")
         finally:
             self.e.setvars(self.doset)
             self.doset = oldset
-
-            self.e.processor.useclass = oldclass
+            self.e.useclass = oldclass
         return out
 
     def __len__(self):
@@ -1040,9 +1024,37 @@ class classcalc(cotobject):
         """Returns The Variables."""
         return self.variables.items()
 
-    def __repr__(self):
+    def __repr__(self, bottom=True, indebug=True):
         """Finds A Representation."""
-        return self.e.prepare(self, False, True, True)
+        out = "{"
+        if top:
+            out += "\n"
+        variables = item.getvars()
+        for k,v in variables.items():
+            out += " "+k+" "
+            if istext(v):
+                out += "= "+v
+            else:
+                out += ":= "
+                if item is v:
+                    out += item.selfvar
+                elif maxrecursion <= 0 and isinstance(v, classcalc):
+                    out += self.speedyprep(v, False, bottom, indebug, maxrecursion)
+                else:
+                    out += self.prepare(v, False, True, indebug, maxrecursion-1)
+            if top:
+                out += "\n"
+            else:
+                out += " ;;"
+        if len(variables) > 0:
+            if top:
+                out = out[:-1]+"\n"
+            else:
+                out = out[:-3]
+        elif top:
+            out = out[:-1]
+        out += " }"
+        return out
 
     def store(self, key, value, bypass=False):
         """Stores An Item."""
@@ -1779,6 +1791,9 @@ class atom(evalobject):
     def __rmod__(self, other):
         """Always Returns self."""
         return self
+    def __repr__(self):
+        """Gets A Representation."""
+        return "_"
 
 class rollfunc(strfunc):
     """Implements A Random Number Generator Object."""
@@ -1808,7 +1823,7 @@ class rollfunc(strfunc):
 
     def calc(self, stop=1):
         """Generates A Random Number."""
-        self.e.processor.setreturned()
+        self.e.setreturned()
         if stop > 1 and stop == int(stop):
             return 1+self.gen.chooseint(int(stop))
         else:

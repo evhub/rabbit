@@ -27,6 +27,7 @@ from .cmd import *
 class commandline(mathbase):
     """The Rabbit Command Line Interface."""
     on = True
+    info = " <<--"
     
     def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", debugcolor="lightred", debug=False, *initializers):
         """Initializes The Command Line Interface."""
@@ -47,51 +48,30 @@ class commandline(mathbase):
         else:
             self.initialize(args=initializers)
 
-    def populator(self):
-        """Creates An Evaluator And Lists Of Commands."""
-        self.pre_cmds = [
-            self.pre_cmd
-            ]
-        self.cmds = [
-            self.cmd_help,
-            self.cmd_debug,
-            self.cmd_exit,
-            self.cmd_run,
-            self.cmd_assert,
-            self.cmd_do,
-            self.cmd_del,
-            self.cmd_make,
-            self.cmd_def,
-            self.cmd_set,
-            self.cmd_normal
-            ]
-        self.set_cmds = [
-            self.set_def,
-            self.set_normal
-            ]
-        self.e = evaluator(processor=self)
-        self.fresh(True)
-        self.genhelp()
-
     def fresh(self, top=True):
         """Refreshes The Environment."""
         if not top:
             self.e.fresh()
         self.e.makevars({
+            "debug":funcfloat(self.debugcall, self.e, "debug"),
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "assert":funcfloat(self.assertcall, self.e, "assert"),
+            "del":funcfloat(self.delcall, self.e, "del"),
+            "make":funcfloat(self.makecall, self.e, "make"),
+            "def":funcfloat(self.defcall, self.e, "def"),
             "save":funcfloat(self.savecall, self.e, "save"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
-            "grab":funcfloat(self.grabcall, self.e, "grab")
+            "grab":funcfloat(self.grabcall, self.e, "grab"),
+            "exit":usefunc(self.doexit, self.e, "exit", [])
             })
 
-    def cmd_exit(self, original):
+    def doexit(self):
         """Exits The Command Line Interface."""
-        if superformat(original) == "exit":
-            self.on = False
-            self.setreturned()
-            return True
+        self.setreturned()
+        self.on = False
 
     def start(self):
         """Starts The Command Line Main Loop."""
@@ -108,7 +88,7 @@ class commandline(mathbase):
 
     def handler(self, original, old=None):
         """Handles Raw Input."""
-        cmd = carefulsplit(original, "#", '"`', {"\u201c":"\u201d"})[0]
+        cmd = self.e.outersplit(original, "#", '"`', {})[0]
         fcmd = basicformat(cmd)
         if old is not None:
             whole = old+"\n"+cmd
@@ -129,11 +109,3 @@ class commandline(mathbase):
             return whole
         self.reset()
         self.process(whole, True)
-
-    def calc(self, expression):
-        """Safely Evaluates An Expression."""
-        if self.debug:
-            self.e.info = " <<--"
-        else:
-            self.e.info = " <<| Traceback"
-        return self.e.calc(expression)

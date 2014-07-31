@@ -274,47 +274,55 @@ class grapher(mathbase):
             self.marker += 1
             self.register(self.scroll, 200)
 
-    def populator(self):
-        """Populates The Grapher."""
-        self.pre_cmds = [
-            self.pre_cmd
-            ]
-        self.cmds = [
-            self.cmd_help,
-            self.cmd_debug,
-            self.cmd_run,
-            self.cmd_assert,
-            self.cmd_do,
-            self.cmd_del,
-            self.cmd_make,
-            self.cmd_def,
+    def points(self):
+        """Gets The Value Of The points Variable."""
+        points = self.calc("points").a
+        out = []
+        for xs in points:
+            out.append((xs[0],xs[1]))
+        return out
 
-            self.cmd_sum,
-            self.cmd_inv,
-            self.cmd_invsum,
-            self.cmd_at,
-            self.cmd_atinv,
-            self.cmd_intersect,
-            self.cmd_parametric,
-            self.cmd_polar,
-            self.cmd_scroll,
+    def reset(self):
+        """Sets The Rendering Variables."""
+        self.dumpdebug(True)
+        self.e.recursion = 0
+        self.xstretch = self.e.funcfind("xstretch")*0.01
+        self.ystretch = self.e.funcfind("ystretch")*0.01
+        self.xup = self.e.funcfind("xup")
+        self.yup = self.e.funcfind("yup")
+        self.dumpdebug(True)
 
-            self.cmd_set,
-            self.cmd_normal
-            ]
-        self.set_cmds = [
-            self.set_def,
-            self.set_normal
-            ]
-        self.e = evaluator(processor=self)
-        self.fresh(True)
-        self.genhelp()
+    def center(self):
+        """Centers The Origin."""
+        self.e.variables["xup"] = str((self.width/2.0)*self.xstretch)
+        self.e.variables["yup"] = str((self.height/2.0)*self.ystretch)
+        self.setreturned()
+
+    def origin(self):
+        """Plots The Origin."""
+        self.gridpoint(0,0)
+        self.setreturned()
 
     def fresh(self, top=True):
         """Refreshes The Environment."""
         if not top:
             self.e.fresh()
         self.e.makevars({
+            "debug":funcfloat(self.debugcall, self.e, "debug"),
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "assert":funcfloat(self.assertcall, self.e, "assert"),
+            "del":funcfloat(self.delcall, self.e, "del"),
+            "make":funcfloat(self.makecall, self.e, "make"),
+            "def":funcfloat(self.defcall, self.e, "def"),
+            "cum":funcfloat(self.cumcall, self.e, "cum"),
+            "inv":funcfloat(self.invcall, self.e, "inv"),
+            "invcum":funcfloat(self.invcumcall, self.e, "invcum"),
+            "at":funcfloat(self.atcall, self.e, "at"),
+            "invat":funcfloat(self.invatcall, self.e, "invat"),
+            "sect":funcfloat(self.sectcall, self.e, "sect"),
+            "para":funcfloat(self.paracall, self.e, "para"),
+            "polar":funcfloat(self.polarcall, self.e, "polar"),
+            "scroll":funcfloat(self.scrollcall, self.e, "scroll"),
             "save":funcfloat(self.savecall, self.e, "save"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
@@ -350,119 +358,80 @@ class grapher(mathbase):
             "height":self.height/100.0
             })
 
-    def points(self):
-        """Gets The Value Of The points Variable."""
-        points = self.calc("points").a
-        out = []
-        for xs in points:
-            out.append((xs[0],xs[1]))
-        return out
-
-    def reset(self):
-        """Sets The Rendering Variables."""
-        self.dumpdebug(True)
-        self.e.recursion = 0
-        self.xstretch = self.e.funcfind("xstretch")*0.01
-        self.ystretch = self.e.funcfind("ystretch")*0.01
-        self.xup = self.e.funcfind("xup")
-        self.yup = self.e.funcfind("yup")
-        self.dumpdebug(True)
-
-    def center(self):
-        """Centers The Origin."""
-        self.e.variables["xup"] = str((self.width/2.0)*self.xstretch)
-        self.e.variables["yup"] = str((self.height/2.0)*self.ystretch)
-        self.setreturned()
-
-    def origin(self):
-        """Plots The Origin."""
-        self.gridpoint(0,0)
-        self.setreturned()
-
-    def cmd_sum(self, original):
+    def cumcall(self, variables, dorender=None):
         """Processes A Graphing Command."""
-        if superformat(original).startswith("sum "):
-            original = original[4:]
-            item = self.calc(original)
-            if not isnull(item):
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to cum")
+        elif len(variables) == 1:
+            if not isnull(variables[0]):
+                if dorender is None:
+                    dorender = self.render
                 self.temp = 0
-                self.render(lambda x: self.sumcall(item, x))
-            self.setreturned()
-            return True
+                dorender(lambda x: self.sumcall(variables[0], x))
+                self.setreturned()
+        else:
+            for arg in variables:
+                self.cumcall([arg])
+        return matrix(0)
+                
 
-    def cmd_inv(self, original):
+    def invcall(self, variables):
         """Processes A Graphing Command."""
-        if superformat(original).startswith("inv "):
-            original = original[4:]
-            item = self.calc(original)
-            if not isnull(item):
-                self.swaprender(lambda x: self.call(item, x))
-            self.setreturned()
-            return True
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to inv")
+        elif len(variables) == 1:
+            if not isnull(variables[0]):
+                self.swaprender(lambda x: self.call(variables[0], x))
+                self.setreturned()
+        else:
+            for arg in variables:
+                self.invcall([arg])
+        return matrix(0)
 
-    def cmd_invsum(self, original):
+    def invcumcall(self, variables):
         """Processes A Graphing Command."""
-        if superformat(original).startswith("invsum "):
-            original = original[7:]
-            item = self.calc(original)
-            if not isnull(item):
-                self.temp = 0
-                self.swaprender(lambda x: self.sumcall(original, x))
-            self.setreturned()
-            return True
+        return self.cumcall(variables, self.invrender)
 
-    def cmd_at(self, original):
+    def atcall(self, atlist, dorender=None):
         """Processes A Graphing Command."""
-        if superformat(original).startswith("at "):
-            original = self.e.find(original[3:])
-            atlist = original.split(" do ", 1)
-            atlist[1] = self.calc(atlist[1])
+        if len(atlist) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to at")
+        elif len(atlist) == 2:
             if not isnull(atlist[1]):
-                atlist[0] = self.calc(atlist[0])
+                if dorender = None:
+                    dorender = self.atrender
                 if not isinstance(atlist[0], matrix):
-                    self.atrender(atlist[0], lambda x: self.call(atlist[1], x))
+                    dorender(atlist[0], lambda x: self.call(atlist[1], x))
                 else:
                     for x in atlist[0].getitems():
-                        self.atrender(x, lambda x: self.call(atlist[1], x))
+                        dorender(x, lambda x: self.call(atlist[1], x))
             self.setreturned()
-            return True
+            return matrix(0)
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to at")
 
-    def cmd_atinv(self, original):
+    def invatcall(self, variables):
         """Processes A Graphing Command."""
-        if superformat(original).startswith("atinv "):
-            original = self.e.find(original[6:])
-            atlist = original.split(" do ", 1)
-            atlist[1] = self.calc(atlist[1])
-            if not isnull(atlist[1]):
-                atlist[0] = self.calc(atlist[0])
-                if not isinstance(atlist[0], matrix):
-                    self.atswaprender(atlist[0], lambda x: self.call(atlist[1], x))
-                else:
-                    for x in atlist[0].getitems():
-                        self.atswaprender(x, lambda x: self.call(atlist[1], x))
-            self.setreturned()
-            return True
+        return self.atcall(variables, self.atswaprender)
 
-    def cmd_intersect(self, original):
+    def sectcall(self, interlist):
         """Processes A Graphing Command."""
-        if superformat(original).startswith("intersect "):
-            original = self.e.find(original[10:])
-            interlist = original.split(" and ", 1)
-            interlist[0] = self.calc(interlist[0])
-            interlist[1] = self.calc(interlist[1])
-            if not isnull(interlist[0]) or isnull(interlist[1]):
+        if len(interlist) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to sect")
+        elif len(interlist) == 2:
+            if not (isnull(interlist[0]) or isnull(interlist[1])):
                 self.intersectrender(lambda x: self.call(interlist[0], x), lambda x: self.call(interlist[1], x))
             self.setreturned()
-            return True
+            return matrix(0)
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to sect")
 
-    def cmd_parametric(self, original):
+    def paracall(self, paralist):
         """Processes A Graphing Command."""
-        if superformat(original).startswith("parametric "):
-            original = self.e.find(original[11:])
-            paralist = original.split(" and ", 1)
-            paralist[0] = self.calc(paralist[0])
-            paralist[1] = self.calc(paralist[1])
-            if not isnull(paralist[0]) or isnull(paralist[1]):
+        if len(paralist) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to para")
+        elif len(paralist) == 2:
+            if not (isnull(paralist[0]) or isnull(paralist[1])):
                 stop = self.e.funcfind("stop")
                 x = self.e.funcfind("start")
                 inter = self.e.funcfind("interval")
@@ -470,46 +439,50 @@ class grapher(mathbase):
                     self.singlerender(self.call(paralist[0], x), self.call(paralist[1], x))
                     x += inter
             self.setreturned()
-            return True
+            return matrix(0)
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to para")
 
-    def cmd_polar(self, original):
+    def polarcall(self, variables):
         """Processes A Graphing Command."""
-        if superformat(original).startswith("polar "):
-            item = self.calc(original)
-            if not isnull(item):
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to polar")
+        elif len(variables) == 1:
+            if not isnull(variables[0]):
                 angle = self.e.funcfind("start")
                 inter = self.e.funcfind("interval")
                 stop = self.e.funcfind("stop")
                 while angle < stop:
-                    r = self.call(item, angle)
+                    r = self.call(variables[0], angle)
                     if r is not None:
                         self.singlerender(math.cos(angle)*r, math.sin(angle)*r)
                     angle += inter
             self.setreturned()
-            return True
+        else:
+            for arg in variables:
+                self.polarcall([arg])
+        return matrix(0)
 
-    def cmd_scroll(self, original):
+    def scrollcall(self, variables):
         """Processes A Graphing Command."""
-        if superformat(original).startswith("scroll "):
-            original = original[7:]
-            forlist = original.split(" do ", 1)
-            self.cmd = "cleargrid()clear();;xup:=x+0.01*scroller;;"+self.e.find(forlist[1])
-            self.marker = 0
-            self.end = int(getnum(self.e.find(forlist[0])))
-            self.register(self.scroll, 200)
-            self.setreturned()
-            return True
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to scroll")
+        elif len(variables) == 2:
+            if isinstance(variables[0], codestr) and isinstance(variables[1], codestr):
+                self.cmd = "cleargrid()clear();;xup:=x+0.01*scroller;;"+str(variables[1])
+                self.marker = 0
+                self.end = getint(self.e.calc(variables[0]))
+                self.register(self.scroll, 200)
+                self.setreturned()
+                return matrix(0)
+            else:
+                raise ExecutionError("StatementError", "Can only call scroll as a statement")
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to scroll")
 
-    def cmd_do(self, original):
-        """Evaluates Functions Silently."""
-        if superformat(original).startswith("do "):
-            self.calc(original[3:])
-            return True
-
-    def cmd_normal(self, original):
+    def normcommand(self, item):
         """Graphs Normal Entries."""
-        item = self.calc(original)
-        if not isnull(item):
+        if not isnull(item) and self.doshow:
             if isinstance(item, strcalc):
                 self.show(self.e.prepare(item, True, True))
             elif isinstance(item, data):
@@ -524,7 +497,6 @@ class grapher(mathbase):
             else:
                 self.render(lambda x: self.call(item, x))
             self.setreturned()
-        return True
 
     def matrixrender(self, inputmatrix, base=None):
         """Renders A Matrix."""
