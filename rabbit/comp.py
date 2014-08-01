@@ -30,7 +30,7 @@ class compiler(commandline):
     debug = False
     doshow = False
     compiling = False
-    normcommand = lambda: None
+    normcommand = always(None)
 
     def __init__(self, debugcolor="lightred", mainprompt=addcolor("Rabbit:", "pink")+" ", prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", *initializers):
         """Initializes The Command Line Interface."""

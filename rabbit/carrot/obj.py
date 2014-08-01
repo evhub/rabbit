@@ -123,6 +123,10 @@ def curry(func, arg, key=None):
         return func(*args, **kwargs)
     return _func
 
+def always(out):
+    """Creates A Function That Always Returns out."""
+    return lambda *args, **kwargs: out
+
 class memoizer(object):
     """A Memoized Function."""
     def __init__(self, func):

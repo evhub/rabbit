@@ -547,7 +547,7 @@ Global Operator Precedence List:
             groupers = self.groupers
         return carefulsplit(inputstring, splitstring, '"`', {"\u201c":"\u201d"}, groupers)
 
-    def process(self, inputstring, info="", command=lambda: None):
+    def process(self, inputstring, info="", command=always(None)):
         """Performs Top-Level Evaluation."""
         inputstring = str(inputstring)
         for original in self.outersplit(inputstring, ";;", {"{":"}"}):
@@ -739,7 +739,7 @@ Global Operator Precedence List:
                                 useclass.store(value[0], out)
                             else:
                                 useclass.store(value[0], value[1])
-                                out = strfunc(useclass.selfvar+"."+value[0], [strfunc.allargs], {useclass.selfvar:useclass}, self, value[0])
+                                out = strfunc(useclass.selfvar+"."+value[0], self, [strfunc.allargs], {useclass.selfvar:useclass}, value[0])
                     return out
 
     def readytofunc(self, expression, extra="", allowed=""):
