@@ -3,6 +3,9 @@ passert(statement) = str(statement)$assert:code(statement)
 assert:: (passert::"abc")
 assert:: iserr(:(passert::0))
 
+# Includes:
+passert:: include(math, stats, unicode)
+
 # Boolean Operator Tests:
 passert:: 1 ?= 1
 passert:: ? 1 ?= 1
@@ -421,6 +424,6 @@ passert:: is("abc", `abc`)
 # Final Testing:
 passert:: save("Tests.save.txt");true
 passert:: contents ?= read("Tests.save.txt")		$ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
-passert:: len: { run :: Tests.save.txt } ?= 3
+passert:: { run :: Tests.save.txt }
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
 passert:: printdone() ?= printdone()				$ printdone() = print("    Message sent.")
