@@ -1048,9 +1048,9 @@ class classcalc(cotobject):
                 if self is v:
                     out += self.selfvar
                 elif maxrecursion <= 0 and isinstance(v, classcalc):
-                    out += self.speedyprep(v, False, bottom, indebug, maxrecursion)
+                    out += self.e.speedyprep(v, False, bottom, indebug, maxrecursion)
                 else:
-                    out += self.prepare(v, False, True, indebug, maxrecursion-1)
+                    out += self.e.prepare(v, False, True, indebug, maxrecursion-1)
             if top:
                 out += "\n"
             else:
