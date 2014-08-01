@@ -588,11 +588,12 @@ Global Operator Precedence List:
 
     def proc_cmd(self, inputstring, top=False):
         """Evaluates Statements."""
+        if top:
+            spawned = self.spawned
+            self.setspawned(False)
         inputlist = self.outersplit(inputstring, "::")
         func, args = inputlist[0], inputlist[1:]
         func = basicformat(func)
-        spawned = self.spawned
-        self.setspawned(not top)
         if len(args) == 0:
             out = self.proc_set(func)
         else:
@@ -615,9 +616,10 @@ Global Operator Precedence List:
                 out = diagmatrixlist(params)
             self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
             self.recursion -= 1
-        if not self.spawned:
-            self.processor.addcommand(inputstring)
-        self.setspawned(spawned or self.spawned)
+        if top:
+            if not self.spawned:
+                self.processor.addcommand(inputstring)
+            self.setspawned(self.spawned or spawned)
         return out
 
     def proc_set(self, inputstring):
@@ -2111,7 +2113,7 @@ class evalfuncs(object):
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
-                out = self.variables[original]
+                out = self.e.variables[original]
                 del self.e.variables[original]
             elif "." in original:
                 test = original.split(".")
