@@ -337,7 +337,7 @@ passert:: except( :(1/0), :(1/0) )
 passert:: int(1.5) ?= 1
 passert:: class({}()) ?= {}
 passert:: type(class({}())) ?= "class"
-passert:: '1 ?= 2
+passert:: succ1 ?= 2
 passert:: is:"a":"a" & is(5,5,5)
 passert:: 0 ?= ¬1
 passert:: 0.5 ?= ½
@@ -420,6 +420,7 @@ passert:: "a"**3 ?= "a","a","a"
 passert:: (5\5): ?= 25
 passert:: 2π ?= 2*pi
 passert:: is("abc", `abc`)
+passert:: ( del::x ) $ x = 1
 
 # Final Testing:
 passert:: save("Tests.save.txt");true

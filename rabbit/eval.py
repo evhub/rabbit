@@ -565,32 +565,34 @@ Global Operator Precedence List:
             groupers = self.groupers
         return carefulsplit(inputstring, splitstring, '"`', {"\u201c":"\u201d"}, groupers)
 
-    def process(self, inputstring, info="", command=always(None)):
+    def process(self, inputstring, info="", command=None):
         """Performs Top-Level Evaluation."""
         inputstring = str(inputstring)
         for original in self.outersplit(inputstring, ";;", {"{":"}"}):
             original = basicformat(original)
             if not iswhite(original):
-                command(self.calc(original, info))
+                out = self.calc(original, info, command is not None)
+                if command is not None:
+                    command(out)
 
-    def calc(self, inputstring, info=""):
+    def calc(self, inputstring, info="", top=False):
         """Gets The Value Of An Expression."""
         if info is None:
             info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
         self.printdebug(">>> "+inputstring+str(info))
         self.recursion += 1
-        out = self.proc_cmd(inputstring)
+        out = self.proc_cmd(inputstring, top)
         self.printdebug(self.prepare(out, False, True, True)+" <<< "+inputstring)
         self.recursion -= 1
         return out
 
-    def proc_cmd(self, inputstring):
+    def proc_cmd(self, inputstring, top=False):
         """Evaluates Statements."""
         inputlist = self.outersplit(inputstring, "::")
         func, args = inputlist[0], inputlist[1:]
         func = basicformat(func)
         spawned = self.spawned
-        self.setspawned(False)
+        self.setspawned(top)
         if len(args) == 0:
             out = self.proc_set(func)
         else:
@@ -2107,27 +2109,27 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to del")
         elif len(variables) == 1:
-            original = self.prepare(variables[0], False, False)
-            if original in self.variables:
+            original = self.e.prepare(variables[0], False, False)
+            if original in self.e.variables:
                 out = self.variables[original]
-                del self.variables[original]
+                del self.e.variables[original]
             elif "." in original:
                 test = original.split(".")
                 item = test.pop()
-                useclass = self.find(test[0], True)
+                useclass = self.e.find(test[0], True)
                 if isinstance(useclass, classcalc):
                     last = useclass
                     for x in xrange(1, len(test)):
                         useclass = useclass.retrieve(test[x])
                         if not isinstance(useclass, classcalc):
-                            raise ExecutionError("ClassError", "Could not delete "+test[x]+" in "+self.prepare(last, False, True, True))
+                            raise ExecutionError("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
                 else:
                     raise ExecutionError("VariableError", "Could not find class "+test[0])
                 out = useclass.retrieve(item)
                 useclass.remove(item)
             else:
                 raise ExecutionError("VariableError", "Could not find "+original)
-            self.setreturned()
+            self.e.setreturned()
             return out
         else:
             out = []
@@ -2992,12 +2994,12 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to def")
         elif len(variables) == 1:
-            original = self.prepare(variables[0], True, False)
-            self.redef = True
-            test = self.cmd_set(original)
-            self.redef = False
+            original = self.e.prepare(variables[0], True, False)
+            self.e.redef = True
+            test = self.e.cmd_set(original)
+            self.e.redef = False
             if test:
-                self.setreturned()
+                self.e.setreturned()
                 return test
             else:
                 raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
