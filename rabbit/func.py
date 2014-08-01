@@ -1033,7 +1033,7 @@ class classcalc(cotobject):
         """Returns The Variables."""
         return self.variables.items()
 
-    def __repr__(self, top=True, bottom=True, indebug=True):
+    def __repr__(self, top=True, bottom=True, indebug=True, maxrecursion=5):
         """Finds A Representation."""
         out = "{"
         if top:
@@ -1815,7 +1815,7 @@ class rollfunc(strfunc):
         self.gen = random(key)
         if counter is not None:
             self.gen.counter = int(counter)
-        self.stop = float(stop)
+        self.stop = getnum(stop)
         self.funcstr = str(self.stop)
         if name:
             self.name = str(name)
@@ -1830,8 +1830,9 @@ class rollfunc(strfunc):
         """Copies The Random Number Generator."""
         return rollfunc(self.stop, self.e, self.gen.key, self.name, self.gen.counter)
 
-    def calc(self, stop=1):
+    def calc(self, m=1.0):
         """Generates A Random Number."""
+        stop = self.stop*m
         self.e.setreturned()
         if stop > 1 and stop == int(stop):
             return 1+self.gen.chooseint(int(stop))
@@ -1850,8 +1851,10 @@ class rollfunc(strfunc):
         elif ismatrix(variables[0]):
             out = variables[0].code(lambda x: self.call([x]))
         else:
-            stop = getnum(self.stop*variables[0])
-            out = self.calc(int(stop))
+            stop = getnum(variables[0])
+            out = 0.0
+            for x in xrange(0, int(stop)):
+                out += self.calc()
             if stop > int(stop):
                 out += self.calc(stop-int(stop))
         return out
