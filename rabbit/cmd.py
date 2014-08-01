@@ -190,7 +190,7 @@ class mathbase(safebase):
                 info = " <<| Traceback"
             self.saferun(self.e.process, inputstring, info, self.normcommand)
 
-    def addcommand(self, inputsring):
+    def addcommand(self, inputstring):
         """Adds A Command To The Commands."""
         self.commands.append(inputstring)
 

@@ -560,7 +560,7 @@ Global Operator Precedence List:
             info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
         self.printdebug(">>> "+inputstring+str(info))
         self.recursion += 1
-        out = self.proc_cmd(inputstring, command)
+        out = self.proc_cmd(inputstring)
         self.printdebug("<<< "+inputstring)
         self.recursion -= 1
         return out
@@ -593,6 +593,7 @@ Global Operator Precedence List:
             else:
                 out = diagmatrixlist(params)
             self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
+            self.recursion -= 1
         if not self.spawned:
             self.processor.addcommand(inputstring)
         self.setspawned(spawned or self.spawned)

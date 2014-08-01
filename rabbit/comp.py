@@ -69,9 +69,11 @@ class compiler(commandline):
             elif cmd in ["n", "interactive"]:
                 on = self.on
                 self.on = True
-                self.cmds = [self.cmd_exit]+self.cmds
+                oldvars = self.e.setvars({
+                    "exit":usefunc(self.doexit, self.e, "exit", [])
+                    })
                 self.cli_start()
-                self.cmds.pop(0)
+                self.e.setvars(oldvars)
                 self.on = on
             elif cmd in ["x", "exit"]:
                 self.on = False

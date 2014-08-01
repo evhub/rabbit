@@ -70,7 +70,7 @@ class commandline(mathbase):
 
     def doexit(self):
         """Exits The Command Line Interface."""
-        self.setreturned()
+        self.e.setreturned()
         self.on = False
 
     def start(self):
@@ -81,10 +81,10 @@ class commandline(mathbase):
                 while old:
                     old = self.handler(raw_input(self.moreprompt), old)
             except KeyboardInterrupt as detail:
-                self.app.display(addcolor("\n<!> KeyboardInterrupt: Action has been terminated, to quit type exit", self.e.color))
+                self.app.display(addcolor("\n<!> KeyboardInterrupt: Action has been terminated, to quit type exit()", self.e.color))
             except EOFError as detail:
                 self.app.display(addcolor("\n<!> EOFInterrupt: Program has been terminated", self.e.color))
-                self.cmd_exit("exit")
+                self.doexit()
 
     def handler(self, original, old=None):
         """Handles Raw Input."""
@@ -108,4 +108,4 @@ class commandline(mathbase):
         elif isinside(whole, '"`', {"\u201c":"\u201d"}, self.e.groupers):
             return whole
         self.reset()
-        self.process(whole, True)
+        self.process(whole)

@@ -120,23 +120,22 @@ class grapher(mathbase):
 
     def clear(self):
         """Clears The Graph."""
+        self.e.setreturned()
         for x in self.identifiers:
             self.app.clear(x)
         self.identifiers = []
-        self.setreturned()
 
     def cleargrid(self):
         """Clears The Grid."""
-        self.setreturned()
+        self.e.setreturned()
         for x in self.grid:
             self.app.clear(x)
         self.grid = []
-        self.setreturned()
 
     def render(self, function):
         """Renders A Function."""
         testx = -1.0*self.xup
-        sself.setreturned(False)
+        self.e.setreturned(False)
         for x in xrange(0, self.width/self.xsize+1):
             testy = self.saferun(function, testx)
             if self.returned:
@@ -144,12 +143,12 @@ class grapher(mathbase):
             elif testy is not None and testy != matrix(0):
                 self.singlerender(testx, testy)
             testx += self.xstretch
-        self.setreturned()
+        self.e.setreturned()
 
     def swaprender(self, function):
         """Renders The Inverse Of A Function."""
         testy = -1.0*self.yup
-        self.setreturned(False)
+        self.e.setreturned(False)
         for y in xrange(0, self.height/self.ysize+1):
             testx = self.saferun(function, testy)
             if self.returned:
@@ -157,7 +156,7 @@ class grapher(mathbase):
             elif testx is not None and testx != matrix(0):
                 self.singlerender(testx, testy)
             testy += self.xstretch
-        self.setreturned()
+        self.e.setreturned()
 
     def atrender(self, x, function):
         """Renders A Function At A Point."""
@@ -201,7 +200,7 @@ class grapher(mathbase):
     def intersectrender(self, f, g):
         """Renders The Intersection Of Two Functions."""
         testx = -1.0*self.xup
-        self.setreturned(False)
+        self.e.setreturned(False)
         for x in xrange(0, self.width/self.xsize+1):
             fy = self.saferun(f, testx)
             fnew = self.convert(testx, fy)
@@ -224,7 +223,7 @@ class grapher(mathbase):
                 newx, newy = gnew
                 self.dorender(newx, newy)
             testx += self.xstretch
-        self.setreturned()
+        self.e.setreturned()
 
     def gridrender(self):
         """Renders The Grid."""
@@ -239,7 +238,7 @@ class grapher(mathbase):
             test += ygrid
             for x in xrange(0, self.width+1):
                 self.dorender(x, test, True)
-        self.setreturned()
+        self.e.setreturned()
 
     def tickrender(self):
         """Renders Axis Ticks."""
@@ -255,7 +254,7 @@ class grapher(mathbase):
             test += ygrid
             for x in xrange(-2, 3):
                 self.dorender(x+xstart, test, True)
-        self.setreturned()
+        self.e.setreturned()
 
     def axisrender(self):
         """Renders The Axis."""
@@ -265,7 +264,7 @@ class grapher(mathbase):
             self.dorender(x, ystart, True)
         for y in xrange(0, self.height+1):
             self.dorender(xstart, y, True)
-        self.setreturned()
+        self.e.setreturned()
 
     def scroll(self):
         """Advances The Scroll."""
@@ -296,12 +295,12 @@ class grapher(mathbase):
         """Centers The Origin."""
         self.e.variables["xup"] = str((self.width/2.0)*self.xstretch)
         self.e.variables["yup"] = str((self.height/2.0)*self.ystretch)
-        self.setreturned()
+        self.e.setreturned()
 
     def origin(self):
         """Plots The Origin."""
         self.gridpoint(0,0)
-        self.setreturned()
+        self.e.setreturned()
 
     def fresh(self, top=True):
         """Refreshes The Environment."""
@@ -368,7 +367,7 @@ class grapher(mathbase):
                     dorender = self.render
                 self.temp = 0
                 dorender(lambda x: self.sumcall(variables[0], x))
-                self.setreturned()
+                self.e.setreturned()
         else:
             for arg in variables:
                 self.cumcall([arg])
@@ -382,7 +381,7 @@ class grapher(mathbase):
         elif len(variables) == 1:
             if not isnull(variables[0]):
                 self.swaprender(lambda x: self.call(variables[0], x))
-                self.setreturned()
+                self.e.setreturned()
         else:
             for arg in variables:
                 self.invcall([arg])
@@ -405,7 +404,7 @@ class grapher(mathbase):
                 else:
                     for x in atlist[0].getitems():
                         dorender(x, lambda x: self.call(atlist[1], x))
-            self.setreturned()
+            self.e.setreturned()
             return matrix(0)
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to at")
@@ -421,7 +420,7 @@ class grapher(mathbase):
         elif len(interlist) == 2:
             if not (isnull(interlist[0]) or isnull(interlist[1])):
                 self.intersectrender(lambda x: self.call(interlist[0], x), lambda x: self.call(interlist[1], x))
-            self.setreturned()
+            self.e.setreturned()
             return matrix(0)
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to sect")
@@ -438,7 +437,7 @@ class grapher(mathbase):
                 while x <= stop:
                     self.singlerender(self.call(paralist[0], x), self.call(paralist[1], x))
                     x += inter
-            self.setreturned()
+            self.e.setreturned()
             return matrix(0)
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to para")
@@ -457,7 +456,7 @@ class grapher(mathbase):
                     if r is not None:
                         self.singlerender(math.cos(angle)*r, math.sin(angle)*r)
                     angle += inter
-            self.setreturned()
+            self.e.setreturned()
         else:
             for arg in variables:
                 self.polarcall([arg])
@@ -473,7 +472,7 @@ class grapher(mathbase):
                 self.marker = 0
                 self.end = getint(self.e.calc(variables[0]))
                 self.register(self.scroll, 200)
-                self.setreturned()
+                self.e.setreturned()
                 return matrix(0)
             else:
                 raise ExecutionError("StatementError", "Can only call scroll as a statement")
@@ -496,7 +495,7 @@ class grapher(mathbase):
                 self.matrixrender(item)
             else:
                 self.render(lambda x: self.call(item, x))
-            self.setreturned()
+            self.e.setreturned()
 
     def matrixrender(self, inputmatrix, base=None):
         """Renders A Matrix."""
