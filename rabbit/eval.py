@@ -592,7 +592,7 @@ Global Operator Precedence List:
         func, args = inputlist[0], inputlist[1:]
         func = basicformat(func)
         spawned = self.spawned
-        self.setspawned(top)
+        self.setspawned(not top)
         if len(args) == 0:
             out = self.proc_set(func)
         else:
