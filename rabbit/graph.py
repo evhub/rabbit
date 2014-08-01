@@ -398,7 +398,7 @@ class grapher(mathbase):
             raise ExecutionError("ArgumentError", "Not enough arguments to at")
         elif len(atlist) == 2:
             if not isnull(atlist[1]):
-                if dorender = None:
+                if dorender is None:
                     dorender = self.atrender
                 if not isinstance(atlist[0], matrix):
                     dorender(atlist[0], lambda x: self.call(atlist[1], x))
