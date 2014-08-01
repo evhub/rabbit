@@ -1,6 +1,7 @@
 # Assertion Tests:
-passert(statement) = statement$assert:statement
-assert:: "abc" ?= (passert::"abc")
+passert(statement) = str(statement)$assert:code(statement)
+assert:: (passert::"abc")
+assert:: iserr(:(passert::0))
 
 # Boolean Operator Tests:
 passert:: 1 ?= 1
