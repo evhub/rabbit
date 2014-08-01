@@ -1024,7 +1024,7 @@ class classcalc(cotobject):
         """Returns The Variables."""
         return self.variables.items()
 
-    def __repr__(self, bottom=True, indebug=True):
+    def __repr__(self, top=True, bottom=True, indebug=True):
         """Finds A Representation."""
         out = "{"
         if top:

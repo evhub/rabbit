@@ -397,7 +397,7 @@ Global Operator Precedence List:
             else:
                 out = str(item)
         elif isinstance(item, classcalc):
-            out = item.__repr__(bottom, indebug)
+            out = item.__repr__(top, bottom, indebug)
         elif isinstance(item, (data, multidata)):
             if bottom:
                 out = "data:(" + self.prepare(getmatrix(item), False, True, indebug, maxrecursion) + ")"
@@ -561,7 +561,7 @@ Global Operator Precedence List:
         self.printdebug(">>> "+inputstring+str(info))
         self.recursion += 1
         out = self.proc_cmd(inputstring)
-        self.printdebug("<<< "+inputstring)
+        self.printdebug(self.prepare(out, False, True, True)+" <<< "+inputstring)
         self.recursion -= 1
         return out
 
