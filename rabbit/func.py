@@ -508,7 +508,7 @@ class strfloat(strfunc):
             self.memo = test.memo
             self.snapshot = test.snapshot
             if self.lexical:
-                self.snapshot.extend(self.e.variables)
+                self.snapshot.update(self.e.variables)
         else:
             self.funcstr = funcstr
             self.overflow = overflow

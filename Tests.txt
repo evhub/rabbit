@@ -1,5 +1,5 @@
 # Assertion Tests:
-passert(statement) = assert:statement|statement
+passert(statement) = statement$assert:statement
 assert:: "abc" ?= (passert::"abc")
 
 # Boolean Operator Tests:
@@ -420,6 +420,6 @@ passert:: is("abc", `abc`)
 # Final Testing:
 passert:: save("Tests.save.txt");true
 passert:: contents ?= read("Tests.save.txt")		$ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
-passert:: { passert := passert ;; nothing := nothing ;; nil := nil } ?= { run Tests.save.txt }
+passert:: { passert := passert ;; nothing := nothing ;; nil := nil } ?= { run :: Tests.save.txt }
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
 passert:: printdone() ?= printdone()				$ printdone() = print("    Message sent.")
