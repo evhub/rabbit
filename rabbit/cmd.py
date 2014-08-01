@@ -317,7 +317,7 @@ class mathbase(safebase):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to def")
         elif len(variables) == 1:
-            original = self.e.prepare(variables[0], True, True)
+            original = self.e.prepare(variables[0], True, False)
             self.redef = True
             test = self.e.cmd_set(original)
             self.redef = False

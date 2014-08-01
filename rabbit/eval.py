@@ -473,6 +473,11 @@ Global Operator Precedence List:
                 out = out[:-2]
             elif out.endswith("L"):
                 out = out[:-1]
+        elif isinstance(item, codestr):
+            if bottom:
+                out = repr(item)
+            else:
+                out = str(item)
         elif bottom and isinstance(item, rollfunc):
             out = "d:"+self.prepare(item.stop, False, bottom, indebug, maxrecursion)
         elif bottom and isinstance(item, strfunc):
