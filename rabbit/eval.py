@@ -398,7 +398,7 @@ Global Operator Precedence List:
             else:
                 out = str(item)
         elif isinstance(item, classcalc):
-            out = item.__repr__(top, bottom, indebug, maxrecursion)
+            out = item.getrepr(top, bottom, indebug, maxrecursion)
         elif isinstance(item, (data, multidata)):
             if bottom:
                 out = "data:(" + self.prepare(getmatrix(item), False, True, indebug, maxrecursion) + ")"
@@ -474,10 +474,9 @@ Global Operator Precedence List:
             elif out.endswith("L"):
                 out = out[:-1]
         elif isinstance(item, codestr):
+            out = str(item)
             if bottom:
-                out = repr(item)
-            else:
-                out = str(item)
+                out = "::"+out
         elif bottom and isinstance(item, rollfunc):
             out = "d:"+self.prepare(item.stop, False, bottom, indebug, maxrecursion)
         elif bottom and isinstance(item, strfunc):
@@ -527,7 +526,7 @@ Global Operator Precedence List:
                     if item.n != 1:
                         out += ":"+str(item.n)
             else:
-                out = repr(item)
+                out = "\\"+str(item)
         elif bottom and isinstance(item, strcalc):
             out = repr(item)
         elif istext(item) or isinstance(item, (funcfloat, strcalc)) or getcheck(item) >= 1:

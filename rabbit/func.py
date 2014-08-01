@@ -188,10 +188,6 @@ class funcfloat(numobject):
         """Retrieves An Integer."""
         return int(self.calc())
 
-    def __repr__(self):
-        """Returns A String Representation."""
-        return "\\"+self.funcstr
-
     def __str__(self):
         """Retrieves The Function String."""
         return self.funcstr
@@ -493,7 +489,7 @@ class strfloat(strfunc):
             self.funcstr = test.funcstr
             self.overflow = overflow and test.overflow
             self.variables = variables
-            self.reqargs += other.reqargs
+            self.reqargs += test.reqargs
             for x in test.variables:
                 if not x in self.variables:
                     self.variables.append(x)
@@ -667,10 +663,6 @@ class codestr(rawstrcalc):
     def copy(self):
         """Returns A Copy Of The Code String."""
         return codestr(self.calcstr, self.e)
-
-    def __repr__(self):
-        """Gets A Representation Of The Code String."""
-        return "::"+str(self)
 
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
@@ -1033,7 +1025,7 @@ class classcalc(cotobject):
         """Returns The Variables."""
         return self.variables.items()
 
-    def __repr__(self, top=True, bottom=True, indebug=True, maxrecursion=5):
+    def getrepr(self, top=True, bottom=True, indebug=True, maxrecursion=5):
         """Finds A Representation."""
         out = "{"
         if top:
