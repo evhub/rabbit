@@ -659,6 +659,15 @@ class rawstrcalc(strcalc):
 
 class codestr(rawstrcalc):
     """A Code Evaluator String."""
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("codestr", self.calcstr)
+
+    def copy(self):
+        """Returns A Copy Of The Code String."""
+        return codestr(self.calcstr, self.e)
+
     def __repr__(self):
         """Gets A Representation Of The Code String."""
         return "::"+str(self)
@@ -1029,15 +1038,15 @@ class classcalc(cotobject):
         out = "{"
         if top:
             out += "\n"
-        variables = item.getvars()
+        variables = self.getvars()
         for k,v in variables.items():
             out += " "+k+" "
             if istext(v):
                 out += "= "+v
             else:
                 out += ":= "
-                if item is v:
-                    out += item.selfvar
+                if self is v:
+                    out += self.selfvar
                 elif maxrecursion <= 0 and isinstance(v, classcalc):
                     out += self.speedyprep(v, False, bottom, indebug, maxrecursion)
                 else:

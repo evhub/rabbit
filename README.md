@@ -403,6 +403,7 @@ atan			# Arc tangent
 calc			# Calculate a string of code
 ceil			# Ceiling function
 class			# Convert to class
+code			# Convert to code
 comb			# Combinations
 connect			# Connects matrices
 cont			# Convert to container

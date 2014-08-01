@@ -155,6 +155,7 @@ Global Operator Precedence List:
             "to":funcfloat(self.funcs.tocall, self, "to"),
             "str":funcfloat(self.funcs.strcall, self, "str"),
             "repr":funcfloat(self.funcs.reprcall, self, "repr"),
+            "code":funcfloat(self.funcs.codecall, self, "code"),
             "calc":funcfloat(self.funcs.docalc, self, "calc"),
             "proc":funcfloat(self.funcs.cmdcall, self, "proc"),
             "fold":funcfloat(self.funcs.foldcall, self, "fold"),
@@ -601,10 +602,11 @@ Global Operator Precedence List:
 
     def proc_set(self, inputstring):
         """Evaluates Definitions."""
-        if self.cmd_set(inputstring):
-            return matrix(0)
-        else:
+        test = self.cmd_set(inputstring)
+        if test is None:
             return self.proc_calc(inputstring)
+        else:
+            return test
 
     def cmd_set(self, original):
         """Evaluates Definition Commands."""
@@ -635,6 +637,7 @@ Global Operator Precedence List:
                         func = None
                     else:
                         sides[1] = [sides[1]]
+                    out = []
                     for x in xrange(0, len(sides[0])):
                         if x == len(sides[0])-1:
                             toset = sides[1][x:]
@@ -651,9 +654,10 @@ Global Operator Precedence List:
                             toset = itemlist.pop(0)
                             for item in itemlist:
                                 toset += item
+                        out.append(toset)
                         if not self.cmd_set_do([sides[0][x], self.wrap(toset)], docalc):
                             raise ExecutionError("VariableError", "Could not multi-set to invalid variable "+sides[0][x])
-                    return True
+                    return diagmatrixlist(out)
             else:
                 sides[0] = sides[0][0]
                 return self.cmd_set_do(sides, docalc)
@@ -714,18 +718,22 @@ Global Operator Precedence List:
                             raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
                         else:
                             if docalc:
-                                self.variables[value[0]] = self.trycalc(value[1])
+                                out = self.trycalc(value[1])
+                                self.variables[value[0]] = out
                             else:
                                 self.variables[value[0]] = value[1]
+                                out = strfloat(value[0], self, name=value[0])
                     else:
                         if not self.redef and value[0] in useclass.variables:
                             raise ExecutionError("RedefinitionError", "The attribute "+value[0]+" already exists")
                         else:
                             if docalc:
-                                useclass.store(value[0], self.trycalc(value[1]))
+                                out = self.trycalc(value[1])
+                                useclass.store(value[0], out)
                             else:
                                 useclass.store(value[0], value[1])
-                    return True
+                                out = strfunc(useclass.selfarg+"."+value[0], [strfunc.allargs], {useclass.selfarg:useclass}, self, value[0])
+                    return out
 
     def readytofunc(self, expression, extra="", allowed=""):
         """Determines If An Expression Could Be Turned Into A Function."""
@@ -2021,6 +2029,8 @@ Global Operator Precedence List:
                         value.store(y,x, self.deitem(args[0][y][x]))
             elif name == "strfunc":
                 value = strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]))
+            elif name == "codestr":
+                value = codestr(args[0], self)
             elif name == "strcalc":
                 value = rawstrcalc(args[0], self)
             elif name == "derivfunc":
@@ -2653,19 +2663,31 @@ class evalfuncs(object):
             item = "str"
         return item
 
+    def codecall(self, variables):
+        """Converts To Code."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to code")
+        elif len(variables) == 1:
+            return codestr(self.e.prepare(variables[0], True, False), self.e)
+        else:
+            out = []
+            for arg in variables:
+                out.append(self.codecall([arg]))
+            return diagmatrixlist(out)
+
     def strcall(self, variables):
         """Finds A String."""
-        out = ""
+        out = []
         for x in variables:
-            out += self.e.prepare(x, True, False)
-        return rawstrcalc(out, self.e)
+            out.append(self.e.prepare(x, True, False))
+        return rawstrcalc(strlist(out, ""), self.e)
 
     def reprcall(self, variables):
         """Finds A Representation."""
-        out = ""
+        out = []
         for x in variables:
-            out += self.e.prepare(x, False, True)
-        return rawstrcalc(out, self.e)
+            out.append(self.e.prepare(x, False, True))
+        return rawstrcalc(strlist(out, ""), self.e)
 
     def joincall(self, variables):
         """Joins Variables By A Delimiter."""

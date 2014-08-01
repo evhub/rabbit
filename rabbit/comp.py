@@ -171,11 +171,12 @@ class compiler(commandline):
 
     def proc_set(self, inputstring):
         """Replaces self.e.proc_set."""
-        if self.e.cmd_set(inputstring):
-            self.e.setspawned()
-            return matrix(0)
-        else:
+        test = self.e.cmd_set(inputstring)
+        if test is None:
             return self.e.proc_calc(inputstring)
+        else:
+            self.e.setspawned()
+            return test
 
     def makecall(self, variables):
         """Adds To Make Commands."""

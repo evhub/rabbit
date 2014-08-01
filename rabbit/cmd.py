@@ -312,7 +312,7 @@ class mathbase(safebase):
                 self.makecall([arg])
         return matrix(0)
 
-    def defcall(self, original):
+    def defcall(self, variables):
         """Defines A Variable."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to def")
