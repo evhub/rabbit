@@ -4,7 +4,7 @@ assert:: (passert::"abc")
 assert:: iserr(:(passert::0))
 
 # Includes:
-passert:: include(math, stats, unicode)
+passert:: include(math, stats)
 
 # Boolean Operator Tests:
 passert:: 1 ?= 1
