@@ -608,6 +608,13 @@ Global Operator Precedence List:
         else:
             return test
 
+    def trycalc(self, inputobject):
+        """Attempts To Calculate A Variable."""
+        if istext(inputobject):
+            return self.calc(inputobject)
+        else:
+            return inputobject
+
     def cmd_set(self, original):
         """Evaluates Definition Commands."""
         if "=" in original:
@@ -732,7 +739,7 @@ Global Operator Precedence List:
                                 useclass.store(value[0], out)
                             else:
                                 useclass.store(value[0], value[1])
-                                out = strfunc(useclass.selfarg+"."+value[0], [strfunc.allargs], {useclass.selfarg:useclass}, self, value[0])
+                                out = strfunc(useclass.selfvar+"."+value[0], [strfunc.allargs], {useclass.selfvar:useclass}, self, value[0])
                     return out
 
     def readytofunc(self, expression, extra="", allowed=""):
@@ -759,7 +766,7 @@ Global Operator Precedence List:
             if top:
                 sides[0] = sides[0][:-1].split("(", 1)
             else:
-                sides[0] = sides[0].split(sefl.parenchar, 1)
+                sides[0] = sides[0].split(self.parenchar, 1)
                 sides[0][1] = self.namefind(self.parenchar+sides[0][1])
             params, personals, allargs, reqargs = self.eval_set(sides[0][1].split(","))
             return (sides[0][0], strfunc(sides[1], self, params, personals, allargs=allargs, reqargs=reqargs))

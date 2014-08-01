@@ -427,13 +427,6 @@ class mathbase(safebase):
                 self.savecall([x])
         return matrix(0)
 
-    def trycalc(self, inputobject):
-        """Attempts To Calculate A Variable."""
-        if istext(inputobject):
-            return self.e.calc(inputobject)
-        else:
-            return inputobject
-
     def call(self, item, value, varname="x"):
         """Evaluates An Item With A Value."""
         return self.e.call(item, value, varname)
