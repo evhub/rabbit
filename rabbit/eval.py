@@ -326,13 +326,14 @@ Global Operator Precedence List:
 
     def printdebug(self, message):
         """Prints Debug Output."""
-        message = self.recursion*"  "+str(message)
-        if self.color in colors:
-            message = addcolor(message, self.color)
-        if self.debug:
-            print(message)
-        else:
-            self.debuglog.append(message)
+        for line in str(message).splitlines():
+            item = self.recursion*"  "+line
+            if self.color in colors:
+                item = addcolor(item, self.color)
+            if self.debug:
+                print(item)
+            else:
+                self.debuglog.append(item)
 
     def makevars(self, variables):
         """Forcibly Stores Variables."""

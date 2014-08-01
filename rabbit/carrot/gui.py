@@ -56,8 +56,8 @@ class terminal(object):
                 newmessage += str(message)
             for x in messages:
                 newmessage += " " + str(x)
-            print(self.colorwrap(newmessage))
-            for line in newmessage.split("\n"):
+            for line in newmessage.splitlines():
+                print(self.colorwrap(line))
                 self.history.append(line)
     def getlines(self):
         """Retreives All Lines In The History."""
