@@ -146,10 +146,8 @@ class compiler(commandline):
             self.e.fresh()
         self.e.makevars({
             "run":funcfloat(self.runcall, self.e, "run"),
-            "del":funcfloat(self.delcall, self.e, "del"),
             "make":funcfloat(self.makecall, self.e, "make"),
             "assert":funcfloat(self.comp_assertcall, self.e, "assert"),
-            "def":funcfloat(self.comp_defcall, self.e, "def"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show")
@@ -160,12 +158,6 @@ class compiler(commandline):
     def comp_assertcall(self, variables):
         """Wrapper around assertcall."""
         out = self.assertcall(variables)
-        self.e.setspawned()
-        return out
-
-    def comp_defcall(self, variables):
-        """Wrapper around defcall."""
-        out = self.defcall(variables)
         self.e.setspawned()
         return out
 

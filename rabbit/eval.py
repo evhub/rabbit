@@ -183,11 +183,6 @@ Global Operator Precedence List:
             "size":funcfloat(self.funcs.sizecall, self, "size"),
             "abs":funcfloat(self.funcs.abscall, self, "abs"),
             "d":funcfloat(self.funcs.randcall, self, "d"),
-            "D":funcfloat(self.funcs.derivcall, self, "D"),
-            "S":funcfloat(self.funcs.integcall, self, "S"),
-            "data":funcfloat(self.funcs.datacall, self, "data"),
-            "frac":funcfloat(self.funcs.fractcall, self, "frac"),
-            "simp":funcfloat(self.funcs.simpcall, self, "simp"),
             "from":funcfloat(self.funcs.instanceofcall, self, "from"),
             "iserr":funcfloat(self.funcs.iserrcall, self, "iserr"),
             "class":funcfloat(self.funcs.classcall, self, "class"),
@@ -201,31 +196,44 @@ Global Operator Precedence List:
             "imag":funcfloat(self.funcs.imagcall, self, "imag"),
             "read":funcfloat(self.funcs.readcall, self, "read"),
             "write":funcfloat(self.funcs.writecall, self, "write"),
-            "det":funcfloat(self.funcs.detcall, self, "det"),
             "is":funcfloat(self.funcs.iseqcall, self, "is"),
+            "include":funcfloat(self.funcs.includecall, self, "include"),
+            "del":funcfloat(self.funcs.delcall, self, "del"),
+            "def":funcfloat(self.funcs.defcall, self, "def"),
+            "effect":usefunc(self.setreturned, self, "effect", []),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
-            "floor":usefunc(math.floor, self, "floor", ["x"]),
-            "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
-            "log":usefunc(math.log10, self, "log", ["x"]),
-            "ln":usefunc(math.log, self, "ln", ["x"]),
-            "sqrt":usefunc(isqrt, self, "sqrt", ["x"]),
-            "tan":usefunc(math.tan, self, "tan", ["x"]),
-            "sin":usefunc(math.sin, self, "sin", ["x"]),
-            "cos":usefunc(math.cos, self, "cos", ["x"]),
-            "atan":usefunc(math.atan, self, "atan", ["x"]),
-            "asin":usefunc(math.asin, self, "asin", ["x"]),
-            "acos":usefunc(math.acos, self, "acos", ["x"]),
-            "deg":usefunc(math.degrees, self, "deg", ["x"]),
-            "rad":usefunc(math.radians, self, "rad", ["x"]),
-            "fact":usefunc(factorial, self, "fact", ["x"]),
-            "gamma":usefunc(gamma, self, "gamma", ["x"]),
-            "gcd":usefunc(gcd, self, "gcd", ["x", "y"]),
-            "lcm":usefunc(lcm, self, "lcm", ["x", "y"]),
-            "perm":usefunc(perm, self, "perm", ["n", "k"]),
-            "comb":usefunc(comb, self, "comb", ["n", "k"]),
-            "'":usefunc(succ, self, "'", ["x"]),
             "E":usefunc(E10, self, "E", ["x"]),
-            "stats": classcalc(self, {
+            "math":classcalc(self, {
+                "D":funcfloat(self.funcs.derivcall, self, "D"),
+                "S":funcfloat(self.funcs.integcall, self, "S"),
+                "data":funcfloat(self.funcs.datacall, self, "data"),
+                "frac":funcfloat(self.funcs.fractcall, self, "frac"),
+                "simp":funcfloat(self.funcs.simpcall, self, "simp"),
+                "det":funcfloat(self.funcs.detcall, self, "det"),
+                "floor":usefunc(math.floor, self, "floor", ["x"]),
+                "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
+                "log":usefunc(math.log10, self, "log", ["x"]),
+                "ln":usefunc(math.log, self, "ln", ["x"]),
+                "sqrt":usefunc(isqrt, self, "sqrt", ["x"]),
+                "tan":usefunc(math.tan, self, "tan", ["x"]),
+                "sin":usefunc(math.sin, self, "sin", ["x"]),
+                "cos":usefunc(math.cos, self, "cos", ["x"]),
+                "atan":usefunc(math.atan, self, "atan", ["x"]),
+                "asin":usefunc(math.asin, self, "asin", ["x"]),
+                "acos":usefunc(math.acos, self, "acos", ["x"]),
+                "deg":usefunc(math.degrees, self, "deg", ["x"]),
+                "rad":usefunc(math.radians, self, "rad", ["x"]),
+                "fact":usefunc(factorial, self, "fact", ["x"]),
+                "gamma":usefunc(gamma, self, "gamma", ["x"]),
+                "gcd":usefunc(gcd, self, "gcd", ["x", "y"]),
+                "lcm":usefunc(lcm, self, "lcm", ["x", "y"]),
+                "perm":usefunc(perm, self, "perm", ["n", "k"]),
+                "comb":usefunc(comb, self, "comb", ["n", "k"]),
+                "succ":usefunc(succ, self, "'", ["x"]),
+                "e":math.e,
+                "pi":math.pi
+                }),
+            "stats":classcalc(self, {
                 "normdist":usefunc(normdist, self, "normdist", ["x", "mean", "stdev"]),
                 "binomP":usefunc(binomP, self, "binomP", ["n", "p", "x"]),
                 "poissonP":usefunc(poissonP, self, "poissonP", ["lambda", "x"]),
@@ -241,73 +249,72 @@ Global Operator Precedence List:
                 "chisqP":usefunc(chisqP, self, "chisqP", ["x", "df"], evalinclude="e"),
                 "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], evalinclude="e")
                 }),
-            "effect":usefunc(self.setreturned, self, "effect", []),
             "i":complex(0.0, 1.0),
-            "e":math.e,
-            "pi":math.pi,
             "none":matrix(0),
             "true":1.0,
             "false":0.0,
             "_":atom(),
-            funcfloat.allargs : matrix(0),
-            "\xf8" : "none",
-            "\u221e" : "inf",
-            "\u2211" : "sum",
-            "\u03c0" : "pi",
-            "\u221a" : "sqrt",
-            "\u222b" : "S",
-            "\u0393" : "gamma",
-            "\u220f" : "prod",
-            "\u2208" : "in",
-            "\u230a" : "min",
-            "\u2308" : "max",
-            "\xb0" : "deg",
-            "\xbd" : 0.5,
-            "\xbc" : 0.25,
-            "\xbe" : 0.75,
-            "\u2400" : rawstrcalc("\x00", self),
-            "\u2401" : rawstrcalc("\x01", self),
-            "\u2402" : rawstrcalc("\x02", self),
-            "\u2403" : rawstrcalc("\x03", self),
-            "\u2404" : rawstrcalc("\x04", self),
-            "\u2405" : rawstrcalc("\x05", self),
-            "\u2406" : rawstrcalc("\x06", self),
-            "\u2407" : rawstrcalc("\x07", self),
-            "\u2408" : rawstrcalc("\x08", self),
-            "\u2409" : rawstrcalc("\x09", self),
-            "\u240a" : rawstrcalc("\n", self),
-            "\u240b" : rawstrcalc("\x0b", self),
-            "\u240c" : rawstrcalc("\x0c", self),
-            "\u240d" : rawstrcalc("\r", self),
-            "\u240e" : rawstrcalc("\x0e", self),
-            "\u240f" : rawstrcalc("\x0f", self),
-            "\u2410" : rawstrcalc("\x10", self),
-            "\u2411" : rawstrcalc("\x11", self),
-            "\u2412" : rawstrcalc("\x12", self),
-            "\u2413" : rawstrcalc("\x13", self),
-            "\u2414" : rawstrcalc("\x14", self),
-            "\u2415" : rawstrcalc("\x15", self),
-            "\u2416" : rawstrcalc("\x16", self),
-            "\u2417" : rawstrcalc("\x17", self),
-            "\u2418" : rawstrcalc("\x18", self),
-            "\u2419" : rawstrcalc("\x19", self),
-            "\u241a" : rawstrcalc("\x1a", self),
-            "\u241b" : rawstrcalc("\x1b", self),
-            "\u241c" : rawstrcalc("\x1c", self),
-            "\u241d" : rawstrcalc("\x1d", self),
-            "\u241e" : rawstrcalc("\x1e", self),
-            "\u241f" : rawstrcalc("\x1f", self),
-            "\u2420" : rawstrcalc(" ", self),
-            "\u2421" : rawstrcalc("\x21", self)
+            funcfloat.allargs : matrix(0)
             }
         self.variables.update({
-            "\u2209" : strfunc("!\u2208(__)", self, [], name="\u2209", overflow=False),
-            "\u220b" : strfunc("\u2208(rev(__))", self, [], name="\u220b", overflow=False),
-            "\u220c" : strfunc("!\u220b(__)", self, [], name="\u220c", overflow=False),
-            "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
-            "\u221c" : strfunc("sqrt(sqrt(x))", self, ["x"], name="\u221c"),
-            "\u222c" : strfunc("S(S(f,++args),++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
-            "\u222d" : strfunc("S(S(S(f,++args),++args),++args)", self, ["f", "args"], reqargs=1, name="\u222d")
+            "unicode":classcalc(self, {
+                "\xf8" : "none",
+                "\u221e" : "inf",
+                "\u2211" : "sum",
+                "\u03c0" : "math.pi",
+                "\u221a" : "math.sqrt",
+                "\u222b" : "math.S",
+                "\u0393" : "math.gamma",
+                "\u220f" : "math.prod",
+                "\u2208" : "in",
+                "\u230a" : "min",
+                "\u2308" : "max",
+                "\xb0" : "math.rad",
+                "\xbd" : 0.5,
+                "\xbc" : 0.25,
+                "\xbe" : 0.75,
+                "\u2400" : rawstrcalc("\x00", self),
+                "\u2401" : rawstrcalc("\x01", self),
+                "\u2402" : rawstrcalc("\x02", self),
+                "\u2403" : rawstrcalc("\x03", self),
+                "\u2404" : rawstrcalc("\x04", self),
+                "\u2405" : rawstrcalc("\x05", self),
+                "\u2406" : rawstrcalc("\x06", self),
+                "\u2407" : rawstrcalc("\x07", self),
+                "\u2408" : rawstrcalc("\x08", self),
+                "\u2409" : rawstrcalc("\x09", self),
+                "\u240a" : rawstrcalc("\n", self),
+                "\u240b" : rawstrcalc("\x0b", self),
+                "\u240c" : rawstrcalc("\x0c", self),
+                "\u240d" : rawstrcalc("\r", self),
+                "\u240e" : rawstrcalc("\x0e", self),
+                "\u240f" : rawstrcalc("\x0f", self),
+                "\u2410" : rawstrcalc("\x10", self),
+                "\u2411" : rawstrcalc("\x11", self),
+                "\u2412" : rawstrcalc("\x12", self),
+                "\u2413" : rawstrcalc("\x13", self),
+                "\u2414" : rawstrcalc("\x14", self),
+                "\u2415" : rawstrcalc("\x15", self),
+                "\u2416" : rawstrcalc("\x16", self),
+                "\u2417" : rawstrcalc("\x17", self),
+                "\u2418" : rawstrcalc("\x18", self),
+                "\u2419" : rawstrcalc("\x19", self),
+                "\u241a" : rawstrcalc("\x1a", self),
+                "\u241b" : rawstrcalc("\x1b", self),
+                "\u241c" : rawstrcalc("\x1c", self),
+                "\u241d" : rawstrcalc("\x1d", self),
+                "\u241e" : rawstrcalc("\x1e", self),
+                "\u241f" : rawstrcalc("\x1f", self),
+                "\u2420" : rawstrcalc(" ", self),
+                "\u2421" : rawstrcalc("\x21", self),
+                "\u2209" : strfunc("!\u2208(__)", self, [], name="\u2209", overflow=False),
+                "\u220b" : strfunc("\u2208(rev(__))", self, [], name="\u220b", overflow=False),
+                "\u220c" : strfunc("!\u220b(__)", self, [], name="\u220c", overflow=False),
+                "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
+                "\u221c" : strfunc("math.sqrt(math.sqrt(x))", self, ["x"], name="\u221c"),
+                "\u222c" : strfunc("math.S(math.S(f,++args),++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
+                "\u222d" : strfunc("math.S(math.S(math.S(f,++args),++args),++args)", self, ["f", "args"], reqargs=1, name="\u222d")
+                })
             })
 
     def setreturned(self, value=True):
@@ -388,7 +395,42 @@ Global Operator Precedence List:
         """Prepares The Output Of An Evaluation."""
         if maxrecursion is None:
             maxrecursion = self.maxrecursion
-        if self.speedy and indebug:
+        if istext(item):
+            out = str(item)
+        elif isinstance(item, atom):
+            out = repr(item)
+        elif isinstance(item, strcalc):
+            if bottom:
+                out = repr(item)
+            else:
+                out = str(item)
+        elif item is None:
+            out = "none"
+        elif isinstance(item, bool):
+            out = self.prepare(float(item), False, bottom, indebug, maxrecursion)
+        elif isinstance(item, complex):
+            out = ""
+            if item.real != 0:
+                out += self.prepare(item.real, False, bottom, indebug, maxrecursion)+"+"
+            if item.imag == 1:
+                out += "i"
+            else:
+                out += self.prepare(item.imag, False, bottom, indebug, maxrecursion)+"*i"
+        elif isnum(item):
+            out = repr(item)
+            if "e" in out:
+                out = out.replace("+", "").replace("e", "*10^")
+                if out.startswith("1*"):
+                    out = out[2:]
+            elif out.endswith(".0"):
+                out = out[:-2]
+            elif out.endswith("L"):
+                out = out[:-1]
+        elif isinstance(item, codestr):
+            out = str(item)
+            if bottom:
+                out = "::"+out
+        elif self.speedy and indebug:
             out = self.speedyprep(item, top, bottom, True, maxrecursion)
         elif isinstance(item, instancecalc):
             if maxrecursion <= 0:
@@ -451,32 +493,6 @@ Global Operator Precedence List:
                 out += b
             else:
                 out += "("+b+")"
-        elif isinstance(item, atom):
-            out = repr(item)
-        elif isinstance(item, bool):
-            out = self.prepare(float(item), False, bottom, indebug, maxrecursion)
-        elif isinstance(item, complex):
-            out = ""
-            if item.real != 0:
-                out += self.prepare(item.real, False, bottom, indebug, maxrecursion)+"+"
-            if item.imag == 1:
-                out += "i"
-            else:
-                out += self.prepare(item.imag, False, bottom, indebug, maxrecursion)+"*i"
-        elif isnum(item):
-            out = repr(item)
-            if "e" in out:
-                out = out.replace("+", "").replace("e", "*10^")
-                if out.startswith("1*"):
-                    out = out[2:]
-            elif out.endswith(".0"):
-                out = out[:-2]
-            elif out.endswith("L"):
-                out = out[:-1]
-        elif isinstance(item, codestr):
-            out = str(item)
-            if bottom:
-                out = "::"+out
         elif bottom and isinstance(item, rollfunc):
             out = "d:"+self.prepare(item.stop, False, bottom, indebug, maxrecursion)
         elif bottom and isinstance(item, strfunc):
@@ -527,9 +543,7 @@ Global Operator Precedence List:
                         out += ":"+str(item.n)
             else:
                 out = "\\"+str(item)
-        elif bottom and isinstance(item, strcalc):
-            out = repr(item)
-        elif istext(item) or isinstance(item, (funcfloat, strcalc)) or getcheck(item) >= 1:
+        elif isinstance(item, funcfloat) or getcheck(item) >= 1:
             out = str(item)
         elif indebug:
             if indebug > 1:
@@ -2088,6 +2102,39 @@ class evalfuncs(object):
         """Initializes The Functions."""
         self.e = e
 
+    def delcall(self, variables):
+        """Deletes A Variable."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to del")
+        elif len(variables) == 1:
+            original = self.prepare(variables[0], False, False)
+            if original in self.variables:
+                out = self.variables[original]
+                del self.variables[original]
+            elif "." in original:
+                test = original.split(".")
+                item = test.pop()
+                useclass = self.find(test[0], True)
+                if isinstance(useclass, classcalc):
+                    last = useclass
+                    for x in xrange(1, len(test)):
+                        useclass = useclass.retrieve(test[x])
+                        if not isinstance(useclass, classcalc):
+                            raise ExecutionError("ClassError", "Could not delete "+test[x]+" in "+self.prepare(last, False, True, True))
+                else:
+                    raise ExecutionError("VariableError", "Could not find class "+test[0])
+                out = useclass.retrieve(item)
+                useclass.remove(item)
+            else:
+                raise ExecutionError("VariableError", "Could not find "+original)
+            self.setreturned()
+            return out
+        else:
+            out = []
+            for arg in variables:
+                out.append(self.delcall([arg]))
+            return diagmatrixlist(out)
+
     def iseqcall(self, variables):
         """Determins Whether All Arguments Are Equal."""
         if len(variables) < 2:
@@ -2098,6 +2145,23 @@ class evalfuncs(object):
             for x in xrange(1, len(variables)):
                 out = out and iseq(last, variables[x])
             return out
+
+    def includecall(self, variables):
+        """Includes A Class In The Global Namespace."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to include")
+        elif len(variables) == 1:
+            if isinstance(variables[0], classcalc):
+                oldvars = self.e.setvars(variables[0].getvars())
+                self.e.setreturned()
+                return classcalc(self.e, oldvars)
+            else:
+                raise ValueError("Can only include a class")
+        else:
+            out = []
+            for arg in variables:
+                out.append(self.includecall([arg]))
+            return diagmatrixlist(out)
 
     def envcall(self, variables):
         """Retrieves A Class Of The Global Environment."""
@@ -2922,3 +2986,22 @@ class evalfuncs(object):
             for x in variables:
                 out.append(self.readcall([x]))
             return diagmatrixlist(out)
+
+    def defcall(self, variables):
+        """Defines A Variable."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to def")
+        elif len(variables) == 1:
+            original = self.prepare(variables[0], True, False)
+            self.redef = True
+            test = self.cmd_set(original)
+            self.redef = False
+            if test:
+                self.setreturned()
+                return test
+            else:
+                raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
+        else:
+            for arg in variables:
+                self.defcall([arg])
+        return matrix(0)

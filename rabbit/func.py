@@ -1086,8 +1086,13 @@ class classcalc(cotobject):
     def getitem(self, test):
         """Retrieves An Item At The Base Level."""
         if istext(self.variables[test]):
-            self.store(test, self.calc(self.variables[test]))
-        return self.variables[test]
+            out = self.calc(self.variables[test])
+            self.store(test, out)
+            return out
+        elif self.variables[test] is None:
+            return matrix(0)
+        else:
+            return self.variables[test]
 
     def retrieve(self, key):
         """Retrieves An Item."""

@@ -115,9 +115,7 @@ class mathbase(safebase):
             "debug":funcfloat(self.debugcall, self.e, "debug"),
             "run":funcfloat(self.runcall, self.e, "run"),
             "assert":funcfloat(self.assertcall, self.e, "assert"),
-            "del":funcfloat(self.delcall, self.e, "del"),
             "make":funcfloat(self.makecall, self.e, "make"),
-            "def":funcfloat(self.defcall, self.e, "def"),
             "save":funcfloat(self.savecall, self.e, "save"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
@@ -263,36 +261,6 @@ class mathbase(safebase):
         else:
             raise ExecutionError("AssertionError", "Assertion failed that "+original, {"Result":out})
 
-    def delcall(self, variables):
-        """Deletes A Variable."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to del")
-        elif len(variables) == 1:
-            original = self.e.prepare(variables[0], False, False)
-            if original in self.e.variables:
-                del self.e.variables[original]
-            elif "." in original:
-                test = original.split(".")
-                item = test.pop()
-                useclass = self.e.find(test[0], True)
-                if isinstance(useclass, classcalc):
-                    last = useclass
-                    for x in xrange(1, len(test)):
-                        useclass = useclass.retrieve(test[x])
-                        if not isinstance(useclass, classcalc):
-                            raise ExecutionError("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
-                else:
-                    raise ExecutionError("VariableError", "Could not find class "+test[0])
-                useclass.remove(item)
-            else:
-                raise ExecutionError("VariableError", "Could not find "+original)
-            self.e.setreturned()
-            self.printdebug("< "+original+" >")
-        else:
-            for arg in variables:
-                self.delcall([arg])
-        return matrix(0)
-
     def makecall(self, variables):
         """Sets A Variable."""
         if not variables:
@@ -310,25 +278,6 @@ class mathbase(safebase):
         else:
             for arg in variables:
                 self.makecall([arg])
-        return matrix(0)
-
-    def defcall(self, variables):
-        """Defines A Variable."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to def")
-        elif len(variables) == 1:
-            original = self.e.prepare(variables[0], True, False)
-            self.e.redef = True
-            test = self.e.cmd_set(original)
-            self.e.redef = False
-            if test:
-                self.e.setreturned()
-                return test
-            else:
-                raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
-        else:
-            for arg in variables:
-                self.defcall([arg])
         return matrix(0)
 
     def printcall(self, variables, func=None):
