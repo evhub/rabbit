@@ -565,17 +565,33 @@ Global Operator Precedence List:
             groupers = self.groupers
         return carefulsplit(inputstring, splitstring, '"`', {"\u201c":"\u201d"}, groupers)
 
-    def process(self, inputstring, info="", command=None):
+    def remcomment(self, inputstring, commentstring="#"):
+        """Removes A Comment."""
+        return self.outersplit(inputstring, commentstring, {})[0]
+
+    def calc(self, inputstring, info=""):
+        """Performs Top-Level Calculation."""
+        out = matrix(0)
+        def _command(new):
+            out = new
+        self.process(inputstring, info, _command, False)
+        return out
+
+    def process(self, inputstring, info="", command=None, top=None):
         """Performs Top-Level Evaluation."""
-        inputstring = str(inputstring)
+        inputstring = self.remcomment(str(inputstring))
+        if top is None:
+            top = command is not None
+        else:
+            top = top
         for original in self.outersplit(inputstring, ";;", {"{":"}"}):
             original = basicformat(original)
             if not iswhite(original):
-                out = self.calc(original, info, command is not None)
+                out = self.proc_calc(original, info, top)
                 if command is not None:
                     command(out)
 
-    def calc(self, inputstring, info="", top=False):
+    def proc_calc(self, inputstring, info="", top=False):
         """Gets The Value Of An Expression."""
         if info is None:
             info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
@@ -2838,7 +2854,8 @@ class evalfuncs(object):
         """Performs calc."""
         out = []
         for x in variables:
-            out.append(self.e.calc(self.e.prepare(x, False, False)))
+            inputstring = self.e.prepare(x, False, False)
+            out.append(self.e.calc(inputstring))
         if len(out) == 1:
             return out[0]
         else:
@@ -2849,7 +2866,8 @@ class evalfuncs(object):
         out = []
         e = self.e.new()
         for x in variables:
-            out.append(e.calc(self.e.prepare(x, False, False)))
+            inputstring = self.e.prepare(x, False, False)
+            out.append(self.e.calc(inputstring))
         if len(out) == 1:
             return out[0]
         else:
@@ -2858,7 +2876,8 @@ class evalfuncs(object):
     def cmdcall(self, variables):
         """Performs proc."""
         for item in variables:
-            self.e.processor.process(self.e.prepare(item, False, False))
+            inputstring = self.e.prepare(item, False, False)
+            self.e.processor.evaltext(inputstring)
         return matrix(0)
 
     def foldcall(self, variables, func=None, overflow=True):

@@ -104,7 +104,7 @@ class editor(mathbase):
 
     def endline(self):
         """Checks The Last Line."""
-        last = carefulsplit(self.box.output("insert-1l", "insert-1c"), "#", '"`', {"\u201c":"\u201d"})[0]
+        last = self.e.remcomment(self.box.output("insert-1l", "insert-1c"))
         space = 0
         start = True
         instring = False

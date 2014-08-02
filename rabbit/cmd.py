@@ -147,7 +147,7 @@ class mathbase(safebase):
         """Handles A Return Event."""
         self.reset()
         original = self.box.output()
-        cmd = self.e.outersplit(original, "#", {})[0]
+        cmd = self.e.remcomment(original)
         if delspace(cmd) == "":
             if len(self.box.commands) > 1:
                 self.process(self.box.commands[-2])
@@ -169,12 +169,13 @@ class mathbase(safebase):
     def evaltext(self, inputstring):
         """Runs Text."""
         cmdlist = inputstring.splitlines()
+        self.e.setspawned()
         x = 0
         while x < len(cmdlist):
             self.reset()
-            cmdlist[x] = self.e.outersplit(cmdlist[x], "#", {})[0]
+            cmdlist[x] = self.e.remcomment(cmdlist[x])
             while x < len(cmdlist)-1 and (delspace(cmdlist[x+1]) == "" or iswhite(cmdlist[x+1][0])):
-                cmdlist[x] += "\n"+self.e.outersplit(cmdlist.pop(x+1), "#", {})[0]
+                cmdlist[x] += "\n"+self.e.remcomment(cmdlist.pop(x+1))
             self.process(cmdlist[x])
             x += 1
 
@@ -231,7 +232,6 @@ class mathbase(safebase):
                 if not self.evalfile(original):
                     raise ExecutionError("IOError", "Could not find file "+str(original))
                 else:
-                    self.e.setspawned()
                     self.dumpdebug(True)
             else:
                 raise ExecutionError("StatementError", "Can only call run as a statement")
