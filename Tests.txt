@@ -267,6 +267,13 @@ passert:: crackle pop (10) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Po
     @ x < end
     )
 passert:: sum( 2**20~~ \(x,y)\(x!=y) ) ?= 0
+passert:: z ?= 3
+ $ (
+  if (x < 1) ::
+   z = 3
+  )
+ $ x = 0
+ $ if (cond) = proc @ cond
 
 # Built-Ins Tests:
 passert:: a != b                    $ (def :: b.x = 2) $ b := copy(a) $ a := { x = 1 }
@@ -422,6 +429,7 @@ passert:: 2π ?= 2*pi
 passert:: is("abc", `abc`)
 passert:: ( del::x )    $ x = 1
 passert:: x() ? y ? 1   $ x = y = 1
+passert:: 1 ?= (x=1 ;; x)
 
 # Final Testing:
 passert:: save("Tests.save.txt");true

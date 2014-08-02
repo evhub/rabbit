@@ -588,7 +588,7 @@ Global Operator Precedence List:
             top = command is not None
         else:
             top = top
-        for original in self.outersplit(inputstring, ";;", {"{":"}"}):
+        for original in self.outersplit(inputstring, ";;"):
             original = basicformat(original)
             if not iswhite(original):
                 out = self.proc_top(original, info, top)
