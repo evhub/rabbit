@@ -1822,7 +1822,7 @@ Global Operator Precedence List:
         """Performs Function Composition."""
         if ".." in inputstring:
             funclist = inputstring.split("..")
-            return strfunc(strlist(funclist, "(")+strfunc.allargs+")"*len(funclist), self, overflow=False)
+            return strfunc(strlist(funclist, "(")+"("+strfunc.allargs+")"*len(funclist), self, overflow=False)
 
     def call_lambdacoeff(self, inputstring):
         """Evaluates Lambda Coefficients."""
