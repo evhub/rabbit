@@ -138,7 +138,7 @@ class grapher(mathbase):
         self.e.setreturned(False)
         for x in xrange(0, self.width/self.xsize+1):
             testy = self.saferun(function, testx)
-            if self.returned:
+            if self.e.returned:
                 break
             elif testy is not None and testy != matrix(0):
                 self.singlerender(testx, testy)
@@ -151,7 +151,7 @@ class grapher(mathbase):
         self.e.setreturned(False)
         for y in xrange(0, self.height/self.ysize+1):
             testx = self.saferun(function, testy)
-            if self.returned:
+            if self.e.returned:
                 break
             elif testx is not None and testx != matrix(0):
                 self.singlerender(testx, testy)
@@ -206,7 +206,7 @@ class grapher(mathbase):
             fnew = self.convert(testx, fy)
             gy = self.saferun(g, testx)
             gnew = self.convert(testx, gy)
-            if self.returned:
+            if self.e.returned:
                 break
             elif fnew and gnew:
                 newx, fnewy = fnew

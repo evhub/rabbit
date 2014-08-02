@@ -73,7 +73,7 @@ def getnum(inputobject):
     else:
         value = isreal(inputobject)
         if value is None:
-            return 0.0
+            raise ValueError("Cannot convert to number "+repr(inputobject))
         else:
             return value
 
