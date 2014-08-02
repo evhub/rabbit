@@ -399,6 +399,10 @@ Global Operator Precedence List:
             out = str(item)
         elif isinstance(item, atom):
             out = repr(item)
+        elif isinstance(item, codestr):
+            out = str(item)
+            if bottom:
+                out = "::"+out
         elif isinstance(item, strcalc):
             if bottom:
                 out = repr(item)
@@ -408,14 +412,6 @@ Global Operator Precedence List:
             out = "none"
         elif isinstance(item, bool):
             out = self.prepare(float(item), False, bottom, indebug, maxrecursion)
-        elif isinstance(item, complex):
-            out = ""
-            if item.real != 0:
-                out += self.prepare(item.real, False, bottom, indebug, maxrecursion)+"+"
-            if item.imag == 1:
-                out += "i"
-            else:
-                out += self.prepare(item.imag, False, bottom, indebug, maxrecursion)+"*i"
         elif isnum(item):
             out = repr(item)
             if "e" in out:
@@ -426,10 +422,14 @@ Global Operator Precedence List:
                 out = out[:-2]
             elif out.endswith("L"):
                 out = out[:-1]
-        elif isinstance(item, codestr):
-            out = str(item)
-            if bottom:
-                out = "::"+out
+        elif isinstance(item, complex):
+            out = ""
+            if item.real != 0:
+                out += self.prepare(item.real, False, bottom, indebug, maxrecursion)+"+"
+            if item.imag == 1:
+                out += "i"
+            else:
+                out += self.prepare(item.imag, False, bottom, indebug, maxrecursion)+"*i"
         elif self.speedy and indebug:
             out = self.speedyprep(item, top, bottom, True, maxrecursion)
         elif isinstance(item, instancecalc):
@@ -1785,7 +1785,7 @@ Global Operator Precedence List:
                 item = matrix(0)
                 if l[0].startswith("."):
                     if len(values) > 0:
-                        item = strfunc(strfunc.autoarg+l[0], self, overflow=False).call([values.pop()])
+                        item = strfunc(strfunc.autoarg+l[0], self, [strfunc.autoarg], overflow=False).call([values.pop()])
                     else:
                         raise ExecutionError("NoneError", "Nothing does not have methods.")
                 else:
