@@ -421,6 +421,9 @@ passert:: (5\5): ?= 25
 passert:: 2π ?= 2*pi
 passert:: is("abc", `abc`)
 passert:: ( del::x )    $ x = 1
+passert:: x() ? y ? 1   $ x = y = 1
+passert:: 2 ?= { x = 1
+                 y = 2 }.y
 
 # Final Testing:
 passert:: save("Tests.save.txt");true
