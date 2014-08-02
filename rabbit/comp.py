@@ -36,8 +36,7 @@ class compiler(commandline):
         """Initializes The Command Line Interface."""
         self.startup()
         self.app = terminal()
-        self.populator()
-        self.e.color = debugcolor
+        self.populator(debugcolor)
         self.e.proc_set = self.proc_set
         self.mainprompt = str(mainprompt)
         self.prompt = str(prompt)
@@ -49,6 +48,11 @@ class compiler(commandline):
             self.initialize()
         else:
             self.initialize(args=initializers)
+
+    def populator(self, debugcolor):
+        """Creates An Evaluator And Lists Of Commands."""
+        self.e = evaluator(processor=self, color=debugcolor, speedy=True)
+        self.fresh(True)
 
     def show(self, arg, message=None):
         """Prints A Message To The Console."""

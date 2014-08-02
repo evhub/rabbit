@@ -102,6 +102,7 @@ Global Operator Precedence List:
     useclass = None
     returned = True
     spawned = True
+    calculated = None
 
     def __init__(self, variables=None, processor=None, color=None, speedy=False, maxrecursion=10):
         """Initializes The Evaluator."""
@@ -569,12 +570,15 @@ Global Operator Precedence List:
         """Removes A Comment."""
         return self.outersplit(inputstring, commentstring, {})[0]
 
+    def setcalculated(self, result):
+        """Sets calculated."""
+        self.calculated = result
+
     def calc(self, inputstring, info=""):
         """Performs Top-Level Calculation."""
-        out = matrix(0)
-        def _command(new):
-            out = new
-        self.process(inputstring, info, _command, False)
+        calculated, self.calculated = self.calculated, matrix(0)
+        self.process(inputstring, info, self.setcalculated, False)
+        out, self.calculated = self.calculated, calculated
         return out
 
     def process(self, inputstring, info="", command=None, top=None):

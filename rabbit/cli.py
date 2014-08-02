@@ -40,13 +40,17 @@ class commandline(mathbase):
         self.moreprompt = str(moreprompt)
         self.app = terminal(message, color=outcolor)
         self.show = self.appshow
-        self.populator()
-        self.e.color = debugcolor
+        self.populator(debugcolor)
         self.printdebug(": ON")
         if initializers == ():
             self.initialize()
         else:
             self.initialize(args=initializers)
+
+    def populator(self, debugcolor):
+        """Creates An Evaluator And Lists Of Commands."""
+        self.e = evaluator(processor=self, color=debugcolor)
+        self.fresh(True)
 
     def fresh(self, top=True):
         """Refreshes The Environment."""
@@ -79,9 +83,9 @@ class commandline(mathbase):
                 while old:
                     old = self.handler(raw_input(self.moreprompt), old)
             except KeyboardInterrupt as detail:
-                self.app.display(addcolor("\n<!> KeyboardInterrupt: Action has been terminated, to quit type exit()", self.e.color))
+                print(addcolor("\n<!> KeyboardInterrupt: Action has been terminated, to quit type exit()", self.e.color))
             except EOFError as detail:
-                self.app.display(addcolor("\n<!> EOFInterrupt: Program has been terminated", self.e.color))
+                print(addcolor("\n<!> EOFInterrupt: Program has been terminated", self.e.color))
                 self.doexit()
 
     def handler(self, original, old=None):

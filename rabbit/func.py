@@ -1011,10 +1011,8 @@ class classcalc(cotobject):
         if func is None:
             func = self.e.calc
         command = self.e.namefind(basicformat(command))
-        oldclass = self.e.useclass
-        self.e.useclass = self.selfvar
-        oldset = self.doset
-        self.doset = self.e.setvars(self.variables)
+        oldclass, self.e.useclass = self.e.useclass, self.selfvar
+        oldset, self.doset = self.doset, self.e.setvars(self.variables)
         try:
             out = func(command, " | class")
         finally:
