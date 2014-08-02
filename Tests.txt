@@ -47,24 +47,24 @@ passert:: [1,2,3,4]:1 ?= 2
 passert:: (1,2,3):0:2 ?= 1,2
 
 # Variable Setting Tests:
-passert:: x ?= 1			$ x = 1
-passert:: x ?= 1			$ x := 1
-passert:: 2(x) ?= 2		$ x = 1
-passert:: 2x ?= 2			$ x = 1
+passert:: x ?= 1        $ x = 1
+passert:: x ?= 1        $ x := 1
+passert:: 2(x) ?= 2     $ x = 1
+passert:: 2x ?= 2       $ x = 1
 
 # Function Tests:
-passert:: t()+1 ?= t:+1 ?= 2							$ t() = 1
-passert:: f(2,)*3 ?= f:2*3 ?= f(2)*3 ?= 9				$ f(x) = x+1
-passert:: g(2,3)-5 ?= g:2:3-5 ?= 7						$ g(x,y) = 2*x*y
-passert:: add(a) ?= 6									$ a = 1,2,3 $ add(x,y,z) = x+y+z
-passert:: plusone(1,2,3) ?= 2,3,4						$ plusone(l) = l+1
-passert:: \1 ?= one									$ one() = 1
+passert:: t()+1 ?= t:+1 ?= 2                   $ t() = 1
+passert:: f(2,)*3 ?= f:2*3 ?= f(2)*3 ?= 9      $ f(x) = x+1
+passert:: g(2,3)-5 ?= g:2:3-5 ?= 7             $ g(x,y) = 2*x*y
+passert:: add(a) ?= 6                          $ a = 1,2,3 $ add(x,y,z) = x+y+z
+passert:: plusone(1,2,3) ?= 2,3,4              $ plusone(l) = l+1
+passert:: \1 ?= one                            $ one() = 1
 passert:: (\x\x+1):5 ?= (\x\(x+1)):5 ?= 6
 passert:: (\(x,y)\(x+y))(1,2) ?= 3
 passert:: (\(-x:1)\x): ?= 1
-passert:: gen_func:2:5 ?= 1							$ gen_func(n) = \x\(x%n)
-passert:: gen_func:2:5 ?= 1							$ gen_func(n) = \x,n:n\(x%n)
-passert:: inlist[1,2,3] ?= [1,2,3],					$ inlist(l) = l,
+passert:: gen_func:2:5 ?= 1                    $ gen_func(n) = \x\(x%n)
+passert:: gen_func:2:5 ?= 1                    $ gen_func(n) = \x,n:n\(x%n)
+passert:: inlist[1,2,3] ?= [1,2,3]             $ inlist(l) = l,
 
 # String Tests:
 passert:: "hello, "+"world" ?= "hello, world"
@@ -72,17 +72,17 @@ passert:: "Answer: "+1 ?= "Answer: 1"
 passert:: "hello"*2 ?= "hellohello"
 passert:: "01234":2 ?= "2"
 passert:: "01234":1:3 ?= "12"
-passert:: a"b" ?= "ab"									$ a(x) = "a"+x
+passert:: a"b" ?= "ab"                         $ a(x) = "a"+x
 
 # Class Tests:
 passert:: { x = 1 } ?= { x = 1 }
 passert:: { x = 1 } != { x = 2 }
 passert:: { y = 2 ;; x = 1 }.y ?= 2
-passert:: a.x ?= 1										$ a = { x = 1 }
-passert:: a.x ?= 1										$ a := { x = 1 }
-passert:: a.f(2) ?= a.f:2 ?= 3							$ a = { f(x) = x+1 }
-passert:: a:"x+1" ?= 2									$ a = { x = 1 }
-passert:: b ?= { z = 5 }								$ b = a + {z=5} $ a = {}
+passert:: a.x ?= 1                             $ a = { x = 1 }
+passert:: a.x ?= 1                             $ a := { x = 1 }
+passert:: a.f(2) ?= a.f:2 ?= 3                 $ a = { f(x) = x+1 }
+passert:: a:"x+1" ?= 2                         $ a = { x = 1 }
+passert:: b ?= { z = 5 }                       $ b = a + {z=5} $ a = {}
 passert:: { x = 1 } + { z = 5 } ?= { x = 1 ;; z = 5 }
 
 # Instance Tests:
@@ -163,10 +163,10 @@ passert:: a.f(1) ?= 1
   }
 
 # With Clause Tests:
-passert:: f(1.5) ?= 5			$ f(x) = (gx*floor(gx) $ gx = g(x)) $ g(x) = x+1
-passert:: f(1.5) ?= 5			$ f(x) = { g(x) = x+1 ;; gx = g(x) } : "gx*floor(gx)"
-passert:: g(4) ?= 6			$ g(x) = (m(z) $ z = x^2 $ m(z) = z%10)
-passert:: g(4) ?= 6			$ g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
+passert:: f(1.5) ?= 5        $ f(x) = (gx*floor(gx) $ gx = g(x)) $ g(x) = x+1
+passert:: f(1.5) ?= 5        $ f(x) = { g(x) = x+1 ;; gx = g(x) } : "gx*floor(gx)"
+passert:: g(4) ?= 6          $ g(x) = (m(z) $ z = x^2 $ m(z) = z%10)
+passert:: g(4) ?= 6          $ g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
 
 # Loop Tests:
 passert:: 1,2,3~ \x\x ?= 1,2,3
@@ -174,10 +174,10 @@ passert:: 1,2,3,4~~ \(x,y)\(x+y) ?= 3,7
 passert:: 10,20~ 1,2~ \(x,y)\(x+y) ?= (11,12),(21,22)
 
 # Multi-Set Tests:
-passert:: a,b ?= 1,2						$ a,b = 1,2
-passert:: a ?= 1 & b ?= 2					$ a,b = 1,2
-passert:: a ?= 1 & b ?= 2,3				$ a,b = 1,2,3
-passert:: a ?= 1 & ! b						$ a,b = 1
+passert:: a,b ?= 1,2                      $ a,b = 1,2
+passert:: a ?= 1 & b ?= 2                 $ a,b = 1,2
+passert:: a ?= 1 & b ?= 2,3               $ a,b = 1,2,3
+passert:: a ?= 1 & ! b                    $ a,b = 1
 passert:: smoosh((1,2),(3,4)) ?= 1,2,3,4
  $ smoosh(a) = (
   x ++ smoosh(xs) @ xs;
@@ -186,8 +186,8 @@ passert:: smoosh((1,2),(3,4)) ?= 1,2,3,4
   )
 
 # Miscellaneous Tests:
-passert:: f..g(2) ?= 9						$ f(x) = x^2 $ g(x) = x+1
-passert:: applyplus(0,-2) ?= 1,-1			$ applyplus(__) = __~\x\(x+1)
+passert:: f..g(2) ?= 9                       $ f(x) = x^2 $ g(x) = x+1
+passert:: applyplus(0,-2) ?= 1,-1            $ applyplus(__) = __~\x\(x+1)
 passert:: (x $ x = 1) ?= 1
 
 # Expression Tests:
@@ -269,7 +269,7 @@ passert:: crackle pop (10) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Po
 passert:: sum( 2**20~~ \(x,y)\(x!=y) ) ?= 0
 
 # Built-Ins Tests:
-passert:: a != b					$ (def :: b.x = 2) $ b := copy(a) $ a := { x = 1 }
+passert:: a != b                    $ (def :: b.x = 2) $ b := copy(a) $ a := { x = 1 }
 passert:: type:(1,2,3) ?= "list"
 passert:: num"1" ?= 1
 passert:: (to:"num"):"1" ?= 1
@@ -322,13 +322,13 @@ passert:: gcd:8:6 ?= 2
 passert:: lcm:4:6 ?= 12
 passert:: perm:5:2 ?= 20
 passert:: comb:4:2 ?= 6
-passert:: env().a ?= a ?= 2		$ a = 2
+passert:: env().a ?= a ?= 2         $ a = 2
 passert:: iserr(error())
 passert:: iserr(:raise())
 passert:: from(error, error())
 passert:: from(error, :raise())
-passert:: var:"a" ?= "b"			$ a = b
-passert:: a ?= 5					$ proc("a = 5")
+passert:: var:"a" ?= "b"            $ a = b
+passert:: a ?= 5                    $ proc("a = 5")
 passert:: num(i) ?= i
 passert:: real(i) ?= 0
 passert:: imag(i) ?= 1
@@ -343,13 +343,13 @@ passert:: 0 ?= ¬1
 passert:: 0.5 ?= ½
 passert:: " " ?= ␠
 passert:: 5E6 ?= 5 000 000
-passert:: paren() ?= parens():-1	$ (123)
+passert:: paren() ?= parens():-1    $ (123)
 
 # New Feature Tests:
-passert:: f..g(1)g..f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
-passert:: f() ?= 5, & f(1) ?= 1,				$ f(*l:(5,)) = l
-passert:: a ?= 1 & b ?= [2,3]					$ a,b = [1,2,3]
-passert:: a ?= "a" & b ?= "bc"					$ a,b = "abc"
+passert:: f..g(1)g..f(2) ?= 20      $ f(x) = x^2 $ g(x) = x+1
+passert:: f() ?= 5, & f(1) ?= 1,    $ f(*l:(5,)) = l
+passert:: a ?= 1 & b ?= [2,3]       $ a,b = [1,2,3]
+passert:: a ?= "a" & b ?= "bc"      $ a,b = "abc"
 passert:: "∑" ?= "\u2211"
 passert:: π ?= pi
 passert:: "\'\\'\\n#" ?= `"\'\n#`
@@ -368,13 +368,13 @@ passert:: {x=1} <= {x=1}
 passert:: iserr(:raise())
 passert:: :except( :(1/0) ) ?= :(1/0)
 passert:: :raise( ComplicatedError() ) ?= ComplicatedError()
-	$ ComplicatedError := error + {
-									name := "ComplicatedError"
-									message := "A complicated error occurred"
-									metadata := {
-										top := true
-										}
-									}
+    $ ComplicatedError := error + {
+                                   name := "ComplicatedError"
+                                   message := "A complicated error occurred"
+                                   metadata := {
+                                     top := true
+                                     }
+                                   }
 passert:: ∛:27 ?= 3 ?= (\x\x^(1/3)):27
 passert:: ∜:16 ?= 2 ?= (\x\sqrt(sqrt(x))):16
 passert:: 3 ?= ((\x\x)+1):2
@@ -383,8 +383,8 @@ passert:: 4 ?= ((\x\x)*2):2
 passert:: 4 ?= (2*\x\x):2
 passert:: 8 ?= ((\x\x)^3):2
 passert:: 9 ?= (3^\x\x):2
-passert:: (\y\x+y):2 ?= 5		$ x = 3
-passert:: (\x:5\x*y)() ?= 10	$ y = 2 $ x = 2
+passert:: (\y\x+y):2 ?= 5       $ x = 3
+passert:: (\x:5\x*y)() ?= 10    $ y = 2 $ x = 2
 passert:: (:1:1).name ?= "ArgumentError"
 passert:: iserr:{__error__ = true}()
 passert:: [_, _] ?= [1, 2]
@@ -400,10 +400,10 @@ passert:: (:({ x = 1 ;; x = 2 })).name ?= "RedefinitionError"
 passert:: "All
  done!" ?= "All" ++ "\n " ++ "done!"
 passert:: "All done!" ?= "All "
-		"done!"
+        "done!"
 passert:: "\\n1" ?= "\\n"+1
 passert:: {} ?= {{ x := 42 ;; y := "42" }}
-passert:: () ?= f:		$ f() = ()
+passert:: () ?= f:              $ f() = ()
 passert:: 7625597484987 ?= 3^^3
 passert:: (:({}()+1)).name ?= "TypeError"
 passert:: (:({}()>1)).name ?= "TypeError"
@@ -413,18 +413,18 @@ passert:: { x = 1 } ?= { x = 1 } -- { x = 2 }
 passert:: "abcd" -- "bc" ?= "ad"
 passert:: (data:(data:(1,2,3)):(data:(5,6,7))):2 ?= 6
 passert:: [6] ?= [1, "a", 5, 6] -- 5 -- "a" -- 1
-passert:: {} ?= a				$ a + { x = 1 } $ a := {}
-passert:: 1 ?= a				$ ( a = 1 )
-passert:: f(5) ?= f(5)			$ f(x) = x+1
+passert:: {} ?= a               $ a + { x = 1 } $ a := {}
+passert:: 1 ?= a                $ ( a = 1 )
+passert:: f(5) ?= f(5)          $ f(x) = x+1
 passert:: "a"**3 ?= "a","a","a"
 passert:: (5\5): ?= 25
 passert:: 2π ?= 2*pi
 passert:: is("abc", `abc`)
-passert:: ( del::x ) $ x = 1
+passert:: ( del::x )    $ x = 1
 
 # Final Testing:
 passert:: save("Tests.save.txt");true
-passert:: contents ?= read("Tests.save.txt")		$ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
+passert:: contents ?= read("Tests.save.txt")      $ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
 passert:: { run :: Tests.save.txt }
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
-passert:: printdone() ?= printdone()				$ printdone() = print("    Message sent.")
+passert:: printdone() ?= printdone()              $ printdone() = print("    Message sent.")
