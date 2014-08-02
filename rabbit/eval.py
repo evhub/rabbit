@@ -587,11 +587,11 @@ Global Operator Precedence List:
         for original in self.outersplit(inputstring, ";;", {"{":"}"}):
             original = basicformat(original)
             if not iswhite(original):
-                out = self.proc_calc(original, info, top)
+                out = self.proc_top(original, info, top)
                 if command is not None:
                     command(out)
 
-    def proc_calc(self, inputstring, info="", top=False):
+    def proc_top(self, inputstring, info="", top=False):
         """Gets The Value Of An Expression."""
         if info is None:
             info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
