@@ -64,7 +64,7 @@ passert:: (\(x,y)\(x+y))(1,2) ?= 3
 passert:: (\(-x:1)\x): ?= 1
 passert:: gen_func:2:5 ?= 1                    $ gen_func(n) = \x\(x%n)
 passert:: gen_func:2:5 ?= 1                    $ gen_func(n) = \x,n:n\(x%n)
-passert:: inlist[1,2,3] ?= [1,2,3]             $ inlist(l) = l,
+passert:: inlist[1,2,3] ?= [1,2,3],            $ inlist(l) = l,
 
 # String Tests:
 passert:: "hello, "+"world" ?= "hello, world"
