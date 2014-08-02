@@ -186,7 +186,7 @@ passert:: smoosh((1,2),(3,4)) ?= 1,2,3,4
   )
 
 # Miscellaneous Tests:
-passert:: f.g(2) ?= 9						$ f(x) = x^2 $ g(x) = x+1
+passert:: f..g(2) ?= 9						$ f(x) = x^2 $ g(x) = x+1
 passert:: applyplus(0,-2) ?= 1,-1			$ applyplus(__) = __~\x\(x+1)
 passert:: (x $ x = 1) ?= 1
 
@@ -346,7 +346,7 @@ passert:: 5E6 ?= 5 000 000
 passert:: paren() ?= parens():-1	$ (123)
 
 # New Feature Tests:
-passert:: f.g(1)g.f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
+passert:: f..g(1)g..f(2) ?= 20					$ f(x) = x^2 $ g(x) = x+1
 passert:: f() ?= 5, & f(1) ?= 1,				$ f(*l:(5,)) = l
 passert:: a ?= 1 & b ?= [2,3]					$ a,b = [1,2,3]
 passert:: a ?= "a" & b ?= "bc"					$ a,b = "abc"

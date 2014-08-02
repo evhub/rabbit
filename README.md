@@ -375,11 +375,11 @@ Third is the raw string quote (\`). When used instead of a normal quote, it will
 "she said \'he can't say \\n\'"	# In normal string syntax
 ```
 
-Fourth is the function of a function operator (.). While the syntax is the same as that for methods, since functions don't have methods, function of a function is used like methods for functions. The basic syntax is:
+Fourth is the function of a function operator (..). The basic syntax is:
 ```
 f(x) = x^2
 g(x) = x+1
-f.g(2)		# Read as f(g(x)) (result = 9)
+f..g(2)		# Read as f(g(x)) (result = 9)
 ```
 
 Fifth is the all arguments variable (\_\_). When \_\_ is passed as an argument to a function it sets it to a list of all the arguments passed. The basic syntax is:

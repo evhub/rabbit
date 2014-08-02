@@ -262,7 +262,7 @@ class strfunc(funcfloat):
     method = None
     lexical = True
 
-    def __init__(self, funcstr, e, variables=[], personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None):
+    def __init__(self, funcstr, e, variables=None, personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None):
         """Creates A Callable String Function."""
         self.e = e
         self.funcstr = self.e.namefind(str(funcstr))
@@ -272,7 +272,10 @@ class strfunc(funcfloat):
             self.name = self.autoarg
         if allargs is not None:
             self.allargs = str(allargs)
-        self.variables = variables[:]
+        if variables is None:
+            self.variables = []
+        else:
+            self.variables = variables[:]
         if overflow is None:
             self.overflow = True
         else:
@@ -457,7 +460,7 @@ class strfunc(funcfloat):
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
-    def __init__(self, funcstr, e, variables=[], personals=None, check=True, name=None, overflow=None, allargs=None, reqargs=None):
+    def __init__(self, funcstr, e, variables=None, personals=None, check=True, name=None, overflow=None, allargs=None, reqargs=None):
         """Initializes The String Float."""
         self.e = e
         if name:
@@ -466,7 +469,10 @@ class strfloat(strfunc):
             self.name = self.autoarg
         if allargs is not None:
             self.allargs = str(allargs)
-        variables = variables[:]
+        if variables is None:
+            variables = []
+        else:
+            variables = variables[:]
         if overflow is None:
             overflow = True
         else:

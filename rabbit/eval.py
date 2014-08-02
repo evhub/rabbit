@@ -48,7 +48,7 @@ Global Operator Precedence List:
     >?!=<   Performs equality or inequality checks.
 
     ~       Applies a list to a function for looping.
-    \       Creates a lambda.
+    \\       Creates a lambda.
     ++      Performs concatenation.
     --      Performs removal.
     **      Performs repeat.
@@ -57,13 +57,13 @@ Global Operator Precedence List:
     %       Performs modulo.
     */      Performs multiplication and division.
 
-    var     Evaluates variables.
-    none    Evaluates empty expressions.
+    \\       Denotes a lambda.
     -       Denotes negatives.
     /       Denotes reciprocals.
     ^       Performs exponentiation.
     :       Performs function calls.
-    `       Denotes parentheses.
+    \xa7       Denotes parentheses.
+    ..      Performs function composition.
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
     varname = "x"
@@ -133,6 +133,7 @@ Global Operator Precedence List:
             self.call_exp,
             self.call_colon,
             self.call_paren,
+            self.call_comp,
             self.call_lambdacoeff,
             self.call_method,
             self.call_normal
@@ -200,7 +201,7 @@ Global Operator Precedence List:
             "include":funcfloat(self.funcs.includecall, self, "include"),
             "del":funcfloat(self.funcs.delcall, self, "del"),
             "def":funcfloat(self.funcs.defcall, self, "def"),
-            "effect":usefunc(self.setreturned, self, "effect", []),
+            "effect":usefunc(self.setreturned, self, "effect"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "E":usefunc(E10, self, "E", ["x"]),
             "D":funcfloat(self.funcs.derivcall, self, "D"),
@@ -306,9 +307,9 @@ Global Operator Precedence List:
             "\u2421" : rawstrcalc("\x21", self)
             }
         self.variables.update({
-            "\u2209" : strfunc("!\u2208(__)", self, [], name="\u2209", overflow=False),
-            "\u220b" : strfunc("\u2208(rev(__))", self, [], name="\u220b", overflow=False),
-            "\u220c" : strfunc("!\u220b(__)", self, [], name="\u220c", overflow=False),
+            "\u2209" : strfunc("!\u2208(__)", self, name="\u2209", overflow=False),
+            "\u220b" : strfunc("\u2208(rev(__))", self, name="\u220b", overflow=False),
+            "\u220c" : strfunc("!\u220b(__)", self, name="\u220c", overflow=False),
             "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
             "\u221c" : strfunc("math.sqrt(math.sqrt(x))", self, ["x"], name="\u221c"),
             "\u222c" : strfunc("math.S(math.S(f,++args),++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
@@ -760,7 +761,7 @@ Global Operator Precedence List:
                                 useclass.store(value[0], out)
                             else:
                                 useclass.store(value[0], value[1])
-                                out = strfunc(useclass.selfvar+"."+value[0], self, [strfunc.allargs], {useclass.selfvar:useclass}, value[0])
+                                out = strfunc(useclass.selfvar+"."+value[0], self, [], {useclass.selfvar:useclass}, value[0], overflow=False)
                     return out
 
     def readytofunc(self, expression, extra="", allowed=""):
@@ -1066,12 +1067,12 @@ Global Operator Precedence List:
         value = reassemble(top, ["~", "\\", "++", "--", "**", ",", "+", "%", "*"])
         self.printdebug("=> "+value)
         self.recursion += 1
-        out = self.eval_check(self.eval_comp(top), True)
+        out = self.eval_check(self.eval_loop(top), True)
         self.printdebug(self.prepare(out, False, True, True)+" <= "+value)
         self.recursion -= 1
         return out
 
-    def eval_comp(self, complist):
+    def eval_loop(self, complist):
         """Performs List Comprehension."""
         if len(complist) == 1:
             return self.eval_lambda(complist[0])
@@ -1085,9 +1086,9 @@ Global Operator Precedence List:
                 else:
                     lists.append((self.eval_lambda(complist[x]), argnum))
                     argnum = 1
-            return self.eval_comp_set(lists, [], item)
+            return self.eval_loop_set(lists, [], item)
 
-    def eval_comp_set(self, lists, args, func):
+    def eval_loop_set(self, lists, args, func):
         """Performs Recursive Comprehension."""
         value, argnum = lists.pop()
         if hasmatrix(value):
@@ -1104,7 +1105,7 @@ Global Operator Precedence List:
                     else:
                         item = func
                 else:
-                    item = self.eval_comp_set(lists[:], args, func)
+                    item = self.eval_loop_set(lists[:], args, func)
                 for y in xrange(0, argnum):
                     args.remove(units[argnum*x+y])
                 if not isnull(item):
@@ -1128,7 +1129,7 @@ Global Operator Precedence List:
                 else:
                     out = func
             else:
-                out = self.eval_comp_set(lists, args, func)
+                out = self.eval_loop_set(lists, args, func)
             args.remove(value)
             return out
 
@@ -1784,7 +1785,7 @@ Global Operator Precedence List:
                 item = matrix(0)
                 if l[0].startswith("."):
                     if len(values) > 0:
-                        item = strfunc(strfunc.autoarg+l[0], self, [strfunc.autoarg]).call([values.pop()])
+                        item = strfunc(strfunc.autoarg+l[0], self, overflow=False).call([values.pop()])
                     else:
                         raise ExecutionError("NoneError", "Nothing does not have methods.")
                 else:
@@ -1817,6 +1818,12 @@ Global Operator Precedence List:
             self.recursion -= 1
             return value
 
+    def call_comp(self, inputstring):
+        """Performs Function Composition."""
+        if ".." in inputstring:
+            funclist = inputstring.split("..")
+            return strfunc(strlist(funclist, "(")+strfunc.allargs+")"*len(funclist), self, overflow=False)
+
     def call_lambdacoeff(self, inputstring):
         """Evaluates Lambda Coefficients."""
         if "\\" in inputstring:
@@ -1835,13 +1842,10 @@ Global Operator Precedence List:
                 isfloat = isfloat and (not item or madeof(item, string.digits))
             if not isfloat:
                 itemlist[0] = self.funcfind(itemlist[0])
-                if isinstance(itemlist[0], classcalc):
-                    if len(itemlist) == 2:
-                        return itemlist[0].retrieve(itemlist[1])
-                    else:
-                        return strfunc(strfunc.autoarg+"."+strlist(itemlist[2:], "."), self, [strfunc.autoarg]).call([itemlist[0].retrieve(itemlist[1])])
-                elif not isnull(itemlist[0]):
-                    return strfunc(strfunc.autoarg+"("+strlist(itemlist[1:], ".")+"("+funcfloat.allargs+"))", self, [funcfloat.allargs], {strfunc.autoarg:itemlist[0]})
+                out = itemlist[0]
+                for x in xrange(1, len(itemlist)):
+                    out = out.retrieve(itemlist[x])
+                return out
 
     def call_normal(self, inputstring):
         """Returns Argument."""
@@ -2121,7 +2125,7 @@ class evalfuncs(object):
                 if isinstance(useclass, classcalc):
                     last = useclass
                     for x in xrange(1, len(test)):
-                        useclass = useclass.retrieve(test[x])
+                        useclass = usecla(test[x])
                         if not isinstance(useclass, classcalc):
                             raise ExecutionError("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
                 else:
@@ -2702,7 +2706,7 @@ class evalfuncs(object):
                 elif variables[0] in self.e.variables and (istext(variables[0]) or isnum(variables[0]) or isinstance(self.e.variables[variables[0]], bool) or (iseval(value) and not hascall(value))):
                     return strfloat(variables[0], self.e, [])
                 else:
-                    return strfunc(variables[0]+":x", self.e, ["x"])
+                    return strfunc(variables[0]+":"+varstrings[0], self.e, [varstrings[0]])
             elif isinstance(variables[0], matrix):
                 funcs = []
                 for t in variables[0].getitems():
