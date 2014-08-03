@@ -122,35 +122,35 @@ def catch(function, *args, **kwargs):
     try:
         result = function(*args, **kwargs)
     except ZeroDivisionError as detail:
-        err = ("ZeroDivisionError", detail)
+        err = ("ZeroDivisionError", detail, True)
     except ValueError as detail:
-        err = ("ValueError", detail)
+        err = ("ValueError", detail, True)
     except OverflowError as detail:
-        err = ("OverflowError", detail)
+        err = ("OverflowError", detail, True)
     except TypeError as detail:
-        err = ("TypeError", detail)
+        err = ("TypeError", detail, True)
     except KeyError as detail:
-        err = ("KeyError", detail)
+        err = ("KeyError", detail, True)
     except AttributeError as detail:
-        err = ("AttributeError", detail)
+        err = ("AttributeError", detail, True)
     except IndexError as detail:
-        err = ("IndexError", detail)
+        err = ("IndexError", detail, True)
     except RuntimeError as detail:
-        err = ("RuntimeError", detail)
+        err = ("RuntimeError", detail, False)
     except AssertionError as detail:
-        err = ("AssertionError", detail)
+        err = ("AssertionError", detail, True)
     except IOError as detail:
-        err = ("IOError", detail)
+        err = ("IOError", detail, True)
     except SyntaxError as detail:
-        err = ("PythonError", detail)
+        err = ("PythonError", detail, True)
     except EOFError as detail:
-        err = ("EOFInterrupt", detail or "Action has been terminated")
+        err = ("EOFInterrupt", detail or "Action has been terminated", True)
     except KeyboardInterrupt as detail:
-        err = ("KeyboardInterrupt", detail or "Action has been terminated")
+        err = ("KeyboardInterrupt", detail or "Action has been terminated", False)
     except ExecutionError as detail:
-        err = (detail.name, detail.message, detail.variables)
+        err = (detail.name, detail.message, detail.fatal, detail.variables)
     except Exception as detail:
-        err = ("Error", detail or "An error occured")
+        err = ("Error", detail or "An error occured", True)
     else:
         err = None
     return result, err

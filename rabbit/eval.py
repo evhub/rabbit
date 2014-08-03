@@ -93,6 +93,9 @@ Global Operator Precedence List:
     multiargops = bools + ":*+-%/^@~\\|&;.,$\u201c" + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + '")]}`\u201d' + "".join(groupers.values()) + parenchar
     errorvar = "__error__"
+    fatalvar = "__fatal__"
+    namevar = "name"
+    messagevar = "message"
     debuglog = []
     recursion = 0
     overflow = []
@@ -147,8 +150,13 @@ Global Operator Precedence List:
         """Resets The Variables To Their Defaults."""
         self.parens = []
         self.variables = {
+            "warning":classcalc(self, {
+                self.errorvar: 1.0,
+                self.fatalvar: 0.0
+                }),
             "error":classcalc(self, {
-                self.errorvar: 1.0
+                self.errorvar: 1.0,
+                self.fatalvar: 1.0
                 }),
             "env":funcfloat(self.funcs.envcall, self, "env"),
             "copy":funcfloat(self.funcs.copycall, self, "copy"),
@@ -1670,11 +1678,14 @@ Global Operator Precedence List:
             else:
                 result, err = catch(self.eval_call, strlist(inputlist[1:], ":"))
                 if err:
-                    out = classcalc(self, {self.errorvar : 1.0}).toinstance()
-                    out.store("name", strcalc(err[0], self))
-                    out.store("message", strcalc(err[1], self))
-                    if len(err) > 2:
-                        for k,v in err[2].items():
+                    out = classcalc(self, {
+                        self.errorvar : 1.0,
+                        self.fatalvar : float(err[2])
+                        }).toinstance()
+                    out.store(self.namevar, strcalc(err[0], self))
+                    out.store(self.messagevar, strcalc(err[1], self))
+                    if len(err) > 3:
+                        for k,v in err[3].items():
                             out.store(k, v)
                     return out
                 else:
@@ -2274,22 +2285,30 @@ class evalfuncs(object):
             raise ExecutionError("Error", "An error occured")
         elif len(variables) == 1:
             if isinstance(variables[0], classcalc) and self.iserrcall(variables):
-                name = variables[0].tryget("name")
+                name = variables[0].tryget(self.e.namevar)
                 if name:
                     name = self.e.prepare(name, False, False)
                 else:
                     name = "Error"
-                message = variables[0].tryget("message")
+                message = variables[0].tryget(self.e.messagevar)
                 if message:
                     message = self.e.prepare(message, False, False)
                 else:
                     message = "An error occured"
+                fatal = variables[0].tryget(self.e.fatalvar)
+                if fatal:
+                    fatal = bool(fatal)
+                else:
+                    fatal = False
                 variables = variables[0].getvars()
-                if "name" in variables:
-                    del variables["name"]
-                if "message" in variables:
-                    del variables["message"]
-                raise ExecutionError(name, message, variables)
+                del variables[self.e.errorvar]
+                if self.e.namevar in variables:
+                    del variables[self.e.namevar]
+                if self.e.messagevar in variables:
+                    del variables[self.e.messagevar]
+                if self.e.fatalvar in variables:
+                    del variables[self.e.fatalvar]
+                raise ExecutionError(name, message, fatal, variables)
             else:
                 raise ExecutionError(self.e.prepare(variables[0], False, False), "An error occured")
         else:
@@ -2302,7 +2321,7 @@ class evalfuncs(object):
         else:
             if self.iserrcall([variables[0]]):
                 for check in variables[1:]:
-                    if variables[0] == check or variables[0].tryget("name") == check:
+                    if variables[0] == check or variables[0].tryget(self.e.namevar) == check:
                         return 1.0
                 return self.raisecall([variables[0]])
             else:
@@ -3095,8 +3114,10 @@ class evalfuncs(object):
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], True, False)
             redef, self.e.redef = self.e.redef, True
-            out = self.e.calc(original)
-            self.e.redef = redef
+            try:
+                out = self.e.calc(original)
+            finally:
+                self.e.redef = redef
             self.e.setreturned()
             return out
         else:
@@ -3112,8 +3133,10 @@ class evalfuncs(object):
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], True, False)
             useclass, self.e.useclass = self.e.useclass, None
-            out = self.e.calc(original)
-            self.e.useclass = useclass
+            try:
+                out = self.e.calc(original)
+            finally:
+                self.e.useclass = useclass
             self.e.setreturned()
             return out
         else:

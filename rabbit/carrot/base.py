@@ -364,10 +364,11 @@ class mctobject(cotobject, numobject):
 
 class ExecutionError(Exception):
     """A Base Class For Rabbit Errors."""
-    def __init__(self, name="ExecutionError", message="An error occured", variables=None):
+    def __init__(self, name="ExecutionError", message="An error occured", fatal=False, variables=None):
         """Creates The Error."""
         self.name = str(name)
         self.message = str(message)
+        self.fatal = bool(fatal)
         self.variables = {}
         if variables:
             self.makevars(variables)

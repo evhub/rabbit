@@ -115,11 +115,11 @@ class safebase(base):
         else:
             result, err = catch(lambda: function(*args))
             if err:
-                if len(err) > 2:
-                    extra = err[2]
+                if len(err) > 3:
+                    extra = err[3]
                 else:
                     extra = None
-                self.adderror(err[0], err[1], extra)
+                self.adderror(err[0], err[1], err[2], extra)
             else:
                 return result
 

@@ -31,6 +31,7 @@ class commandline(mathbase):
     
     def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", debugcolor="lightred", debug=False, *initializers):
         """Initializes The Command Line Interface."""
+        self.fatalerror = self.doexit
         self.startup(debug)
         if message:
             message = str(message)
@@ -84,8 +85,8 @@ class commandline(mathbase):
             except KeyboardInterrupt as detail:
                 print(addcolor("\n<!> KeyboardInterrupt: Action has been terminated, to quit type exit()", self.e.color))
             except EOFError as detail:
-                print(addcolor("\n<!> EOFInterrupt: Program has been terminated", self.e.color))
-                self.doexit()
+                print(addcolor("\n<!!> EOFInterrupt: Program has been terminated", self.e.color))
+                self.fatalerror()
 
     def handler(self, original, old=None):
         """Handles Raw Input."""

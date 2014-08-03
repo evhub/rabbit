@@ -71,14 +71,15 @@ class compiler(commandline):
             elif cmd in ["d", "decompile"]:
                 self.run()
             elif cmd in ["n", "interactive"]:
-                on = self.on
-                self.on = True
+                fatalerror, self.fatalerror = self.fatalerror, self.doexit
+                on, self.on = self.on, True
                 oldvars = self.e.setvars({
                     "exit":usefunc(self.doexit, self.e, "exit", [])
                     })
                 self.cli_start()
                 self.e.setvars(oldvars)
                 self.on = on
+                self.fatalerror = fatalerror
             elif cmd in ["x", "exit"]:
                 self.on = False
             else:
