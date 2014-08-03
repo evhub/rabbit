@@ -1687,9 +1687,9 @@ Global Operator Precedence List:
                     if len(err) > 3:
                         for k,v in err[3].items():
                             out.store(k, v)
-                    return out
+                    return rowmatrixlist([0.0, out])
                 else:
-                    return result
+                    return rowmatrixlist([result, 0.0])
 
     def call_colon_set(self, item, params):
         """Performs Colon Function Calls."""
@@ -2317,15 +2317,18 @@ class evalfuncs(object):
     def exceptcall(self, variables):
         """Excepts Errors."""
         if not variables:
-            return 0.0
-        else:
-            if self.iserrcall([variables[0]]):
+            return rowmatrixlist([0.0])
+        elif isinstance(variables[0], matrix) and variables[0].y == 1 and variables[0].x == 2:
+            items = variables[0].items()
+            if self.iserrcall([items[1]]):
                 for check in variables[1:]:
-                    if variables[0] == check or variables[0].tryget(self.e.namevar) == check:
-                        return 1.0
-                return self.raisecall([variables[0]])
+                    if items[1] == check or items[1].tryget(self.e.namevar) == check:
+                        return rowmatrixlist([items[0], 1.0])
+                return self.raisecall([items[1]])
             else:
-                return 0.0
+                return rowmatrixlist([items[0], 0.0])
+        else:
+            raise ValueError("Can only except the result of a try")
 
     def instanceofcall(self, variables):
         """Determines Whether Something Is An Instance Of Something Else."""

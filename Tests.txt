@@ -331,16 +331,16 @@ passert:: perm:5:2 ?= 20
 passert:: comb:4:2 ?= 6
 passert:: env().a ?= a ?= 2         $ a = 2
 passert:: iserr(error())
-passert:: iserr(:raise())
+passert:: iserr(:raise():1)
 passert:: from(error, error())
-passert:: from(error, :raise())
+passert:: from(error, :raise():1)
 passert:: var:"a" ?= "b"            $ a = b
 passert:: a ?= 5                    $ proc("a = 5")
 passert:: num(i) ?= i
 passert:: real(i) ?= 0
 passert:: imag(i) ?= 1
-passert:: except( :(1/0), "ZeroDivisionError" )
-passert:: except( :(1/0), :(1/0) )
+passert:: except( :(1/0), "ZeroDivisionError" ):1
+passert:: except( :(1/0), :(1/0) ):1
 passert:: int(1.5) ?= 1
 passert:: class({}()) ?= {}
 passert:: type(class({}())) ?= "class"
@@ -372,9 +372,9 @@ passert:: {x=1 ;; y=2} > {x=1}
 passert:: ! {x=1 ;; y=2} > {z=1}
 passert:: {x=1} >= {x=1}
 passert:: {x=1} <= {x=1}
-passert:: iserr(:raise())
+passert:: iserr(:raise():1)
 passert:: :except( :(1/0) ) ?= :(1/0)
-passert:: :raise( ComplicatedError() ) ?= ComplicatedError()
+passert:: :raise( ComplicatedError() ):1 ?= ComplicatedError()
     $ ComplicatedError := error + {
                                    name := "ComplicatedError"
                                    message := "A complicated error occurred"
