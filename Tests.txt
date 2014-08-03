@@ -1,7 +1,7 @@
 # Assertion Tests:
 passert(statement) = str(statement)$assert:code(statement)
 assert:: (passert::"abc")
-assert:: iserr(:(passert::0):1)
+assert:: iserr((:(passert::0)):1)
 
 # Includes:
 passert:: include(math, stats)
@@ -126,9 +126,9 @@ passert:: nil+1 ?= 1 ?= 1+nil
 passert:: nil-1 ?= -1 ?= -(1-nil)
 passert:: nil*1 ?= 0 ?= 1*nil
 passert:: nil/1 ?= 0
-passert:: (:(1/nil):1).name ?= "ZeroDivisionError"
+passert:: ((:(1/nil)):1).name ?= "ZeroDivisionError"
 passert:: nil%1 ?= 0
-passert:: (:(1%nil):1).name ?= "ZeroDivisionError"
+passert:: ((:(1%nil)):1).name ?= "ZeroDivisionError"
 passert:: nil^1 ?= 0
 passert:: 1^nil ?= 1
 passert:: nil ?= 0 ?= nil
@@ -331,9 +331,9 @@ passert:: perm:5:2 ?= 20
 passert:: comb:4:2 ?= 6
 passert:: env().a ?= a ?= 2         $ a = 2
 passert:: iserr(error())
-passert:: iserr(:raise():1)
+passert:: iserr((:raise()):1)
 passert:: from(error, error())
-passert:: from(error, :raise():1)
+passert:: from(error, (:raise()):1)
 passert:: var:"a" ?= "b"            $ a = b
 passert:: a ?= 5                    $ proc("a = 5")
 passert:: num(i) ?= i
@@ -372,9 +372,9 @@ passert:: {x=1 ;; y=2} > {x=1}
 passert:: ! {x=1 ;; y=2} > {z=1}
 passert:: {x=1} >= {x=1}
 passert:: {x=1} <= {x=1}
-passert:: iserr(:raise():1)
+passert:: iserr((:raise()):1)
 passert:: :except( :(1/0) ) ?= :(1/0)
-passert:: :raise( ComplicatedError() ):1 ?= ComplicatedError()
+passert:: (:raise( ComplicatedError() )):1 ?= ComplicatedError()
     $ ComplicatedError := error + {
                                    name := "ComplicatedError"
                                    message := "A complicated error occurred"
@@ -392,7 +392,7 @@ passert:: 8 ?= ((\x\x)^3):2
 passert:: 9 ?= (3^\x\x):2
 passert:: (\y\x+y):2 ?= 5       $ x = 3
 passert:: (\x:5\x*y)() ?= 10    $ y = 2 $ x = 2
-passert:: (:(1:1):1).name ?= "ArgumentError"
+passert:: ((:(1:1)):1).name ?= "ArgumentError"
 passert:: iserr:{__error__ = true}()
 passert:: [_, _] ?= [1, 2]
 passert:: (_, _) != (1, 2, 3)
@@ -403,7 +403,7 @@ passert:: (\x,y\x+y)(1)(2) ?= 3
 passert:: (\x,-y:1\x+y):2 ?= 3
 passert:: _ <> 1
 passert:: { x = 1 } ++ { y = 2 } ?= { x = 1 ;; y = 2 }
-passert:: (:({ x = 1 ;; x = 2 }):1).name ?= "RedefinitionError"
+passert:: ((:({ x = 1 ;; x = 2 })):1).name ?= "RedefinitionError"
 passert:: "All
  done!" ?= "All" ++ "\n " ++ "done!"
 passert:: "All done!" ?= "All "
@@ -412,8 +412,8 @@ passert:: "\\n1" ?= "\\n"+1
 passert:: {} ?= {{ x := 42 ;; y := "42" }}
 passert:: () ?= f:              $ f() = ()
 passert:: 7625597484987 ?= 3^^3
-passert:: (:({}()+1):1).name ?= "TypeError"
-passert:: (:({}()>1):1).name ?= "TypeError"
+passert:: ((:({}()+1)):1).name ?= "TypeError"
+passert:: ((:({}()>1)):1).name ?= "TypeError"
 passert:: { x = 1 } ?= { x := 1 }
 passert:: {} ?= { x := 1 } -- { x = 1 }
 passert:: { x = 1 } ?= { x = 1 } -- { x = 2 }
@@ -432,6 +432,7 @@ passert:: x() ? y ? 1   $ x = y = 1
 passert:: 1 ?= (x=1 ;; x)
 passert:: 9 ?= 2f3      $ f(a,b) = a^b
 passert:: 5mod3 ?= 2    $ mod(base,x) = x%base
+passert:: { global:: (def:: x = 3) ;; x = 2 }.x ?= 2 & x ?= 3 $ x = 1
 
 # Final Testing:
 passert:: save("Tests.save.txt");true

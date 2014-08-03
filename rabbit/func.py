@@ -1335,7 +1335,7 @@ class instancecalc(numobject, classcalc):
         if not self.e.isreserved(test) and test in self.variables:
             return self.getitem(test)
         elif "__get__" in self.variables:
-            return self.domethod(self.getitem("__get__"), rawstrcalc(test, self.e)
+            return self.domethod(self.getitem("__get__"), rawstrcalc(test, self.e))
         else:
             return None
 
