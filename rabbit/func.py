@@ -1878,17 +1878,6 @@ class rollfunc(strfunc):
         """Retrieves An Integer."""
         return int(self.calc())
 
-    def __imul__(self, other):
-        """Performs Multiplication."""
-        if other == 1.0 or isnull(other):
-            return self
-        else:
-            return strfunc(self.name+":("+self.otherarg+"*"+self.variables[0]+")", self.e, self.variables, {self.name:self, self.variables[0]:1.0, self.otherarg:other}, reqargs=0)
-
-    def __rmul__(self, other):
-        """Performs Reverse Multiplication."""
-        return self*other
-
     def __eq__(self, other):
         """Performs Equals."""
         if isinstance(other, rollfunc):
