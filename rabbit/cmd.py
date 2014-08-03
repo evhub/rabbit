@@ -254,7 +254,7 @@ class mathbase(safebase):
         elif len(variables) == 1:
             if isinstance(variables[0], codestr):
                 original = str(variables[0])
-                out = self.e.calc(original, "| assert")
+                out = self.e.calc(original, " | assert")
             else:
                 original = self.e.prepare(variables[0], True, True, True)
                 out = variables[0]
@@ -275,7 +275,7 @@ class mathbase(safebase):
         elif len(variables) == 1:
             if isinstance(variables[0], codestr):
                 original = str(variables[0])
-                out = self.e.calc(original)
+                out = self.e.calc(original, " | make")
                 return out
             else:
                 raise ExecutionError("StatementError", "Can only call make as a statement")

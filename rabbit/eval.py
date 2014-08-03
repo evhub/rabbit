@@ -2952,7 +2952,7 @@ class evalfuncs(object):
         out = []
         for x in variables:
             inputstring = self.e.prepare(x, False, False)
-            out.append(self.e.calc(inputstring))
+            out.append(self.e.calc(inputstring, " | calc"))
         if len(out) == 1:
             return out[0]
         else:
@@ -2964,7 +2964,7 @@ class evalfuncs(object):
         e = self.e.new()
         for x in variables:
             inputstring = self.e.prepare(x, False, False)
-            out.append(self.e.calc(inputstring))
+            out.append(self.e.calc(inputstring, " | eval"))
         if len(out) == 1:
             return out[0]
         else:
@@ -3118,7 +3118,7 @@ class evalfuncs(object):
             original = self.e.prepare(variables[0], True, False)
             redef, self.e.redef = self.e.redef, True
             try:
-                out = self.e.calc(original)
+                out = self.e.calc(original, " | def")
             finally:
                 self.e.redef = redef
             self.e.setreturned()
@@ -3137,7 +3137,7 @@ class evalfuncs(object):
             original = self.e.prepare(variables[0], True, False)
             useclass, self.e.useclass = self.e.useclass, None
             try:
-                out = self.e.calc(original)
+                out = self.e.calc(original, " | global")
             finally:
                 self.e.useclass = useclass
             self.e.setreturned()
