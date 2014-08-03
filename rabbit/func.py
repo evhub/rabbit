@@ -1154,10 +1154,8 @@ class classcalc(cotobject):
 
     def getvars(self):
         """Gets Original Variables."""
-        out = {}
-        for k,v in self.variables.items():
-            if k != self.selfvar:
-                out[k] = getcopy(v)
+        out = self.variables.copy()
+        del out[self.selfvar]
         return out
 
     def calcall(self):
