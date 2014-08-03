@@ -1821,15 +1821,12 @@ Global Operator Precedence List:
                         raise ExecutionError("NoneError", "Nothing does not have methods")
                 else:
                     item = self.eval_call(l[0])
-                self.overflow = []
+                args = []
                 for x in xrange(1, len(l)):
-                    item = self.call_paren_do(item, self.eval_call(l[x]))
-                if len(self.overflow) > 0:
-                    out = self.overflow
-                    self.overflow = []
-                    raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(out) > 1)+" of "+strlist(out, ", ", lambda x: self.prepare(x, False, True, True)))
-                elif values and isinstance(item, funcfloat) and item.infix:
-                    values.append(self.call_paren_do(item, values.pop()))
+                    args.append(self.eval_call(l[x]))
+                item = self.call_paren_do(item, args)
+                if values and isinstance(item, funcfloat) and item.infix:
+                    values.append(self.call_paren_do(item, [values.pop()]))
                 else:
                     values.append(item)
             if len(values) == 0:
@@ -1842,21 +1839,32 @@ Global Operator Precedence List:
             self.recursion -= 1
             return value
 
-    def call_paren_do(self, item, arg):
+    def call_paren_do(self, item, args):
         """Does Parentheses Calling."""
-        arg = getcopy(arg)
-        if not isfunc(item):
-            if isinstance(arg, funcfloat) and arg.infix:
-                return self.call_paren_do(arg, item)
+        x = 0
+        while x < len(args):
+            self.overflow = []
+            arg = getcopy(args[x])
+            if not isfunc(item):
+                if isinstance(arg, funcfloat) and arg.infix:
+                    if x+1 < len(args):
+                        arg = self.call_paren_do(arg, [args.pop(x+1)])
+                    item = self.call_paren_do(arg, [item])
+                else:
+                    item = item * arg
+            elif isinstance(arg, matrix) and arg.onlydiag():
+                args = arg.getdiag()
+                if isinstance(item, (strfunc, usefunc)) and item.overflow and len(args) > len(item.variables):
+                    args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
+                item = getcall(item)(args)
             else:
-                return item * arg
-        elif isinstance(arg, matrix) and arg.onlydiag():
-            args = arg.getdiag()
-            if isinstance(item, (strfunc, usefunc)) and item.overflow and len(args) > len(item.variables):
-                args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
-            return getcall(item)(args)
-        else:
-            return getcall(item)([arg])
+                item = getcall(item)([arg])
+            if self.overflow:
+                out = self.overflow
+                self.overflow = []
+                raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(out) > 1)+" of "+strlist(out, ", ", lambda x: self.prepare(x, False, True, True)))
+            x += 1
+        return item
 
     def call_comp(self, inputstring):
         """Performs Function Composition."""
