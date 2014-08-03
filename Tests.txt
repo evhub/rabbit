@@ -431,6 +431,7 @@ passert:: ( del::x )    $ x = 1
 passert:: x() ? y ? 1   $ x = y = 1
 passert:: 1 ?= (x=1 ;; x)
 passert:: 9 ?= 2f3      $ f(a,b) = a^b
+passert:: 3mod5 ?= 2    $ mod(base,x) = x%base
 
 # Final Testing:
 passert:: save("Tests.save.txt");true
