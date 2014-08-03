@@ -269,17 +269,15 @@ class mathbase(safebase):
         elif len(variables) == 1:
             if isinstance(variables[0], codestr):
                 original = str(variables[0])
-                test = self.e.cmd_set(original)
-                if test is None:
-                    raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
-                else:
-                    return test
+                out = self.e.calc(original)
+                return out
             else:
                 raise ExecutionError("StatementError", "Can only call make as a statement")
         else:
+            out = []
             for arg in variables:
-                self.makecall([arg])
-        return matrix(0)
+                out.append(self.makecall([arg]))
+            return diagmatrixlist(out)
 
     def printcall(self, variables, func=None):
         """Performs print."""

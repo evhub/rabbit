@@ -201,6 +201,7 @@ Global Operator Precedence List:
             "include":funcfloat(self.funcs.includecall, self, "include"),
             "del":funcfloat(self.funcs.delcall, self, "del"),
             "def":funcfloat(self.funcs.defcall, self, "def"),
+            "global":funcfloat(self.funcs.globalcall, self, "global"),
             "effect":usefunc(self.setreturned, self, "effect"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "E":usefunc(E10, self, "E", ["x"]),
@@ -1688,7 +1689,7 @@ Global Operator Precedence List:
                 return item
             else:
                 raise ExecutionError("NoneError", "Nothing cannot be called")
-        elif isinstance(item, strcalc):
+        elif isinstance(item, strcalc) and not isinstance(item, codestr):
             item = item.calcstr
             if len(params) == 0:
                 value = rawstrcalc(item[-1], self)
@@ -1893,7 +1894,48 @@ Global Operator Precedence List:
                 itemlist[0] = self.funcfind(itemlist[0])
                 out = itemlist[0]
                 for x in xrange(1, len(itemlist)):
-                    out = out.retrieve(itemlist[x])
+                    key = itemlist[x]
+                    new = None
+                    if hasattr(out, "getmethod"):
+                        new = out.getmethod(key)
+                    if new is None and hasattr(out, "__dict__") and (not self.laxnull or not isnull(out)):
+                        test = vars(out)
+                        if key in test:
+                            if hasnum(test[key]):
+                                new = test[key]
+                            elif hasattr(test[key], "__doc__"):
+                                docstring = basicformat(test[key].__doc__)
+                                if docstring.startswith("[|") and "|]" in docstring:
+                                    rabstring = superformat(docstring[2:].split("|]")[0])
+                                    if ":" in rabstring:
+                                        rabcheck, rabstring = rabstring.split(":", 1)
+                                        if basicformat(rabcheck) == "rabbit":
+                                            name, rabargs = basicformat(rabstring).split(":", 1)
+                                            name = delspace(name)
+                                            if not name:
+                                                new = eval(rabargs)
+                                            else:
+                                                if rabargs:
+                                                    args, kwargs = eval(rabargs)
+                                                else:
+                                                    args, kwargs = [], {}
+                                                if name == "usefunc":
+                                                    new = usefunc(test[key], self, *args, **kwargs)
+                                                elif name == "funcfloat":
+                                                    args, kwargs = rabargs
+                                                    new = funcfloat(test[key], self, *args, **kwargs)
+                                                elif name == "unifunc":
+                                                    args, kwargs = rabargs
+                                                    new = unifunc(test[key], self, *args, **kwargs)
+                                                elif name == "makefunc":
+                                                    args, kwargs = rabargs
+                                                    new = makefunc(test[key], self, *args, **kwargs)
+                                                else:
+                                                    raise ValueError("Invalid Rabbit wrapper of "+name)
+                    if new is None:
+                        raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
+                    else:
+                        out = new
                 return out
 
     def call_normal(self, inputstring):
@@ -3052,15 +3094,30 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to def")
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], True, False)
-            self.e.redef = True
-            test = self.e.cmd_set(original)
-            self.e.redef = False
-            if test:
-                self.e.setreturned()
-                return test
-            else:
-                raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
+            redef, self.e.redef = self.e.redef, True
+            out = self.e.calc(original)
+            self.e.redef = redef
+            self.e.setreturned()
+            return out
         else:
+            out = []
             for arg in variables:
-                self.defcall([arg])
-        return matrix(0)
+                out.append(self.defcall([arg]))
+            return diagmatrixlist(out)
+
+    def globalcall(self, variables):
+        """Defines A Global Variable."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to def")
+        elif len(variables) == 1:
+            original = self.e.prepare(variables[0], True, False)
+            useclass, self.e.useclass = self.e.useclass, None
+            out = self.e.calc(original)
+            self.e.useclass = useclass
+            self.e.setreturned()
+            return out
+        else:
+            out = []
+            for arg in variables:
+                out.append(self.globalcall([arg]))
+            return diagmatrixlist(out)

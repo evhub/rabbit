@@ -439,6 +439,20 @@ class strfunc(funcfloat):
             del out[self.method]
         return out
 
+    def getitem(self, test):
+        """Retrieves A Personal At The Base Level."""
+        if istext(self.personals[test]):
+            self.personals[test] = self.e.calc(self.personals[test])
+        return self.personals[test]
+
+    def getmethod(self, key):
+        """Retrieves A Personal."""
+        test = delspace(self.e.prepare(key, False, False))
+        if not self.e.isreserved(test) and test in self.personals:
+            return self.getitem(test)
+        else:
+            return None
+
     def curryself(self, other):
         """Curries Self Into The Function."""
         self.method = self.method or other.selfvar
@@ -1107,6 +1121,14 @@ class classcalc(cotobject):
             return matrix(0)
         else:
             return self.variables[test]
+
+    def getmethod(self, key):
+        """Retrieves A Method."""
+        test = delspace(self.e.prepare(key, False, False))
+        if not self.e.isreserved(test) and test in self.variables:
+            return self.getitem(test)
+        else:
+            return None
 
     def retrieve(self, key):
         """Retrieves An Item."""
