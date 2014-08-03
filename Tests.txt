@@ -430,6 +430,7 @@ passert:: is("abc", `abc`)
 passert:: ( del::x )    $ x = 1
 passert:: x() ? y ? 1   $ x = y = 1
 passert:: 1 ?= (x=1 ;; x)
+passert:: 9 ?= 2f3      $ f(a,b) = a^b
 
 # Final Testing:
 passert:: save("Tests.save.txt");true

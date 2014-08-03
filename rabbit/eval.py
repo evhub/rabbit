@@ -67,7 +67,6 @@ Global Operator Precedence List:
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
     varname = "x"
-    bools = "<>=!?\u2260"
     parenchar = "\xa7"
     aliases = {
         "\xac":"!",
@@ -90,13 +89,13 @@ Global Operator Precedence List:
         "{":"}",
         "[":"]"
         }
+    bools = "<>=!?\u2260"
     multiargops = bools + ":*+-%/^@~\\|&;.,$\u201c" + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + '")]}`\u201d' + "".join(groupers.values()) + parenchar
     errorvar = "__error__"
     debuglog = []
     recursion = 0
     overflow = []
-    count = 0
     laxnull = True
     redef = False
     useclass = None
@@ -1819,25 +1818,18 @@ Global Operator Precedence List:
                     if len(values) > 0:
                         item = strfunc(strfunc.autoarg+l[0], self, [strfunc.autoarg], overflow=False).call([values.pop()])
                     else:
-                        raise ExecutionError("NoneError", "Nothing does not have methods.")
+                        raise ExecutionError("NoneError", "Nothing does not have methods")
                 else:
                     item = self.eval_call(l[0])
                 self.overflow = []
                 for x in xrange(1, len(l)):
-                    arg = getcopy(self.eval_call(l[x]))
-                    if not isfunc(item):
-                        item = item * arg
-                    elif isinstance(arg, matrix) and arg.onlydiag():
-                        args = arg.getdiag()
-                        if isinstance(item, (strfunc, usefunc)) and item.overflow and len(args) > len(item.variables):
-                            args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
-                        item = getcall(item)(args)
-                    else:
-                        item = getcall(item)([arg])
+                    item = self.call_paren_do(item, self.eval_call(l[x]))
                 if len(self.overflow) > 0:
                     out = self.overflow
                     self.overflow = []
                     raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(out) > 1)+" of "+strlist(out, ", ", lambda x: self.prepare(x, False, True, True)))
+                elif values and isinstance(item, funcfloat) and item.infix:
+                    values.append(self.call_paren_do(item, values.pop()))
                 else:
                     values.append(item)
             if len(values) == 0:
@@ -1849,6 +1841,22 @@ Global Operator Precedence List:
             self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
             self.recursion -= 1
             return value
+
+    def call_paren_do(self, item, arg):
+        """Does Parentheses Calling."""
+        arg = getcopy(arg)
+        if not isfunc(item):
+            if isinstance(arg, funcfloat) and arg.infix:
+                return self.call_paren_do(arg, item)
+            else:
+                return item * arg
+        elif isinstance(arg, matrix) and arg.onlydiag():
+            args = arg.getdiag()
+            if isinstance(item, (strfunc, usefunc)) and item.overflow and len(args) > len(item.variables):
+                args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
+            return getcall(item)(args)
+        else:
+            return getcall(item)([arg])
 
     def call_comp(self, inputstring):
         """Performs Function Composition."""

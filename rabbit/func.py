@@ -89,6 +89,7 @@ class funcfloat(numobject):
     autoarg = "__auto__"
     otherarg = "__other__"
     reqargs = -1
+    infix = True
 
     def __init__(self, func, e, funcstr=None, reqargs=None, memoize=None, memo=None):
         """Constructs The Float Function."""
@@ -1153,8 +1154,10 @@ class classcalc(cotobject):
 
     def getvars(self):
         """Gets Original Variables."""
-        out = self.variables.copy()
-        del out[self.selfvar]
+        out = {}
+        for k,v in self.variables.items():
+            if k != self.selfvar:
+                out[k] = getcopy(v)
         return out
 
     def calcall(self):
