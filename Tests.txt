@@ -333,7 +333,7 @@ passert:: env().a ?= a ?= 2         $ a = 2
 passert:: iserr(error())
 passert:: iserr((:raise()):1)
 passert:: from(error, error())
-passert:: from(error, (:raise()):1)
+passert:: from(warning, (:raise()):1)
 passert:: var:"a" ?= "b"            $ a = b
 passert:: a ?= 5                    $ proc("a = 5")
 passert:: num(i) ?= i
@@ -360,7 +360,7 @@ passert:: a ?= "a" & b ?= "bc"      $ a,b = "abc"
 passert:: "∑" ?= "\u2211"
 passert:: π ?= pi
 passert:: "\'\\'\\n#" ?= `"\'\n#`
-passert:: :(1) ?= 1
+passert:: (:(1)):0 ?= 1
 passert:: {x=1}~\x\x ?= "x",
 passert:: {x=1 ;; y=2} ?= {
    x = 1
