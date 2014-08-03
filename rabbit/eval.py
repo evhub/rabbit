@@ -1839,16 +1839,16 @@ Global Operator Precedence List:
             self.recursion -= 1
             return value
 
-    def call_paren_do(self, item, args):
+    def call_paren_do(self, item, arglist):
         """Does Parentheses Calling."""
         x = 0
-        while x < len(args):
+        while x < len(arglist):
             self.overflow = []
-            arg = getcopy(args[x])
+            arg = getcopy(arglist[x])
             if not isfunc(item):
                 if isinstance(arg, funcfloat) and arg.infix:
-                    if x+1 < len(args):
-                        arg = self.call_paren_do(arg, [args.pop(x+1)])
+                    if x+1 < len(arglist):
+                        arg = self.call_paren_do(arg, [arglist.pop(x+1)])
                     item = self.call_paren_do(arg, [item])
                 else:
                     item = item * arg
@@ -1863,7 +1863,8 @@ Global Operator Precedence List:
                 out = self.overflow
                 self.overflow = []
                 raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(out) > 1)+" of "+strlist(out, ", ", lambda x: self.prepare(x, False, True, True)))
-            x += 1
+            else:
+                x += 1
         return item
 
     def call_comp(self, inputstring):
