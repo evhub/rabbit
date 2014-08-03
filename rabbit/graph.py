@@ -29,8 +29,7 @@ class grapher(mathbase):
 
     def __init__(self, directory=None, name="Grapher", width=800, height=600, debug=False, *initializers):
         """Initializes A PythonPlus Grapher."""
-        self.debug = bool(debug)
-        self.startup()
+        self.startup(debug)
         self.root = Tkinter.Tk()
         self.root.title(str(name))
         self.show = self.popshow
@@ -81,7 +80,6 @@ class grapher(mathbase):
         self.identifiers = []
         self.grid = []
         self.populator()
-        self.printdebug(": ON")
         if initializers == ():
             self.initialize()
         else:
@@ -324,13 +322,13 @@ class grapher(mathbase):
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
-            "clear":usefunc(self.clear, self.e, "clear", []),
-            "cleargrid":usefunc(self.cleargrid, self.e, "cleargrid", []),
-            "center":usefunc(self.center, self.e, "center", []),
-            "grid":usefunc(self.gridrender, self.e, "grid", []),
-            "ticks":usefunc(self.tickrender, self.e, "ticks", []),
-            "axis":usefunc(self.axisrender, self.e, "axis", []),
-            "origin":usefunc(self.origin, self.e, "origin", []),
+            "clear":usefunc(self.clear, self.e, "clear"),
+            "cleargrid":usefunc(self.cleargrid, self.e, "cleargrid"),
+            "center":usefunc(self.center, self.e, "center"),
+            "grid":usefunc(self.gridrender, self.e, "grid"),
+            "ticks":usefunc(self.tickrender, self.e, "ticks"),
+            "axis":usefunc(self.axisrender, self.e, "axis"),
+            "origin":usefunc(self.origin, self.e, "origin"),
             "render":strfunc("cleargrid()axis()ticks()", self.e, name="render"),
             "display":strfunc("center()render()", self.e, name="display"),
             "stretch":1.0,

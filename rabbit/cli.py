@@ -31,8 +31,7 @@ class commandline(mathbase):
     
     def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", debugcolor="lightred", debug=False, *initializers):
         """Initializes The Command Line Interface."""
-        self.debug = bool(debug)
-        self.startup()
+        self.startup(debug)
         if message:
             message = str(message)
             self.messages.append(message)
@@ -41,7 +40,6 @@ class commandline(mathbase):
         self.app = terminal(message, color=outcolor)
         self.show = self.appshow
         self.populator(debugcolor)
-        self.printdebug(": ON")
         if initializers == ():
             self.initialize()
         else:
@@ -51,6 +49,7 @@ class commandline(mathbase):
         """Creates An Evaluator And Lists Of Commands."""
         self.e = evaluator(processor=self, color=debugcolor)
         self.fresh(True)
+        self.printdebug(": ON")
 
     def fresh(self, top=True):
         """Refreshes The Environment."""
@@ -67,7 +66,7 @@ class commandline(mathbase):
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "exit":usefunc(self.doexit, self.e, "exit", [])
+            "exit":usefunc(self.doexit, self.e, "exit")
             })
 
     def doexit(self):

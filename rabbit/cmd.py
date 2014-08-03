@@ -31,16 +31,17 @@ class mathbase(safebase):
     errorlog = False
     info = None
 
-    def startup(self):
+    def startup(self, debug=None):
         """Initializes Containers."""
+        if debug is not None:
+            self.debug = bool(debug)
         self.messages = []
         self.commands = []
         self.ans = [matrix(0)]
 
     def __init__(self, name="Evaluator", message="Enter A Rabbit Command:", height=None, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator."""
-        self.debug = bool(debug)
-        self.startup()
+        self.startup(debug)
         if message:
             message = str(message)
             self.messages.append(message)
@@ -50,7 +51,6 @@ class mathbase(safebase):
             self.root, self.app, self.box = startconsole(self.handler, message, str(name), int(height))
         self.show = self.appshow
         self.populator()
-        self.printdebug(": ON")
         if initializers == ():
             self.initialize()
         else:
@@ -106,6 +106,7 @@ class mathbase(safebase):
         """Creates An Evaluator And Lists Of Commands."""
         self.e = evaluator(processor=self)
         self.fresh(True)
+        self.printdebug(": ON")
 
     def fresh(self, top=True):
         """Refreshes The Environment."""
@@ -122,7 +123,7 @@ class mathbase(safebase):
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "clear":usefunc(self.clear, self.e, "clear", [])
+            "clear":usefunc(self.clear, self.e, "clear")
             })
 
     def clear(self):

@@ -657,6 +657,18 @@ Global Operator Precedence List:
         else:
             return inputobject
 
+    def getitem(self, variable):
+        """Gets The Calculated Value Of A Variable."""
+        if variable in self.variables:
+            self.variables[variable] = self.trycalc(self.variables[variable])
+            return self.variables[variable]
+        else:
+            return matrix(0)
+
+    def calcitem(self, variable):
+        """Ensures That A Variable Exists."""
+        self.variables[variable] = self.getitem(variable)
+
     def cmd_set(self, original):
         """Evaluates Definition Commands."""
         if "=" in original:

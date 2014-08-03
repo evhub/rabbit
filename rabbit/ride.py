@@ -29,8 +29,7 @@ class editor(mathbase):
 
     def __init__(self, name="RIDE", tablen=1, width=100, height=40, refresh=600, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""
-        self.debug = bool(debug)
-        self.startup()
+        self.startup(debug)
         self.debug_old = self.debug
         self.root = Tkinter.Tk()
         self.root.title(str(name))
@@ -66,7 +65,6 @@ class editor(mathbase):
         self.box.colortag("stringmod", "green")
         self.box.colortag("search", highlight="yellow")
         self.populator()
-        self.printdebug(": ON")
         if initializers == ():
             self.initialize()
         else:
