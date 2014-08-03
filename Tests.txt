@@ -333,7 +333,7 @@ passert:: env().a ?= a ?= 2         $ a = 2
 passert:: iserr(error())
 passert:: iserr((:raise()):1)
 passert:: from(error, error())
-passert:: from(warning, (:raise()):1)
+passert:: from(error, (:raise()):1)
 passert:: var:"a" ?= "b"            $ a = b
 passert:: a ?= 5                    $ proc("a = 5")
 passert:: num(i) ?= i

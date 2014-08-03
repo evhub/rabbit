@@ -7,7 +7,7 @@ python:
 install: true
 
 script:
-  - python ./autotests.py
+  - python ./runtests.py
 
 notifications:
   email: false

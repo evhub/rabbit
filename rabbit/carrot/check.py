@@ -138,7 +138,7 @@ def catch(function, *args, **kwargs):
     except RuntimeError as detail:
         err = ("RuntimeError", detail, False)
     except AssertionError as detail:
-        err = ("AssertionError", detail, True)
+        err = ("AssertionError", detail, False)
     except IOError as detail:
         err = ("IOError", detail, True)
     except SyntaxError as detail:

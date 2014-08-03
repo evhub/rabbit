@@ -18,15 +18,40 @@
 
 from __future__ import with_statement, absolute_import, print_function, unicode_literals
 from rabbit.all import *
-import cProfile
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-if __name__ == "__main__":
-    multiprocessing.freeze_support()
-    main = commandline(addcolor("Running Tests...", "magenta"))
-    cProfile.run('main.evalfile("Tests.txt")', "Stats.save.txt")
-    print(addcolor("Tests Complete.", "blue"))
-    main.start()
+print()
+cli = commandline(addcolor("Running Tests.txt...", "magenta"), debugcolor="red")
+cli.fatalerror = always(None)
+cli.evalfile("Tests.txt")
+print(addcolor("Tests.txt Evaluation Complete.", "blue"))
+
+print()
+comp = compiler()
+comp.fatalerror = always(None)
+print(addcolor("Compiling...", "magenta"))
+newvars = comp.disassemble(comp.assemble())[1]
+print(addcolor("Compiled.", "blue"))
+
+print(addcolor("Testing Compilation...", "magenta"))
+for k,v in comp.e.variables.items():
+    nv = haskey(newvars, k)
+    if v != nv:
+        comp.printdebug(addcolor("<!> For variable "+str(k)+" the old value of "+repr(v)+" is not equal to the new value "+repr(nv), "red"))
+for k,v in newvars.items():
+    ov = haskey(comp.e.variables, k)
+    if v != ov:
+        comp.printdebug(addcolor("<!> For variable "+str(k)+" the new value of "+repr(v)+" is not equal to the old value "+repr(ov), "red"))
+if not comp.e.variables == newvars:
+    comp.adderror("CompileError", "Decompiled variables failed to equal compiled variables", True)
+print(addcolor("Compilation Testing Complete.", "blue"))
+
+print()
+if cli.errorlog or comp.errorlog:
+    print(addcolor("Some Tests Fail:", "red"))
+    raise ExecutionError(addcolor("TestingError", "red"), addcolor("Errors in cli"*cli.errorlog+", "*(cli.errorlog and comp.errorlog)+"Errors in comp"*comp.errorlog, "red"))
+else:
+    print(addcolor("All Tests Pass.", "green"))
