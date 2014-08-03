@@ -1047,6 +1047,7 @@ class classcalc(cotobject):
 
     def __len__(self):
         """Finds The Number Of Variables."""
+        self.e.setreturned()
         return len(self.variables)
 
     def items(self):
@@ -1517,11 +1518,11 @@ class instancecalc(numobject, classcalc):
 
     def __float__(self):
         """Retrieves A Float."""
-        return float(self.tonum())
+        return float(getnum(self.tonum()))
 
     def __int__(self):
         """Retrieves An Integer."""
-        return int(self.tonum())
+        return getint(self.tonum())
 
     def tonum(self):
         """Converts To Float."""
@@ -1717,7 +1718,7 @@ class instancecalc(numobject, classcalc):
         if out is None:
             raise ExecutionError("ClassError", "Insufficient methods defined for len")
         else:
-            return int(out)
+            return getint(out)
 
     def __bool__(self):
         """Converts To A Boolean."""
