@@ -670,6 +670,15 @@ class codestr(rawstrcalc):
         """Returns A Copy Of The Code String."""
         return codestr(self.calcstr, self.e)
 
+    def calc(self):
+        """Calculates The Code String."""
+        return self.e.calc(self.calcstr, " ::>")
+
+    def call(self, variables):
+        """Calls The Code String."""
+        self.e.overflow = variables
+        return self.calc()
+
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
     def __init__(self, func, e, funcstr=None, variables=None, extras=None, overflow=True, reqargs=None, evalinclude=False, memoize=None, memo=None):
