@@ -744,12 +744,18 @@ Global Operator Precedence List:
                 classlist = [self.useclass]
             else:
                 classlist = []
+            delfrom = None
+            if self.useclass is False and classcalc.selfvar in self.variables and isinstance(self.variables[classcalc.selfvar], classcalc):
+                delfrom = self.variables[classcalc.selfvar].doset
             if "." in sides[0]:
                 classlist += sides[0].split(".")
                 for x in xrange(0, len(classlist)-1):
                     if self.isreserved(classlist[x]):
                         return None
                 sides[0] = classlist.pop()
+                if delfrom is not None and classlist[0] in delfrom:
+                    del delfrom[classlist[0]]
+                    delfrom = None
                 useclass = self.find(classlist[0], True)
                 if isinstance(useclass, classcalc):
                     for x in xrange(1, len(classlist)):
@@ -802,6 +808,8 @@ Global Operator Precedence List:
                             else:
                                 useclass.store(value[0], value[1])
                                 out = strfunc(useclass.selfvar+"."+value[0], self, [], {useclass.selfvar:useclass}, value[0], overflow=False)
+                    if delfrom is not None and value[0] in delfrom:
+                        del delfrom[value[0]]
                     return out
 
     def readytofunc(self, expression, extra="", allowed=""):
@@ -3135,7 +3143,7 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to def")
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], True, False)
-            useclass, self.e.useclass = self.e.useclass, None
+            useclass, self.e.useclass = self.e.useclass, False
             try:
                 out = self.e.calc(original, " | global")
             finally:

@@ -1,5 +1,6 @@
 # Assertion Tests:
-passert(statement) = str(statement)$assert:code(statement)
+x = "don't touch me"
+passert(statement) = ( assert:code(statement) ;; str(statement) )
 assert:: (passert::"abc")
 assert:: iserr((:(passert::0)):1)
 
@@ -431,10 +432,9 @@ passert:: ( del::x )    $ x = 1
 passert:: x() ? y ? 1   $ x = y = 1
 passert:: 9 ?= 2f3      $ f(a,b) = a^b
 passert:: 5mod3 ?= 2    $ mod(base,x) = x%base
-passert:: 1 ?= (x=1 ;; x)
-x = 1
+passert:: x             $ 1 ?= (x=1 ;; x)
+passert:: x ?= "don't touch me"
 passert:: { global:: (def:: x = 3) ;; x = 2 }.x ?= 2 & x ?= 3
-passert:: x ?= 3
 
 # Final Testing:
 passert:: save("Tests.save.txt");true
