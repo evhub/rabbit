@@ -340,7 +340,7 @@ passert:: num(i) ?= i
 passert:: real(i) ?= 0
 passert:: imag(i) ?= 1
 passert:: except( :(1/0), "ZeroDivisionError" ):1
-passert:: except( :(1/0), :(1/0) ):1
+passert:: except( :(1/0), (:(1/0)):1 ):1
 passert:: int(1.5) ?= 1
 passert:: class({}()) ?= {}
 passert:: type(class({}())) ?= "class"
@@ -432,8 +432,8 @@ passert:: x() ? y ? 1   $ x = y = 1
 passert:: 1 ?= (x=1 ;; x)
 passert:: 9 ?= 2f3      $ f(a,b) = a^b
 passert:: 5mod3 ?= 2    $ mod(base,x) = x%base
-passert:: x = 1
-passert:: x ?= 1
+passert:: (global:: x = 6)
+passert:: x ?= 6
 passert:: { global:: (def:: x = 3) ;; x = 2 }.x ?= 2 & x ?= 3
 passert:: x ?= 3
 
