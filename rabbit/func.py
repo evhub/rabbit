@@ -1329,6 +1329,16 @@ class instancecalc(numobject, classcalc):
             self.variables[test].curryself(self)
         return self.variables[test]
 
+    def getmethod(self, key):
+        """Retrieves A Method."""
+        test = delspace(self.e.prepare(key, False, False))
+        if not self.e.isreserved(test) and test in self.variables:
+            return self.getitem(test)
+        elif "__get__" in self.variables:
+            return self.domethod(self.getitem("__get__"), rawstrcalc(test, self.e)
+        else:
+            return None
+
     def retrieve(self, key):
         """Retrieves An Item."""
         test = delspace(self.e.prepare(key, False, False))
@@ -1336,7 +1346,7 @@ class instancecalc(numobject, classcalc):
             if test in self.variables:
                 out = self.getitem(test)
             elif "__get__" in self.variables:
-                out = self.domethod(self.getitem("__get__"), strcalc(test, self.e))
+                out = self.domethod(self.getitem("__get__"), rawstrcalc(test, self.e))
             else:
                 raise ExecutionError("ClassError", "Could not find "+test+" in the class")
             return out
