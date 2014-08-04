@@ -89,7 +89,8 @@ Global Operator Precedence List:
         "{":"}",
         "[":"]"
         }
-    bools = "<>=!?\u2260"
+    unary = "!?"
+    bools = unary + "<>=\u2260"
     multiargops = bools + ":*+-%/^@~\\|&;.,$\u201c" + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + '")]}`\u201d' + "".join(groupers.values()) + parenchar
     errorvar = "__error__"
@@ -689,7 +690,7 @@ Global Operator Precedence List:
             sides = original.split("=", 1)
             sides[0] = basicformat(sides[0])
             sides[1] = basicformat(sides[1])
-            if not (endswithany(sides[0], self.bools) or startswithany(sides[1], self.bools)) and not self.insideouter(sides[0]) and not "$" in sides[0]:
+            if not (endswithany(sides[0], self.bools) or startswithany(sides[1], delspace(self.bools, self.unary))) and not self.insideouter(sides[0]) and not "$" in sides[0]:
                 docalc = False
                 if sides[0].endswith(":"):
                     sides[0] = sides[0][:-1]
