@@ -689,7 +689,7 @@ Global Operator Precedence List:
             sides = original.split("=", 1)
             sides[0] = basicformat(sides[0])
             sides[1] = basicformat(sides[1])
-            if not (endswithany(sides[0], self.bools) or startswithany(sides[1], self.bools)) and not self.insideouter(sides[0]):
+            if not (endswithany(sides[0], self.bools) or startswithany(sides[1], self.bools)) and not self.insideouter(sides[0]) and not "$" in sides[0]:
                 docalc = False
                 if sides[0].endswith(":"):
                     sides[0] = sides[0][:-1]

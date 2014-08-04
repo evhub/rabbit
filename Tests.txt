@@ -105,8 +105,8 @@ nothing := {
  __num__(self) = 0
  __abs__(self) = 0
  __cmp__(self, other) = other
- __eq__(self, other) = !other
- __ne__(self, other) = ?other
+ __eq__(self, other) = (!other)
+ __ne__(self, other) = (?other)
  __gt__(self, other) = other < 0
  __lt__(self, other) = other > 0
  __ge__(self, other) = other <= 0
@@ -352,6 +352,7 @@ passert:: 0.5 ?= ½
 passert:: " " ?= ␠
 passert:: 5E6 ?= 5 000 000
 passert:: paren() ?= parens():-1    $ (123)
+passert:: 2 is 2
 
 # New Feature Tests:
 passert:: f..g(1)g..f(2) ?= 20      $ f(x) = x^2 $ g(x) = x+1

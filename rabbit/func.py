@@ -172,8 +172,6 @@ class funcfloat(numobject):
                 out.curry(arg)
             return out
         else:
-            if self.reqargs > 0:
-                variables, self.e.overflow = variables[:self.reqargs], variables[self.reqargs:]
             return self.calc(variables)
 
     def curry(self, arg):
