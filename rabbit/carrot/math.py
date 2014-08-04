@@ -229,7 +229,7 @@ def knuth(a, b, n):
     elif n == 1:
         return a ** b
     elif int(a) != a or int(b) != b or a < 0 or b < 0:
-        raise ValueError("Knuth up arrow is only defined over the positive integers")
+        raise ValueError("Knuth up-arrow is only defined over the positive integers")
     else:
         return knuth(a, knuth(a, b-1.0, n), n-1)
 

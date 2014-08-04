@@ -683,53 +683,56 @@ Global Operator Precedence List:
             sides = original.split("=", 1)
             sides[0] = basicformat(sides[0])
             sides[1] = basicformat(sides[1])
-            docalc = False
-            if sides[0].endswith(":"):
-                sides[0] = sides[0][:-1]
-                docalc = True
-            sides[0] = self.outersplit(sides[0], ",")
-            if len(sides[0]) > 1:
-                test = True
-                for x in sides[0]:
-                    test = test and self.readytofunc(x)
-                if test:
-                    sides[1] = self.calc(sides[1])
-                    func = diagmatrixlist
-                    if isinstance(sides[1], matrix):
-                        if sides[1].onlydiag():
-                            sides[1] = sides[1].getitems()
+            if not (endswithany(sides[0], self.bools) or startswithany(sides[1], self.bools)):
+                docalc = False
+                if sides[0].endswith(":"):
+                    sides[0] = sides[0][:-1]
+                    docalc = True
+                sides[0] = self.outersplit(sides[0], ",")
+                if len(sides[0]) > 1:
+                    test = True
+                    for x in sides[0]:
+                        test = test and self.readytofunc(x)
+                    if test:
+                        sides[1] = self.calc(sides[1])
+                        func = diagmatrixlist
+                        if isinstance(sides[1], matrix):
+                            if sides[1].onlydiag():
+                                sides[1] = sides[1].getitems()
+                            else:
+                                sides[1] = sides[1].items()
+                                func = rowmatrixlist
+                        elif isinstance(sides[1], strcalc):
+                            sides[1] = sides[1].tomatrix().getitems()
+                            func = None
                         else:
-                            sides[1] = sides[1].items()
-                            func = rowmatrixlist
-                    elif isinstance(sides[1], strcalc):
-                        sides[1] = sides[1].tomatrix().getitems()
-                        func = None
+                            sides[1] = [sides[1]]
+                        out = []
+                        for x in xrange(0, len(sides[0])):
+                            if x == len(sides[0])-1:
+                                toset = sides[1][x:]
+                            else:
+                                toset = sides[1][x:x+1]
+                            if len(toset) == 0:
+                                toset = matrix(0)
+                            elif len(toset) == 1:
+                                toset = toset[0]
+                            elif func is not None:
+                                toset = func(toset)
+                            else:
+                                itemlist = toset
+                                toset = itemlist.pop(0)
+                                for item in itemlist:
+                                    toset += item
+                            out.append(toset)
+                            if not self.cmd_set_do([sides[0][x], self.wrap(toset)], docalc):
+                                raise ExecutionError("VariableError", "Could not multi-set to invalid variable "+sides[0][x])
+                        return diagmatrixlist(out)
                     else:
-                        sides[1] = [sides[1]]
-                    out = []
-                    for x in xrange(0, len(sides[0])):
-                        if x == len(sides[0])-1:
-                            toset = sides[1][x:]
-                        else:
-                            toset = sides[1][x:x+1]
-                        if len(toset) == 0:
-                            toset = matrix(0)
-                        elif len(toset) == 1:
-                            toset = toset[0]
-                        elif func is not None:
-                            toset = func(toset)
-                        else:
-                            itemlist = toset
-                            toset = itemlist.pop(0)
-                            for item in itemlist:
-                                toset += item
-                        out.append(toset)
-                        if not self.cmd_set_do([sides[0][x], self.wrap(toset)], docalc):
-                            raise ExecutionError("VariableError", "Could not multi-set to invalid variable "+sides[0][x])
-                    return diagmatrixlist(out)
-            else:
-                sides[0] = sides[0][0]
-                return self.cmd_set_do(sides, docalc)
+                        raise ExecutionError("SyntaxError", "Could not set to invalid variable "+strlist(sides[0], ","))
+                else:
+                    sides[0] = sides[0][0]
+                    return self.cmd_set_do(sides, docalc)
                 
     def cmd_set_do(self, sides, docalc):
         """Performs The Definition Command."""
@@ -738,7 +741,9 @@ Global Operator Precedence List:
             sides[0] = delspace(sides[0][0])+"("+sides[0][1]
         else:
             sides[0] = delspace(sides[0][0])
-        if self.readytofunc(sides[0], allowed="."):
+        if not self.readytofunc(sides[0], allowed="."):
+            raise ExecutionError("SyntaxError", "Could not set to invalid variable name "+sides[0])
+        else:
             useclass = None
             if self.useclass:
                 classlist = [self.useclass]
@@ -751,7 +756,7 @@ Global Operator Precedence List:
                 classlist += sides[0].split(".")
                 for x in xrange(0, len(classlist)-1):
                     if self.isreserved(classlist[x]):
-                        return None
+                        raise ExecutionError("SyntaxError", "Could not set to invalid class name "+classlist[x])
                 sides[0] = classlist.pop()
                 if delfrom is not None and classlist[0] in delfrom:
                     del delfrom[classlist[0]]
