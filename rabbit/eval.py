@@ -205,7 +205,7 @@ Global Operator Precedence List:
             "imag":funcfloat(self.funcs.imagcall, self, "imag"),
             "read":funcfloat(self.funcs.readcall, self, "read"),
             "write":funcfloat(self.funcs.writecall, self, "write"),
-            "is":funcfloat(self.funcs.iseqcall, self, "is"),
+            "is":funcfloat(self.funcs.iseqcall, self, "is", reqargs=2),
             "include":funcfloat(self.funcs.includecall, self, "include"),
             "del":funcfloat(self.funcs.delcall, self, "del"),
             "def":funcfloat(self.funcs.defcall, self, "def"),
@@ -568,6 +568,12 @@ Global Operator Precedence List:
             raise ExecutionError("DisplayError", "Unable to display "+repr(item))
         return str(out)
 
+    def insideouter(self, inputstring, groupers=None):
+        """Determines If Inside A String Or Grouper."""
+        if groupers is None:
+            groupers = self.groupers
+        return isinside(inputstring, '"`', {"\u201c":"\u201d"}, groupers)
+
     def outersplit(self, inputstring, splitstring, groupers=None):
         """Splits By Something Not In A String Or Grouper."""
         if groupers is None:
@@ -683,7 +689,7 @@ Global Operator Precedence List:
             sides = original.split("=", 1)
             sides[0] = basicformat(sides[0])
             sides[1] = basicformat(sides[1])
-            if not (endswithany(sides[0], self.bools) or startswithany(sides[1], self.bools)):
+            if not (endswithany(sides[0], self.bools) or startswithany(sides[1], self.bools)) and not self.insideouter(sides[0]):
                 docalc = False
                 if sides[0].endswith(":"):
                     sides[0] = sides[0][:-1]
@@ -826,7 +832,7 @@ Global Operator Precedence List:
                 top = False
         out = funcparts[0] != "" and (not self.isreserved(funcparts[0], extra, allowed)) and (len(funcparts) == 1 or funcparts[1].endswith(")"*top or self.parenchar))
         if out and len(funcparts) != 1:
-            return not isinside(funcparts[1][:-1], '"`', {"\u201c":"\u201d"}, self.groupers)
+            return not self.insideouter(funcparts[1][:-1])
         else:
             return out
 

@@ -173,12 +173,13 @@ class funcfloat(numobject):
             return out
         else:
             if self.reqargs > 0:
-                variables, self.e.overflow = variables[:reqargs], variables[reqargs:]
+                variables, self.e.overflow = variables[:self.reqargs], variables[self.reqargs:]
             return self.calc(variables)
 
     def curry(self, arg):
         """Curries An Argument."""
-        self.func = curry(self.func, arg)
+        old_func = self.func
+        self.func = lambda variables: old_func([arg]+variables)
         self.reqargs -= 1
 
     def __float__(self):
