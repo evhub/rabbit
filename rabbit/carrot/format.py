@@ -166,22 +166,14 @@ def listsuperformat(inputlist):
 def delspace(inputstring, wipestring=None):
     """Removes All Whitespace From A String."""
     if wipestring:
-        wipestring = str(wipestring)
+        regex = re.compile("["+re.escape(wipestring)+"]")
     else:
         regex = re.compile("\s")
-    out = ""
-    for x in str(inputstring):
-        if wipestring:
-            if not x in wipestring:
-                out += x
-        else:
-            if not regex.match(x):
-                out += x
-    return out
+    return regex.sub("", str(inputstring))
 
 def iswhite(inputstring):
     """Determines Whether A String Is Made Of Whitespace."""
-    return re.compile("\s+").match(str(inputstring))
+    return bool(re.compile("\s+$").match(str(inputstring)))
 
 def leading(inputstring, check=iswhite, func=True):
     """Counts Leading Special Characters."""
