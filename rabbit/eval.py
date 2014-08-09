@@ -58,6 +58,7 @@ Global Operator Precedence List:
     */      Performs multiplication and division.
 
     \\       Denotes a lambda.
+    +       Denotes positives.
     -       Denotes negatives.
     /       Denotes reciprocals.
     ^       Performs exponentiation.
@@ -91,7 +92,8 @@ Global Operator Precedence List:
         }
     unary = "!?"
     bools = unary + "<>=\u2260"
-    multiargops = bools + ":*+-%/^@~\\|&;.,$\u201c" + "".join(groupers.keys()) + "".join(aliases.keys())
+    callops = "%/*^:\\"
+    multiargops = bools + callops + "+-@~|&;.,$\u201c" + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + '")]}`\u201d' + "".join(groupers.values()) + parenchar
     errorvar = "__error__"
     fatalvar = "__fatal__"
@@ -123,7 +125,17 @@ Global Operator Precedence List:
         self.fresh()
         if variables is not None:
             self.makevars(variables)
-        self.set_cmds = [
+        self.tops = [
+            self.top_string,
+            self.top_paren,
+            self.top_class,
+            self.top_brack
+            ]
+        self.pre_calcs = [
+            self.pre_with,
+            self.pre_set
+            ]
+        self.set_calcs = [
             self.set_def,
             self.set_normal
             ]
@@ -132,6 +144,7 @@ Global Operator Precedence List:
             self.call_parenvar,
             self.call_none,
             self.call_lambda,
+            self.call_pos,
             self.call_neg,
             self.call_reciproc,
             self.call_exp,
@@ -333,7 +346,7 @@ Global Operator Precedence List:
     def setspawned(self, value=True):
         """Sets spawned."""
         self.spawned = bool(value)
-        self.setreturned(value)
+        self.setreturned()
 
     def printdebug(self, message):
         """Prints Debug Output."""
@@ -630,7 +643,7 @@ Global Operator Precedence List:
         func, args = inputlist[0], inputlist[1:]
         func = basicformat(func)
         if len(args) == 0:
-            out = self.proc_set(func)
+            out = self.proc_calc(func)
         else:
             original = func+" :: "+strlist(args, " :: ")
             self.printdebug("::> "+original)
@@ -657,14 +670,6 @@ Global Operator Precedence List:
             self.setspawned(self.spawned or spawned)
         return out
 
-    def proc_set(self, inputstring):
-        """Evaluates Definitions."""
-        test = self.cmd_set(inputstring)
-        if test is None:
-            return self.proc_calc(inputstring)
-        else:
-            return test
-
     def trycalc(self, inputobject):
         """Attempts To Calculate A Variable."""
         if istext(inputobject):
@@ -684,13 +689,141 @@ Global Operator Precedence List:
         """Ensures That A Variable Exists."""
         self.variables[variable] = self.getitem(variable)
 
-    def cmd_set(self, original):
+    def proc_calc(self, inputstring):
+        """Performs Full Evaluation On An Expression."""
+        self.printdebug("=>> "+inputstring)
+        self.recursion += 1
+        out = self.calc_top(inputstring)
+        self.printdebug(self.prepare(out, False, True, True)+" <<= "+inputstring)
+        self.recursion -= 1
+        return out
+
+    def calc_top(self, value):
+        """Begins Calculation."""
+        for func in self.tops:
+            value = func(value)
+        self.printdebug("| "+self.prepare(value, False, True, True))
+        return self.calc_pre(value)
+
+    def iseq(self, a, b):
+        """Determines Whether Two Evaluator Objects Are Really Equal."""
+        return type(a) is type(b) and self.itemstate(a) == self.itemstate(b)
+
+    def wrap(self, item):
+        """Wraps An Item In Parentheses."""
+        for x in xrange(0, len(self.parens)):
+            if self.iseq(self.parens[x], item):
+                return self.parenchar+str(x)+self.parenchar
+        indexstr = self.parenchar+str(len(self.parens))+self.parenchar
+        self.parens.append(item)
+        return indexstr
+
+    def top_string(self, expression):
+        """Evaluates The String Part Of An Expression."""
+        strlist = eithersplit(expression, '"`', {"\u201c":"\u201d"})
+        command = ""
+        for item in strlist:
+            if istext(item):
+                command += item
+            elif item[0] in ['"', "\u201c", "\u201d"]:
+                command += self.wrap(strcalc(item[1], self))
+            elif item[0] == "`":
+                command += self.wrap(rawstrcalc(item[1], self))
+        return command.replace("\t", "    ")
+
+    def top_paren(self, expression):
+        """Evaluates The Parenthetical Part Of An Expression."""
+        parenlist = fullsplit(expression, "(", ")")
+        command = ""
+        for x in parenlist:
+            if istext(x):
+                command += x
+            else:
+                command += self.wrap(self.top_paren(x))
+        return command
+
+    def top_class(self, expression):
+        """Evaluates The Curly Brackets In An Expression."""
+        curlylist = fullsplit(expression, "{", "}", 1)
+        command = ""
+        for x in curlylist:
+            if istext(x):
+                command += x
+            else:
+                original = self.top_class(x)
+                lines = []
+                for line in original.splitlines():
+                    if not delspace(line) == "":
+                        lines.append(line)
+                out = classcalc(self)
+                last = ""
+                for x in xrange(0, len(lines)):
+                    if x == 0:
+                        num = leading(lines[x])
+                        last = lines[x]
+                    else:
+                        check = leading(lines[x])
+                        if check > num:
+                            last += lines[x]
+                        elif check == num:
+                            out.process(last)
+                            last = lines[x]
+                        else:
+                            raise ExecutionError("IndentationError", "Unexpected unindent in line "+lines[x])
+                if last:
+                    out.process(last)
+                command += self.wrap(out)
+        return command
+
+    def top_brack(self, expression):
+        """Evaluates The Brackets In An Expression."""
+        bracklist = fullsplit(expression, "[", "]")
+        command = ""
+        for x in bracklist:
+            if istext(x):
+                command += x
+            else:
+                out = self.calc(self.top_brack(x))
+                if isinstance(out, matrix) and out.onlydiag():
+                    out = out.getdiag()
+                else:
+                    out = [out]
+                command += self.wrap(rowmatrixlist(out))
+        return command
+
+    def calc_pre(self, expression):
+        """Performs Pre-Format Evaluation."""
+        for func in self.pre_calcs:
+            test = func(expression)
+            if test is not None:
+                return test
+        return self.calc_post(expression)
+
+    def pre_with(self, expression):
+        """Evaluates With Clauses."""
+        inputlist = expression.split("$")
+        if len(inputlist) > 1:
+            inputlist.reverse()
+            item = inputlist.pop()
+            withclass = classcalc(self)
+            for x in inputlist:
+                withclass.process(x)
+            return withclass.calc(item)
+
+    def pre_set(self, inputstring):
+        """Evaluates Setting."""
+        test = self.calc_set(inputstring)
+        if test is not None:
+            return test
+
+    def calc_set(self, original):
         """Evaluates Definition Commands."""
-        if "=" in original:
-            sides = original.split("=", 1)
+        sides = original.split("=", 1)
+        if len(sides) > 1:
             sides[0] = basicformat(sides[0])
             sides[1] = basicformat(sides[1])
-            if not (endswithany(sides[0], self.bools) or startswithany(sides[1], delspace(self.bools, self.unary))) and not self.insideouter(sides[0]) and not "$" in sides[0]:
+            fsides = map(lambda x: replaceall(x, self.aliases), sides)
+            if not endswithany(fsides[0], self.bools) and not startswithany(fsides[1], self.bools):
                 docalc = False
                 if sides[0].endswith(":"):
                     sides[0] = sides[0][:-1]
@@ -732,16 +865,16 @@ Global Operator Precedence List:
                                 for item in itemlist:
                                     toset += item
                             out.append(toset)
-                            if not self.cmd_set_do([sides[0][x], self.wrap(toset)], docalc):
+                            if not self.calc_set_do([sides[0][x], self.wrap(toset)], docalc):
                                 raise ExecutionError("VariableError", "Could not multi-set to invalid variable "+sides[0][x])
                         return diagmatrixlist(out)
                     else:
                         raise ExecutionError("SyntaxError", "Could not set to invalid variable "+strlist(sides[0], ","))
                 else:
                     sides[0] = sides[0][0]
-                    return self.cmd_set_do(sides, docalc)
+                    return self.calc_set_do(sides, docalc)
                 
-    def cmd_set_do(self, sides, docalc):
+    def calc_set_do(self, sides, docalc):
         """Performs The Definition Command."""
         sides[0] = sides[0].split("(", 1)
         if len(sides[0]) > 1:
@@ -794,7 +927,7 @@ Global Operator Precedence List:
             elif self.useclass:
                 useclass = self.funcfind(self.useclass)
             sides[1] = basicformat(sides[1])
-            for func in self.set_cmds:
+            for func in self.set_calcs:
                 value = func(sides)
                 if value is not None:
                     if not isinstance(value, tuple):
@@ -858,126 +991,10 @@ Global Operator Precedence List:
         if not self.isreserved(sides[0]):
             return sides[1]
 
-    def proc_calc(self, inputstring):
-        """Performs Full Evaluation On An Expression."""
-        self.printdebug("=>> "+inputstring)
-        self.recursion += 1
-        out = self.calc_top(inputstring)
-        self.printdebug(self.prepare(out, False, True, True)+" <<= "+inputstring)
-        self.recursion -= 1
-        return out
-
-    def calc_top(self, expression):
-        """Begins Calculation."""
-        value = self.calc_brack(fullsplit(
-                    self.calc_class(fullsplit(
-                        self.calc_paren(fullsplit(
-                            self.calc_string(expression).replace("\t","    "),
-                        "(", ")")),
-                    "{", "}", 1)),
-                "[", "]"))
-        self.printdebug("| "+self.prepare(value, False, True, True))
-        return self.calc_with(value)
-
-    def iseq(self, a, b):
-        """Determines Whether Two Evaluator Objects Are Really Equal."""
-        return type(a) is type(b) and self.itemstate(a) == self.itemstate(b)
-
-    def wrap(self, item):
-        """Wraps An Item In Parentheses."""
-        for x in xrange(0, len(self.parens)):
-            if self.iseq(self.parens[x], item):
-                return self.parenchar+str(x)+self.parenchar
-        indexstr = self.parenchar+str(len(self.parens))+self.parenchar
-        self.parens.append(item)
-        return indexstr
-
-    def calc_string(self, expression):
-        """Evaluates The String Part Of An Expression."""
-        strlist = eithersplit(expression, '"`', {"\u201c":"\u201d"})
-        command = ""
-        for item in strlist:
-            if istext(item):
-                command += item
-            elif item[0] in ['"', "\u201c", "\u201d"]:
-                command += self.wrap(strcalc(item[1], self))
-            elif item[0] == "`":
-                command += self.wrap(rawstrcalc(item[1], self))
-        return command
-
-    def calc_paren(self, parenlist):
-        """Evaluates The Parenthetical Part Of An Expression."""
-        command = ""
-        for x in parenlist:
-            if istext(x):
-                command += x
-            else:
-                command += self.wrap(self.calc_paren(x))
-        return command
-
-    def calc_class(self, curlylist):
-        """Evaluates The Curly Brackets In An Expression."""
-        command = ""
-        for x in curlylist:
-            if istext(x):
-                command += x
-            else:
-                original = self.calc_class(x)
-                lines = []
-                for line in original.splitlines():
-                    if not delspace(line) == "":
-                        lines.append(line)
-                out = classcalc(self)
-                last = ""
-                for x in xrange(0, len(lines)):
-                    if x == 0:
-                        num = leading(lines[x])
-                        last = lines[x]
-                    else:
-                        check = leading(lines[x])
-                        if check > num:
-                            last += lines[x]
-                        elif check == num:
-                            out.process(last)
-                            last = lines[x]
-                        else:
-                            raise ExecutionError("IndentationError", "Unexpected unindent in line "+lines[x])
-                if last:
-                    out.process(last)
-                command += self.wrap(out)
-        return command
-
-    def calc_brack(self, bracklist):
-        """Evaluates The Brackets In An Expression."""
-        command = ""
-        for x in bracklist:
-            if istext(x):
-                command += x
-            else:
-                out = self.calc(self.calc_brack(x))
-                if isinstance(out, matrix) and out.onlydiag():
-                    out = out.getdiag()
-                else:
-                    out = [out]
-                command += self.wrap(rowmatrixlist(out))
-        return command
-
-    def calc_with(self, expression):
-        """Evaluates With Clauses."""
-        inputlist = expression.split("$")
-        if len(inputlist) == 1:
-            return self.calc_pieces(self.calc_format(inputlist[0]))
-        else:
-            inputlist.reverse()
-            item = inputlist.pop()
-            withclass = classcalc(self)
-            for x in inputlist:
-                withclass.process(x)
-            return withclass.calc(item)
-
-    def calc_format(self, expression):
+    def calc_post(self, original):
         """Formats Expressions."""
-        return replaceall(delspace(expression), self.aliases)
+        expression = delspace(replaceall(original, self.aliases))
+        return self.calc_pieces(expression)
 
     def calc_pieces(self, expression):
         """Evaluates Piecewise Expressions."""
@@ -1119,7 +1136,7 @@ Global Operator Precedence List:
                         for e in xrange(0, len(top[a][0][c][d])):
                             top[a][0][c][d][e] = top[a][0][c][d][e].split(",")
                             for f in xrange(0, len(top[a][0][c][d][e])):
-                                top[a][0][c][d][e][f] = splitinplace(top[a][0][c][d][e][f].split("+"), "-", "%/*^:\\", 2)
+                                top[a][0][c][d][e][f] = splitinplace(splitinplace([top[a][0][c][d][e][f]], "+", self.callops), "-", self.callops, 2)
                                 for g in xrange(0, len(top[a][0][c][d][e][f])):
                                     top[a][0][c][d][e][f][g] = top[a][0][c][d][e][f][g].split("%")
                                     for h in xrange(0, len(top[a][0][c][d][e][f][g])):
@@ -1647,8 +1664,17 @@ Global Operator Precedence List:
         if inputstring.startswith("\\"):
             return self.eval_lambda([inputstring])
 
+    def call_pos(self, inputstring):
+        """Evaluates Unary +."""
+        if inputstring.startswith("+"):
+            item = self.eval_call(inputstring[1:])
+            if isnull(item):
+                return 1.0
+            else:
+                return 1.0*item
+
     def call_neg(self, inputstring):
-        """Evaluates -."""
+        """Evaluates Unary -."""
         if inputstring.startswith("-"):
             item = self.eval_call(inputstring[1:])
             if isnull(item):

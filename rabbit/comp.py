@@ -37,7 +37,7 @@ class compiler(commandline):
         self.startup()
         self.app = terminal()
         self.populator(debugcolor)
-        self.e.proc_set = self.proc_set
+        self.e.pre_set = self.pre_set
         self.mainprompt = str(mainprompt)
         self.prompt = str(prompt)
         self.moreprompt = str(moreprompt)
@@ -166,12 +166,10 @@ class compiler(commandline):
         self.e.setspawned()
         return out
 
-    def proc_set(self, inputstring):
-        """Replaces self.e.proc_set."""
-        test = self.e.cmd_set(inputstring)
-        if test is None:
-            return self.e.proc_calc(inputstring)
-        else:
+    def pre_set(self, inputstring):
+        """Replaces self.e.pre_set."""
+        test = self.e.calc_set(inputstring)
+        if test is not None:
             self.e.setspawned()
             return test
 
