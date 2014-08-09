@@ -524,6 +524,8 @@ Global Operator Precedence List:
                 out += "D:"
             variables = item.getvars()
             personals = item.getpers()
+            if item.method:
+                personals[item.method] = item.method
             out += "\\"+strlist(variables,",")
             if len(variables) > 0:
                 out += ","
