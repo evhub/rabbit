@@ -611,7 +611,7 @@ Global Operator Precedence List:
 
     def process(self, inputstring, info="", command=None, top=None):
         """Performs Top-Level Evaluation."""
-        inputstring = self.remcomment(str(inputstring))
+        inputstring = self.remcomment(replaceall(str(inputstring), self.aliases))
         if top is None:
             top = command is not None
         else:
@@ -835,8 +835,7 @@ Global Operator Precedence List:
         if len(sides) > 1:
             sides[0] = basicformat(sides[0])
             sides[1] = basicformat(sides[1])
-            fsides = map(lambda x: replaceall(x, self.aliases), sides)
-            if not endswithany(fsides[0], self.bools) and not startswithany(fsides[1], self.bools):
+            if not endswithany(sides[0], self.bools) and not startswithany(sides[1], self.bools):
                 docalc = False
                 if sides[0].endswith(":"):
                     sides[0] = sides[0][:-1]
@@ -1004,10 +1003,9 @@ Global Operator Precedence List:
         if not self.isreserved(sides[0]):
             return sides[1]
 
-    def calc_post(self, original):
+    def calc_post(self, expression):
         """Formats Expressions."""
-        expression = delspace(replaceall(original, self.aliases))
-        return self.calc_pieces(expression)
+        return self.calc_pieces(delspace(expression))
 
     def calc_pieces(self, expression):
         """Evaluates Piecewise Expressions."""
