@@ -821,7 +821,7 @@ Global Operator Precedence List:
             withclass = classcalc(self)
             for x in inputlist:
                 withclass.process(x)
-            return withclass.calc(item, True)
+            return withclass.calc(item)
 
     def pre_set(self, inputstring):
         """Evaluates Setting."""

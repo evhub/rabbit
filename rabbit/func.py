@@ -1030,7 +1030,7 @@ class classcalc(cotobject):
         """Copies The Class."""
         return classcalc(self.e, getcopy(self.getvars()))
 
-    def process(self, inglobal=False, command):
+    def process(self, command, inglobal=False):
         """Processes A Command And Puts The Result In The Variables."""
         self.calc(command, inglobal, self.e.process)
 
