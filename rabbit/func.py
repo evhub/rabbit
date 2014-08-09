@@ -146,13 +146,18 @@ class funcfloat(numobject):
         if self.memoize:
             returned = self.e.returned
             self.e.setreturned(False)
-            out = self.base_func(*args, **kwargs)
-            if not self.e.returned:
-                if arghash is None:
-                    arghash = (self.keyhash(args), self.keyhash(kwargs))
-                self.memo[arghash] = out
-            self.e.setreturned(returned or self.e.returned)
-            return out
+            try:
+                out = self.base_func(*args, **kwargs)
+            except:
+                self.e.setreturned()
+                raise
+            else:
+                if not self.e.returned:
+                    if arghash is None:
+                        arghash = (self.keyhash(args), self.keyhash(kwargs))
+                    self.memo[arghash] = out
+                self.e.setreturned(returned or self.e.returned)
+                return out
         return self.base_func(*args, **kwargs)
 
     def calc(self, variables=None):

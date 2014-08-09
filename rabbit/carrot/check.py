@@ -142,7 +142,9 @@ def catch(function, *args, **kwargs):
     except IOError as detail:
         err = ("IOError", detail, True)
     except SyntaxError as detail:
-        err = ("PythonError", detail, True)
+        err = ("PythonSyntaxError", detail, True)
+    except NameError as detail:
+        err = ("PythonNameError", detail, True)
     except EOFError as detail:
         err = ("EOFInterrupt", detail or "Action has been terminated", True)
     except KeyboardInterrupt as detail:
