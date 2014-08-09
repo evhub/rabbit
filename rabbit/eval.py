@@ -738,10 +738,12 @@ Global Operator Precedence List:
         for x in parenlist:
             if istext(x):
                 command += x
-            elif len(x) == 1:
+            elif len(x) <= 1:
+                if len(x) < 1:
+                    x.append("")
                 command += self.wrap(x[0])
             else:
-                raise SyntaxError("Error in evaluating parentheses")
+                raise SyntaxError("Error in evaluating parentheses len("+repr(x)+")>1")
         return command
 
     def top_class(self, expression):
@@ -751,11 +753,14 @@ Global Operator Precedence List:
         for x in curlylist:
             if istext(x):
                 command += x
-            elif len(x) == 1:
-                original = x[0]
+            elif len(x) <= 1:
+                if len(x) < 1:
+                    original = ""
+                else:
+                    original = x[0]
                 lines = []
                 for line in original.splitlines():
-                    if not delspace(line) == "":
+                    if not iswhite(line):
                         lines.append(line)
                 out = classcalc(self)
                 last = ""
@@ -776,7 +781,7 @@ Global Operator Precedence List:
                     out.process(last)
                 command += self.wrap(out)
             else:
-                raise SyntaxError("Error in evaluating curly braces")
+                raise SyntaxError("Error in evaluating curly braces len("+repr(x)+")>1")
         return command
 
     def top_brack(self, expression):
@@ -786,7 +791,9 @@ Global Operator Precedence List:
         for x in bracklist:
             if istext(x):
                 command += x
-            elif len(x) == 1:
+            elif len(x) <= 1:
+                if len(x) < 1:
+                    x.append("")
                 out = self.calc(x[0])
                 if isinstance(out, matrix) and out.onlydiag():
                     out = out.getdiag()
@@ -794,7 +801,7 @@ Global Operator Precedence List:
                     out = [out]
                 command += self.wrap(rowmatrixlist(out))
             else:
-                raise SyntaxError("Error in evaluating brackets")
+                raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
         return command
 
     def calc_pre(self, expression):
