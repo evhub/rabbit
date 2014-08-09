@@ -267,7 +267,7 @@ class strfunc(funcfloat):
     method = None
     lexical = True
 
-    def __init__(self, funcstr, e, variables=None, personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None):
+    def __init__(self, funcstr, e, variables=None, personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None, method=None):
         """Creates A Callable String Function."""
         self.e = e
         self.funcstr = self.e.namefind(str(funcstr))
@@ -306,6 +306,8 @@ class strfunc(funcfloat):
             self.snapshot = self.e.variables.copy()
         else:
             self.snapshot = {}
+        if method is not None:
+            self.method = method
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -313,11 +315,11 @@ class strfunc(funcfloat):
             memo = None
         else:
             memo = self.e.getstates(self.memo)
-        return ("strfunc", self.funcstr, self.variables, self.e.getstates(self.getpers()), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo)
+        return ("strfunc", self.funcstr, self.variables, self.e.getstates(self.getpers()), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method)
 
     def copy(self):
         """Copies The String Function."""
-        return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo)
+        return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method)
 
     def calc(self, personals=None):
         """Calculates The String."""
@@ -534,6 +536,7 @@ class strfloat(strfunc):
             self.snapshot = test.snapshot
             if self.lexical:
                 self.snapshot.update(self.e.variables)
+            self.method = other.method
         else:
             self.funcstr = funcstr
             self.overflow = overflow

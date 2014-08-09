@@ -1145,7 +1145,7 @@ Global Operator Precedence List:
                         for e in xrange(0, len(top[a][0][c][d])):
                             top[a][0][c][d][e] = top[a][0][c][d][e].split(",")
                             for f in xrange(0, len(top[a][0][c][d][e])):
-                                top[a][0][c][d][e][f] = splitinplace([top[a][0][c][d][e][f]].split("+"), "-", self.callops, 2)
+                                top[a][0][c][d][e][f] = splitinplace(top[a][0][c][d][e][f].split("+"), "-", self.callops, 2)
                                 for g in xrange(0, len(top[a][0][c][d][e][f])):
                                     top[a][0][c][d][e][f][g] = top[a][0][c][d][e][f][g].split("%")
                                     for h in xrange(0, len(top[a][0][c][d][e][f][g])):
@@ -2208,7 +2208,7 @@ Global Operator Precedence List:
                     for x in xrange(0, len(args[0][y])):
                         value.store(y,x, self.deitem(args[0][y][x]))
             elif name == "strfunc":
-                value = strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]))
+                value = strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]), args[9])
             elif name == "codestr":
                 value = codestr(args[0], self)
             elif name == "strcalc":
