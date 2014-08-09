@@ -1080,7 +1080,7 @@ Global Operator Precedence List:
         inputlist = switchsplit(inputstring, self.bools)
         if len(inputlist) == 0:
             return matrix(0)
-        elif len(inputlist) == 1 and not (inputlist[0] and madeof(inputlist[0], self.bools)):
+        elif len(inputlist) == 1 and not madeof(inputlist[0], self.bools):
             return self.calc_eval(inputlist[0])
         else:
             for x in xrange(0, len(inputlist)):

@@ -117,10 +117,13 @@ def endswithany(inputstring, inputlist):
 
 def madeof(inputstring, findstr):
     """Determines If A String Is Made Of Another String."""
-    for x in inputstring:
-        if not x in findstr:
-            return False
-    return True
+    if inputstring:
+        for x in inputstring:
+            if not x in findstr:
+                return False
+        return True
+    else:
+        return False
 
 def table(freqs, delimiter=",", seperator=" | "):
     """Creates A Distribution Table."""
