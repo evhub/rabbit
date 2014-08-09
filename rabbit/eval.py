@@ -58,7 +58,6 @@ Global Operator Precedence List:
     */      Performs multiplication and division.
 
     \\       Denotes a lambda.
-    +       Denotes positives.
     -       Denotes negatives.
     /       Denotes reciprocals.
     ^       Performs exponentiation.
@@ -144,7 +143,6 @@ Global Operator Precedence List:
             self.call_parenvar,
             self.call_none,
             self.call_lambda,
-            self.call_pos,
             self.call_neg,
             self.call_reciproc,
             self.call_exp,
@@ -1147,7 +1145,7 @@ Global Operator Precedence List:
                         for e in xrange(0, len(top[a][0][c][d])):
                             top[a][0][c][d][e] = top[a][0][c][d][e].split(",")
                             for f in xrange(0, len(top[a][0][c][d][e])):
-                                top[a][0][c][d][e][f] = splitinplace(splitinplace([top[a][0][c][d][e][f]], "+", self.callops), "-", self.callops, 2)
+                                top[a][0][c][d][e][f] = splitinplace([top[a][0][c][d][e][f]].split("+"), "-", self.callops, 2)
                                 for g in xrange(0, len(top[a][0][c][d][e][f])):
                                     top[a][0][c][d][e][f][g] = top[a][0][c][d][e][f][g].split("%")
                                     for h in xrange(0, len(top[a][0][c][d][e][f][g])):
@@ -1674,15 +1672,6 @@ Global Operator Precedence List:
         """Wraps Lambda Evaluation."""
         if inputstring.startswith("\\"):
             return self.eval_lambda([inputstring])
-
-    def call_pos(self, inputstring):
-        """Evaluates Unary +."""
-        if inputstring.startswith("+"):
-            item = self.eval_call(inputstring[1:])
-            if isnull(item):
-                return 1.0
-            else:
-                return 1.0*item
 
     def call_neg(self, inputstring):
         """Evaluates Unary -."""
