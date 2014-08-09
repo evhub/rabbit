@@ -733,13 +733,15 @@ Global Operator Precedence List:
 
     def top_paren(self, expression):
         """Evaluates The Parenthetical Part Of An Expression."""
-        parenlist = fullsplit(expression, "(", ")")
+        parenlist = fullsplit(expression, "(", ")", 1)
         command = ""
         for x in parenlist:
             if istext(x):
                 command += x
+            elif len(x) == 1:
+                command += self.wrap(x[0])
             else:
-                command += self.wrap(self.top_paren(x))
+                raise SyntaxError("Error in evaluating parentheses")
         return command
 
     def top_class(self, expression):
@@ -749,8 +751,8 @@ Global Operator Precedence List:
         for x in curlylist:
             if istext(x):
                 command += x
-            else:
-                original = self.top_class(x)
+            elif len(x) == 1:
+                original = x[0]
                 lines = []
                 for line in original.splitlines():
                     if not delspace(line) == "":
@@ -773,22 +775,26 @@ Global Operator Precedence List:
                 if last:
                     out.process(last)
                 command += self.wrap(out)
+            else:
+                raise SyntaxError("Error in evaluating curly braces")
         return command
 
     def top_brack(self, expression):
         """Evaluates The Brackets In An Expression."""
-        bracklist = fullsplit(expression, "[", "]")
+        bracklist = fullsplit(expression, "[", "]", 1)
         command = ""
         for x in bracklist:
             if istext(x):
                 command += x
-            else:
-                out = self.calc(self.top_brack(x))
+            elif len(x) == 1:
+                out = self.calc(x[0])
                 if isinstance(out, matrix) and out.onlydiag():
                     out = out.getdiag()
                 else:
                     out = [out]
                 command += self.wrap(rowmatrixlist(out))
+            else:
+                raise SyntaxError("Error in evaluating brackets")
         return command
 
     def calc_pre(self, expression):
