@@ -536,7 +536,7 @@ class strfloat(strfunc):
             self.snapshot = test.snapshot
             if self.lexical:
                 self.snapshot.update(self.e.variables)
-            self.method = other.method
+            self.method = test.method
         else:
             self.funcstr = funcstr
             self.overflow = overflow
