@@ -173,7 +173,7 @@ def delspace(inputstring, wipestring=None):
 
 def iswhite(inputstring):
     """Determines Whether A String Is Made Of Whitespace."""
-    return bool(re.compile("\s+$").match(str(inputstring)))
+    return bool(re.compile("\s*$").match(str(inputstring)))
 
 def leading(inputstring, check=iswhite, func=True):
     """Counts Leading Special Characters."""

@@ -771,7 +771,7 @@ Global Operator Precedence List:
                     else:
                         check = leading(lines[x])
                         if check > num:
-                            last += lines[x]
+                            last += "\n"+lines[x]
                         elif check == num:
                             out.process(last)
                             last = lines[x]
