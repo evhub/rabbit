@@ -1030,23 +1030,29 @@ class classcalc(cotobject):
         """Copies The Class."""
         return classcalc(self.e, getcopy(self.getvars()))
 
-    def process(self, command):
+    def process(self, inglobal=False, command):
         """Processes A Command And Puts The Result In The Variables."""
-        self.calc(command, self.e.process)
+        self.calc(command, inglobal, self.e.process)
 
-    def calc(self, command, func=None):
+    def calc(self, command, inglobal=False, func=None):
         """Calculates A String In The Environment Of The Class."""
         if func is None:
             func = self.e.calc
         command = self.e.namefind(basicformat(command))
-        oldclass, self.e.useclass = self.e.useclass, self.selfvar
-        oldset, self.doset = self.doset, self.e.setvars(self.variables)
+        if inglobal:
+            doset = self.e.setvars(self.variables)
+        else:
+            oldclass, self.e.useclass = self.e.useclass, self.selfvar
+            oldset, self.doset = self.doset, self.e.setvars(self.variables)
         try:
             out = func(command, " | class")
         finally:
-            self.e.setvars(self.doset)
-            self.doset = oldset
-            self.e.useclass = oldclass
+            if inglobal:
+                self.e.setvars(doset)
+            else:
+                self.e.setvars(self.doset)
+                self.doset = oldset
+                self.e.useclass = oldclass
         return out
 
     def __len__(self):
