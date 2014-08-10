@@ -185,7 +185,7 @@ class editor(mathbase):
                     if last[0] in [funcfloat.allargs, strfunc.autoarg]:
                         self.box.placetag("builtin", last[1], point+"-2c")
                     elif last[0] in self.e.variables:
-                        if isinstance(self.e.variables[last[0]], usefunc) or (isinstance(self.e.variables[last[0]], funcfloat) and not isinstance(self.e.variables[last[0]], strfunc)):
+                        if isbuiltin(self.e.variables[last[0]]):
                             self.box.placetag("builtin", last[1], point+"-2c")
                         else:
                             self.box.placetag("variable", last[1], point+"-2c")
@@ -251,7 +251,7 @@ class editor(mathbase):
                     if last[0] in [funcfloat.allargs, strfunc.autoarg]:
                         self.box.placetag("builtin", last[1], point+"-1c")
                     elif last[0] in self.e.variables:
-                        if isinstance(self.e.variables[last[0]], usefunc) or (isinstance(self.e.variables[last[0]], funcfloat) and not isinstance(self.e.variables[last[0]], strfunc)):
+                        if isbuiltin(self.e.variables[last[0]]):
                             self.box.placetag("builtin", last[1], point+"-1c")
                         else:
                             self.box.placetag("variable", last[1], point+"-1c")

@@ -49,10 +49,18 @@ else:
 old_print = print
 print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
 
+old_int = int
+def int(x, **kwargs):
+    """Does Proper Integer Conversion."""
+    if istext(x):
+        while x.endswith("0") or x.endswith("."):
+            x = x[:-1]
+    return int(x)
+
 old_float = float
 def float(x, **kwargs):
     """Converts To The Proper Number Object."""
-    if isinstance(x, (int, long)):
+    if isinstance(x, (old_int, long)):
         return int(x)
     elif isinstance(x, old_float):
         if int(x) == x:
@@ -68,7 +76,7 @@ def float(x, **kwargs):
         else:
             if test_float_int == test_float:
                 try:
-                    test_int = int(x)
+                    int(x)
                 except:
                     return test_float
                 else:
@@ -134,7 +142,7 @@ def hasreal(value):
 
 def isnum(inputobject):
     """Determines If An Object Is A Number."""
-    return isinstance(inputobject, (old_float, int, long, complex))
+    return isinstance(inputobject, (old_float, old_int, long, complex))
 
 def iseq(a, b):
     """Determines Whether Two Objects Are Really Equal."""

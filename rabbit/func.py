@@ -34,6 +34,10 @@ def collapse(item):
     else:
         return item
 
+def isbuiltin(inputobject):
+    """Checks Whether An Object Is A Builtin."""
+    return isinstance(inputobject, funcfloat) and not isinstance(inputobject, strfunc)
+
 def ismatrix(inputobject):
     """Checks Whether An Object Is A Matrix."""
     return hasmatrix(inputobject) and not isinstance(inputobject, strcalc)
