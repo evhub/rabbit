@@ -342,7 +342,9 @@ class mathbase(safebase):
                 raise ExecutionError("IOError", "Could not find for install file "+inputstring)
             else:
                 self.e.setreturned()
-                if iseval(impclass):
+                if impclass is None:
+                    return matrix(0)
+                elif iseval(impclass):
                     return impclass(self)
                 elif hascall(impclass):
                     return funcfloat(impclass(self).call, self.e, name)
