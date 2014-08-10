@@ -622,7 +622,9 @@ class strcalc(numobject):
             self += other
         else:
             other = getnum(other)
-            if other and other != 1:
+            if not other:
+                self.calcstr = ""
+            elif other != 1:
                 if other < 0:
                     self.calcstr = self.calcstr[::-1]
                     self *= -other
