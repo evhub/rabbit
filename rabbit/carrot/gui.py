@@ -19,8 +19,14 @@
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
 from .file import *
-import tkMessageBox
-import tkSimpleDialog
+try:
+    import tkMessageBox
+except ImportError:
+    tkMessageBox = Tkinter.messagebox
+try:
+    import tkSimpleDialog
+except ImportError:
+    tkSimpleDialog = Tkinter.simpledialog
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
