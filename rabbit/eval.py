@@ -439,6 +439,14 @@ Global Operator Precedence List:
                 out = "true"
             else:
                 out = "false"
+        elif isinstance(item, complex):
+            out = ""
+            if item.real != 0:
+                out += self.prepare(item.real, False, bottom, indebug, maxrecursion)+"+"
+            if item.imag == 1:
+                out += "i"
+            else:
+                out += self.prepare(item.imag, False, bottom, indebug, maxrecursion)+"*i"
         elif isnum(item):
             out = repr(item)
             if "e" in out:
@@ -449,14 +457,6 @@ Global Operator Precedence List:
                 out = out[:-2]
             elif out.endswith("L"):
                 out = out[:-1]
-        elif isinstance(item, complex):
-            out = ""
-            if item.real != 0:
-                out += self.prepare(item.real, False, bottom, indebug, maxrecursion)+"+"
-            if item.imag == 1:
-                out += "i"
-            else:
-                out += self.prepare(item.imag, False, bottom, indebug, maxrecursion)+"*i"
         elif self.speedy and indebug:
             out = self.speedyprep(item, top, bottom, True, maxrecursion)
         elif isinstance(item, instancecalc):

@@ -119,6 +119,10 @@ class numobject(evalobject):
 
     def __float__(self):
         """Retrieves A Float."""
+        return old_float(self.getfloat())
+
+    def getfloat(self):
+        """Retrieves A Number."""
         return float(self.calc())
 
     def __int__(self):

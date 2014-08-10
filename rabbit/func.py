@@ -189,14 +189,6 @@ class funcfloat(numobject):
         self.func = lambda variables: old_func([arg]+variables)
         self.reqargs -= 1
 
-    def __float__(self):
-        """Retrieves A Float."""
-        return float(self.calc())
-
-    def __int__(self):
-        """Retrieves An Integer."""
-        return int(self.calc())
-
     def __str__(self):
         """Retrieves The Function String."""
         return self.funcstr
@@ -582,7 +574,7 @@ class strcalc(numobject):
         """Returns A Copy Of The Evaluator String."""
         return rawstrcalc(self.calcstr, self.e)
 
-    def __float__(self):
+    def getfloat(self):
         """Attempts To Get A Float."""
         return float(self.calcstr)
 
@@ -1531,7 +1523,7 @@ class instancecalc(numobject, classcalc):
             return self.domethod(check_rpow, other)
         raise ExecutionError("TypeError", "Insufficient methods defined for reverse exponentiation")
 
-    def __float__(self):
+    def getfloat(self):
         """Retrieves A Float."""
         return float(getnum(self.tonum()))
 
@@ -1917,14 +1909,6 @@ class rollfunc(strfunc):
             if stop > int(stop):
                 out += self.calc(stop-int(stop))
         return out
-
-    def __float__(self):
-        """Retrieves A Float."""
-        return float(self.calc())
-
-    def __int__(self):
-        """Retrieves An Integer."""
-        return int(self.calc())
 
     def __eq__(self, other):
         """Performs Equals."""

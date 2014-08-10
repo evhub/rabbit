@@ -52,33 +52,35 @@ print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
 old_int = int
 def int(x, **kwargs):
     """Does Proper Integer Conversion."""
-    if istext(x):
+    if istext(x) and "." in x:
         while x.endswith("0"):
             x = x[:-1]
         if x.endswith("."):
             x = x[:-1]
-    return old_int(x)
+    return old_int(x, **kwargs)
 
 old_float = float
 def float(x, **kwargs):
     """Converts To The Proper Number Object."""
     if isinstance(x, (old_int, long)):
-        return int(x)
+        return int(x, **kwargs)
     elif isinstance(x, old_float):
         if int(x) == x:
-            return int(x)
+            return int(x, **kwargs)
         else:
-            return old_float(x)
+            return old_float(x, **kwargs)
+    elif hasattr(x, "getfloat"):
+        return x.getfloat(**kwargs)
     else:
-        test_float = old_float(x)
+        test_float = old_float(x, **kwargs)
         try:
-            test_float_int = int(test_float)
+            test_float_int = int(test_float, **kwargs)
         except:
             return test_float
         else:
             if test_float_int == test_float:
                 try:
-                    test_int = int(x)
+                    test_int = int(x, **kwargs)
                 except:
                     return test_float
                 else:

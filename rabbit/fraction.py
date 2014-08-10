@@ -108,7 +108,7 @@ class fraction(numobject):
         """Performs The Division."""
         return self.n/self.d
 
-    def __float__(self):
+    def getfloat(self):
         """Retrieves A Float."""
         return float(self.n)/float(self.d)
 
