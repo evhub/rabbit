@@ -36,12 +36,12 @@ def compute(inputstring, extras=None, builtins=None):
     extras["__builtins__"] = builtins
     return eval(inputstring, extras)
 
-def runcode(code, extras=None):
+def runcode(code):
     """Executes Code With Access Only To Global Variables."""
     if extras is None:
-        exec str(code) in globals()
+        exec(str(code))
     else:
-        exec str(code) in globals(), extras
+        exec(str(code))
 
 def runcmd(command):
     """Runs A System Command."""

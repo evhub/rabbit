@@ -32,6 +32,11 @@ try:
 except NameError:
     long = int
 
+try:
+    long
+except NameError:
+    long = int
+
 encoding = "UTF"
 
 try:
