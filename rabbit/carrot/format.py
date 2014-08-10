@@ -166,9 +166,9 @@ def listsuperformat(inputlist):
 def delspace(inputstring, wipestring=None):
     """Removes All Whitespace From A String."""
     if wipestring:
-        regex = re.compile("["+re.escape(wipestring)+"]")
+        regex = re.compile("["+re.escape(wipestring)+"]+")
     else:
-        regex = re.compile("\s")
+        regex = re.compile("\s+")
     return regex.sub("", str(inputstring))
 
 def iswhite(inputstring):
@@ -215,10 +215,7 @@ def repeating(inputstring):
 
 def strlist(inputlist, delimeter=" ", converter=str):
     """Formats A List Into A String."""
-    out = []
-    for x in inputlist:
-        out.append(converter(x))
-    return str(delimeter).join(out)
+    return str(delimeter).join(map(converter, inputlist))
 
 def strdict(inputdict, seperator=":", delimeter=" ", termconverter=str, keyconverter=str):
     """Formats A Dictionary Into A String."""
@@ -342,7 +339,7 @@ def splitinplace(inputlist, findstr, reserved="", domod=None):
 def carefulsplit(inputstring, splitstring, holdstrings="", closers={}, counters={}):
     """Splits A String By Something Not Inside Something Else."""
     out = [""]
-    hold = False
+    hold = None
     check = 0
     for x in inputstring:
         if not hold and x == splitstring[check]:
@@ -376,7 +373,7 @@ def carefulsplit(inputstring, splitstring, holdstrings="", closers={}, counters=
 
 def isinside(inputstring, holdstrings="", closers={}, counters={}):
     """Determins Whether An Inputstring Is Currently At The Top Level."""
-    hold = False
+    hold = None
     for x in inputstring:
         if hold:
             if isinstance(hold, tuple):
@@ -416,7 +413,7 @@ def switchsplit(inputstring, splitstring, otherstring=None, notstring=None):
 def eithersplit(inputstring, holdstrings, closers={}):
     """Splists A String By Any Of The Hold Strings."""
     out = [""]
-    inside = False
+    inside = None
     for x in inputstring:
         if inside:
             if x == out[-1][0]:
@@ -439,9 +436,74 @@ def eithersplit(inputstring, holdstrings, closers={}):
         raise ExecutionError("SyntaxError", "Unmatched token "+out[-1][0])
     return out
 
-def replaceall(inputstring, replaces={}):
+def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
     """Replaces All replaces In A String."""
-    out = str(inputstring)
-    for a,b in replaces.items():
-        out = out.replace(a,b)
-    return out
+    found = {}
+    out = []
+    hold = None
+    for x in inputstring:
+        new = x
+        if hold:
+            if x == hold:
+                hold = False
+        elif found:
+            for k in found.keys():
+                v,i,ex = found[k]
+                if ex is None:
+                    found[k] = (v+x, i, None)
+                elif x == k[v]:
+                    if len(k) == v+1:
+                        found[k] = (ex+replaces[k], i+1, None)
+                    else:
+                        found[k] = (v+1, i+1, ex)
+                else:
+                    found[k] = (ex+k[:v]+x, i, None)
+            if istext(v):
+                last = v
+            else:
+                last = k[:v]
+            for k in replaces:
+                if k not in found and k.startswith(x):
+                    if len(k) == 1:
+                        found[k] = (last+replaces[k], 1, None)
+                    else:
+                        found[k] = (1, 0, last)
+            done = True
+            new = ("", -1)
+            for v,i,ex in found.values():
+                if ex is None:
+                    if i > new[1]:
+                        new = v,i
+                else:
+                    done = False
+                    break
+            if done:
+                new = new[0]
+                found = {}
+        else:
+            for k in replaces:
+                if k.startswith(x):
+                    if len(k) == 1:
+                        found[k] = (replaces[k], 1, None)
+                    else:
+                        found[k] = (1, 0, "")
+        if not found:
+            out.append(new)
+            if not hold:
+                for c in new:
+                    if hold:
+                        if c == hold:
+                            hold = False
+                    elif c in holdstrings:
+                        hold = c
+                    elif c in closers:
+                        hold = closers[c]
+    if found:
+        new = ("", -1)
+        for k,(v,i,ex) in found.items():
+            if ex is not None and v == len(k):
+                v,i,ex = replaces[k], i+1, None
+            if ex is None and i > new[1]:
+                new = v,i
+        out.append(new[0])
+    return "".join(out)

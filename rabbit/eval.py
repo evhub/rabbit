@@ -69,6 +69,7 @@ Global Operator Precedence List:
     varname = "x"
     parenchar = "\xa7"
     aliases = {
+        "\t":"    ",
         "\xac":"!",
         "\xf7":"/",
         "\xd7":"*",
@@ -222,6 +223,7 @@ Global Operator Precedence List:
             "del":funcfloat(self.funcs.delcall, self, "del"),
             "def":funcfloat(self.funcs.defcall, self, "def"),
             "global":funcfloat(self.funcs.globalcall, self, "global"),
+            "alias":funcfloat(self.funcs.aliascall, self, "alias"),
             "effect":usefunc(self.setreturned, self, "effect"),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "E":usefunc(E10, self, "E", ["x"]),
@@ -611,7 +613,7 @@ Global Operator Precedence List:
 
     def process(self, inputstring, info="", command=None, top=None):
         """Performs Top-Level Evaluation."""
-        inputstring = self.remcomment(replaceall(str(inputstring), self.aliases))
+        inputstring = self.remcomment(replaceall(str(inputstring), self.aliases, '"`', {"\u201c":"\u201d"}))
         if top is None:
             top = command is not None
         else:
@@ -725,7 +727,7 @@ Global Operator Precedence List:
                 command += self.wrap(strcalc(item[1], self))
             elif item[0] == "`":
                 command += self.wrap(rawstrcalc(item[1], self))
-        return command.replace("\t", "    ")
+        return command
 
     def top_paren(self, expression):
         """Evaluates The Parenthetical Part Of An Expression."""
@@ -1968,8 +1970,8 @@ Global Operator Precedence List:
                     elif self.laxnull and isnull(out):
                         raise ExecutionError("NoneError", "Nothing does not have methods")
                     else:
-                        new = None
                         if hasattr(out, key):
+                            new = None
                             test = getattr(out, key)
                             if hasnum(test):
                                 new = test
@@ -2003,8 +2005,9 @@ Global Operator Precedence List:
                                                 else:
                                                     raise ValueError("Invalid Rabbit wrapper of "+name)
                             if new is None:
-                                pass # This is where whatever test is should be wrapped regardless in a special full-conversion wrapper
-                        if new is None:
+                                raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
+                                # This is where whatever test is should be wrapped regardless in a special full-conversion wrapper
+                        else:
                             raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                     out = new
                 return out
@@ -3212,3 +3215,25 @@ class evalfuncs(object):
             for arg in variables:
                 out.append(self.globalcall([arg]))
             return diagmatrixlist(out)
+
+    def aliascall(self, variables):
+        """Makes Aliases."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to alias")
+        elif len(variables) == 1:
+            key = self.e.prepare(variables[0], True, False)
+            self.e.setreturned()
+            if key in self.e.aliases:
+                out = rawstrcalc(self.e.aliases[key], self.e)
+                del self.e.aliases[key]
+            else:
+                out = matrix(0)
+            return out
+        elif len(variables) == 2:
+            key = self.e.prepare(variables[0], True, False)
+            value = self.e.prepare(variables[1], True, False)
+            self.e.setreturned()
+            self.e.aliases[key] = value
+            return diagmatrixlist([rawstrcalc(key, self.e), rawstrcalc(value, self.e)])
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to alias")
