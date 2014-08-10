@@ -648,20 +648,16 @@ Global Operator Precedence List:
             original = func+" :: "+strlist(args, " :: ")
             self.printdebug("::> "+original)
             self.recursion += 1
-            params = []
-            for x in xrange(0, len(args)):
-                arg = basicformat(args[x])
-                if x != len(args)-1 or arg:
-                    params.append(codestr(arg, self))
             if func:
                 item = self.funcfind(func)
+                params = []
+                for x in xrange(0, len(args)):
+                    arg = basicformat(args[x])
+                    if x != len(args)-1 or arg:
+                        params.append(codestr(arg, self))
                 out = self.call_colon_set(item, params)
-            elif len(params) == 0:
-                out = codestr("", self)
-            elif len(params) == 1:
-                out = params[0]
             else:
-                out = diagmatrixlist(params)
+                out = codestr(strlist(args, "::"), self)
             self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
             self.recursion -= 1
         if top:
@@ -1188,6 +1184,8 @@ Global Operator Precedence List:
                 else:
                     lists.append((self.eval_lambda(complist[x]), argnum))
                     argnum = 1
+            if argnum > 1:
+                lists.append((matrix(0), argnum))
             return self.eval_loop_set(lists, [], item)
 
     def eval_loop_set(self, lists, args, func):
@@ -1749,9 +1747,9 @@ Global Operator Precedence List:
                     if len(err) > 3:
                         for k,v in err[3].items():
                             out.store(k, v)
-                    return rowmatrixlist([0.0, out])
+                    return rowmatrixlist([matrix(0), out])
                 else:
-                    return rowmatrixlist([result, 0.0])
+                    return rowmatrixlist([result, matrix(0)])
 
     def call_colon_set(self, item, params):
         """Performs Colon Function Calls."""
@@ -1965,16 +1963,18 @@ Global Operator Precedence List:
                 out = itemlist[0]
                 for x in xrange(1, len(itemlist)):
                     key = itemlist[x]
-                    new = None
                     if hasattr(out, "getmethod"):
                         new = out.getmethod(key)
-                    if new is None and hasattr(out, "__dict__") and (not self.laxnull or not isnull(out)):
-                        test = vars(out)
-                        if key in test:
-                            if hasnum(test[key]):
-                                new = test[key]
-                            elif hasattr(test[key], "__doc__"):
-                                docstring = basicformat(test[key].__doc__)
+                    elif self.laxnull and isnull(out):
+                        raise ExecutionError("NoneError", "Nothing does not have methods")
+                    else:
+                        new = None
+                        if hasattr(out, key):
+                            test = getattr(out, key)
+                            if hasnum(test):
+                                new = test
+                            elif hasattr(test, "__doc__"):
+                                docstring = basicformat(test.__doc__)
                                 if docstring.startswith("[|") and "|]" in docstring:
                                     rabstring = superformat(docstring[2:].split("|]")[0])
                                     if ":" in rabstring:
@@ -1990,22 +1990,23 @@ Global Operator Precedence List:
                                                 else:
                                                     args, kwargs = [], {}
                                                 if name == "usefunc":
-                                                    new = usefunc(test[key], self, *args, **kwargs)
+                                                    new = usefunc(test, self, *args, **kwargs)
                                                 elif name == "funcfloat":
                                                     args, kwargs = rabargs
-                                                    new = funcfloat(test[key], self, *args, **kwargs)
+                                                    new = funcfloat(test, self, *args, **kwargs)
                                                 elif name == "unifunc":
                                                     args, kwargs = rabargs
-                                                    new = unifunc(test[key], self, *args, **kwargs)
+                                                    new = unifunc(test, self, *args, **kwargs)
                                                 elif name == "makefunc":
                                                     args, kwargs = rabargs
-                                                    new = makefunc(test[key], self, *args, **kwargs)
+                                                    new = makefunc(test, self, *args, **kwargs)
                                                 else:
                                                     raise ValueError("Invalid Rabbit wrapper of "+name)
-                    if new is None:
-                        raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
-                    else:
-                        out = new
+                            if new is None:
+                                pass # This is where whatever test is should be wrapped regardless in a special full-conversion wrapper
+                        if new is None:
+                            raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
+                    out = new
                 return out
 
     def call_normal(self, inputstring):

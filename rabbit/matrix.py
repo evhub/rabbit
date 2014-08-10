@@ -702,7 +702,7 @@ def diagmatrixlist(inputlist, converter=float, func=None, fake=True, clean=True)
             out.store(x,x, inputlist[x])
     return out
 
-def rowmatrixlist(inputlist, converter=float, func=None, fake=False, clean=True):
+def rowmatrixlist(inputlist, converter=float, func=None, fake=False, clean=False):
     """Constructs A Row Matrix From A List."""
     if func is None:
         func = rowmatrixlist
