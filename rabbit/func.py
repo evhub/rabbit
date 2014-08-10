@@ -255,9 +255,7 @@ class funcfloat(numobject):
 
     def __eq__(self, other):
         """Performs ==."""
-        if isinstance(other, strfunc):
-            return other == self
-        elif isinstance(other, funcfloat):
+        if isinstance(other, funcfloat) and not isinstance(other, strfunc):
             return self.base_func == other.base_func and self.reqargs == other.reqargs
         else:
             return False
@@ -473,9 +471,7 @@ class strfunc(funcfloat):
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, strfunc):
-            return self.funcstr == other.funcstr and self.variables == other.variables and self.personals == other.personals and self.overflow == other.overflow and self.reqargs == other.reqargs
-        elif isinstance(other, funcfloat):
-            return self.funcstr == other.funcstr
+            return self.funcstr == other.funcstr and self.variables == other.variables and self.personals == other.personals and self.overflow == other.overflow and self.reqargs == other.reqargs and self.allargs == other.allargs and self.method == other.method
         else:
             return False
 
