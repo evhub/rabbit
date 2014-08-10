@@ -435,7 +435,10 @@ Global Operator Precedence List:
         elif item is None:
             out = "none"
         elif isinstance(item, bool):
-            out = self.prepare(float(item), False, bottom, indebug, maxrecursion)
+            if item:
+                out = "true"
+            else:
+                out = "false"
         elif isnum(item):
             out = repr(item)
             if "e" in out:

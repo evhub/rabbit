@@ -53,12 +53,12 @@ old_float = float
 def float(x, **kwargs):
     """Converts To The Proper Number Object."""
     if isinstance(x, (int, long)):
-        return x
+        return int(x)
     elif isinstance(x, old_float):
         if int(x) == x:
             return int(x)
         else:
-            return x
+            return old_float(x)
     else:
         test_float = old_float(x)
         try:
