@@ -27,6 +27,11 @@ try:
 except NameError:
     xrange = range
 
+try:
+    long
+except NameError:
+    long = int
+
 encoding = "UTF"
 
 try:
