@@ -22,7 +22,7 @@ from .file import *
 try:
     import tkMessageBox
 except ImportError:
-    tkMessageBox = Tkinter.messagebox
+    import messagebox as tkMessageBox
 try:
     import tkSimpleDialog
 except ImportError:
