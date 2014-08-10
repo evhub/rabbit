@@ -56,13 +56,14 @@ def isqrt(inputnum):
 
 def isprime(checknumber):
     """Determines If A Number Is Prime."""
+    checknumber = int(checknumber)
     isprime = 0
     if checknumber % 2 == 0:
         if checknumber != 2:
             return False
     else:
         x = 3
-        while x <= int(math.sqrt(float(checknumber))):
+        while x <= int(math.sqrt(checknumber)):
             if checknumber % x == 0:
                 return False
             x += 2
@@ -129,11 +130,11 @@ def iroots(a, b, c):
 
 def perm(n, k):
     """Determines The Possible Number Of Permutations In n Choose k."""
-    return float(factorial(n))/float(factorial(n-k))
+    return factorial(n)/factorial(n-k)
 
 def comb(n, k):
     """Determines The Possible Number Of Combinations In n Choose k."""
-    return perm(n,k)/float(factorial(k))
+    return perm(n,k)/factorial(k)
 
 def deriv(func, x, n=1, accuracy=0.0001, scaledown=1.25):
     """Finds The nth Derivative Of A Function At x."""
@@ -141,13 +142,10 @@ def deriv(func, x, n=1, accuracy=0.0001, scaledown=1.25):
     if n <= 0:
         return func(x)
     else:
-        accuracy = float(accuracy)
-        scaledown = float(scaledown)
         return (deriv(func, x+accuracy, n-1, accuracy/scaledown, scaledown) - deriv(func, x, n-1, accuracy/scaledown, scaledown))/accuracy
 
 def defint(func, start, stop, accuracy=0.0001, strict=False):
     """Finds The Definite Integral Of A Function From start To stop."""
-    accuracy = float(accuracy)
     if strict:
         step = accuracy
         endpoint = int((stop-start)/accuracy)+1
@@ -208,7 +206,6 @@ def factorial(x):
 
 def gamma(n, accuracy=0.00000001, stop=None):
     """Implements The Gamma Function Over The Positive Numbers."""
-    accuracy = float(accuracy)
     if stop is None:
         stop = -n*math.log(accuracy**(1.0/n)/n)/math.log(2.0)
     return defint(lambda x: x**(n-1.0)*math.e**(-1.0*x), 0.0, stop)

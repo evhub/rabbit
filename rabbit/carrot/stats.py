@@ -26,9 +26,6 @@ from .math import *
 
 def updateP(priorP, Pe_h, Pe_nh):
     """Performs Bayes's Theorem."""
-    priorP = float(priorP)
-    Pe_h = float(Pe_h)
-    Pe_nh = float(Pe_nh)
     return priorP*Pe_h / (priorP*Pe_h + Pe_nh*(1-priorP))
 
 def priorP(bits=1.0, total=1.0):

@@ -49,6 +49,19 @@ else:
 old_print = print
 print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
 
+old_float = float
+def float(*args, **kwargs):
+    """Converts To The Proper Number Object."""
+    try:
+        test = int(*args, **kwargs)
+    except:
+        return old_float(*args, **kwargs)
+    else:
+        if test == x:
+            return test
+        else:
+            return old_float(*args, **kwargs)
+
 def tostr(obj):
     """Converts An Object Into A String."""
     return str(obj, encoding=encoding)
@@ -107,7 +120,7 @@ def hasreal(value):
 
 def isnum(inputobject):
     """Determines If An Object Is A Number."""
-    return isinstance(inputobject, (float, int, long, complex))
+    return isinstance(inputobject, (old_float, int, long, complex))
 
 def iseq(a, b):
     """Determines Whether Two Objects Are Really Equal."""
