@@ -16,5 +16,5 @@
 # DATA AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-from __future__ import with_statement, absolute_import, print_function, unicode_literals
+from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 from rabbit.all import *
