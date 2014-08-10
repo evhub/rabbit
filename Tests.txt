@@ -275,6 +275,19 @@ passert:: z ?= 3
   )
  $ x = 0
  $ if (cond) = proc @ cond
+passert:: abs'(2) ?= 2 & abs'(0) ?= 0 & abs'(-2) ?= 2
+ $ abs'(x) = if (x<0) (\-x) elif (x?0) (\0) else (x)
+ $ if(cond, expr) =
+    [1, expr()]@cond; [0]
+ $ elif(cond, parts, expr) = (
+    [1, out]@done; [1, expr()]@cond; [0]
+    $ done, out = list:parts
+    )
+ $ else(expr, parts) = (
+    out@done;expr()
+    $ done, out = list:parts
+    )
+passert:: ( try:: 1/0 ).name ?= "ZeroDivisionError"
 
 # Built-Ins Tests:
 passert:: a != b                    $ (def :: b.x = 2) $ b := copy(a) $ a := { x = 1 }
