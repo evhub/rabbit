@@ -447,8 +447,7 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
             if x == hold:
                 hold = False
         elif found:
-            for k in found.keys():
-                v,i,ex = found[k]
+            for k,(v,i,ex) in found.items():
                 if ex is None:
                     found[k] = (v+x, i, None)
                 elif x == k[v]:
@@ -457,7 +456,7 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
                     else:
                         found[k] = (v+1, i+1, ex)
                 else:
-                    found[k] = (ex+k[:v]+x, i, None)
+                    found[k] = (ex+k[:v]+x, 0, None)
             if istext(v):
                 last = v
             else:
