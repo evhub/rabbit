@@ -275,6 +275,7 @@ Global Operator Precedence List:
                 }),
             "i":complex(0.0, 1.0),
             "none":matrix(0),
+            "empty":rowmatrixlist([matrix(0)]),
             "true":1.0,
             "false":0.0,
             "_":atom(),
@@ -1355,10 +1356,7 @@ Global Operator Precedence List:
                         domatrix += 1
                         if rowlen == 2:
                             domultidata += 1
-                    if len(x) == 1:
-                        dolist += 1
-                        dobrack += 1
-                    elif x.onlydiag():
+                    if x.onlydiag():
                         dolist += 1
                     elif x.onlyrow():
                         dobrack += 1

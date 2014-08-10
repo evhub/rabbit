@@ -451,6 +451,7 @@ passert:: x ?= "don't touch me"
 passert:: { global:: (def:: x = 3) ;; x = 2 }.x ?= 2 & x ?= 3
 passert:: (:: 1 :: 2) ?= " 1 :: 2"
 passert:: "'"*0 ?= ""
+passert:: [1]++[1] ?= [1]**2
 
 # Final Testing:
 passert:: save("Tests.save.txt");true
