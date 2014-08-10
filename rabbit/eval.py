@@ -1009,7 +1009,7 @@ Global Operator Precedence List:
             else:
                 sides[0] = sides[0].split(self.parenchar, 1)
                 sides[0][1] = self.namefind(self.parenchar+sides[0][1])
-            params, personals, allargs, reqargs = self.eval_set(self.e.outersplit(sides[0][1], ","))
+            params, personals, allargs, reqargs = self.eval_set(self.outersplit(sides[0][1], ","))
             return (sides[0][0], strfunc(sides[1], self, params, personals, allargs=allargs, reqargs=reqargs))
 
     def set_normal(self, sides):
@@ -1258,7 +1258,7 @@ Global Operator Precedence List:
             elif out[0] == "":
                 return strfloat(out[1], self, check=False)
             else:
-                params, personals, allargs, reqargs = self.eval_set(self.e.outersplit(self.namefind(out[0]), ","))
+                params, personals, allargs, reqargs = self.eval_set(self.outersplit(self.namefind(out[0]), ","))
                 if out[1].startswith("\\"):
                     return strfloat(out[1][1:], self, params, personals, check=False, allargs=allargs, reqargs=reqargs)
                 else:
@@ -1951,7 +1951,7 @@ Global Operator Precedence List:
         """Evaluates Lambda Coefficients."""
         parts = inputstring.split("\\", 1)
         if len(parts) > 1:
-            return self.eval_call(strlist(parts, self.parenchar*2+"\\"))
+            return self.eval_call(parts[0]+self.wrap(self.eval_lambda(["\\"+parts[1]])))
 
     def call_method(self, inputstring):
         """Returns Method Instances."""
