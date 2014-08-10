@@ -98,11 +98,11 @@ class fraction(numobject):
         if nf == "":
             self.n = int(ni)
         else:
-            self.n = float(ni+nf)
+            self.n = float(ni+"."+nf)
         if df == "":
             self.d = int(di)
         else:
-            self.d = float(di+df)
+            self.d = float(di+"."+df)
 
     def collapse(self):
         """Performs The Division."""
@@ -118,7 +118,7 @@ class fraction(numobject):
 
     def __repr__(self):
         """Retrieves A String."""
-        return str(self.n)+"/"+str(self.d)
+        return "("+str(self.n)+")/("+str(self.d)+")"
 
     def __idiv__(self, other):
         """Performs Division In-Place."""
@@ -228,26 +228,30 @@ def fractionstr(inputstr, converter=float):
 
 def fractionfloat(inputfloat, replen=16):
     """Converts A Float Into A Fraction."""
-    replen = int(replen)
-    intpart, floatpart = repr(float(inputfloat)).split(".", 1)
-    if intpart.startswith("-"):
-        intpart = intpart[1:]
-        sign = -1
+    inputfloat = float(inputfloat)
+    if isinstance(inputfloat, old_float):
+        replen = int(replen)
+        intpart, floatpart = repr(inputfloat).split(".", 1)
+        if intpart.startswith("-"):
+            intpart = intpart[1:]
+            sign = -1
+        else:
+            sign = 1
+        if "e" in floatpart:
+            floatpart, exppart = floatpart.split("e", 1)
+            exppart = exppart
+        else:
+            exppart = 0
+        out = fraction(int(intpart))
+        if len(floatpart) >= replen-len(intpart):
+            floatstart, floatrep = repeating(floatpart[:-1])
+            if floatstart != "":
+                out += fraction(int(floatstart), 10**len(floatstart))
+            if floatrep != "":
+                out += fraction(int(floatrep), 10**len(floatstart)*(10**len(floatrep)-1))
+        else:
+            out += fraction(int(floatpart), 10**len(floatpart))
+        out *= sign*10**int(exppart)
+        return out
     else:
-        sign = 1
-    if "e" in floatpart:
-        floatpart, exppart = floatpart.split("e", 1)
-        exppart = exppart
-    else:
-        exppart = 0
-    out = fraction(int(intpart))
-    if len(floatpart) >= replen-len(intpart):
-        floatstart, floatrep = repeating(floatpart[:-1])
-        if floatstart != "":
-            out += fraction(int(floatstart), 10**len(floatstart))
-        if floatrep != "":
-            out += fraction(int(floatrep), 10**len(floatstart)*(10**len(floatrep)-1))
-    else:
-        out += fraction(int(floatpart), 10**len(floatpart))
-    out *= sign*10**int(exppart)
-    return out
+        return fraction(inputfloat)

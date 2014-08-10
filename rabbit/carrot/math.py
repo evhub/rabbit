@@ -56,7 +56,6 @@ def isqrt(inputnum):
 
 def isprime(checknumber):
     """Determines If A Number Is Prime."""
-    checknumber = int(checknumber)
     isprime = 0
     if checknumber % 2 == 0:
         if checknumber != 2:
@@ -71,7 +70,6 @@ def isprime(checknumber):
 
 def factor(checknumber):
     """Determines The Factors Of A Number."""
-    checknumber = int(checknumber)
     if checknumber < 0:
         checknumber *= -1
         factorlist = [-1]
@@ -89,7 +87,6 @@ def factor(checknumber):
 
 def primefactor(checknumber):
     """Determines The Prime Factors Of A Number."""
-    checknumber = int(checknumber)
     if checknumber < 0:
         checknumber *= -1
         extra = [-1]

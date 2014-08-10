@@ -52,15 +52,24 @@ print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
 old_float = float
 def float(x, **kwargs):
     """Converts To The Proper Number Object."""
-    try:
-        test = int(x, **kwargs)
-    except:
-        return old_float(x, **kwargs)
-    else:
-        if test == x:
-            return test
+    if isinstance(x, (int, long)):
+        return x
+    elif isinstance(x, old_float):
+        if int(x) == x:
+            return int(x)
         else:
-            return old_float(x, **kwargs)
+            return x
+    else:
+        test_float = old_float(x)
+        try:
+            test_int = old_int(x)
+        except:
+            return test_float
+        else:
+            if int(test_float) == test_float:
+                return test_int
+            else:
+                return test_float
 
 def tostr(obj):
     """Converts An Object Into A String."""
