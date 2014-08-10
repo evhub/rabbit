@@ -1126,7 +1126,9 @@ Global Operator Precedence List:
                             hasne = True
                         elif c == "!":
                             inv = not inv
-                    if haseq and ((hasgt and haslt) or hasne):
+                    if haseq and hasne:
+                        out = args[0] != args[1] or args[0] == args[1]
+                    elif haseq and hasgt and haslt:
                         out = args[0] >= args[1] or args[0] <= args[1]
                     elif (hasgt and haslt) or hasne:
                         out = args[0] != args[1]
