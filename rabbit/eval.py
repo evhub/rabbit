@@ -740,8 +740,9 @@ Global Operator Precedence List:
                 command += x
             elif len(x) <= 1:
                 if len(x) < 1:
-                    x.append("")
-                command += self.wrap(x[0])
+                    command += self.wrap("")
+                else:
+                    command += self.wrap(x[0])
             else:
                 raise SyntaxError("Error in evaluating parentheses len("+repr(x)+")>1")
         return command
@@ -762,7 +763,7 @@ Global Operator Precedence List:
                 for line in original.splitlines():
                     if not iswhite(line):
                         lines.append(line)
-                out = classcalc(self)
+                cmds = []
                 last = ""
                 for x in xrange(0, len(lines)):
                     if x == 0:
@@ -773,13 +774,18 @@ Global Operator Precedence List:
                         if check > num:
                             last += "\n"+lines[x]
                         elif check == num:
-                            out.process(last)
+                            cmds.append(last)
                             last = lines[x]
                         else:
                             raise ExecutionError("IndentationError", "Unexpected dedent in line "+lines[x])
                 if last:
-                    out.process(last)
-                command += self.wrap(out)
+                    cmds.append(last)
+                def _class():
+                    out = classcalc(self)
+                    for cmd in cmds:
+                        out.process(cmd)
+                    return out
+                command += self.wrap(_class)
             else:
                 raise SyntaxError("Error in evaluating curly braces len("+repr(x)+")>1")
         return command
@@ -793,13 +799,17 @@ Global Operator Precedence List:
                 command += x
             elif len(x) <= 1:
                 if len(x) < 1:
-                    x.append("")
-                out = self.calc(x[0])
-                if isinstance(out, matrix) and out.onlydiag():
-                    out = out.getdiag()
+                    original = ""
                 else:
-                    out = [out]
-                command += self.wrap(rowmatrixlist(out))
+                    original = x[0]
+                def _row():
+                    out = self.calc(original)
+                    if isinstance(out, matrix) and out.onlydiag():
+                        out = out.getdiag()
+                    else:
+                        out = [out]
+                    return rowmatrixlist(out)
+                command += self.wrap(_row)
             else:
                 raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
         return command
@@ -2001,6 +2011,14 @@ Global Operator Precedence List:
         """Returns Argument."""
         return inputstring
 
+    def getparen(self, num):
+        """Gets A Parenthesis."""
+        test = self.parens[num]
+        if typestr(test) == "function":
+            return test()
+        else:
+            return test
+
     def namefind(self, varname, follow=False):
         """Finds A Name."""
         while varname.startswith(self.parenchar) and varname.endswith(self.parenchar):
@@ -2016,9 +2034,9 @@ Global Operator Precedence List:
             if num < 0 or num >= len(self.parens):
                 raise ExecutionError("VariableError", "Could not find parentheses "+self.parenchar+str(num)+self.parenchar)
             elif istext(self.parens[num]):
-                varname = self.parens[num]
+                varname = self.getparen(num)
             elif follow:
-                return self.parens[num]
+                return self.getparen(num)
             else:
                 break
         return varname
@@ -2437,8 +2455,8 @@ class evalfuncs(object):
             self.e.overflow = variables
         out = []
         self.e.setreturned()
-        for paren in self.e.parens:
-            out.append(rawstrcalc(self.e.prepare(paren, True, True), self.e))
+        for x in xrange(0, len(self.e.parens)):
+            out.append(rawstrcalc(self.e.prepare(self.e.getparen(x), True, True), self.e))
         return diagmatrixlist(out)
 
     def getparenvarcall(self, variables):
@@ -2451,7 +2469,7 @@ class evalfuncs(object):
                 original += len(self.e.parens)
             self.e.setreturned()
             if 0 < original and original < self.e.parens:
-                return rawstrcalc(self.e.prepare(self.e.parens[original], True, True), self.e)
+                return rawstrcalc(self.e.prepare(self.e.getparen(original), True, True), self.e)
             else:
                 return matrix(0)
         else:
