@@ -50,17 +50,17 @@ old_print = print
 print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
 
 old_float = float
-def float(*args, **kwargs):
+def float(x, **kwargs):
     """Converts To The Proper Number Object."""
     try:
-        test = int(*args, **kwargs)
+        test = int(x, **kwargs)
     except:
-        return old_float(*args, **kwargs)
+        return old_float(x, **kwargs)
     else:
         if test == x:
             return test
         else:
-            return old_float(*args, **kwargs)
+            return old_float(x, **kwargs)
 
 def tostr(obj):
     """Converts An Object Into A String."""
