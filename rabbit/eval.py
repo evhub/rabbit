@@ -780,15 +780,17 @@ Global Operator Precedence List:
                             raise ExecutionError("IndentationError", "Unexpected dedent in line "+lines[x])
                 if last:
                     cmds.append(last)
-                def _class():
-                    out = classcalc(self)
-                    for cmd in cmds:
-                        out.process(cmd)
-                    return out
-                command += self.wrap(_class)
+                command += self.wrap(curry(self.top_class_do, original))
             else:
                 raise SyntaxError("Error in evaluating curly braces len("+repr(x)+")>1")
         return command
+
+    def top_class_do(self, cmds):
+        """Calculates A Class."""
+        out = classcalc(self)
+        for cmd in cmds:
+            out.process(cmd)
+        return out
 
     def top_brack(self, expression):
         """Evaluates The Brackets In An Expression."""
@@ -802,17 +804,19 @@ Global Operator Precedence List:
                     original = ""
                 else:
                     original = x[0]
-                def _row():
-                    out = self.calc(original)
-                    if isinstance(out, matrix) and out.onlydiag():
-                        out = out.getdiag()
-                    else:
-                        out = [out]
-                    return rowmatrixlist(out)
-                command += self.wrap(_row)
+                command += self.wrap(curry(self.top_brack_do, original))
             else:
                 raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
         return command
+
+    def top_brack_do(self, original):
+        """Calculates A Bracket."""
+        out = self.calc(original)
+        if isinstance(out, matrix) and out.onlydiag():
+            out = out.getdiag()
+        else:
+            out = [out]
+        return rowmatrixlist(out)
 
     def calc_pre(self, expression):
         """Performs Pre-Format Evaluation."""
