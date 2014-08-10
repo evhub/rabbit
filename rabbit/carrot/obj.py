@@ -50,37 +50,37 @@ old_print = print
 print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
 
 old_int = int
-def int(x, **kwargs):
+def int(x, *args, **kwargs):
     """Does Proper Integer Conversion."""
     if istext(x) and "." in x:
         while x.endswith("0"):
             x = x[:-1]
         if x.endswith("."):
             x = x[:-1]
-    return old_int(x, **kwargs)
+    return old_int(x, *args, **kwargs)
 
 old_float = float
-def float(x, **kwargs):
+def float(x, *args, **kwargs):
     """Converts To The Proper Number Object."""
     if isinstance(x, (old_int, long)):
-        return int(x, **kwargs)
+        return int(x, *args, **kwargs)
     elif isinstance(x, old_float):
         if int(x) == x:
-            return int(x, **kwargs)
+            return int(x, *args, **kwargs)
         else:
-            return old_float(x, **kwargs)
+            return old_float(x, *args, **kwargs)
     elif hasattr(x, "getfloat"):
-        return x.getfloat(**kwargs)
+        return x.getfloat(*args, **kwargs)
     else:
-        test_float = old_float(x, **kwargs)
+        test_float = old_float(x, *args, **kwargs)
         try:
-            test_float_int = int(test_float, **kwargs)
+            test_float_int = int(test_float, *args, **kwargs)
         except:
             return test_float
         else:
             if test_float_int == test_float:
                 try:
-                    test_int = int(x, **kwargs)
+                    test_int = int(x, *args, **kwargs)
                 except:
                     return test_float
                 else:
