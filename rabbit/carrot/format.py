@@ -441,9 +441,7 @@ def eithersplit(inputstring, holdstrings, closers={}):
 
 def replaceall(inputstring, replaces={}):
     """Replaces All replaces In A String."""
-    def _replace(x):
-        if x in replaces:
-            return replaces[x]
-        else:
-            return x
-    return strlist(inputstring, "", _replace)
+    out = str(inputstring)
+    for a,b in replaces.items():
+        out = out.replace(a,b)
+    return out
