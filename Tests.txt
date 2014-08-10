@@ -449,6 +449,7 @@ passert:: 5mod3 ?= 2    $ mod(base,x) = x%base
 passert:: x             $ 1 ?= (x=1 ;; x)
 passert:: x ?= "don't touch me"
 passert:: { global:: (def:: x = 3) ;; x = 2 }.x ?= 2 & x ?= 3
+passert:: (:: 1 :: 2) ?= " 1 :: 2"
 
 # Final Testing:
 passert:: save("Tests.save.txt");true
