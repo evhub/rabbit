@@ -2451,14 +2451,11 @@ class evalfuncs(object):
             return diagmatrixlist(out)
 
     def getparenscall(self, variables):
-        """Retreives A List Of Parentheses."""
+        """Retreives The Number Of Parentheses."""
         if variables:
             self.e.overflow = variables
-        out = []
         self.e.setreturned()
-        for x in xrange(0, len(self.e.parens)):
-            out.append(rawstrcalc(self.e.prepare(self.e.getparen(x), True, True), self.e))
-        return diagmatrixlist(out)
+        return float(len(self.e.parens))
 
     def getparenvarcall(self, variables):
         """Gets The Value Of A Paren."""

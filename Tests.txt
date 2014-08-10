@@ -425,7 +425,7 @@ passert:: {} ?= a               $ a + { x = 1 } $ a := {}
 passert:: 1 ?= a                $ ( a = 1 )
 passert:: f(5) ?= f(5)          $ f(x) = x+1
 passert:: "a"**3 ?= "a","a","a"
-passert:: (5\5): ?= 25
+passert:: 6 ?= 5\x\x+1
 passert:: 2π ?= 2*pi
 passert:: is("abc", `abc`)
 passert:: ( del::x )    $ x = 1
@@ -440,6 +440,6 @@ passert:: { global:: (def:: x = 3) ;; x = 2 }.x ?= 2 & x ?= 3
 passert:: save("Tests.save.txt");true
 passert:: contents ?= read("Tests.save.txt")      $ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
 passert:: { run :: Tests.save.txt }
-passert:: paren() ?= parens():-1    $ (123456)
+passert:: paren(parens()) ?= "123"                $ (123)
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
 passert:: printdone() ?= printdone()              $ printdone() = print("    Message sent.")
