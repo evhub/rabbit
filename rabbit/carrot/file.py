@@ -22,7 +22,10 @@ from .format import *
 from .sys import *
 import codecs
 import zipfile
-import Tkinter
+try:
+    import Tkinter
+except ImportError:
+    import tkinter as Tkinter
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
