@@ -22,11 +22,11 @@ from .file import *
 try:
     import tkMessageBox
 except ImportError:
-    import messagebox as tkMessageBox
+    import tkinter.messagebox as tkMessageBox
 try:
     import tkSimpleDialog
 except ImportError:
-    tkSimpleDialog = Tkinter.simpledialog
+    import tkinter.simpledialog as tkSimpleDialog
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)

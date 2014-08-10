@@ -19,7 +19,10 @@
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
 from .cli import *
-import cPickle
+try:
+    import cPickle
+except ImportError:
+    import pickle as cPickle
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
