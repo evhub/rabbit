@@ -89,9 +89,9 @@ class grapher(mathbase):
         """Converts From Mathematical To Canvas Coordinates."""
         x = float(x)
         y = float(y)
-        top, side = self.width/self.xsize, self.height/self.ysize
-        xpoint = int((x+self.xup)/self.xstretch)
-        ypoint = side - int((y+self.yup)/self.ystretch)
+        top, side = self.width//self.xsize, self.height//self.ysize
+        xpoint = (x+self.xup)//self.xstretch
+        ypoint = side - (y+self.yup)//self.ystretch
         if 0 <= xpoint and xpoint <= top and ypoint <= side and ypoint >= 0:
             xpoint *= self.xsize
             ypoint *= self.ysize
@@ -134,7 +134,7 @@ class grapher(mathbase):
         """Renders A Function."""
         testx = -1.0*self.xup
         self.e.setreturned(False)
-        for x in xrange(0, self.width/self.xsize+1):
+        for x in xrange(0, self.width//self.xsize+1):
             testy = self.saferun(function, testx)
             if self.e.returned:
                 break
@@ -147,7 +147,7 @@ class grapher(mathbase):
         """Renders The Inverse Of A Function."""
         testy = -1.0*self.yup
         self.e.setreturned(False)
-        for y in xrange(0, self.height/self.ysize+1):
+        for y in xrange(0, self.height//self.ysize+1):
             testx = self.saferun(function, testy)
             if self.e.returned:
                 break
@@ -171,7 +171,7 @@ class grapher(mathbase):
             points = self.points()
             while points != []:
                 a,b = points.pop()
-                if ypoint+b <= self.height/self.ysize and ypoint+b >= 0 and 0 <= xpoint+a and xpoint+a <= self.width/self.xsize:
+                if ypoint+b <= self.height//self.ysize and ypoint+b >= 0 and 0 <= xpoint+a and xpoint+a <= self.width//self.xsize:
                     self.dorender(xpoint+a, ypoint+b)
 
     def atswaprender(self, y, function):
@@ -192,14 +192,14 @@ class grapher(mathbase):
             points = self.points()
             while points != []:
                 a,b = points.pop()
-                if ypoint+b <= self.height/self.ysize and ypoint+b >= 0 and 0 <= xpoint+a and xpoint+a <= self.width/self.xsize:
+                if ypoint+b <= self.height//self.ysize and ypoint+b >= 0 and 0 <= xpoint+a and xpoint+a <= self.width//self.xsize:
                     self.dorender(xpoint+a, ypoint+b, True)
 
     def intersectrender(self, f, g):
         """Renders The Intersection Of Two Functions."""
         testx = -1.0*self.xup
         self.e.setreturned(False)
-        for x in xrange(0, self.width/self.xsize+1):
+        for x in xrange(0, self.width//self.xsize+1):
             fy = self.saferun(f, testx)
             fnew = self.convert(testx, fy)
             gy = self.saferun(g, testx)
@@ -225,7 +225,7 @@ class grapher(mathbase):
 
     def gridrender(self):
         """Renders The Grid."""
-        xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
+        xgrid, ygrid = self.xsize//self.xstretch, self.ysize//self.ystretch
         test = 0
         for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch)):
             test += xgrid
@@ -240,7 +240,7 @@ class grapher(mathbase):
 
     def tickrender(self):
         """Renders Axis Ticks."""
-        xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
+        xgrid, ygrid = self.xsize//self.xstretch, self.ysize//self.ystretch
         xstart, ystart = self.xup*xgrid, self.height-(self.yup*ygrid)
         test = 0
         for x in xrange(0, int(float(self.width+xgrid-1)/float(xgrid+1)+(self.width/2.0)*self.xstretch)):
@@ -256,7 +256,7 @@ class grapher(mathbase):
 
     def axisrender(self):
         """Renders The Axis."""
-        xgrid, ygrid = self.xsize/self.xstretch, self.ysize/self.ystretch
+        xgrid, ygrid = self.xsize//self.xstretch, self.ysize//self.ystretch
         xstart, ystart = self.xup*xgrid, self.height-(self.yup*ygrid)
         for x in xrange(0, self.width+1):
             self.dorender(x, ystart, True)

@@ -1201,7 +1201,7 @@ Global Operator Precedence List:
             value = getmatrix(value)
             units = value.getitems()
             new = []
-            for x in xrange(0, len(units)/argnum):
+            for x in xrange(0, len(units)//argnum):
                 for y in xrange(0, argnum):
                     args.append(units[argnum*x+y])
                 if len(lists) == 0:
