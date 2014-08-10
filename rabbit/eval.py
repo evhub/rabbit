@@ -780,7 +780,7 @@ Global Operator Precedence List:
                             raise ExecutionError("IndentationError", "Unexpected dedent in line "+lines[x])
                 if last:
                     cmds.append(last)
-                command += self.wrap(curry(self.top_class_do, original))
+                command += self.wrap(curry(self.top_class_do, cmds))
             else:
                 raise SyntaxError("Error in evaluating curly braces len("+repr(x)+")>1")
         return command
