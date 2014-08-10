@@ -61,15 +61,20 @@ def float(x, **kwargs):
             return old_float(x)
     else:
         test_float = old_float(x)
-        if int(test_float) == test_float:
-            try:
-                test_int = int(x)
-            except:
-                return test_float
-            else:
-                return test_int
-        else:
+        try:
+            test_float_int = int(test_float)
+        except:
             return test_float
+        else:
+            if test_float_int == test_float:
+                try:
+                    test_int = int(x)
+                except:
+                    return test_float
+                else:
+                    return test_int
+            else:
+                return test_float
 
 def tostr(obj):
     """Converts An Object Into A String."""
