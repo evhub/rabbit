@@ -1924,7 +1924,7 @@ Global Operator Precedence List:
                     if x+1 < len(arglist):
                         arg = self.call_paren_do(arg, [arglist.pop(x+1)])
                     item = self.call_paren_do(arg, [item])
-                else:
+                elif not isnull(arg):
                     item = item * arg
             elif isinstance(arg, matrix) and arg.onlydiag():
                 args = arg.getdiag()

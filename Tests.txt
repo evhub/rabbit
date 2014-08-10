@@ -279,7 +279,7 @@ passert:: abs'(2) ?= 2 & abs'(0) ?= 0 & abs'(-2) ?= 2
  $ abs'(x) = if (x<0) (\-x) elif (x?0) (\0) else (x)
  $ if(cond, expr) =
     [1, expr()]@cond; [0]
- $ elif(cond, parts, expr) = (
+ $ elif(cond, expr, parts) = (
     [1, out]@done; [1, expr()]@cond; [0]
     $ done, out = list:parts
     )
@@ -288,6 +288,7 @@ passert:: abs'(2) ?= 2 & abs'(0) ?= 0 & abs'(-2) ?= 2
     $ done, out = list:parts
     )
 passert:: ( try:: 1/0 ).name ?= "ZeroDivisionError"
+ $ try(expr) = :expr()
 
 # Built-Ins Tests:
 passert:: a != b                    $ (def :: b.x = 2) $ b := copy(a) $ a := { x = 1 }
