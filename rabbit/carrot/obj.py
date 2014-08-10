@@ -53,9 +53,11 @@ old_int = int
 def int(x, **kwargs):
     """Does Proper Integer Conversion."""
     if istext(x):
-        while x.endswith("0") or x.endswith("."):
+        while x.endswith("0"):
             x = x[:-1]
-    return int(x)
+        if x.endswith("."):
+            x = x[:-1]
+    return old_int(x)
 
 old_float = float
 def float(x, **kwargs):
@@ -76,7 +78,7 @@ def float(x, **kwargs):
         else:
             if test_float_int == test_float:
                 try:
-                    int(x)
+                    test_int = int(x)
                 except:
                     return test_float
                 else:
