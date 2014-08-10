@@ -440,6 +440,6 @@ passert:: { global:: (def:: x = 3) ;; x = 2 }.x ?= 2 & x ?= 3
 passert:: save("Tests.save.txt");true
 passert:: contents ?= read("Tests.save.txt")      $ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
 passert:: { run :: Tests.save.txt }
-passert:: paren(parens()) ?= "123"                $ (123)
+passert:: paren(parens()-1) ?= "123"              $ (123)
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
 passert:: printdone() ?= printdone()              $ printdone() = print("    Message sent.")
