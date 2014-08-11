@@ -157,7 +157,7 @@ class fakelist(cotobject):
             else:
                 raise IndexError("Fake list could not retrieve invalid index "+repr(x))
 
-    def __getslice__(self, start, stop, step=None):
+    def __getslice__(self, start=None, stop=None, step=None):
         """Gets A Fake Slice."""
         if step is None:
             step = 1
@@ -169,12 +169,18 @@ class fakelist(cotobject):
             self.reverse()
             return self[start:stop:-step]
         else:
-            start = int(start)
+            if start is None:
+                start = 0
+            else:
+                start = int(start)
             if start < 0:
                 start += len(self)
             elif start > len(self):
                 return self.new(0)
-            stop = int(stop)
+            if stop is None:
+                stop = len(self)
+            else:
+                stop = int(stop)
             if stop < 0:
                 stop += len(self)
             elif stop > len(self):
