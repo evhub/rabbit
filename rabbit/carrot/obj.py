@@ -26,11 +26,8 @@ try:
     xrange
 except NameError:
     xrange = range
-
-try:
-    long
-except NameError:
-    long = int
+else:
+    range = xrange
 
 try:
     long
@@ -42,11 +39,10 @@ encoding = "UTF"
 try:
     raw_input
 except NameError:
-    old_input = input
+    raw_input = input
 else:
     old_input = raw_input
-
-raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode(encoding)
+    raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode(encoding)
 
 old_print = print
 try:
@@ -66,7 +62,10 @@ def int(x, *args, **kwargs):
             x = x[:-1]
         if x.endswith("."):
             x = x[:-1]
-    return old_int(x, *args, **kwargs)
+    if hasattr(x, "__int__"):
+        return x.__int__(*args, **kwargs)
+    else:
+        return old_int(x, *args, **kwargs)
 
 old_float = float
 def float(x, *args, **kwargs):
