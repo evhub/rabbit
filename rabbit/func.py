@@ -570,6 +570,10 @@ class strcalc(numobject):
         """Returns A Pickleable Reference Object."""
         return ("strcalc", self.calcstr)
 
+    def __hash__(self):
+        """Returns A Hash Of The String."""
+        return hash(self.calcstr)
+
     def copy(self):
         """Returns A Copy Of The Evaluator String."""
         return rawstrcalc(self.calcstr, self.e)
