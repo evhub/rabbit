@@ -135,7 +135,7 @@ class compiler(commandline):
         self.compiling = True
         self.evalfile(name)
         self.compiling = compiling
-        resultfile = openfile(result, "wt")
+        resultfile = openfile(result, "wb")
         writefile(resultfile, self.assemble())
         resultfile.close()
         return True
@@ -199,12 +199,13 @@ class compiler(commandline):
 
     def assemble(self, protocol=0):
         """Compiles Code."""
-        out = cPickle.dumps({
+        state = {
             "commands": self.commands,
             "makes": self.makes,
             "variables": self.e.getstates(self.e.variables),
             "parens": self.e.liststate(self.e.parens)
-            }, protocol=int(protocol))
+            }
+        out = cPickle.dumps(state, protocol=int(protocol))
         self.fresh()
         return out
 

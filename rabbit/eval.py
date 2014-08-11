@@ -2197,7 +2197,7 @@ Global Operator Precedence List:
 
     def liststate(self, inputlist):
         """Compiles A List."""
-        return map(itemstate, inputlist)
+        return list(map(itemstate, inputlist))
 
     def getstates(self, variables):
         """Compiles Variables."""
