@@ -36,8 +36,8 @@ class random(object):
         if key is None:
             self.key = hashlib.md5(os.urandom(16)).hexdigest()
         else:
-            self.key = old_str(key)
-        self.basestate = hashlib.md5(self.key)
+            self.key = str(key).encode(encoding)
+        self.basestate = hashlib.md5(old_str(self.key))
         self.counter = 0
         self.bitstore = ""
         self.digitstore = ""

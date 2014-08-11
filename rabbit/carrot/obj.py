@@ -62,10 +62,7 @@ def int(x, *args, **kwargs):
             x = x[:-1]
         if x.endswith("."):
             x = x[:-1]
-    if hasattr(x, "__int__"):
-        return x.__int__(*args, **kwargs)
-    else:
-        return old_int(x, *args, **kwargs)
+    return old_int(x, *args, **kwargs)
 
 old_float = float
 def float(x, *args, **kwargs):
