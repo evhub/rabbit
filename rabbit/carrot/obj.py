@@ -48,6 +48,7 @@ else:
 
 raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode(encoding)
 
+old_print = print
 try:
     unicode
 except NameError:
@@ -55,9 +56,7 @@ except NameError:
 else:
     old_str = str
     str = unicode
-
-old_print = print
-print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
+    print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
 
 old_int = int
 def int(x, *args, **kwargs):
