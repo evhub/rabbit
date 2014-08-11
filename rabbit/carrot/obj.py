@@ -137,9 +137,9 @@ def urepr(inputobject):
     """Returns A Pre-Unicode Representation."""
     out = repr(inputobject)
     if istext(inputobject):
-        return out[1:]
-    else:
-        return out
+        while out and out[0] not in "\"'":
+            out = out[1:]
+    return out
 
 def hasreal(value):
     """Tests To See If A Value Is A Number."""

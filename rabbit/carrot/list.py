@@ -144,19 +144,25 @@ class fakelist(cotobject):
 
     def __getitem__(self, x):
         """Gets The Value Of An Index."""
-        x = int(x)
-        if x < 0:
-            x += len(self)
-        if x in self.a:
-            return self.a[x]
-        elif x < len(self):
-            return self.default
+        if isinstance(x, slice):
+            return self.__getslice__(x.start, x.stop, x.step)
         else:
-            raise IndexError("Fake list could not retrieve invalid index "+repr(x))
+            x = int(x)
+            if x < 0:
+                x += len(self)
+            if x in self.a:
+                return self.a[x]
+            elif x < len(self):
+                return self.default
+            else:
+                raise IndexError("Fake list could not retrieve invalid index "+repr(x))
 
-    def __getslice__(self, start, stop, step=1):
+    def __getslice__(self, start, stop, step=None):
         """Gets A Fake Slice."""
-        step = int(step)
+        if step is None:
+            step = 1
+        else:
+            step = int(step)
         if step == 0:
             return self.new(0)
         elif step < 0:
