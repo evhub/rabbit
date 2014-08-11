@@ -709,7 +709,7 @@ Global Operator Precedence List:
 
     def iseq(self, a, b):
         """Determines Whether Two Evaluator Objects Are Really Equal."""
-        return type(a) is type(b) and self.itemstate(a) == self.itemstate(b)
+        return type(a) is type(b) and itemstate(a) == itemstate(b)
 
     def wrap(self, item):
         """Wraps An Item In Parentheses."""
@@ -2197,21 +2197,14 @@ Global Operator Precedence List:
 
     def liststate(self, inputlist):
         """Compiles A List."""
-        return map(self.itemstate, inputlist)
+        return map(itemstate, inputlist)
 
     def getstates(self, variables):
         """Compiles Variables."""
         out = {}
         for k,v in variables.items():
-            out[k] = self.itemstate(v)
+            out[k] = itemstate(v)
         return out
-
-    def itemstate(self, item):
-        """Gets The State Of An Item."""
-        if hasattr(item, "getstate"):
-            return item.getstate()
-        else:
-            return item
 
     def deitem(self, item):
         """Decompiles An Item."""

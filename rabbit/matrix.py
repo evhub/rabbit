@@ -51,13 +51,7 @@ class matrix(mctobject):
         for row in self.a:
             out.append([])
             for item in row:
-                try:
-                    item.getstate
-                except AttributeError:
-                    value = item
-                else:
-                    value = item.getstate()
-                out[-1].append(value)
+                out[-1].append(itemstate(item))
         return ("matrix", out, self.y, self.x, self.converter, self.onlydiag())
 
     def new(self, y=None, x=None, fake=None):

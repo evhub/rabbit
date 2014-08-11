@@ -174,6 +174,13 @@ def always(out):
     """Creates A Function That Always Returns out."""
     return lambda *args, **kwargs: out
 
+def itemstate(item):
+    """Gets The State Of An Item."""
+    if hasattr(item, "getstate"):
+        return item.getstate()
+    else:
+        return item
+
 class memoizer(object):
     """A Memoized Function."""
     def __init__(self, func):

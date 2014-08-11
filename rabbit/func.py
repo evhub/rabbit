@@ -135,9 +135,9 @@ class funcfloat(numobject):
             out = self.e.liststate(args)
         elif isinstance(args, dict):
             item = self.e.getstates(args)
-            out = (item.keys(), item.values())
+            out = (list(item.keys()), list(item.values()))
         else:
-            out = self.e.itemstate(args)
+            out = itemstate(args)
         return self.hashify(out)
 
     def func(self, *args, **kwargs):
@@ -588,7 +588,25 @@ class strcalc(numobject):
 
     def __repr__(self):
         """Retrieves A Representation."""
-        return '"'+repr(self.calcstr)[2:-1].replace("\\'", "'").replace('\\"', '"').replace('"', "\\'")+'"'
+        out = []
+        inside = False
+        special = False
+        for c in repr(self.calcstr):
+            if c == "\\":
+                special = not special
+            elif special:
+                if c not in "\"'":
+                    out.append("\\")
+                out.append(c)
+                special = False
+            elif inside:
+                if c == inside:
+                    inside = False
+                else:
+                    out.append(c)
+            elif c in "\"'":
+                inside = c
+        return '"'+"".join(out).replace('"', "\\'")+'"'
 
     def __str__(self):
         """Retrieves The Evaluator String."""
