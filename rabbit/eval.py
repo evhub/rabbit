@@ -2466,7 +2466,7 @@ class evalfuncs(object):
             if original < 0:
                 original += len(self.e.parens)
             self.e.setreturned()
-            if 0 < original and original < self.e.parens:
+            if 0 < original and original < len(self.e.parens):
                 return rawstrcalc(self.e.prepare(self.e.getparen(original), True, True), self.e)
             else:
                 return matrix(0)
