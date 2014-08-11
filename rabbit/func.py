@@ -137,7 +137,7 @@ class funcfloat(numobject):
         elif istext(args) or isnum(args) or args in [None, False, True]:
             out = args
         else:
-            out = keyhash(itemstate(args))
+            out = self.keyhash(itemstate(args))
         return out
 
     def func(self, *args, **kwargs):
