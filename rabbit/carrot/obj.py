@@ -93,10 +93,6 @@ def float(x, *args, **kwargs):
             else:
                 return test_float
 
-def tostr(obj):
-    """Converts An Object Into A String."""
-    return str(obj, encoding=encoding)
-
 def typestr(obj):
     """Formats The Type Of Something Into A String."""
     return str(type(obj)).split("'")[1]

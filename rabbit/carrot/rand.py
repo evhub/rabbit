@@ -34,13 +34,19 @@ class random(object):
         """Initializes The Random Number Generator."""
         self.debug = bool(debug)
         if key is None:
-            self.key = hashlib.md5(os.urandom(16)).hexdigest()
-        else:
-            self.key = str(key).encode(encoding)
-        self.basestate = hashlib.md5(old_str(self.key))
+            key = hashlib.md5(os.urandom(16)).hexdigest()
+        self.key = self.prepare(key)
+        self.basestate = hashlib.md5(self.key)
         self.counter = 0
         self.bitstore = ""
         self.digitstore = ""
+
+    def prepare(self, key):
+        """Prepares A String For Hashing."""
+        if isinstance(key, old_str):
+            return key
+        else:
+            return str(key).encode(encoding)
 
     def goto(self, position=0):
         """Advances The Random Number Generator To A Position."""
@@ -48,7 +54,7 @@ class random(object):
         if self.counter != position:
             self.counter = position
             self.state = self.basestate.copy()
-            self.state.update(str(self.counter))
+            self.state.update(self.prepare(self.counter))
 
     def advance(self, amount=1):
         """Advances The Random Number Generator."""
