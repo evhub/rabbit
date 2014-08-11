@@ -343,9 +343,16 @@ def flip(inputdict):
         outputdict[y] = x
     return outputdict
 
-def islist(inputobject):
+def islist(inputobject, extras=[type({}.keys()), type({}.values()), type({}.items())]):
     """Determines If An Object Is A List."""
-    return isinstance(inputobject, (list, fakelist))
+    if isinstance(inputobject, (list, fakelist)):
+        return True
+    else:
+        objtype = type(inputobject)
+        for extra in extras:
+            if objtype is extra:
+                return True
+        return False
 
 def callfuncs(funclist, *args):
     """Calls A List Of Functions."""

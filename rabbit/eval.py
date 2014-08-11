@@ -2195,17 +2195,6 @@ Global Operator Precedence List:
             raise TypeError("Cannot convert non-evaluatour result type "+typestr(item))
         return out
 
-    def liststate(self, inputlist):
-        """Compiles A List."""
-        return list(map(itemstate, inputlist))
-
-    def getstates(self, variables):
-        """Compiles Variables."""
-        out = {}
-        for k,v in variables.items():
-            out[k] = itemstate(v)
-        return out
-
     def deitem(self, item):
         """Decompiles An Item."""
         if isinstance(item, tuple):

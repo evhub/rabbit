@@ -120,25 +120,25 @@ class funcfloat(numobject):
         """Returns A Copy Of The Float Function."""
         return funcfloat(self.base_func, self.e, self.funcstr, self.reqargs, self.memoize, self.memo)
 
-    def hashify(self, item):
-        """Recursively Converts Dicts And Lists To Tuples."""
-        if isinstance(item, (tuple, list)):
-            return tuple(map(self.hashify, item))
-        elif isinstance(item, dict):
-            return (tuple(item.keys()), self.hashify(item.values()))
-        else:
-            return item
-
     def keyhash(self, args):
         """Creates An Argument Hash."""
-        if isinstance(args, (tuple, list)):
-            out = self.e.liststate(args)
+        if islist(args) or isinstance(args, tuple):
+            new = []
+            for item in args:
+                new.append(self.keyhash(item))
+            out = tuple(new)
         elif isinstance(args, dict):
-            item = self.e.getstates(args)
-            out = (list(item.keys()), list(item.values()))
+            keys = []
+            values = []
+            for k,v in args.items():
+                keys.append(k)
+                values.append(self.keyhash(v))
+            out = (tuple(keys), tuple(values))
+        elif istext(args) or isnum(args) or args in [None, False, True]:
+            out = args
         else:
-            out = itemstate(args)
-        return self.hashify(out)
+            out = keyhash(itemstate(args))
+        return out
 
     def func(self, *args, **kwargs):
         """Calls The Memoized Function."""
@@ -308,8 +308,8 @@ class strfunc(funcfloat):
         if self.method:
             memo = None
         else:
-            memo = self.e.getstates(self.memo)
-        return ("strfunc", self.funcstr, self.variables, self.e.getstates(self.getpers()), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method)
+            memo = getstates(self.memo)
+        return ("strfunc", self.funcstr, self.variables, getstates(self.getpers()), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method)
 
     def copy(self):
         """Copies The String Function."""
@@ -751,7 +751,7 @@ class usefunc(funcfloat):
         if typestr(self.base_func) == "instancemethod":
             return ("find", self.funcstr)
         else:
-            return ("usefunc", self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, self.e.getstates(self.memo))
+            return ("usefunc", self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, getstates(self.memo))
 
     def copy(self):
         """Copies The Function."""
@@ -841,7 +841,7 @@ class makefunc(funcfloat):
         if typestr(self.base_func) == "instancemethod":
             return ("find", self.funcstr)
         else:
-            return ("makefunc", self.base_func, self.funcstr, self.memoize, self.e.getstates(self.memo))
+            return ("makefunc", self.base_func, self.funcstr, self.memoize, getstates(self.memo))
 
     def copy(self):
         """Copies The Evaluator Function."""
@@ -939,7 +939,7 @@ class derivfunc(derivbase, strfunc):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("derivfunc", self.funcstr, self.n, self.accuracy, self.scaledown, self.varname, self.personals, self.name, self.memoize, self.e.getstates(self.memo))
+        return ("derivfunc", self.funcstr, self.n, self.accuracy, self.scaledown, self.varname, self.personals, self.name, self.memoize, getstates(self.memo))
 
     def copy(self):
         """Returns A Copy Of The Derivative Function."""
@@ -970,7 +970,7 @@ class integfunc(integbase, strfunc):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("integfunc", self.funcstr, self.accuracy, self.varname, self.personals, self.name, self.memoize, self.e.getstates(self.memo))
+        return ("integfunc", self.funcstr, self.accuracy, self.varname, self.personals, self.name, self.memoize, getstates(self.memo))
 
     def copy(self):
         """Returns A Copy Of The Integral Function."""
@@ -1043,7 +1043,7 @@ class classcalc(cotobject):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("classcalc", self.e.getstates(self.getvars()))
+        return ("classcalc", getstates(self.getvars()))
 
     def copy(self):
         """Copies The Class."""
@@ -1304,7 +1304,7 @@ class instancecalc(numobject, classcalc):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("instancecalc", self.e.getstates(self.getvars()), self.e.getstates(self.parent))
+        return ("instancecalc", getstates(self.getvars()), getstates(self.parent))
 
     def copy(self):
         """Copies The Instance."""

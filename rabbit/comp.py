@@ -202,8 +202,8 @@ class compiler(commandline):
         state = {
             "commands": self.commands,
             "makes": self.makes,
-            "variables": self.e.getstates(self.e.variables),
-            "parens": self.e.liststate(self.e.parens)
+            "variables": getstates(self.e.variables),
+            "parens": liststate(self.e.parens)
             }
         out = cPickle.dumps(state, protocol=int(protocol))
         self.fresh()

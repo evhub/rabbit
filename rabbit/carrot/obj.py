@@ -174,6 +174,20 @@ def itemstate(item):
     else:
         return item
 
+def liststate(inputlist):
+    """Compiles A List."""
+    out = []
+    for item in inputlist:
+        out.append(itemstate(item))
+    return out
+
+def getstates(variables):
+    """Compiles Variables."""
+    out = {}
+    for k,v in variables.items():
+        out[k] = itemstate(v)
+    return out
+
 class memoizer(object):
     """A Memoized Function."""
     def __init__(self, func):
