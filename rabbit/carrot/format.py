@@ -20,6 +20,14 @@ from __future__ import with_statement, print_function, absolute_import, unicode_
 
 from .list import *
 import string
+try:
+    string.lowercase
+except AttributeError:
+    string.lowercase = string.ascii_lowercase
+try:
+    string.uppercase
+except AttributeError:
+    string.uppercase = string.ascii_uppercase
 import re
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
