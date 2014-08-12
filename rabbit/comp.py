@@ -133,7 +133,8 @@ class compiler(commandline):
         """Compiles A File."""
         compiling = self.compiling
         self.compiling = True
-        self.evalfile(name)
+        if name:
+            self.evalfile(name)
         self.compiling = compiling
         resultfile = openfile(result, "wb")
         writefile(resultfile, self.assemble())
@@ -211,7 +212,7 @@ class compiler(commandline):
 
     def disassemble(self, inputstring):
         """Decompiles Code."""
-        out = cPickle.loads(inputstring)
+        out = cPickle.loads(getbytes(inputstring))
         for command in out["makes"]:
             self.calc(command)
         return out["commands"], self.e.devariables(out["variables"]), self.e.delist(out["parens"])

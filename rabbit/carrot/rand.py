@@ -43,10 +43,7 @@ class random(object):
 
     def prepare(self, key):
         """Prepares A String For Hashing."""
-        if isinstance(key, old_str):
-            return key
-        else:
-            return str(key).encode(encoding)
+        return getbytes(key)
 
     def goto(self, position=0):
         """Advances The Random Number Generator To A Position."""

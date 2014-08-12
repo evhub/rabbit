@@ -93,6 +93,13 @@ def float(x, *args, **kwargs):
             else:
                 return test_float
 
+def getbytes(obj):
+    """Gets A Bytes Object."""
+    if isinstance(obj, old_str):
+        return obj
+    else:
+        return str(obj).encode(encoding)
+
 def typestr(obj):
     """Formats The Type Of Something Into A String."""
     return str(type(obj)).split("'")[1]
