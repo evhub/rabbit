@@ -134,10 +134,10 @@ class funcfloat(numobject):
                 keys.append(k)
                 values.append(self.keyhash(v))
             out = (tuple(keys), tuple(values))
-        elif istext(args) or isnum(args) or args in [None, False, True]:
-            out = args
-        else:
+        elif hasattr(args, "getstate"):
             out = self.keyhash(itemstate(args))
+        else:
+            out = args
         return out
 
     def func(self, *args, **kwargs):
