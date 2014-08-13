@@ -782,17 +782,10 @@ Global Operator Precedence List:
                             raise ExecutionError("IndentationError", "Unexpected dedent in line "+lines[x])
                 if last:
                     cmds.append(last)
-                command += self.wrap(curry(self.top_class_do, cmds))
+                command += self.wrap(brace(self, cmds))
             else:
                 raise SyntaxError("Error in evaluating curly braces len("+repr(x)+")>1")
         return command
-
-    def top_class_do(self, cmds):
-        """Calculates A Class."""
-        out = classcalc(self)
-        for cmd in cmds:
-            out.process(cmd)
-        return out
 
     def top_brack(self, expression):
         """Evaluates The Brackets In An Expression."""
@@ -806,19 +799,10 @@ Global Operator Precedence List:
                     original = ""
                 else:
                     original = x[0]
-                command += self.wrap(curry(self.top_brack_do, original))
+                command += self.wrap(bracket(self, original))
             else:
                 raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
         return command
-
-    def top_brack_do(self, original):
-        """Calculates A Bracket."""
-        out = self.calc(original)
-        if isinstance(out, matrix) and out.onlydiag():
-            out = out.getdiag()
-        else:
-            out = [out]
-        return rowmatrixlist(out)
 
     def calc_pre(self, expression):
         """Performs Pre-Format Evaluation."""
@@ -2022,8 +2006,8 @@ Global Operator Precedence List:
     def getparen(self, num):
         """Gets A Parenthesis."""
         test = self.parens[num]
-        if typestr(test) == "function":
-            return test()
+        if isinstance(test, (bracket, brace)):
+            return test.calc()
         else:
             return test
 
@@ -2235,6 +2219,10 @@ Global Operator Precedence List:
                 value = instancecalc(self, self.devariables(args[0]), self.devariables(args[1]))
             elif name == "makefunc":
                 value = makefunc(args[0], self, args[1], args[2], self.devariables(args[3]))
+            elif name == "brace":
+                value = brace(self, args[0])
+            elif name == "bracket":
+                value = bracket(self, args[0])
             elif name == "find":
                 tofind = str(args[0])
                 if tofind in self.variables:

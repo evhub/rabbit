@@ -1938,3 +1938,37 @@ class rollfunc(strfunc):
             return self.stop == other.stop and self.name == other.name and self.gen.key == other.gen.key and self.gen.counter == other.gen.counter
         else:
             return False
+
+class brace(object):
+    """A To-Be-Calculated Class."""
+    def __init__(self, e, cmds):
+        """Constructs The Class."""
+        self.e = e
+        self.cmds = cmds
+    def calc(self):
+        """Calculates The Class."""
+        out = classcalc(self.e)
+        for cmd in self.cmds:
+            out.process(cmd)
+        return out
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("brace", self.cmds)
+
+class bracket(object):
+    """A To-Be-Calculated Row."""
+    def __init__(self, e, original):
+        """Constructs The Row."""
+        self.e = e
+        self.original = original
+    def calc(self):
+        """Calculates The Row."""
+        out = self.e.calc(self.original)
+        if isinstance(out, matrix) and out.onlydiag():
+            out = out.getdiag()
+        else:
+            out = [out]
+        return rowmatrixlist(out)
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("bracket", self.original)
