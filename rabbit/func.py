@@ -188,6 +188,7 @@ class funcfloat(numobject):
         old_func = self.func
         self.func = lambda variables: old_func([arg]+variables)
         self.reqargs -= 1
+        self.funcstr += ":("+self.e.prepare(arg, False, True)+")"
 
     def __str__(self):
         """Retrieves The Function String."""
@@ -768,6 +769,8 @@ class usefunc(funcfloat):
         """Curries An Argument."""
         self.func = curry(self.func, arg)
         self.variables.pop(0)
+        self.reqargs -= 1
+        self.funcstr += ":("+self.e.prepare(arg, False, True)+")"
 
     def call(self, params):
         """Calls The Function."""
@@ -1286,6 +1289,13 @@ class classcalc(cotobject):
         for key in self.getvars().keys():
             out.append(strcalc(key, self.e))
         return diagmatrixlist(out)
+
+    def __contains__(self, item):
+        """Determines Whether Another Class Is In This One."""
+        if isinstance(item, classcalc):
+            return self >= item
+        else:
+            return False
 
 class instancecalc(numobject, classcalc):
     """An Evaluator Class Instance."""

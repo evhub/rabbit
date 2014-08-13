@@ -199,13 +199,13 @@ Global Operator Precedence List:
             "find":funcfloat(self.funcs.findcall, self, "find"),
             "split":funcfloat(self.funcs.splitcall, self, "split"),
             "replace":funcfloat(self.funcs.replacecall, self, "replace"),
-            "in":funcfloat(self.funcs.containscall, self, "in"),
+            "in":funcfloat(self.funcs.containscall, self, "in", reqargs=2),
             "range":funcfloat(self.funcs.rangecall, self, "range"),
             "len":funcfloat(self.funcs.lencall, self, "len"),
             "size":funcfloat(self.funcs.sizecall, self, "size"),
             "abs":funcfloat(self.funcs.abscall, self, "abs"),
             "d":funcfloat(self.funcs.randcall, self, "d"),
-            "from":funcfloat(self.funcs.instanceofcall, self, "from"),
+            "from":funcfloat(self.funcs.instanceofcall, self, "from", reqargs=2),
             "iserr":funcfloat(self.funcs.iserrcall, self, "iserr"),
             "class":funcfloat(self.funcs.classcall, self, "class"),
             "var":funcfloat(self.funcs.getvarcall, self, "var"),
@@ -2172,7 +2172,7 @@ Global Operator Precedence List:
         elif istext(item):
             out = strcalc(item, self)
         elif islist(item):
-            out = diagmatrixlist(item, func=self.frompython)
+            out = diagmatrixlist(map(self.frompython, item))
         elif isfunc(item):
             out = item
         else:
@@ -2823,10 +2823,10 @@ class evalfuncs(object):
             return self.reversecall([self.connectcall(variables)])
 
     def containscall(self, variables):
-        """Performs contains."""
+        """Performs in."""
         if variables:
             variables[0] = collapse(variables[0])
-            if isinstance(variables[0], (matrix, strcalc, data, multidata)):
+            if hasmatrix(variables[0]):
                 for x in xrange(1, len(variables)):
                     if collapse(variables[x]) in variables[0]:
                         return 1.0
