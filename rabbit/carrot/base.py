@@ -175,10 +175,6 @@ class numobject(evalobject):
         """Retrieves A Float."""
         return old_float(self.getfloat())
 
-    def calc(self):
-        """Raises An Error."""
-        raise ExecutionError("OperatorError", "Conversion to number not defined for object")
-
     def getfloat(self):
         """Retrieves A Number."""
         return float(self.calc())
@@ -318,18 +314,6 @@ class cotobject(evalobject):
     """A Base Class For Container Objects."""
     check = 2
 
-    def items(self):
-        """Raises An Error."""
-        raise ExecutionError("OperatorError", "Item enumeration not defined for object")
-
-    def remove(self):
-        """Raises An Error."""
-        raise ExecutionError("OperatorError", "Item removal not defined for object")
-
-    def extend(self):
-        """Raises An Error."""
-        raise ExecutionError("OperatorError", "Item extension not defined for object")
-
     def __iter__(self):
         """Iterates Over The Object."""
         return iter(self.items())
@@ -408,10 +392,6 @@ class cotobject(evalobject):
 
 class mctobject(cotobject, numobject):
     """A Base Class For Mathematical Container Objects."""
-
-    def code(self, func):
-        """Raises An Error."""
-        raise ExecutionError("OperatorError", "Function mapping not defined for object")
 
     def __iadd__(self, other):
         """Performs Addition In-Place."""
