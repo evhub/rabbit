@@ -209,6 +209,7 @@ class compiler(commandline):
             "variables": getstates(self.e.variables),
             "parens": liststate(self.e.parens)
             }
+        self.printdebug("|>>| "+repr(state))
         out = cPickle.dumps(state, protocol=int(protocol))
         self.fresh()
         return getbytes(out)
