@@ -108,8 +108,10 @@ class compiler(commandline):
 
     def decompfile(self, name):
         """Decompiles A File."""
+        if not name:
+            name = ".rabbit"
         try:
-            tempfile = openfile(name, "rb")
+            tempfile = open(name, "rb")
         except IOError:
             return False
         else:
@@ -136,7 +138,7 @@ class compiler(commandline):
         if name:
             self.evalfile(name)
         self.compiling = compiling
-        resultfile = openfile(result, "wb")
+        resultfile = open(result, "wb")
         writefile(resultfile, self.assemble())
         resultfile.close()
         return True
@@ -209,7 +211,7 @@ class compiler(commandline):
             }
         out = cPickle.dumps(state, protocol=int(protocol))
         self.fresh()
-        return getstr(out)
+        return getbytes(out)
 
     def disassemble(self, inputstring):
         """Decompiles Code."""

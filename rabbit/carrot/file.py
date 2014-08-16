@@ -39,16 +39,13 @@ def writefile(openedfile, writer):
     """Sets The Contents Of A File."""
     openedfile.seek(0)
     openedfile.truncate()
-    openedfile.write(str(writer))
+    openedfile.write(writer)
 
 def readfile(openedfile):
     """Reads The Contents Of A File."""
     openedfile.seek(0)
     out = openedfile.read()
-    if isinstance(out, old_str):
-        return tostr(out)
-    else:
-        return str(out)
+    return out
 
 def createfile(filename, opentype="r+b"):
     """Creates A File And Returns An Open File Object For It."""

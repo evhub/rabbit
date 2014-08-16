@@ -45,10 +45,12 @@ else:
     raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode(encoding)
 
 old_print = print
+def_str = str
 try:
     unicode
 except NameError:
     old_str = bytes
+    unicode = str
 else:
     old_str = str
     str = unicode
@@ -102,8 +104,10 @@ def getbytes(obj):
 
 def getstr(obj):
     """Gets A Unicode Object."""
-    if isinstance(obj, old_str):
-        return obj.decode(encoding)
+    if isinstance(obj, str):
+        return obj
+    elif isinstance(obj, old_str):
+        return str(obj, encoding)
     else:
         return str(obj)
 
