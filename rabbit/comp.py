@@ -208,7 +208,7 @@ class compiler(commandline):
             }
         out = cPickle.dumps(state, protocol=int(protocol))
         self.fresh()
-        return out
+        return str(out)
 
     def disassemble(self, inputstring):
         """Decompiles Code."""

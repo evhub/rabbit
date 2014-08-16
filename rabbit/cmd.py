@@ -234,18 +234,36 @@ class mathbase(safebase):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to run")
         elif len(variables) == 1:
-            if isinstance(variables[0], codestr):
-                original = str(variables[0])
-                if not self.evalfile(original):
-                    raise ExecutionError("IOError", "Could not find file "+str(original))
+            original = os.path.normcase(self.e.prepare(variables[0], False, False))
+            while not os.path.isfile(original):
+                if "." not in original:
+                    original += ".rab"
                 else:
-                    self.dumpdebug(True)
+                    raise ExecutionError("IOError", "Could not find file "+str(original))
+            if not self.evalfile(original):
+                raise ExecutionError("IOError", "Failed to execute file "+str(original))
             else:
-                raise ExecutionError("StatementError", "Can only call run as a statement")
+                self.dumpdebug(True)
         else:
             for arg in variables:
                 self.runcall([arg])
         return matrix(0)
+
+    def requirecall(self, variables):
+        """Performs require."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to require")
+        elif len(variables) == 1:
+            out = classcalc(self.e)
+            params = out.begin()
+            self.runcall(variables)
+            out.end(params)
+            return out
+        else:
+            out = []
+            for arg in variables:
+                out.append(self.requirecall([arg]))
+            return diagmatrixlist(out)
 
     def assertcall(self, variables):
         """Checks For Errors By Asserting That Something Is True."""

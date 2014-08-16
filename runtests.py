@@ -26,7 +26,7 @@ from rabbit.all import *
 print()
 cli = commandline(addcolor("Running Tests.txt...", "magenta"), debugcolor="red")
 cli.fatalerror = always(None)
-cli.evalfile("Tests.txt")
+cli.evalfile("Tests.rab")
 print(addcolor("Tests.txt Evaluation Complete.", "blue"))
 
 print()

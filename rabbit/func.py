@@ -1056,25 +1056,38 @@ class classcalc(cotobject):
         """Processes A Command And Puts The Result In The Variables."""
         self.calc(command, inglobal, self.e.process)
 
+    def begin(self, inglobal=False):
+        """Enters The Class."""
+        if inglobal:
+            oldset = self.e.setvars(self.variables)
+            oldclass = False
+        else:
+            oldclass, self.e.useclass = self.e.useclass, self.selfvar
+            oldset, self.doset = self.doset, self.e.setvars(self.variables)
+        return oldset, oldclass
+
+    def end(self, params):
+        """Exits The Class."""
+        oldset, oldclass = params
+        if oldclass is False:
+            self.e.setvars(oldset)
+            return True
+        else:
+            self.e.setvars(self.doset)
+            self.doset = oldset
+            self.e.useclass = oldclass
+            return False
+
     def calc(self, command, inglobal=False, func=None):
         """Calculates A String In The Environment Of The Class."""
         if func is None:
             func = self.e.calc
         command = self.e.namefind(basicformat(command))
-        if inglobal:
-            doset = self.e.setvars(self.variables)
-        else:
-            oldclass, self.e.useclass = self.e.useclass, self.selfvar
-            oldset, self.doset = self.doset, self.e.setvars(self.variables)
+        params = self.begin(inglobal)
         try:
             out = func(command, " | class")
         finally:
-            if inglobal:
-                self.e.setvars(doset)
-            else:
-                self.e.setvars(self.doset)
-                self.doset = oldset
-                self.e.useclass = oldclass
+            self.end(params)
         return out
 
     def __len__(self):
