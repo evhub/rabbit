@@ -55,6 +55,7 @@ Global Operator Precedence List:
     ,       Seperates list elements.
     +-      Performs addition and subtraction.
     %       Performs modulo.
+    //      Performs floor division.
     */      Performs multiplication and division.
 
     \\       Denotes a lambda.
@@ -231,7 +232,6 @@ Global Operator Precedence List:
             "bitxor":funcfloat(self.funcs.bitxorcall, self, "bitxor", reqargs=2),
             "rshift":funcfloat(self.funcs.rshiftcall, self, "rshift", reqargs=2),
             "lshift":funcfloat(self.funcs.lshiftcall, self, "lshift", reqargs=2),
-            "intdiv":funcfloat(self.funcs.intdivcall, self, "intdiv", reqargs=2),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "E":usefunc(E10, self, "E", ["x"]),
             "D":funcfloat(self.funcs.derivcall, self, "D", reqargs=1),
@@ -624,15 +624,14 @@ Global Operator Precedence List:
 
     def process(self, inputstring, info="", command=None, top=None):
         """Performs Top-Level Evaluation."""
+        inputstring = str(inputstring)
         if top is None:
             top = command is not None
         else:
             top = top
         if top:
-            command = replaceall(str(inputstring), self.aliases, '"`', {"\u201c":"\u201d"})
-        else:
-            command = str(inputstring)
-        for original in self.outersplit(self.remcomment(command), ";;"):
+            inputstring = replaceall(inputstring, self.aliases, '"`', {"\u201c":"\u201d"})
+        for original in self.outersplit(self.remcomment(inputstring), ";;"):
             original = basicformat(original)
             if not iswhite(original):
                 out = self.proc_top(original, info, top)
@@ -1163,7 +1162,9 @@ Global Operator Precedence List:
                                 for g in xrange(0, len(top[a][0][c][d][e][f])):
                                     top[a][0][c][d][e][f][g] = top[a][0][c][d][e][f][g].split("%")
                                     for h in xrange(0, len(top[a][0][c][d][e][f][g])):
-                                        top[a][0][c][d][e][f][g][h] = splitinplace(top[a][0][c][d][e][f][g][h].split("*"), "/")
+                                        top[a][0][c][d][e][f][g][h] = top[a][0][c][d][e][f][g][h].split("//")
+                                        for i in xrange(0, len(top[a][0][c][d][e][f][g][h])):
+                                            top[a][0][c][d][e][f][g][h][i] = splitinplace(top[a][0][c][d][e][f][g][h][i].split("*"), "/")
         value = reassemble(top, ["~", "\\", "++", "--", "**", ",", "+", "%", "*"])
         self.printdebug("=> "+value)
         self.recursion += 1
@@ -1583,9 +1584,16 @@ Global Operator Precedence List:
 
     def eval_mod(self, inputlist):
         """Evaluates The Modulus Part Of An Expression."""
+        value = self.eval_intdiv(inputlist[0])
+        for x in xrange(1, len(inputlist)):
+            value = value % self.eval_intdiv(inputlist[x])
+        return value
+
+    def eval_intdiv(self, inputlist):
+        """Evaluates The Floor Division Part Of An Expression."""
         value = self.eval_mul(inputlist[0])
         for x in xrange(1, len(inputlist)):
-            value = value % self.eval_mul(inputlist[x])
+            value = value // self.eval_mul(inputlist[x])
         return value
 
     def eval_mul(self, inputlist):
@@ -3291,14 +3299,4 @@ class evalfuncs(object):
             out = variables[-1]
             for x in xrange(0, len(variables)-1):
                 out = out << variables[x]
-            return out
-
-    def intdivcall(self, variables):
-        """Wraps //."""
-        if len(variables) < 2:
-            raise ExecutionError("ArgumentError", "Not enough arguments to intdiv")
-        else:
-            out = variables[0]
-            for x in xrange(1, len(variables)):
-                out = out // variables[x]
             return out

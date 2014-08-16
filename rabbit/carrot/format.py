@@ -37,9 +37,11 @@ import re
 def basicformat(inputstring, leading=True, tailing=True):
     """Performs Basic Formatting On A String."""
     out = str(inputstring)
-    if leading:
+    if leading and tailing:
+        out = out.strip()
+    elif leading:
         out = out.lstrip()
-    if tailing:
+    elif tailing:
         out = out.rstrip()
     return out
 
