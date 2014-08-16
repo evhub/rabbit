@@ -60,3 +60,6 @@ Thumbs.db
 
 # Tests save files
 *.save.txt
+
+# Compiled Rabbit files
+*.rabbit
