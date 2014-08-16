@@ -76,6 +76,36 @@ class evalobject(object):
         out %= other
         return out
 
+    def __or__(self, other):
+        """Performs Bitwise Or."""
+        out = self.copy()
+        out |= other
+        return out
+
+    def __and__(self, other):
+        """Performs Bitwise And."""
+        out = self.copy()
+        out &= other
+        return out
+
+    def __xor__(self, other):
+        """Performs Bitwise Xor."""
+        out = self.copy()
+        out ^= other
+        return out
+
+    def __rshift__(self, other):
+        """Performs Bitwise Right Shift."""
+        out = self.copy()
+        out >>= other
+        return out
+
+    def __lshift__(self, other):
+        """Performs Bitwise Left Shift."""
+        out = self.copy()
+        out <<= other
+        return out
+
     def __imul__(self, other):
         """Performs *."""
         for x in xrange(0, int(other)):
@@ -235,6 +265,26 @@ class numobject(evalobject):
         """Implements round."""
         return round(float(self), n)
 
+    def __ior__(self, other):
+        """Performs Bitwise Or In-Place."""
+        return float(self) | other
+
+    def __iand__(self, other):
+        """Performs Bitwise And In-Place."""
+        return float(self) & other
+
+    def __ixor__(self, other):
+        """Performs Bitwise Xor In-Place."""
+        return float(self) ^ other
+
+    def __irshift__(self, other):
+        """Performs Bitwise Right Shift In-Place."""
+        return float(self) >> other
+
+    def __ilshift__(self, other):
+        """Performs Bitwise Left Shift In-Place."""
+        return float(self) << other
+
 class cotobject(evalobject):
     """A Base Class For Container Objects."""
     check = 2
@@ -364,6 +414,31 @@ class mctobject(cotobject, numobject):
         out = self.copy()
         out.code(lambda x: round(x, n))
         return out
+
+    def __ior__(self, other):
+        """Performs Bitwise Or In-Place."""
+        self.code(lambda x: x|other)
+        return self
+
+    def __iand__(self, other):
+        """Performs Bitwise And In-Place."""
+        self.code(lambda x: x&other)
+        return self
+
+    def __ixor__(self, other):
+        """Performs Bitwise Xor In-Place."""
+        self.code(lambda x: x^other)
+        return self
+
+    def __irshift__(self, other):
+        """Performs Bitwise Right Shift In-Place."""
+        self.code(lambda x: x>>other)
+        return self
+
+    def __ilshift__(self, other):
+        """Performs Bitwise Left Shift In-Place."""
+        self.code(lambda x: x<<other)
+        return self
 
 class ExecutionError(Exception):
     """A Base Class For Rabbit Errors."""

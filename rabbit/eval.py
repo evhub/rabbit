@@ -3274,8 +3274,8 @@ class evalfuncs(object):
         if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to rshift")
         else:
-            out = variables[0]
-            for x in xrange(1, len(variables)):
+            out = variables[-1]
+            for x in xrange(0, len(variables)-1):
                 out = out >> variables[x]
             return out
 
@@ -3284,7 +3284,7 @@ class evalfuncs(object):
         if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to lshift")
         else:
-            out = variables[0]
-            for x in xrange(1, len(variables)):
+            out = variables[-1]
+            for x in xrange(0, len(variables)-1):
                 out = out << variables[x]
             return out
