@@ -749,7 +749,7 @@ class usefunc(funcfloat):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        if "method" in typestr(self.base_func):
+        if typestr(self.base_func) in ["instancemethod", "method"]:
             return ("find", self.funcstr)
         else:
             return ("usefunc", self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, getstates(self.memo))
