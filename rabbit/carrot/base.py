@@ -45,78 +45,103 @@ class evalobject(object):
         out = self.copy()
         out += other
         return out
+    def __iadd__(self, other):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Addition not defined for object")
 
     def __sub__(self, other):
         """Performs Subtraction."""
         out = self.copy()
         out -= other
         return out
+    def __isub__(self, other):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Subtraction not defined for object")
 
     def __mul__(self, other):
         """Performs Multiplication."""
         out = self.copy()
         out *= other
         return out
-
-    def __div__(self, other):
-        """Performs Division."""
-        out = self.copy()
-        out /= other
-        return out
-
-    def __pow__(self, other):
-        """Performs Exponentiation."""
-        out = self.copy()
-        out **= other
-        return out
-
-    def __mod__(self, other):
-        """Performs Modulus."""
-        out = self.copy()
-        out %= other
-        return out
-
-    def __or__(self, other):
-        """Performs Bitwise Or."""
-        out = self.copy()
-        out |= other
-        return out
-
-    def __and__(self, other):
-        """Performs Bitwise And."""
-        out = self.copy()
-        out &= other
-        return out
-
-    def __xor__(self, other):
-        """Performs Bitwise Xor."""
-        out = self.copy()
-        out ^= other
-        return out
-
-    def __rshift__(self, other):
-        """Performs Bitwise Right Shift."""
-        out = self.copy()
-        out >>= other
-        return out
-
-    def __lshift__(self, other):
-        """Performs Bitwise Left Shift."""
-        out = self.copy()
-        out <<= other
-        return out
-
     def __imul__(self, other):
         """Performs *."""
         for x in xrange(0, int(other)):
             self += self
         return self
 
+    def __div__(self, other):
+        """Performs Division."""
+        out = self.copy()
+        out /= other
+        return out
+    def __idiv__(self, other):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Division not defined for object")
+
+    def __pow__(self, other):
+        """Performs Exponentiation."""
+        out = self.copy()
+        out **= other
+        return out
     def __ipow__(self, other):
         """Performs **."""
         for x in xrange(0, int(other)):
             self *= self
         return self
+
+    def __mod__(self, other):
+        """Performs Modulus."""
+        out = self.copy()
+        out %= other
+        return out
+    def __imod__(self, other):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Addition not defined for object")
+
+    def __or__(self, other):
+        """Performs Bitwise Or."""
+        out = self.copy()
+        out |= other
+        return out
+    def __ior__(self, other):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Bitwise or not defined for object")
+
+    def __and__(self, other):
+        """Performs Bitwise And."""
+        out = self.copy()
+        out &= other
+        return out
+    def __iand__(self, other):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Bitwise and not defined for object")
+
+    def __xor__(self, other):
+        """Performs Bitwise Xor."""
+        out = self.copy()
+        out ^= other
+        return out
+    def __ixor__(self, other):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Bitwise xor not defined for object")
+
+    def __rshift__(self, other):
+        """Performs Bitwise Right Shift."""
+        out = self.copy()
+        out >>= other
+        return out
+    def __irshift__(self, other):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Bitwise right shift not defined for object")
+
+    def __lshift__(self, other):
+        """Performs Bitwise Left Shift."""
+        out = self.copy()
+        out <<= other
+        return out
+    def __ilshift__(self, other):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Bitwise left shift not defined for object")
 
 class numobject(evalobject):
     """A Base Class For Objects."""
@@ -149,6 +174,10 @@ class numobject(evalobject):
     def __float__(self):
         """Retrieves A Float."""
         return old_float(self.getfloat())
+
+    def calc(self):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Conversion to number not defined for object")
 
     def getfloat(self):
         """Retrieves A Number."""
@@ -289,6 +318,18 @@ class cotobject(evalobject):
     """A Base Class For Container Objects."""
     check = 2
 
+    def items(self):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Item enumeration not defined for object")
+
+    def remove(self):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Item removal not defined for object")
+
+    def extend(self):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Item extension not defined for object")
+
     def __iter__(self):
         """Iterates Over The Object."""
         return iter(self.items())
@@ -367,6 +408,10 @@ class cotobject(evalobject):
 
 class mctobject(cotobject, numobject):
     """A Base Class For Mathematical Container Objects."""
+
+    def code(self, func):
+        """Raises An Error."""
+        raise ExecutionError("OperatorError", "Function mapping not defined for object")
 
     def __iadd__(self, other):
         """Performs Addition In-Place."""
