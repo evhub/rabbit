@@ -624,12 +624,15 @@ Global Operator Precedence List:
 
     def process(self, inputstring, info="", command=None, top=None):
         """Performs Top-Level Evaluation."""
-        inputstring = self.remcomment(replaceall(str(inputstring), self.aliases, '"`', {"\u201c":"\u201d"}))
         if top is None:
             top = command is not None
         else:
             top = top
-        for original in self.outersplit(inputstring, ";;"):
+        if top:
+            command = replaceall(str(inputstring), self.aliases, '"`', {"\u201c":"\u201d"})
+        else:
+            command = str(inputstring)
+        for original in self.outersplit(self.remcomment(command), ";;"):
             original = basicformat(original)
             if not iswhite(original):
                 out = self.proc_top(original, info, top)
