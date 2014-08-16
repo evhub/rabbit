@@ -229,6 +229,8 @@ Global Operator Precedence List:
             "bitor":funcfloat(self.funcs.bitorcall, self, "bitor", reqargs=2),
             "bitand":funcfloat(self.funcs.bitandcall, self, "bitand", reqargs=2),
             "bitxor":funcfloat(self.funcs.bitxorcall, self, "bitxor", reqargs=2),
+            "rshift":funcfloat(self.funcs.rshiftcall, self, "rshift", reqargs=2),
+            "lshift":funcfloat(self.funcs.lshiftcall, self, "lshift", reqargs=2),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "E":usefunc(E10, self, "E", ["x"]),
             "D":funcfloat(self.funcs.derivcall, self, "D", reqargs=1),
@@ -3265,4 +3267,24 @@ class evalfuncs(object):
             out = variables[0]
             for x in xrange(1, len(variables)):
                 out = out ^ variables[x]
+            return out
+
+    def rshiftcall(self, variables):
+        """Wraps ^."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to rshift")
+        else:
+            out = variables[0]
+            for x in xrange(1, len(variables)):
+                out = out >> variables[x]
+            return out
+
+    def lshiftcall(self, variables):
+        """Wraps ^."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to lshift")
+        else:
+            out = variables[0]
+            for x in xrange(1, len(variables)):
+                out = out << variables[x]
             return out
