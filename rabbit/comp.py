@@ -155,6 +155,7 @@ class compiler(commandline):
             self.e.fresh()
         self.e.makevars({
             "run":funcfloat(self.runcall, self.e, "run"),
+            "require":funcfloat(self.requirecall, self.e, "require"),
             "make":funcfloat(self.makecall, self.e, "make"),
             "assert":funcfloat(self.comp_assertcall, self.e, "assert"),
             "install":funcfloat(self.installcall, self.e, "install"),

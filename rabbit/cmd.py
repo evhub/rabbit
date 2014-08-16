@@ -121,6 +121,7 @@ class mathbase(safebase):
         self.e.makevars({
             "debug":funcfloat(self.debugcall, self.e, "debug"),
             "run":funcfloat(self.runcall, self.e, "run"),
+            "require":funcfloat(self.requirecall, self.e, "require"),
             "assert":funcfloat(self.assertcall, self.e, "assert"),
             "make":funcfloat(self.makecall, self.e, "make"),
             "save":funcfloat(self.savecall, self.e, "save"),
