@@ -231,6 +231,7 @@ Global Operator Precedence List:
             "bitxor":funcfloat(self.funcs.bitxorcall, self, "bitxor", reqargs=2),
             "rshift":funcfloat(self.funcs.rshiftcall, self, "rshift", reqargs=2),
             "lshift":funcfloat(self.funcs.lshiftcall, self, "lshift", reqargs=2),
+            "intdiv":funcfloat(self.funcs.intdivcall, self, "intdiv", reqargs=2),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "E":usefunc(E10, self, "E", ["x"]),
             "D":funcfloat(self.funcs.derivcall, self, "D", reqargs=1),
@@ -3270,7 +3271,7 @@ class evalfuncs(object):
             return out
 
     def rshiftcall(self, variables):
-        """Wraps ^."""
+        """Wraps >>."""
         if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to rshift")
         else:
@@ -3280,11 +3281,21 @@ class evalfuncs(object):
             return out
 
     def lshiftcall(self, variables):
-        """Wraps ^."""
+        """Wraps <<."""
         if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to lshift")
         else:
             out = variables[-1]
             for x in xrange(0, len(variables)-1):
                 out = out << variables[x]
+            return out
+
+    def intdivcall(self, variables):
+        """Wraps //."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to intdiv")
+        else:
+            out = variables[0]
+            for x in xrange(1, len(variables)):
+                out = out // variables[x]
             return out

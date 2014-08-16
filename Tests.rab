@@ -462,6 +462,7 @@ passert:: 6 bitand 5 ?= 4
 passert:: 3 bitxor 7 ?= 4
 passert:: 5 rshift 1 ?= 2
 passert:: 5 lshift 1 ?= 10
+passert:: 5 intdiv 2 ?= 2
 
 # Final Testing:
 passert:: save("Tests.save.txt");true
