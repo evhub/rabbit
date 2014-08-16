@@ -172,67 +172,71 @@ Global Operator Precedence List:
                 self.fatalvar: 1.0
                 }),
             "env":funcfloat(self.funcs.envcall, self, "env"),
-            "copy":funcfloat(self.funcs.copycall, self, "copy"),
+            "copy":funcfloat(self.funcs.copycall, self, "copy", reqargs=1),
             "type":funcfloat(self.funcs.typecall, self, "type"),
-            "to":funcfloat(self.funcs.tocall, self, "to"),
+            "to":funcfloat(self.funcs.tocall, self, "to", reqargs=1),
             "str":funcfloat(self.funcs.strcall, self, "str"),
             "repr":funcfloat(self.funcs.reprcall, self, "repr"),
             "code":funcfloat(self.funcs.codecall, self, "code"),
-            "calc":funcfloat(self.funcs.docalc, self, "calc"),
-            "proc":funcfloat(self.funcs.cmdcall, self, "proc"),
-            "fold":funcfloat(self.funcs.foldcall, self, "fold"),
+            "calc":funcfloat(self.funcs.docalc, self, "calc", reqargs=1),
+            "proc":funcfloat(self.funcs.cmdcall, self, "proc", reqargs=1),
+            "fold":funcfloat(self.funcs.foldcall, self, "fold", reqargs=1),
             "row":funcfloat(rowmatrixlist, self, "row"),
-            "list":funcfloat(self.funcs.listcall, self, "list"),
-            "matrix":funcfloat(self.funcs.matrixcall, self, "matrix"),
-            "cont":funcfloat(self.funcs.getmatrixcall, self, "cont"),
-            "sum":funcfloat(self.funcs.sumcall, self, "sum"),
-            "prod":funcfloat(self.funcs.prodcall, self, "prod"),
-            "join":funcfloat(self.funcs.joincall, self, "join"),
-            "connect":funcfloat(self.funcs.connectcall, self, "connect"),
-            "merge":funcfloat(self.funcs.mergecall, self, "merge"),
-            "sort":funcfloat(self.funcs.sortcall, self, "sort"),
-            "rev":funcfloat(self.funcs.reversecall, self, "rev"),
-            "round":funcfloat(self.funcs.roundcall, self, "round"),
+            "list":funcfloat(self.funcs.listcall, self, "list", reqargs=1),
+            "matrix":funcfloat(self.funcs.matrixcall, self, "matrix", reqargs=1),
+            "cont":funcfloat(self.funcs.getmatrixcall, self, "cont", reqargs=1),
+            "sum":funcfloat(self.funcs.sumcall, self, "sum", reqargs=1),
+            "prod":funcfloat(self.funcs.prodcall, self, "prod", reqargs=1),
+            "join":funcfloat(self.funcs.joincall, self, "join", reqargs=2),
+            "connect":funcfloat(self.funcs.connectcall, self, "connect", reqargs=1),
+            "merge":funcfloat(self.funcs.mergecall, self, "merge", reqargs=1),
+            "sort":funcfloat(self.funcs.sortcall, self, "sort", reqargs=1),
+            "rev":funcfloat(self.funcs.reversecall, self, "rev", reqargs=1),
+            "round":funcfloat(self.funcs.roundcall, self, "round", reqargs=1),
             "num":funcfloat(self.funcs.numcall, self, "num"),
             "int":funcfloat(self.funcs.intcall, self, "int"),
-            "eval":funcfloat(self.funcs.evalcall, self, "eval"),
-            "find":funcfloat(self.funcs.findcall, self, "find"),
-            "split":funcfloat(self.funcs.splitcall, self, "split"),
-            "replace":funcfloat(self.funcs.replacecall, self, "replace"),
+            "eval":funcfloat(self.funcs.evalcall, self, "eval", reqargs=1),
+            "find":funcfloat(self.funcs.findcall, self, "find", reqargs=2),
+            "split":funcfloat(self.funcs.splitcall, self, "split", reqargs=1),
+            "replace":funcfloat(self.funcs.replacecall, self, "replace", reqargs=1),
             "in":funcfloat(self.funcs.containscall, self, "in", reqargs=2),
-            "range":funcfloat(self.funcs.rangecall, self, "range"),
-            "len":funcfloat(self.funcs.lencall, self, "len"),
-            "size":funcfloat(self.funcs.sizecall, self, "size"),
-            "abs":funcfloat(self.funcs.abscall, self, "abs"),
-            "d":funcfloat(self.funcs.randcall, self, "d"),
+            "range":funcfloat(self.funcs.rangecall, self, "range", reqargs=1),
+            "len":funcfloat(self.funcs.lencall, self, "len", reqargs=1),
+            "size":funcfloat(self.funcs.sizecall, self, "size", reqargs=1),
+            "abs":funcfloat(self.funcs.abscall, self, "abs", reqargs=1),
+            "d":funcfloat(self.funcs.randcall, self, "d", reqargs=1),
             "from":funcfloat(self.funcs.instanceofcall, self, "from", reqargs=2),
-            "iserr":funcfloat(self.funcs.iserrcall, self, "iserr"),
-            "class":funcfloat(self.funcs.classcall, self, "class"),
-            "var":funcfloat(self.funcs.getvarcall, self, "var"),
-            "val":funcfloat(self.funcs.getvalcall, self, "val"),
+            "iserr":funcfloat(self.funcs.iserrcall, self, "iserr", reqargs=1),
+            "class":funcfloat(self.funcs.classcall, self, "class", reqargs=1),
+            "var":funcfloat(self.funcs.getvarcall, self, "var", reqargs=1),
+            "val":funcfloat(self.funcs.getvalcall, self, "val", reqargs=1),
             "paren":funcfloat(self.funcs.getparenvarcall, self, "paren"),
             "parens":funcfloat(self.funcs.getparenscall, self, "parens"),
-            "raise":funcfloat(self.funcs.raisecall, self, "raise"),
-            "except":funcfloat(self.funcs.exceptcall, self, "except"),
+            "raise":funcfloat(self.funcs.raisecall, self, "raise", reqargs=1),
+            "except":funcfloat(self.funcs.exceptcall, self, "except", reqargs=1),
             "real":funcfloat(self.funcs.realcall, self, "real"),
             "imag":funcfloat(self.funcs.imagcall, self, "imag"),
-            "read":funcfloat(self.funcs.readcall, self, "read"),
-            "write":funcfloat(self.funcs.writecall, self, "write"),
+            "read":funcfloat(self.funcs.readcall, self, "read", reqargs=1),
+            "write":funcfloat(self.funcs.writecall, self, "write", reqargs=1),
             "is":funcfloat(self.funcs.iseqcall, self, "is", reqargs=2),
-            "include":funcfloat(self.funcs.includecall, self, "include"),
-            "del":funcfloat(self.funcs.delcall, self, "del"),
-            "def":funcfloat(self.funcs.defcall, self, "def"),
-            "global":funcfloat(self.funcs.globalcall, self, "global"),
-            "alias":funcfloat(self.funcs.aliascall, self, "alias"),
+            "include":funcfloat(self.funcs.includecall, self, "include", reqargs=1),
+            "del":funcfloat(self.funcs.delcall, self, "del", reqargs=1),
+            "def":funcfloat(self.funcs.defcall, self, "def", reqargs=1),
+            "global":funcfloat(self.funcs.globalcall, self, "global", reqargs=1),
+            "alias":funcfloat(self.funcs.aliascall, self, "alias", reqargs=1),
             "effect":usefunc(self.setreturned, self, "effect"),
+            "bitnot":funcfloat(self.funcs.bitnotcall, self, "bitnot", reqargs=1),
+            "bitor":funcfloat(self.funcs.bitorcall, self, "bitor", reqargs=2),
+            "bitand":funcfloat(self.funcs.bitandcall, self, "bitand", reqargs=2),
+            "bitxor":funcfloat(self.funcs.bitxorcall, self, "bitxor", reqargs=2),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "E":usefunc(E10, self, "E", ["x"]),
-            "D":funcfloat(self.funcs.derivcall, self, "D"),
-            "S":funcfloat(self.funcs.integcall, self, "S"),
+            "D":funcfloat(self.funcs.derivcall, self, "D", reqargs=1),
+            "S":funcfloat(self.funcs.integcall, self, "S", reqargs=1),
             "data":funcfloat(self.funcs.datacall, self, "data"),
             "frac":funcfloat(self.funcs.fractcall, self, "frac"),
             "simp":funcfloat(self.funcs.simpcall, self, "simp"),
-            "det":funcfloat(self.funcs.detcall, self, "det"),
+            "det":funcfloat(self.funcs.detcall, self, "det", reqargs=1),
             "math":classcalc(self, {
                 "floor":usefunc(math.floor, self, "floor", ["x"]),
                 "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
@@ -2595,7 +2599,9 @@ class evalfuncs(object):
 
     def findcall(self, variables):
         """Finds Equivalencies."""
-        if variables is not None and len(variables) >= 2:
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to find")
+        else:
             variables[1] = getmatrix(variables[1])
             if variables[1].onlydiag():
                 for x in xrange(0, variables[1].lendiag()):
@@ -2604,8 +2610,8 @@ class evalfuncs(object):
             else:
                 for x,y in variables[1].coords():
                     if variables[1].retrieve(x,y) == variables[0]:
-                            return diagmatrixlist([float(x),float(y)])
-        return matrix(0)
+                        return diagmatrixlist([float(x),float(y)])
+            return matrix(0)
 
     def mergecall(self, variables):
         """Merges Variables."""
@@ -2673,7 +2679,7 @@ class evalfuncs(object):
 
     def intcall(self, variables):
         """Performs int."""
-        return self.numcall(variables, func=lambda x: float(makeint(x)))
+        return self.numcall(variables, func=lambda x: makeint(x))
 
     def realcall(self, variables):
         """Performs Re."""
@@ -2700,81 +2706,87 @@ class evalfuncs(object):
 
     def splitcall(self, variables):
         """Performs split."""
-        variables[0] = collapse(variables[0])
-        items = []
-        for x in xrange(1, len(variables)):
-            items.append(collapse(variables[x]))
-        if isinstance(variables[0], strcalc):
-            out = self.splitcall([getmatrix(variables[0])]+items)
-            if isinstance(out, matrix) and out.onlydiag():
-                new = []
-                for x in out.getitems():
-                    if isinstance(x, matrix) and x.onlydiag():
-                        temp = ""
-                        for y in x.getitems():
-                            temp += self.e.prepare(y, True, False)
-                        new.append(rawstrcalc(temp, self))
-                    else:
-                        new.append(x)
-                return new
-            else:
-                return out
-        elif hasmatrix(variables[0]):
-            out = [[]]
-            for x in getmatrix(variables[0]).getitems():
-                if x in items:
-                    out.append([])
-                else:
-                    out[-1].append(x)
-            return diagmatrixlist(out)
-        elif variables[0] in items:
-            return matrix(0)
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to split")
         else:
-            return variables[0]
+            variables[0] = collapse(variables[0])
+            items = []
+            for x in xrange(1, len(variables)):
+                items.append(collapse(variables[x]))
+            if isinstance(variables[0], strcalc):
+                out = self.splitcall([getmatrix(variables[0])]+items)
+                if isinstance(out, matrix) and out.onlydiag():
+                    new = []
+                    for x in out.getitems():
+                        if isinstance(x, matrix) and x.onlydiag():
+                            temp = ""
+                            for y in x.getitems():
+                                temp += self.e.prepare(y, True, False)
+                            new.append(rawstrcalc(temp, self))
+                        else:
+                            new.append(x)
+                    return new
+                else:
+                    return out
+            elif hasmatrix(variables[0]):
+                out = [[]]
+                for x in getmatrix(variables[0]).getitems():
+                    if x in items:
+                        out.append([])
+                    else:
+                        out[-1].append(x)
+                return diagmatrixlist(out)
+            elif variables[0] in items:
+                return matrix(0)
+            else:
+                return variables[0]
 
     def replacecall(self, variables):
         """Performs replace."""
-        variables[0] = collapse(variables[0])
-        pairs = {}
-        for x in xrange(1, len(variables)):
-            if x%2 == 1:
-                temp = collapse(variables[x])
-            else:
-                pairs[temp] = variables[x]
-        if isinstance(variables[0], strcalc):
-            items = [getmatrix(variables[0])]
-            for k,v in pairs.items():
-                items.append(k)
-                items.append(v)
-            out = self.replacecall(items)
-            if isinstance(out, matrix) and out.onlydiag():
-                new = ""
-                for x in out.getitems():
-                    new += self.e.prepare(x, True, False)
-                return rawstrcalc(new, self)
-            else:
-                return out
-        elif ismatrix(variables[0]):
-            variables[0] = getmatrix(variables[0])
-            keys = []
-            values = []
-            for k,v in pairs.items():
-                keys.append(k)
-                values.append(v)
-            if variables[0].onlydiag():
-                for x in xrange(0, variables[0].lendiag()):
-                    temp = variables[0].retrieve(x)
-                    if temp in keys:
-                        variables[0].store(x,x, values[keys.index(temp)])
-            else:
-                for y,x in variables[0].coords():
-                    temp = variables[0].retrieve(y,x)
-                    if temp in keys:
-                        variables[0].store(y,x, values[keys.index(temp)])
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to replace")
         else:
-            while variables[0] in pairs:
-                variables[0] = pairs[variables[0]]
-        return variables[0]
+            variables[0] = collapse(variables[0])
+            pairs = {}
+            for x in xrange(1, len(variables)):
+                if x%2 == 1:
+                    temp = collapse(variables[x])
+                else:
+                    pairs[temp] = variables[x]
+            if isinstance(variables[0], strcalc):
+                items = [getmatrix(variables[0])]
+                for k,v in pairs.items():
+                    items.append(k)
+                    items.append(v)
+                out = self.replacecall(items)
+                if isinstance(out, matrix) and out.onlydiag():
+                    new = ""
+                    for x in out.getitems():
+                        new += self.e.prepare(x, True, False)
+                    return rawstrcalc(new, self)
+                else:
+                    return out
+            elif ismatrix(variables[0]):
+                variables[0] = getmatrix(variables[0])
+                keys = []
+                values = []
+                for k,v in pairs.items():
+                    keys.append(k)
+                    values.append(v)
+                if variables[0].onlydiag():
+                    for x in xrange(0, variables[0].lendiag()):
+                        temp = variables[0].retrieve(x)
+                        if temp in keys:
+                            variables[0].store(x,x, values[keys.index(temp)])
+                else:
+                    for y,x in variables[0].coords():
+                        temp = variables[0].retrieve(y,x)
+                        if temp in keys:
+                            variables[0].store(y,x, values[keys.index(temp)])
+            else:
+                while variables[0] in pairs:
+                    variables[0] = pairs[variables[0]]
+            return variables[0]
 
     def sortcall(self, variables):
         """Performs sort."""
@@ -2902,7 +2914,7 @@ class evalfuncs(object):
     def codecall(self, variables):
         """Converts To Code."""
         if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to code")
+            return codestr("", self.e)
         elif len(variables) == 1:
             return codestr(self.e.prepare(variables[0], True, False), self.e)
         else:
@@ -2928,7 +2940,7 @@ class evalfuncs(object):
     def joincall(self, variables):
         """Joins Variables By A Delimiter."""
         if len(variables) < 2:
-            return rawstrcalc("", self.e)
+            raise ExecutionError("ArgumentError", "Not enough arguments to join")
         else:
             delim = self.e.prepare(variables[0], True, False)
             out = ""
@@ -2952,7 +2964,9 @@ class evalfuncs(object):
 
     def datacall(self, variables):
         """Performs data."""
-        if len(variables) == 1 and isinstance(variables[0], data):
+        if not variables:
+            return data()
+        elif len(variables) == 1 and isinstance(variables[0], data):
             return variables[0]
         elif len(variables) == 1:
             return datamatrix(variables[0])
@@ -3210,3 +3224,45 @@ class evalfuncs(object):
             return diagmatrixlist([rawstrcalc(key, self.e), rawstrcalc(value, self.e)])
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to alias")
+
+    def bitnotcall(self, variables):
+        """Wraps ~."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to bitnot")
+        elif len(variables) == 1:
+            return ~variables[0]
+        else:
+            out = []
+            for arg in variables:
+                out.append(~arg)
+            return diagmatrixlist(out)
+
+    def bitorcall(self, variables):
+        """Wraps |."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to bitor")
+        else:
+            out = variables[0]
+            for x in xrange(1, len(variables)):
+                out = out | variables[x]
+            return out
+
+    def bitandcall(self, variables):
+        """Wraps &."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to bitand")
+        else:
+            out = variables[0]
+            for x in xrange(1, len(variables)):
+                out = out & variables[x]
+            return out
+
+    def bitxorcall(self, variables):
+        """Wraps ^."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to bitxor")
+        else:
+            out = variables[0]
+            for x in xrange(1, len(variables)):
+                out = out ^ variables[x]
+            return out

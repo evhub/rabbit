@@ -120,12 +120,12 @@ class mathbase(safebase):
             self.e.fresh()
         self.e.makevars({
             "debug":funcfloat(self.debugcall, self.e, "debug"),
-            "run":funcfloat(self.runcall, self.e, "run"),
-            "require":funcfloat(self.requirecall, self.e, "require"),
-            "assert":funcfloat(self.assertcall, self.e, "assert"),
-            "make":funcfloat(self.makecall, self.e, "make"),
-            "save":funcfloat(self.savecall, self.e, "save"),
-            "install":funcfloat(self.installcall, self.e, "install"),
+            "run":funcfloat(self.runcall, self.e, "run", reqargs=1),
+            "require":funcfloat(self.requirecall, self.e, "require", reqargs=1),
+            "assert":funcfloat(self.assertcall, self.e, "assert", reqargs=1),
+            "make":funcfloat(self.makecall, self.e, "make", reqargs=1),
+            "save":funcfloat(self.savecall, self.e, "save", reqargs=1),
+            "install":funcfloat(self.installcall, self.e, "install", reqargs=1),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
@@ -350,7 +350,7 @@ class mathbase(safebase):
 
     def installcall(self, variables):
         """Performs x = import."""
-        if variables is None or len(variables) == 0:
+        if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
         elif len(variables) == 1:
             inputstring = self.e.prepare(variables[0], False, False)
@@ -387,7 +387,7 @@ class mathbase(safebase):
 
     def savecall(self, variables):
         """Performs save."""
-        if variables is None or len(variables) == 0:
+        if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
         elif len(variables) == 1:
             original = self.e.prepare(variables[0], False, False)
