@@ -43,6 +43,7 @@ except NameError:
 else:
     old_input = raw_input
     raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode(encoding)
+    input = raw_input
 
 old_print = print
 def_str = str
