@@ -168,6 +168,10 @@ def isnum(inputobject):
     """Determines If An Object Is A Number."""
     return isinstance(inputobject, (old_float, old_int, long, complex))
 
+def ismethod(inputobject):
+    """Determines Whether An Object Is A Method."""
+    return typestr(inputobject) in ["instancemethod", "method"]
+
 def iseq(a, b):
     """Determines Whether Two Objects Are Really Equal."""
     return a is b or (type(a) is type(b) and a == b)
