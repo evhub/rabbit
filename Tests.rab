@@ -457,6 +457,11 @@ passert:: type({}) ?= "class"
 passert:: 270394572394085723904572394857203495793457 ?= 270394572394085723904572394857203495793457.0
 passert:: 5 in [1,5,2]
 passert:: ({x=1}()) from {x=1}
+passert:: 5 bitor 3 ?= 7
+passert:: 6 bitand 5 ?= 4
+passert:: 3 bitxor 7 ?= 4
+passert:: 5 rshift 1 ?= 2
+passert:: 7 lshift 1 ?= 14
 
 # Final Testing:
 passert:: save("Tests.save.txt");true
