@@ -100,6 +100,13 @@ def getbytes(obj):
     else:
         return str(obj).encode(encoding)
 
+def getstr(obj):
+    """Gets A Unicode Object."""
+    if isinstance(obj, old_str):
+        return obj.decode(encoding)
+    else:
+        return str(obj)
+
 def typestr(obj):
     """Formats The Type Of Something Into A String."""
     return str(type(obj)).split("'")[1]
