@@ -35,7 +35,7 @@ class compiler(commandline):
     compiling = False
     normcommand = always(None)
 
-    def __init__(self, debugcolor="lightred", mainprompt=addcolor("Rabbit:", "pink")+" ", prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", *initializers):
+    def __init__(self, debugcolor="lightred", mainprompt=addcolor("Rabbit:", "pink")+" ", prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", debug=False, *initializers):
         """Initializes The Command Line Interface."""
         self.startup()
         self.app = terminal()
@@ -47,6 +47,7 @@ class compiler(commandline):
         self.color = outcolor
         self.cli_start = self.start
         self.start = self.comp_start
+        self.comp_debug = debug
         if initializers == ():
             self.initialize()
         else:
@@ -201,6 +202,11 @@ class compiler(commandline):
                 self.makecall([arg])
         return matrix(0)
 
+    def comp_printdebug(self, message):
+        """Prints A Debug Message."""
+        if self.comp_debug:
+            print(addcolor(message, self.e.color))
+
     def assemble(self, protocol=0):
         """Compiles Code."""
         state = {
@@ -209,7 +215,7 @@ class compiler(commandline):
             "variables": getstates(self.e.variables),
             "parens": liststate(self.e.parens)
             }
-        self.printdebug("|>>| "+repr(state))
+        self.comp_printdebug("|>>| "+repr(state))
         out = cPickle.dumps(state, protocol=int(protocol))
         self.fresh()
         return getbytes(out)
