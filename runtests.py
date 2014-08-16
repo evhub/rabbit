@@ -30,7 +30,8 @@ cli.evalfile("Tests.rab")
 print(addcolor("Tests.txt Evaluation Complete.", "blue"))
 
 print()
-comp = compiler(debug=True)
+comp = compiler()
+comp.debug = True
 comp.fatalerror = always(None)
 print(addcolor("Compiling...", "magenta"))
 newvars = comp.disassemble(comp.assemble())[1]
