@@ -33,19 +33,21 @@ print()
 comp = compiler()
 comp.fatalerror = always(None)
 print(addcolor("Compiling...", "magenta"))
-newvars = comp.disassemble(comp.assemble())[1]
+oldvars = comp.e.variables.copy()
+comp.compfile()
+comp.decompfile()
 print(addcolor("Compiled.", "blue"))
 
 print(addcolor("Testing Compilation...", "magenta"))
-for k,v in comp.e.variables.items():
-    nv = haskey(newvars, k)
+for k,v in oldvars.items():
+    nv = haskey(comp.e.variables, k)
     if v != nv:
         comp.printdebug(addcolor("<!> For variable "+str(k)+" the old value of "+repr(v)+" is not equal to the new value "+repr(nv), "red"))
-for k,v in newvars.items():
-    ov = haskey(comp.e.variables, k)
+for k,v in comp.e.variables.items():
+    ov = haskey(oldvars, k)
     if v != ov:
         comp.printdebug(addcolor("<!> For variable "+str(k)+" the new value of "+repr(v)+" is not equal to the old value "+repr(ov), "red"))
-if not comp.e.variables == newvars:
+if oldvars != comp.e.variables:
     comp.adderror("CompileError", "Decompiled variables failed to equal compiled variables", True)
 print(addcolor("Compilation Testing Complete.", "blue"))
 

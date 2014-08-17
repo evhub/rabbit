@@ -30,10 +30,12 @@ except ImportError:
 
 class compiler(commandline):
     """The Rabbit Semi-Compiler."""
+    compext = ".rabbit"
     debug = False
     doshow = False
     compiling = False
     normcommand = always(None)
+    protocol = 0
 
     def __init__(self, debugcolor="lightred", mainprompt=addcolor("Rabbit:", "pink")+" ", prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", *initializers):
         """Initializes The Command Line Interface."""
@@ -97,7 +99,7 @@ class compiler(commandline):
     def comp(self):
         """Runs The Compiler On A Source File."""
         name = raw_input(self.mainprompt+addcolor("Compile Source File:", self.color)+" ")
-        if not self.compfile(name, name+".rabbit"):
+        if not self.compfile(name):
             self.app.display(addcolor("<!> IOError: Rabbit could not open file "+name, self.e.color))
 
     def run(self):
@@ -106,10 +108,10 @@ class compiler(commandline):
         if not self.decompfile(name):
             self.app.display(addcolor("<!> IOError: Rabbit could not open file "+name, self.e.color))
 
-    def decompfile(self, name):
+    def decompfile(self, name=None):
         """Decompiles A File."""
         if not name:
-            name = ".rabbit"
+            name = self.compext
         try:
             tempfile = open(name, "rb")
         except IOError:
@@ -131,9 +133,13 @@ class compiler(commandline):
         self.compiling = compiling
         return True
 
-    def compfile(self, name, result):
+    def compfile(self, name=None, result=None):
         """Compiles A File."""
-        compiling = self.compiling
+        if not name:
+            name = ""
+        if not result:
+            result = name+self.compext
+        compiling = self.compext
         self.compiling = True
         if name:
             self.evalfile(name)
@@ -201,7 +207,7 @@ class compiler(commandline):
                 self.makecall([arg])
         return matrix(0)
 
-    def assemble(self, protocol=0):
+    def assemble(self):
         """Compiles Code."""
         state = {
             "commands": self.commands,
@@ -209,7 +215,7 @@ class compiler(commandline):
             "variables": getstates(self.e.variables),
             "parens": liststate(self.e.parens)
             }
-        out = cPickle.dumps(state, protocol=int(protocol))
+        out = cPickle.dumps(state, protocol=self.protocol)
         self.fresh()
         return getbytes(out)
 
