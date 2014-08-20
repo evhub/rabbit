@@ -252,7 +252,7 @@ passert:: range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Cra
     $ div by three = x%3 ?= 0
     $ div by five = x%5 ?= 0
  )
-passert:: crackle pop (10) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop")
+passert:: crackle pop (5) ?= (1,2,"Crackle",4,"Pop")
  $ crackle pop (end, -x:1, -mod three:1, -mod five:1) =
   (
    "CracklePop"
