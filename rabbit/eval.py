@@ -3148,7 +3148,7 @@ class evalfuncs(object):
         """Writes To A File."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to write")
-        else:
+        elif len(variables) == 2:
             name = self.e.prepare(variables[0], False, False)
             if len(variables) == 1:
                 writer = ""
