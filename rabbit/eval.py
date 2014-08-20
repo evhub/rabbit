@@ -48,11 +48,11 @@ Global Operator Precedence List:
     >?!=<   Performs equality or inequality checks.
 
     ~       Applies a list to a function for looping.
-    \\       Creates a lambda.
-    ++      Performs concatenation.
-    --      Performs removal.
-    **      Performs repeat.
     ,       Seperates list elements.
+    \\       Creates a lambda.
+    --      Performs removal.
+    ++      Performs concatenation.
+    **      Performs repeat.
     +-      Performs addition and subtraction.
     %       Performs modulo.
     //      Performs floor division.
@@ -139,6 +139,31 @@ Global Operator Precedence List:
         self.set_calcs = [
             self.set_def,
             self.set_normal
+            ]
+        self.eval_splits = [
+            ("~", True),
+            (",", True),
+            ("\\", False),
+            ("--", True),
+            ("++", True),
+            ("**", True),
+            ("+", True, ("-", self.callops, 2)),
+            ("%", True),
+            ("//", True),
+            ("*", True, ("/",))
+            ]
+        self.eval_funcs = [
+            self.eval_loop,
+            self.eval_list,
+            self.eval_lambda,
+            self.eval_remove,
+            self.eval_join,
+            self.eval_repeat,
+            self.eval_add,
+            self.eval_mod,
+            self.eval_intdiv,
+            self.eval_mul,
+            self.eval_call
             ]
         self.calls = [
             self.call_var,
@@ -1147,46 +1172,83 @@ Global Operator Precedence List:
 
     def calc_eval(self, expression):
         """Evaluates An Expression."""
-        top = expression.split("~")
-        for a in xrange(0, len(top)):
-            top[a] = [top[a]]
-            if not top[a][0].startswith("\\"):
-                top[a][0] = top[a][0].split("++")
-                for c in xrange(0, len(top[a][0])):
-                    top[a][0][c] = top[a][0][c].split("--")
-                    for d in xrange(0, len(top[a][0][c])):
-                        top[a][0][c][d] = top[a][0][c][d].split("**")
-                        for e in xrange(0, len(top[a][0][c][d])):
-                            top[a][0][c][d][e] = top[a][0][c][d][e].split(",")
-                            for f in xrange(0, len(top[a][0][c][d][e])):
-                                top[a][0][c][d][e][f] = splitinplace(top[a][0][c][d][e][f].split("+"), "-", self.callops, 2)
-                                for g in xrange(0, len(top[a][0][c][d][e][f])):
-                                    top[a][0][c][d][e][f][g] = top[a][0][c][d][e][f][g].split("%")
-                                    for h in xrange(0, len(top[a][0][c][d][e][f][g])):
-                                        top[a][0][c][d][e][f][g][h] = top[a][0][c][d][e][f][g][h].split("//")
-                                        for i in xrange(0, len(top[a][0][c][d][e][f][g][h])):
-                                            top[a][0][c][d][e][f][g][h][i] = splitinplace(top[a][0][c][d][e][f][g][h][i].split("*"), "/")
-        value = reassemble(top, ["~", "\\", "++", "--", "**", ",", "+", "%", "*"])
+        top, ops = self.eval_split(expression)
+        value = reassemble(top, ops)
         self.printdebug("=> "+value)
         self.recursion += 1
-        out = self.eval_check(self.eval_loop(top), True)
+        out = self.eval_check(self.eval_next(top), True)
         self.printdebug(self.prepare(out, False, True, True)+" <= "+value)
         self.recursion -= 1
         return out
 
-    def eval_loop(self, complist):
+    def eval_split(self, expression):
+        """Splits An Expression By eval_splits."""
+        params = self.eval_splits[0]
+        if len(params) == 2:
+            (op, split), args = params, None
+        elif len(params) == 3:
+            op, split, args = params
+        else:
+            raise SyntaxError("Invalid eval_split "+repr(params))
+        if split:
+            top = expression.split(op)
+        else:
+            top = [expression]
+        if args is not None:
+            top = splitinplace(top, *args)
+        ops = [op]
+        if not split and top[0].startswith(op):
+            return top, ops
+        else:
+            return self.eval_split_do(top, ops, self.eval_splits[1:])
+
+    def eval_split_do(self, top, ops, eval_splits):
+        """Performs Splitting."""
+        if eval_splits:
+            params = eval_splits.pop(0)
+            if len(params) == 2:
+                (op, split), args = params, None
+            elif len(params) == 3:
+                op, split, args = params
+            else:
+                raise SyntaxError("Invalid eval_split "+repr(params))
+            ops.append(op)
+            for x in xrange(0, len(top)):
+                if split:
+                    top[x] = top[x].split(op)
+                else:
+                    top[x] = [top[x]]
+                if args is not None:
+                    top[x] = splitinplace(top[x], *args)
+                if split or not top[x][0].startswith(op):
+                    top[x], ops = self.eval_split_do(top[x], ops, eval_splits[:])
+        return top, ops
+
+    def eval_next(self, arg, eval_funcs=None):
+        """Calls The Next eval_func."""
+        if eval_funcs is None:
+            funcs = self.eval_funcs[:]
+        else:
+            funcs = eval_funcs[:]
+        func = funcs.pop(0)
+        if funcs:
+            return func(arg, funcs)
+        else:
+            return func(arg)
+
+    def eval_loop(self, complist, eval_funcs):
         """Performs List Comprehension."""
         if len(complist) == 1:
-            return self.eval_lambda(complist[0])
+            return self.eval_next(complist[0], eval_funcs)
         else:
-            item = self.eval_lambda(complist.pop())
+            item = self.eval_next(complist.pop(), eval_funcs)
             lists = []
             argnum = 1
             for x in reversed(xrange(0, len(complist))):
                 if not delist(complist[x]):
                     argnum += 1
                 else:
-                    lists.append((self.eval_lambda(complist[x]), argnum))
+                    lists.append((self.eval_next(complist[x], eval_funcs), argnum))
                     argnum = 1
             if argnum > 1:
                 lists.append((matrix(0), argnum))
@@ -1240,10 +1302,10 @@ Global Operator Precedence List:
             args.remove(value)
             return out
 
-    def eval_lambda(self, inputlist):
+    def eval_lambda(self, inputlist, eval_funcs):
         """Evaluates Lambdas."""
         if islist(inputlist[0]):
-            return self.eval_join(inputlist[0])
+            return self.eval_next(inputlist[0], eval_funcs)
         else:
             inputstring = inputlist[0]
             out = inputstring[1:].split("\\", 1)
@@ -1328,11 +1390,11 @@ Global Operator Precedence List:
                         params.append(x)
         return params, personals, allargs, reqargs
 
-    def eval_join(self, inputlist):
+    def eval_join(self, inputlist, eval_funcs):
         """Performs Concatenation."""
         items = []
         for item in inputlist:
-            item = self.eval_remove(item)
+            item = self.eval_next(item, eval_funcs)
             if not isnull(item):
                 items.append(item)
         if len(items) == 0:
@@ -1427,13 +1489,13 @@ Global Operator Precedence List:
             else:
                 raise ExecutionError("TypeError", "Could not concatenate items "+repr(items))
 
-    def eval_remove(self, inputlist):
+    def eval_remove(self, inputlist, eval_funcs):
         """Performs Removal."""
-        item = self.eval_repeat(inputlist[0])
+        item = self.eval_next(inputlist[0], eval_funcs)
         if len(inputlist) > 1:
             params = []
             for x in xrange(1, len(inputlist)):
-                params.append(self.eval_repeat(inputlist[x]))
+                params.append(self.eval_next(inputlist[x], eval_funcs))
             item = getcopy(item)
             if isinstance(item, classcalc):
                 item.calcall()
@@ -1504,15 +1566,15 @@ Global Operator Precedence List:
                 raise ExecutionError("TypeError", "Could not remove from item "+self.prepare(item, False, True, True))
         return item
 
-    def eval_repeat(self, inputlist):
+    def eval_repeat(self, inputlist, eval_funcs):
         """Evaluates Repeats."""
         if len(inputlist) == 1:
-            return self.eval_list(inputlist[0])
+            return self.eval_next(inputlist[0], eval_funcs)
         else:
-            out = self.eval_list(inputlist[0])
+            out = self.eval_next(inputlist[0], eval_funcs)
             for x in xrange(1, len(inputlist)):
                 done = False
-                num = self.eval_list(inputlist[x])
+                num = self.eval_next(inputlist[x], eval_funcs)
                 if hasattr(out, "op_repeat"):
                     try:
                         test = out.op_repeat(num)
@@ -1555,11 +1617,11 @@ Global Operator Precedence List:
             else:
                 return out
 
-    def eval_list(self, inputlist):
+    def eval_list(self, inputlist, eval_funcs):
         """Evaluates Matrices."""
         out = []
         for x in xrange(0, len(inputlist)):
-            item = self.eval_add(inputlist[x])
+            item = self.eval_next(inputlist[x], eval_funcs)
             if not isnull(item):
                 out.append(item)
         if len(out) == 0:
@@ -1572,42 +1634,42 @@ Global Operator Precedence List:
         else:
             return diagmatrixlist(out)
 
-    def eval_add(self, inputlist):
+    def eval_add(self, inputlist, eval_funcs):
         """Evaluates The Addition Part Of An Expression."""
         if len(inputlist) == 0:
             return matrix(0)
         else:
-            value = self.eval_mod(inputlist[0])
+            value = self.eval_next(inputlist[0], eval_funcs)
             for x in xrange(1, len(inputlist)):
-                item = self.eval_mod(inputlist[x])
+                item = self.eval_next(inputlist[x], eval_funcs)
                 if isnull(value):
                     value = item
                 elif not isnull(item):
                     value = value + item
             return value
 
-    def eval_mod(self, inputlist):
+    def eval_mod(self, inputlist, eval_funcs):
         """Evaluates The Modulus Part Of An Expression."""
-        value = self.eval_intdiv(inputlist[0])
+        value = self.eval_next(inputlist[0], eval_funcs)
         for x in xrange(1, len(inputlist)):
-            value = value % self.eval_intdiv(inputlist[x])
+            value = value % self.eval_next(inputlist[x], eval_funcs)
         return value
 
-    def eval_intdiv(self, inputlist):
+    def eval_intdiv(self, inputlist, eval_funcs):
         """Evaluates The Floor Division Part Of An Expression."""
-        value = self.eval_mul(inputlist[0])
+        value = self.eval_next(inputlist[0], eval_funcs)
         for x in xrange(1, len(inputlist)):
-            value = value // self.eval_mul(inputlist[x])
+            value = value // self.eval_next(inputlist[x], eval_funcs)
         return value
 
-    def eval_mul(self, inputlist):
+    def eval_mul(self, inputlist, eval_funcs):
         """Evaluates The Multiplication Part Of An Expression."""
         if len(inputlist) == 0:
             return matrix(0)
         else:
-            value = self.eval_call(inputlist[0])
+            value = self.eval_next(inputlist[0], eval_funcs)
             for x in xrange(1, len(inputlist)):
-                item = self.eval_call(inputlist[x])
+                item = self.eval_next(inputlist[x], eval_funcs)
                 if isnull(value):
                     value = item
                 elif not isnull(item):

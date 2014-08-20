@@ -489,11 +489,11 @@ The fifth stage is high-level operator evaluation.
 High-precedence mathematical and functional operators are evaluated at this stage. In order, the different operators evaluated are:
 ```
 1,2,3~ \x\x   # List looping (result = (1,2,3))
-\x\x+1        # Lambdas (result = \x\(x+1))
-1,2 ++ 3,4    # Concatenation (result = (1,2,3,4))
-1,2 -- 1      # Removal (result = (2,))
-1,2 ** 2      # Repeat (result = (1,2,1,2))
 1,2,3,4       # Lists (result = (1,2,3,4))
+\x\x+1        # Lambdas (result = \x\(x+1))
+1,2 -- 1      # Removal (result = (2,))
+1,2 ++ 3,4    # Concatenation (result = (1,2,3,4))
+1,2 ** 2      # Repeat (result = (1,2,1,2))
 1+2-3         # Addition and subtraction (result = 0)
 6 % 3         # Modulo (result = 0)
 5 // 2        # Floor Division (result = 2)
@@ -512,17 +512,19 @@ The sixth stage is low-level operator evaluation. Unlike stages 3-5, but like st
 
 There is a standard order for term operator function evaluation, but in rare cases the interpreter may change the order of or add in additional term operator functions. All interpreters in this module are consistent with the standard order. In standard order, the different term functions and their operators are:
 ```
-x | var         # Evaluates variables
-§ | parenvar	# Evaluates parentheses variables
-  | none        # Evaluates empty strings
-- | neg         # Performs negation
-/ | reciproc    # Performs division
-^ | exp         # Performs exponentiation
-! | fact        # Performs factorial
-: | colon       # Performs function calls
-§ | paren       # Evaluates all forms of parentheses
-. | method      # Evaluates methods and functions of functions
-1 | normal      # Evaluates numbers
+x | var           # Evaluates variables
+§ | parenvar      # Evaluates parentheses variables
+  | none          # Evaluates empty strings
+\ | lambda        # Evaluates lambdas
+- | neg           # Performs negation
+/ | reciproc      # Performs division
+^ | exp           # Performs exponentiation
+: | colon         # Performs function calls
+§ | paren         # Evaluates all forms of parentheses
+.. | comp         # Performs function composition
+x\ | lambdacoeff  # Evaluates lambda coefficients
+. | method        # Evaluates methods and functions of functions
+1 | normal        # Evaluates numbers
 ```
 
 ##### Debug Output
