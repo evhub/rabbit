@@ -93,8 +93,9 @@ Global Operator Precedence List:
         }
     unary = "!?"
     bools = unary + "<>=\u2260"
-    callops = "%/*^:\\"
-    multiargops = bools + callops + "+-@~|&;.,$\u201c" + "".join(groupers.keys()) + "".join(aliases.keys())
+    subparenops = ".^"
+    callops = subparenops + "%/*:\\"
+    multiargops = bools + callops + "+-@~|&;,$\u201c" + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + '")]}`\u201d' + "".join(groupers.values()) + parenchar
     errorvar = "__error__"
     fatalvar = "__fatal__"
@@ -172,9 +173,9 @@ Global Operator Precedence List:
             self.call_lambda,
             self.call_neg,
             self.call_reciproc,
-            self.call_exp,
             self.call_colon,
             self.call_paren,
+            self.call_exp,
             self.call_comp,
             self.call_lambdacoeff,
             self.call_method,
@@ -1959,7 +1960,7 @@ Global Operator Precedence List:
             values = []
             for l in inputlist:
                 item = matrix(0)
-                if l[0].startswith("."):
+                if startswithany(l[0], self.subparenops):
                     if len(values) > 0:
                         item = strfunc(strfunc.autoarg+l[0], self, [strfunc.autoarg], overflow=False).call([values.pop()])
                     else:
