@@ -1959,12 +1959,17 @@ Global Operator Precedence List:
             self.recursion += 1
             values = []
             for l in inputlist:
+                x = 0
+                while x < len(l):
+                    if endswithany(l[x], self.subparenops) and x+1 < len(l):
+                        l[x] += l[x+1]
+                    if startswithany(l[x], self.subparenops) and x > 0:
+                        l[x-1] += l[x]
+                        x -= 1
+                    x += 1
                 item = matrix(0)
-                if startswithany(l[0], self.subparenops):
-                    if len(values) > 0:
-                        item = strfunc(strfunc.autoarg+l[0], self, [strfunc.autoarg], overflow=False).call([values.pop()])
-                    else:
-                        raise ExecutionError("NoneError", "Nothing does not have methods")
+                if len(values) > 0 and startswithany(l[0], self.subparenops):
+                    item = strfunc(strfunc.autoarg+l[0], self, [strfunc.autoarg], overflow=False).call([values.pop()])
                 else:
                     item = self.eval_call(l[0])
                 args = []
