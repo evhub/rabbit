@@ -2851,11 +2851,11 @@ class evalfuncs(object):
         if variables:
             if hasmatrix(variables[0]):
                 for x in xrange(1, len(variables)):
-                    if ariables[x] in variables[0]:
+                    if variables[x] in variables[0]:
                         return 1.0
             else:
                 for x in xrange(1, len(variables)):
-                    if cvariables[x] == variables[0]:
+                    if variables[x] == variables[0]:
                         return 1.0
         return 0.0
 
