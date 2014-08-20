@@ -59,7 +59,7 @@ docs/_build/
 Thumbs.db
 
 # Tests save files
-*.save.txt
+*.save
 
 # Compiled Rabbit files
 *.rabbit

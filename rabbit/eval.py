@@ -1211,10 +1211,13 @@ Global Operator Precedence List:
                     item = self.eval_loop_set(lists[:], args, func)
                 for y in xrange(0, argnum):
                     args.remove(units[argnum*x+y])
-                if not isnull(item):
-                    new.append(item)
+                new.append(item)
             if fromstring:
-                out = rawstrcalc(strlist(new, "", converter=lambda x: self.prepare(x, True, False)), self)
+                outstr = ""
+                for item in new:
+                    if not isnull(item):
+                        outstr += self.prepare(item, True, False)
+                out = rawstrcalc(outstr, self)
             elif value.onlydiag():
                 out = diagmatrixlist(new)
             else:

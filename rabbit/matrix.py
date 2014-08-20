@@ -688,12 +688,15 @@ def diagmatrixlist(inputlist, converter=float, func=None, fake=True, clean=True)
     """Constructs A Diagonal Matrix From A List."""
     if func is None:
         func = diagmatrixlist
-    out = matrix(len(inputlist), converter=converter, fake=fake)
-    for x in xrange(0, len(inputlist)):
-        if islist(inputlist[x]):
-            inputlist[x] = func(inputlist[x])
-        if not clean or not isnull(inputlist[x]):
-            out.store(x,x, inputlist[x])
+    outlist = []
+    for item in inputlist:
+        if islist(item):
+            item = func(item)
+        if not clean or not isnull(item):
+            outlist.append(item)
+    out = matrix(len(outlist), converter=converter, fake=fake)
+    for x in xrange(0, len(outlist)):
+        out.store(x,x, inputlist[x])
     return out
 
 def rowmatrixlist(inputlist, converter=float, func=None, fake=False, clean=False):

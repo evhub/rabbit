@@ -463,11 +463,13 @@ passert:: 3 bitxor 7 ?= 4
 passert:: 5 rshift 1 ?= 2
 passert:: 5 lshift 1 ?= 10
 passert:: 5 // 2 ?= 2
+passert:: ! (1,2,3,4) ~ \x\($)
+passert:: len( [1,2,3,4] ~ \x\($) ) ?= 4
 
 # Final Testing:
-passert:: save("Tests.save.txt");true
-passert:: contents ?= read("Tests.save.txt")      $ write("Tests.save.txt", contents) $ contents = read("Tests.save.txt")
-passert:: { run :: Tests.save.txt }
+passert:: save("Tests.save");true
+passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents) $ contents = read("Tests.save")
+passert:: { run :: Tests.save }
 passert:: paren(parens()-1) ?= "123"              $ (123)
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
 passert:: printdone() ?= printdone()              $ printdone() = print("    Message sent.")
