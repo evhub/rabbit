@@ -1302,7 +1302,7 @@ Global Operator Precedence List:
             args.remove(value)
             return out
 
-    def eval_lambda(self, inputlist, eval_funcs):
+    def eval_lambda(self, inputlist, eval_funcs=None):
         """Evaluates Lambdas."""
         if islist(inputlist[0]):
             return self.eval_next(inputlist[0], eval_funcs)
