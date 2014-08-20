@@ -173,6 +173,7 @@ Global Operator Precedence List:
                 self.fatalvar: 1.0
                 }),
             "env":funcfloat(self.funcs.envcall, self, "env"),
+            "call":funcfloat(self.funcs.callcall, self, "call", reqargs=1),
             "copy":funcfloat(self.funcs.copycall, self, "copy", reqargs=1),
             "type":funcfloat(self.funcs.typecall, self, "type"),
             "to":funcfloat(self.funcs.tocall, self, "to", reqargs=1),
@@ -2566,7 +2567,6 @@ class evalfuncs(object):
         """Finds A Sum."""
         value = 0.0
         for x in variables:
-            x = collapse(x)
             if ismatrix(x):
                 value += self.sumcall(getmatrix(x).items())
             else:
@@ -2577,7 +2577,6 @@ class evalfuncs(object):
         """Finds A Product."""
         value = 1.0
         for x in variables:
-            x = collapse(x)
             if ismatrix(x):
                 value *= self.prodcall(getmatrix(x).getitems())
             else:
@@ -2660,11 +2659,11 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to range")
         elif len(variables) == 1:
-            return rangematrix(0.0, collapse(variables[0]))
+            return rangematrix(0.0, getnum(variables[0]))
         elif len(variables) == 2:
-            return rangematrix(collapse(variables[0]), collapse(variables[1]))
+            return rangematrix(getnum(variables[0]), getnum(variables[1]))
         else:
-            return rangematrix(collapse(variables[0]), collapse(variables[1]), collapse(variables[2]))
+            return rangematrix(getnum(variables[0]), getnum(variables[1]), getnum(variables[2]))
 
     def roundcall(self, variables):
         """Performs round."""
@@ -2726,10 +2725,7 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to split")
         else:
-            variables[0] = collapse(variables[0])
-            items = []
-            for x in xrange(1, len(variables)):
-                items.append(collapse(variables[x]))
+            items = variables[1:]
             if isinstance(variables[0], strcalc):
                 out = self.splitcall([getmatrix(variables[0])]+items)
                 if isinstance(out, matrix) and out.onlydiag():
@@ -2763,11 +2759,10 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to replace")
         else:
-            variables[0] = collapse(variables[0])
             pairs = {}
             for x in xrange(1, len(variables)):
                 if x%2 == 1:
-                    temp = collapse(variables[x])
+                    temp = variables[x]
                 else:
                     pairs[temp] = variables[x]
             if isinstance(variables[0], strcalc):
@@ -2839,7 +2834,7 @@ class evalfuncs(object):
         if not variables:
             return matrix(0)
         elif len(variables) == 1:
-            variables[0] = getmatrix(collapse(variables[0]))
+            variables[0] = getmatrix(variables[0])
             if variables[0].onlydiag():
                 out = variables[0].getdiag()
                 out.reverse()
@@ -2854,14 +2849,13 @@ class evalfuncs(object):
     def containscall(self, variables):
         """Performs in."""
         if variables:
-            variables[0] = collapse(variables[0])
             if hasmatrix(variables[0]):
                 for x in xrange(1, len(variables)):
-                    if collapse(variables[x]) in variables[0]:
+                    if ariables[x] in variables[0]:
                         return 1.0
             else:
                 for x in xrange(1, len(variables)):
-                    if collapse(variables[x]) == variables[0]:
+                    if cvariables[x] == variables[0]:
                         return 1.0
         return 0.0
 
@@ -3057,7 +3051,7 @@ class evalfuncs(object):
             return getcall(self.e.funcfind(variables[0]))(self.e.variables)
         else:
             func = func or getcall(self.e.funcfind(variables[0]))
-            item = collapse(variables[1])
+            item = variables[1]
             if len(variables) >= 3:
                 start = variables[2]
                 if overflow:
@@ -3154,7 +3148,7 @@ class evalfuncs(object):
         """Writes To A File."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to write")
-        elif len(variables) == 2:
+        else:
             name = self.e.prepare(variables[0], False, False)
             if len(variables) == 1:
                 writer = ""
@@ -3303,3 +3297,12 @@ class evalfuncs(object):
             for x in xrange(0, len(variables)-1):
                 out = out << variables[x]
             return out
+
+    def callcall(self, variables):
+        """Calls A Function."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to call")
+        elif len(variables) == 1:
+            return collapse(variables[0])
+        else:
+            return getcall(variables[0])(variables[1:])

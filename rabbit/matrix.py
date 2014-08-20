@@ -696,7 +696,7 @@ def diagmatrixlist(inputlist, converter=float, func=None, fake=True, clean=True)
             outlist.append(item)
     out = matrix(len(outlist), converter=converter, fake=fake)
     for x in xrange(0, len(outlist)):
-        out.store(x,x, inputlist[x])
+        out.store(x,x, outlist[x])
     return out
 
 def rowmatrixlist(inputlist, converter=float, func=None, fake=False, clean=False):
