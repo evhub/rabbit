@@ -48,11 +48,11 @@ Global Operator Precedence List:
     >?!=<   Performs equality or inequality checks.
 
     ~       Applies a list to a function for looping.
-    ,       Seperates list elements.
     \\       Creates a lambda.
     --      Performs removal.
     ++      Performs concatenation.
     **      Performs repeat.
+    ,       Seperates list elements.
     +-      Performs addition and subtraction.
     %       Performs modulo.
     //      Performs floor division.
@@ -142,11 +142,11 @@ Global Operator Precedence List:
             ]
         self.eval_splits = [
             ("~", True),
-            (",", True),
             ("\\", False),
             ("--", True),
             ("++", True),
             ("**", True),
+            (",", True),
             ("+", True, ("-", self.callops, 2)),
             ("%", True),
             ("//", True),
@@ -154,11 +154,11 @@ Global Operator Precedence List:
             ]
         self.eval_funcs = [
             self.eval_loop,
-            self.eval_list,
             self.eval_lambda,
             self.eval_remove,
             self.eval_join,
             self.eval_repeat,
+            self.eval_list,
             self.eval_add,
             self.eval_mod,
             self.eval_intdiv,

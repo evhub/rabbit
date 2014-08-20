@@ -489,11 +489,11 @@ The fifth stage is high-level operator evaluation.
 High-precedence mathematical and functional operators are evaluated at this stage. In order, the different operators evaluated are:
 ```
 1,2,3~ \x\x   # List looping (result = (1,2,3))
-1,2,3,4       # Lists (result = (1,2,3,4))
 \x\x+1        # Lambdas (result = \x\(x+1))
 1,2 -- 1      # Removal (result = (2,))
 1,2 ++ 3,4    # Concatenation (result = (1,2,3,4))
 1,2 ** 2      # Repeat (result = (1,2,1,2))
+1,2,3,4       # Lists (result = (1,2,3,4))
 1+2-3         # Addition and subtraction (result = 0)
 6 % 3         # Modulo (result = 0)
 5 // 2        # Floor Division (result = 2)

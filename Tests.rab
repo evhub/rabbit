@@ -467,7 +467,7 @@ passert:: 5 // 2 ?= 2
 passert:: ! (1,2,3,4) ~ \x\($)
 passert:: len( [1,2,3,4] ~ \x\($) ) ?= 4
 passert:: 1 ?= call:\1
-passert:: 1,2++3,4 ?= 1,(2,3),4
+passert:: 1,2++3,4 ?= 1,2,3,4
 
 # Final Testing:
 passert:: save("Tests.save");true
