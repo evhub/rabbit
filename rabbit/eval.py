@@ -167,8 +167,6 @@ Global Operator Precedence List:
             self.eval_call
             ]
         self.calls = [
-            self.call_var,
-            self.call_parenvar,
             self.call_none,
             self.call_lambda,
             self.call_neg,
@@ -179,6 +177,8 @@ Global Operator Precedence List:
             self.call_comp,
             self.call_lambdacoeff,
             self.call_method,
+            self.call_parenvar,
+            self.call_var,
             self.call_normal
             ]
 
@@ -1677,14 +1677,17 @@ Global Operator Precedence List:
                     value = value * item
             return value
 
-    def eval_call(self, inputstring):
+    def eval_call(self, inputstring, start=-1):
         """Evaluates A Variable."""
         self.printdebug("-> "+inputstring)
         self.recursion += 1
-        for func in self.calls:
-            value = func(inputstring)
+        start += 1
+        for func in self.calls[start:]:
+            value = func(inputstring, start)
             if value is not None:
                 break
+            else:
+                start += 1
         out = self.eval_check(value)
         self.printdebug(self.prepare(out, False, True, True)+" <- "+inputstring+" | "+namestr(func).split("_")[-1])
         self.recursion -= 1
@@ -1721,7 +1724,7 @@ Global Operator Precedence List:
         """Determines If An Item Can Be Converted By eval_check."""
         return hasnum(item) or islist(item) or isinstance(item, bool) or item is None
 
-    def call_var(self, inputstring):
+    def call_var(self, inputstring, count=None):
         """Checks If Variable."""
         if inputstring in self.variables:
             item, key = self.getfind(inputstring, True)
@@ -1735,7 +1738,7 @@ Global Operator Precedence List:
                 self.variables[key] = value
             return value
 
-    def call_parenvar(self, inputstring):
+    def call_parenvar(self, inputstring, count=None):
         """Checks If Parentheses."""
         if inputstring.startswith(self.parenchar) and inputstring.endswith(self.parenchar):
             item = self.namefind(inputstring, True)
@@ -1748,7 +1751,7 @@ Global Operator Precedence List:
                     value = getcall(item)(None)
                 return value
 
-    def call_none(self, inputstring):
+    def call_none(self, inputstring, count=None):
         """Evaluates A Null."""
         if inputstring == "":
             if self.laxnull:
@@ -1756,30 +1759,30 @@ Global Operator Precedence List:
             else:
                 raise ExecutionError("NoneError", "Cannot evaluate the empty string")
 
-    def call_lambda(self, inputstring):
+    def call_lambda(self, inputstring, count=None):
         """Wraps Lambda Evaluation."""
         if inputstring.startswith("\\"):
             return self.eval_lambda([inputstring])
 
-    def call_neg(self, inputstring):
+    def call_neg(self, inputstring, count):
         """Evaluates Unary -."""
         if inputstring.startswith("-"):
-            item = self.eval_call(inputstring[1:])
+            item = self.eval_call(inputstring[1:], count)
             if isnull(item):
                 return -1.0
             else:
                 return -1.0*item
 
-    def call_reciproc(self, inputstring):
+    def call_reciproc(self, inputstring, count):
         """Evaluates /."""
         if inputstring.startswith("/"):
-            item = self.eval_call(inputstring[1:])
+            item = self.eval_call(inputstring[1:], count)
             if isnull(item):
                 return item
             else:
                 return reciprocal(item)
 
-    def call_exp(self, inputstring):
+    def call_exp(self, inputstring, count):
         """Evaluates The Exponential Part Of An Expression."""
         if "^" in inputstring:
             inputlist = inputstring.split("^")
@@ -1788,7 +1791,7 @@ Global Operator Precedence List:
             for x in reversed(xrange(0, len(inputlist))):
                 item = inputlist[x]
                 if item:
-                    value = knuth(self.eval_call(item), value, level)
+                    value = knuth(self.eval_call(item, count), value, level)
                     level = 1
                 else:
                     if x == 0 or x == len(inputlist)-1:
@@ -1798,7 +1801,7 @@ Global Operator Precedence List:
                         level += 1
             return value
 
-    def call_colon(self, inputstring):
+    def call_colon(self, inputstring, count):
         """Evaluates Colons."""
         if ":" in inputstring:
             inputlist = inputstring.split(":")
@@ -1806,11 +1809,11 @@ Global Operator Precedence List:
                 params = []
                 for x in xrange(1, len(inputlist)):
                     if inputlist[x]:
-                        params.append(getcopy(self.eval_call(inputlist[x])))
+                        params.append(getcopy(self.eval_call(inputlist[x], count)))
                 item = self.funcfind(inputlist[0])
                 return self.call_colon_set(item, params)
             else:
-                result, err = catch(self.eval_call, strlist(inputlist[1:], ":"))
+                result, err = catch(self.eval_call, strlist(inputlist[1:], ":"), count)
                 if err:
                     out = classcalc(self, {
                         self.errorvar : 1.0,
@@ -1933,7 +1936,7 @@ Global Operator Precedence List:
             value = self.call_colon_set(value, temp)
         return value
 
-    def call_paren(self, inputstring):
+    def call_paren(self, inputstring, count):
         """Evaluates Parentheses."""
         inputstring = strlist(switchsplit(inputstring, string.digits, notstring=self.reserved), self.parenchar*2)        
         if self.parenchar in inputstring:
@@ -1971,10 +1974,10 @@ Global Operator Precedence List:
                 if len(values) > 0 and startswithany(l[0], self.subparenops):
                     item = strfunc(strfunc.autoarg+l[0], self, [strfunc.autoarg], overflow=False).call([values.pop()])
                 else:
-                    item = self.eval_call(l[0])
+                    item = self.eval_call(l[0], count)
                 args = []
                 for x in xrange(1, len(l)):
-                    args.append(self.eval_call(l[x]))
+                    args.append(self.eval_call(l[x], count))
                 item = self.call_paren_do(item, args)
                 if values and isinstance(item, funcfloat) and item.infix:
                     values.append(self.call_paren_do(item, [values.pop()]))
@@ -2018,19 +2021,19 @@ Global Operator Precedence List:
                 x += 1
         return item
 
-    def call_comp(self, inputstring):
+    def call_comp(self, inputstring, count=None):
         """Performs Function Composition."""
         if ".." in inputstring:
             funclist = inputstring.split("..")
             return strfunc(strlist(funclist, "(")+"("+strfunc.allargs+")"*len(funclist), self, overflow=False)
 
-    def call_lambdacoeff(self, inputstring):
+    def call_lambdacoeff(self, inputstring, count=None):
         """Evaluates Lambda Coefficients."""
         parts = inputstring.split("\\", 1)
         if len(parts) > 1:
             return self.eval_call(parts[0]+self.wrap(self.eval_lambda(["\\"+parts[1]])))
 
-    def call_method(self, inputstring):
+    def call_method(self, inputstring, count=None):
         """Returns Method Instances."""
         if "." in inputstring:
             itemlist = inputstring.split(".")
@@ -2089,7 +2092,7 @@ Global Operator Precedence List:
                     out = new
                 return out
 
-    def call_normal(self, inputstring):
+    def call_normal(self, inputstring, count=None):
         """Returns Argument."""
         return inputstring
 
