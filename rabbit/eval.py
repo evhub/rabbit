@@ -109,6 +109,7 @@ Global Operator Precedence List:
     returned = True
     spawned = True
     calculated = None
+    using = None
 
     def __init__(self, variables=None, processor=None, color=None, speedy=False, maxrecursion=10):
         """Initializes The Evaluator."""
@@ -199,6 +200,7 @@ Global Operator Precedence List:
                 self.errorvar: 1.0,
                 self.fatalvar: 1.0
                 }),
+            "use":funcfloat(self.funcs.usecall, self, "use"),
             "env":funcfloat(self.funcs.envcall, self, "env"),
             "call":funcfloat(self.funcs.callcall, self, "call", reqargs=1),
             "copy":funcfloat(self.funcs.copycall, self, "copy", reqargs=1),
@@ -672,8 +674,19 @@ Global Operator Precedence List:
             info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
         self.printdebug(">>> "+inputstring+str(info))
         self.recursion += 1
-        out = self.proc_cmd(inputstring, top)
-        self.printdebug(self.prepare(out, False, True, True)+" <<< "+inputstring)
+        if top and self.using:
+            func = self.prepare(self.using, False, True, True)
+            original = func+" :: "+inputstring
+            self.printdebug("::> "+original)
+            self.recursion += 1
+            out = getcall(self.using)([codestr(inputstring, self)])
+            prepped = self.prepare(out, False, True, True)
+            self.printdebug(prepped+" <:: "+original)
+            self.recursion -= 1
+        else:
+            out = self.proc_cmd(inputstring, top)
+            prepped = self.prepare(out, False, True, True)
+        self.printdebug(prepped+" <<< "+inputstring)
         self.recursion -= 1
         return out
 
@@ -2356,6 +2369,17 @@ class evalfuncs(object):
     def __init__(self, e):
         """Initializes The Functions."""
         self.e = e
+
+    def usecall(self, variables):
+        """Uses A Default Statement."""
+        if not variables:
+            self.e.using = None
+        elif len(variables) == 1:
+            self.e.using = variables[0]
+            self.e.setreturned()
+            return matrix(0)
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to use")
 
     def delcall(self, variables):
         """Deletes A Variable."""

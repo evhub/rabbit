@@ -31,6 +31,8 @@ def collapse(item):
             raise ExecutionError("ArgumentError", "Not enough arguments supplied to collapse "+item.e.prepare(item, False, True, True))
         else:
             return item.calc()
+    elif isinstance(item, codestr):
+        return item.calc()
     else:
         return item
 
