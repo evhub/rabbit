@@ -201,6 +201,7 @@ Global Operator Precedence List:
                 self.fatalvar: 1.0
                 }),
             "use":funcfloat(self.funcs.usecall, self, "use"),
+            "using":funcfloat(self.funcs.usingcall, self, "using"),
             "env":funcfloat(self.funcs.envcall, self, "env"),
             "call":funcfloat(self.funcs.callcall, self, "call", reqargs=1),
             "copy":funcfloat(self.funcs.copycall, self, "copy", reqargs=1),
@@ -2442,10 +2443,15 @@ class evalfuncs(object):
                 out.append(self.includecall([arg]))
             return diagmatrixlist(out)
 
+    def usingcall(self, variables):
+        """Retrieves The Current Function Being Used."""
+        self.e.overflow = variables
+        self.e.setreturned()
+        return self.e.using
+
     def envcall(self, variables):
         """Retrieves A Class Of The Global Environment."""
-        if variables:
-            self.e.overflow = variables
+        self.e.overflow = variables
         self.e.setreturned()
         return classcalc(self.e, self.e.getvars())
 
