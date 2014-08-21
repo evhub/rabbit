@@ -470,6 +470,7 @@ passert:: 1 ?= call:\1
 passert:: 1,2++3,4 ?= 1,2,3,4
 passert:: 2x^2 ?= 50    $ x = 5
 passert:: (2x)^2 ?= 100 $ x = 5
+passert:: len("\\\\") ?= 2
 
 # Final Testing:
 passert:: save("Tests.save");true

@@ -563,11 +563,14 @@ class strcalc(numobject):
                         self.calcstr = self.calcstr[:-1]
                     x = ""
                 else:
-                    self.calcstr += "\\"
+                    self.calcstr += "\\\\"
             elif x == "\\":
                 func = True
                 x = ""
-            self.calcstr += x
+            else:
+                self.calcstr += x
+        if func:
+            self.calcstr += "\\\\"
         self.calcstr = str(compute('"""'+self.calcstr.replace('"', '\\"')+'"""'))
 
     def getstate(self):
@@ -600,13 +603,13 @@ class strcalc(numobject):
         inside = False
         special = False
         for c in repr(self.calcstr):
-            if c == "\\":
-                special = not special
-            elif special:
+            if special:
                 if c not in "\"'":
                     out.append("\\")
                 out.append(c)
                 special = False
+            elif c == "\\":
+                special = True
             elif inside:
                 if c == inside:
                     inside = False
