@@ -99,7 +99,7 @@ class funcfloat(numobject):
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = property(self.e.unusedarg)
+            self.funcstr = self.e.unusedarg()
         if memoize is not None:
             self.memoize = memoize
         if memo is None:
@@ -267,7 +267,7 @@ class strfunc(funcfloat):
         if name:
             self.name = str(name)
         else:
-            self.name = property(self.e.unusedarg)
+            self.name = self.e.unusedarg()
         if allargs is not None:
             self.allargs = str(allargs)
         if variables is None:
@@ -531,7 +531,7 @@ class strfloat(strfunc):
             self.method = test.method
         else:
             if self.name is None:
-                self.name = property(self.e.unusedarg)
+                self.name = self.e.unusedarg()
             self.funcstr = funcstr
             self.overflow = overflow
             self.variables = variables
@@ -727,7 +727,7 @@ class usefunc(funcfloat):
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = property(self.e.unusedarg)
+            self.funcstr = self.e.unusedarg()
         self.overflow = bool(overflow)
         if variables is None:
             self.variables = []
@@ -796,7 +796,7 @@ class unifunc(funcfloat):
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = property(self.e.unusedarg)
+            self.funcstr = self.e.unusedarg()
         self.store = []
         self.precall = precall
 
@@ -832,7 +832,7 @@ class makefunc(funcfloat):
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = property(self.e.unusedarg)
+            self.funcstr = self.e.unusedarg()
         if memoize is not None:
             self.memoize = memoize
         if memo is None:
@@ -926,7 +926,7 @@ class derivfunc(derivbase, strfunc):
         if name:
             self.name = str(name)
         else:
-            self.name = property(self.e.unusedarg)
+            self.name = self.e.unusedarg()
         self.funcstr = str(funcstr)
         self.n = int(n)
         self.accuracy = float(accuracy)
@@ -959,7 +959,7 @@ class integfunc(integbase, strfunc):
         if name:
             self.name = str(name)
         else:
-            self.name = property(self.e.unusedarg)
+            self.name = self.e.unusedarg()
         self.funcstr = str(funcstr)
         self.accuracy = float(accuracy)
         self.variables = [str(varname)]
@@ -993,7 +993,7 @@ class derivfuncfloat(derivbase, funcfloat):
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = property(self.e.unusedarg)
+            self.funcstr = self.e.unusedarg()
         if memoize is not None:
             self.memoize = memoize
         if memo is None:
@@ -1022,7 +1022,7 @@ class integfuncfloat(integbase, funcfloat):
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = property(self.e.unusedarg)
+            self.funcstr = self.e.unusedarg()
         if memoize is not None:
             self.memoize = memoize
         if memo is None:
@@ -1919,7 +1919,7 @@ class rollfunc(strfunc):
         if name:
             self.name = str(name)
         else:
-            self.name = property(self.e.unusedarg)
+            self.name = self.e.unusedarg()
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
