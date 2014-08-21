@@ -2036,11 +2036,15 @@ Global Operator Precedence List:
                 x += 1
         return item
 
-    def call_comp(self, inputstring, count=None):
+    def call_comp(self, inputstring, count):
         """Performs Function Composition."""
         if ".." in inputstring:
-            funclist = inputstring.split("..")
-            return strfunc(strlist(funclist, "(")+"("+strfunc.allargs+")"*len(funclist), self, overflow=False)
+            funclist = []
+            for item in inputstring.split(".."):
+                func = self.eval_call(item, count)
+                if not isnull(func):
+                    funclist.append(self.wrap(func))
+            return strfunc(strlist(funclist, "(")+"("*bool(funclist)+strfunc.allargs+")"*len(funclist), self, overflow=False)
 
     def call_lambdacoeff(self, inputstring, count=None):
         """Evaluates Lambda Coefficients."""
