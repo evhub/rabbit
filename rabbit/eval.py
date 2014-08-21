@@ -2374,13 +2374,13 @@ class evalfuncs(object):
     def usecall(self, variables):
         """Uses A Default Statement."""
         if not variables:
-            self.e.using = None
+            return matrix(0)
         elif len(variables) == 1:
             self.e.using = variables[0]
-            self.e.setreturned()
-            return matrix(0)
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to use")
+        self.e.setreturned()
+        return matrix(0)
 
     def delcall(self, variables):
         """Deletes A Variable."""
