@@ -1801,7 +1801,7 @@ Global Operator Precedence List:
                         level += 1
             return value
 
-    def call_colon(self, inputstring, count):
+    def call_colon(self, inputstring, count=None):
         """Evaluates Colons."""
         if ":" in inputstring:
             inputlist = inputstring.split(":")
@@ -1809,11 +1809,11 @@ Global Operator Precedence List:
                 params = []
                 for x in xrange(1, len(inputlist)):
                     if inputlist[x]:
-                        params.append(getcopy(self.eval_call(inputlist[x], count)))
+                        params.append(getcopy(self.eval_call(inputlist[x])))
                 item = self.funcfind(inputlist[0])
                 return self.call_colon_set(item, params)
             else:
-                result, err = catch(self.eval_call, strlist(inputlist[1:], ":"), count)
+                result, err = catch(self.eval_call, strlist(inputlist[1:], ":"))
                 if err:
                     out = classcalc(self, {
                         self.errorvar : 1.0,
