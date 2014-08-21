@@ -1965,9 +1965,9 @@ Global Operator Precedence List:
                 x = 0
                 while x < len(l):
                     if endswithany(l[x], self.subparenops) and x+1 < len(l):
-                        l[x] += l[x+1]
+                        l[x] += l.pop(x+1)
                     if startswithany(l[x], self.subparenops) and x > 0:
-                        l[x-1] += l[x]
+                        l[x-1] += l.pop(x)
                         x -= 1
                     x += 1
                 item = matrix(0)
