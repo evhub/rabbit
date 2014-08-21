@@ -2374,7 +2374,7 @@ class evalfuncs(object):
     def usecall(self, variables):
         """Uses A Default Statement."""
         if not variables:
-            return matrix(0)
+            self.e.using = None
         elif len(variables) == 1:
             self.e.using = variables[0]
         else:
