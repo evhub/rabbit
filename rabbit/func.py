@@ -563,12 +563,11 @@ class strcalc(numobject):
                         self.calcstr = self.calcstr[:-1]
                     x = ""
                 else:
-                    self.calcstr += "\\\\"
+                    x += "\\"
             elif x == "\\":
                 func = True
                 x = ""
-            else:
-                self.calcstr += x
+            self.calcstr += x
         if func:
             self.calcstr += "\\\\"
         self.calcstr = str(compute('"""'+self.calcstr.replace('"', '\\"')+'"""'))
