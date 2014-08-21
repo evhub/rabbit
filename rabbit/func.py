@@ -385,7 +385,7 @@ class strfunc(funcfloat):
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfunc("("+self.name+":"+strlist(self.variables,":")+")"+self.e.wrap(other), self.e, self.variables, {self.name:self})
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")^"+self.e.wrap(other), self.e, self.variables, {self.name:self})
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
@@ -406,7 +406,7 @@ class strfunc(funcfloat):
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"/("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self,})
+            return strfunc(self.e.wrap(other)+"/("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
