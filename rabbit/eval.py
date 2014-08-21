@@ -2447,7 +2447,10 @@ class evalfuncs(object):
         """Retrieves The Current Function Being Used."""
         self.e.overflow = variables
         self.e.setreturned()
-        return self.e.using
+        if self.e.using is None:
+            return matrix(0)
+        else:
+            return self.e.using
 
     def envcall(self, variables):
         """Retrieves A Class Of The Global Environment."""

@@ -474,11 +474,14 @@ passert:: (2x)^2 ?= 100 $ x = 5
 # Final Testing:
 passert:: save("Tests.save");true
 passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents) $ contents = read("Tests.save")
+passert:: ! using()
+use(calc) ;; use(using())
+passert:: using()
 passert:: {
-           use(calc)
            run :: Tests.save
-           use()
            }
+use()
+passert:: ! using()
 passert:: paren(parens()-1) ?= "123"              $ (123)
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
 passert:: printdone() ?= printdone()              $ printdone() = print("    Message sent.")
