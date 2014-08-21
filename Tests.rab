@@ -480,7 +480,7 @@ passert:: using()
 passert:: {
            run :: Tests.save
            }
-use()
+use() ;; use(using())
 passert:: ! using()
 passert:: paren(parens()-1) ?= "123"              $ (123)
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
