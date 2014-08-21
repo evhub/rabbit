@@ -101,9 +101,8 @@ Global Operator Precedence List:
     fatalvar = "__fatal__"
     namevar = "name"
     messagevar = "message"
-    debuglog = []
+    autoarg = "____"
     recursion = 0
-    overflow = []
     laxnull = True
     redef = False
     useclass = None
@@ -123,6 +122,8 @@ Global Operator Precedence List:
         self.speedy = bool(speedy)
         self.maxrecursion = int(maxrecursion)
         self.color = color
+        self.debuglog = []
+        self.overflow = []
         self.funcs = evalfuncs(self)
         self.fresh()
         if variables is not None:
@@ -148,10 +149,10 @@ Global Operator Precedence List:
             ("++", True),
             ("**", True),
             (",", True),
-            ("+", True, ("-", self.callops, 2)),
+            ("+", True, ["-", self.callops, 2]),
             ("%", True),
             ("//", True),
-            ("*", True, ("/",))
+            ("*", True, ["/"])
             ]
         self.eval_funcs = [
             self.eval_loop,
@@ -1936,6 +1937,13 @@ Global Operator Precedence List:
             value = self.call_colon_set(value, temp)
         return value
 
+    def unusedarg(self):
+        """Returns An Unused Arg."""
+        out = self.autoarg
+        while out in self.variables:
+            out = "_"+out
+        return out
+
     def call_paren(self, inputstring, count):
         """Evaluates Parentheses."""
         inputstring = strlist(switchsplit(inputstring, string.digits, notstring=self.reserved), self.parenchar*2)        
@@ -1972,7 +1980,8 @@ Global Operator Precedence List:
                     x += 1
                 item = matrix(0)
                 if len(values) > 0 and startswithany(l[0], self.subparenops):
-                    item = strfunc(strfunc.autoarg+l[0], self, [strfunc.autoarg], overflow=False).call([values.pop()])
+                    autoarg = self.unusedarg()
+                    item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
                 else:
                     item = self.eval_call(l[0], count)
                 args = []
