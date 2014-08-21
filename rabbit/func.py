@@ -563,7 +563,7 @@ class strcalc(numobject):
                         self.calcstr = self.calcstr[:-1]
                     x = ""
                 else:
-                    x += "\\"
+                    self.calcstr += "\\"
             elif x == "\\":
                 func = True
                 x = ""
