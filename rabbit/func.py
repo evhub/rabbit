@@ -197,56 +197,56 @@ class funcfloat(numobject):
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfunc("("+self.e.wrap(self)+"("+self.allargs+"))+"+self.e.wrap(other), self.e, [self.allargs])
+            return strfunc("("+self.funcstr+"("+self.allargs+"))+"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
 
     def __idiv__(self, other):
         """Performs Division."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfunc("("+self.e.wrap(self)+"("+self.allargs+"))/"+self.e.wrap(other), self.e, [self.allargs])
+            return strfunc("("+self.funcstr+"("+self.allargs+"))/"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
 
     def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfunc("("+self.e.wrap(self)+"("+self.allargs+"))*"+self.e.wrap(other), self.e, [self.allargs])
+            return strfunc("("+self.funcstr+"("+self.allargs+"))*"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
 
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfunc("("+self.e.wrap(self)+"("+self.allargs+"))^"+self.e.wrap(other), self.e, [self.allargs])
+            return strfunc("("+self.funcstr+"("+self.allargs+"))^"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"+("+self.e.wrap(self)+"("+self.allargs+"))", self.e, [self.allargs])
+            return strfunc(self.e.wrap(other)+"+("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
 
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"^("+self.e.wrap(self)+"("+self.allargs+"))", self.e, [self.allargs])
+            return strfunc(self.e.wrap(other)+"^("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
 
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"/("+self.e.wrap(self)+"("+self.allargs+"))", self.e, [self.allargs])
+            return strfunc(self.e.wrap(other)+"/("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"*("+self.e.wrap(self)+"("+self.allargs+"))", self.e, [self.allargs])
+            return strfunc(self.e.wrap(other)+"*("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
 
     def __eq__(self, other):
         """Performs ==."""
@@ -257,7 +257,6 @@ class funcfloat(numobject):
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
-    name = None
     method = None
     lexical = True
 
@@ -267,6 +266,8 @@ class strfunc(funcfloat):
         self.funcstr = self.e.namefind(str(funcstr))
         if name:
             self.name = str(name)
+        else:
+            self.name = self.e.unusedarg()
         if allargs is not None:
             self.allargs = str(allargs)
         if variables is None:
@@ -363,56 +364,56 @@ class strfunc(funcfloat):
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfunc("("+self.e.wrap(self)+":"+strlist(self.variables,":")+")+"+self.e.wrap(other), self.e, self.variables)
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")+"+self.e.wrap(other), self.e, self.variables, {self.name:self})
 
     def __idiv__(self, other):
         """Performs Division."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfunc("("+self.e.wrap(self)+":"+strlist(self.variables,":")+")/"+self.e.wrap(other), self.e, self.variables)
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")/"+self.e.wrap(other), self.e, self.variables, {self.name:self})
 
     def __imul__(self, other):
         """Performs Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfunc("("+self.e.wrap(self)":"+strlist(self.variables,":")+")*"+self.e.wrap(other), self.e, self.variables)
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")*"+self.e.wrap(other), self.e, self.variables, {self.name:self})
 
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfunc("("+self.e.wrap(self)+":"+strlist(self.variables,":")+")^"+self.e.wrap(other), self.e, self.variables)
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")"+self.e.wrap(other), self.e, self.variables, {self.name:self})
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if other == 0.0 or isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"+("+self.e.wrap(self)+":"+strlist(self.variables,":")+")", self.e, self.variables)
+            return strfunc(self.e.wrap(other)+"+("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
 
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"^("+self.e.wrap(self)+":"+strlist(self.variables,":")+")", self.e, self.variables)
+            return strfunc(self.e.wrap(other)+"^("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
 
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"/("+self.e.wrap(self)+":"+strlist(self.variables,":")+")", self.e, self.variables)
+            return strfunc(self.e.wrap(other)+"/("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self,})
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
         if other == 1.0 or isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"*("+self.e.wrap(self)+":"+strlist(self.variables,":")+")", self.e, self.variables)
+            return strfunc(self.e.wrap(other)+"*("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
 
     def find(self):
         """Simplifies The Function String."""
@@ -476,6 +477,8 @@ class strfloat(strfunc):
         self.e = e
         if name:
             self.name = str(name)
+        else:
+            self.name = None
         if allargs is not None:
             self.allargs = str(allargs)
         if variables is None:
@@ -527,6 +530,8 @@ class strfloat(strfunc):
                 self.snapshot.update(self.e.variables)
             self.method = test.method
         else:
+            if self.name is None:
+                self.name = self.e.unusedarg()
             self.funcstr = funcstr
             self.overflow = overflow
             self.variables = variables
@@ -920,6 +925,8 @@ class derivfunc(derivbase, strfunc):
         self.e = e
         if name:
             self.name = str(name)
+        else:
+            self.name = self.e.unusedarg()
         self.funcstr = str(funcstr)
         self.n = int(n)
         self.accuracy = float(accuracy)
@@ -951,6 +958,8 @@ class integfunc(integbase, strfunc):
         self.e = e
         if name:
             self.name = str(name)
+        else:
+            self.name = self.e.unusedarg()
         self.funcstr = str(funcstr)
         self.accuracy = float(accuracy)
         self.variables = [str(varname)]
@@ -1909,6 +1918,8 @@ class rollfunc(strfunc):
         self.funcstr = str(self.stop)
         if name:
             self.name = str(name)
+        else:
+            self.name = self.e.unusedarg()
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -1950,7 +1961,7 @@ class rollfunc(strfunc):
     def __eq__(self, other):
         """Performs Equals."""
         if isinstance(other, rollfunc):
-            return self.stop == other.stop and self.gen.key == other.gen.key and self.gen.counter == other.gen.counter
+            return self.stop == other.stop and self.name == other.name and self.gen.key == other.gen.key and self.gen.counter == other.gen.counter
         else:
             return False
 
