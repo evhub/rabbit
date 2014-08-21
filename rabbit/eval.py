@@ -169,7 +169,6 @@ Global Operator Precedence List:
             self.eval_call
             ]
         self.calls = [
-            self.call_none,
             self.call_lambda,
             self.call_neg,
             self.call_reciproc,
@@ -181,6 +180,7 @@ Global Operator Precedence List:
             self.call_method,
             self.call_parenvar,
             self.call_var,
+            self.call_none,
             self.call_normal
             ]
 
@@ -1765,14 +1765,6 @@ Global Operator Precedence List:
                     value = getcall(item)(None)
                 return value
 
-    def call_none(self, inputstring, count=None):
-        """Evaluates A Null."""
-        if inputstring == "":
-            if self.laxnull:
-                return matrix(0)
-            else:
-                raise ExecutionError("NoneError", "Cannot evaluate the empty string")
-
     def call_lambda(self, inputstring, count=None):
         """Wraps Lambda Evaluation."""
         if inputstring.startswith("\\"):
@@ -2113,6 +2105,14 @@ Global Operator Precedence List:
                             raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                     out = new
                 return out
+
+    def call_none(self, inputstring, count=None):
+        """Evaluates A Null."""
+        if inputstring == "":
+            if self.laxnull:
+                return matrix(0)
+            else:
+                raise ExecutionError("NoneError", "Cannot evaluate the empty string")
 
     def call_normal(self, inputstring, count=None):
         """Returns Argument."""
