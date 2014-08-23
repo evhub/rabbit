@@ -2291,12 +2291,30 @@ Global Operator Precedence List:
             out = item
         elif istext(item):
             out = strcalc(item, self)
-        elif islist(item):
+        elif isinstance(item, tuple):
             out = diagmatrixlist(map(self.frompython, item))
+        elif islist(item):
+            out = rowmatrixlist(map(self.frompython, item))
         elif isfunc(item):
             out = item
         else:
             raise TypeError("Cannot convert non-evaluatour result type "+typestr(item))
+        return out
+
+    def topython(self, item):
+        """Converts A Rabbit Object To A Python Object."""
+        if isnull(item):
+            out = None
+        elif isinstance(item, strcalc):
+            out = str(item)
+        elif isinstance(item, matrix):
+            out = map(topython, item.getitems())
+            if item.onlydiag():
+                out = tuple(out)
+            else:
+                out = list(out)
+        else:
+            out = item
         return out
 
     def deitem(self, item):
