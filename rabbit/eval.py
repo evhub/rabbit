@@ -110,6 +110,7 @@ Global Operator Precedence List:
     spawned = True
     calculated = None
     using = None
+    pure = False
 
     def __init__(self, variables=None, processor=None, color=None, speedy=False, maxrecursion=10):
         """Initializes The Evaluator."""
@@ -202,6 +203,7 @@ Global Operator Precedence List:
                 }),
             "use":funcfloat(self.funcs.usecall, self, "use"),
             "using":funcfloat(self.funcs.usingcall, self, "using"),
+            "pure":funcfloat(self.funcs.purecall, self, "pure", reqargs=1),
             "env":funcfloat(self.funcs.envcall, self, "env"),
             "call":funcfloat(self.funcs.callcall, self, "call", reqargs=1),
             "copy":funcfloat(self.funcs.copycall, self, "copy", reqargs=1),
@@ -380,7 +382,10 @@ Global Operator Precedence List:
 
     def setreturned(self, value=True):
         """Sets returned."""
-        self.returned = bool(value)
+        value = bool(value)
+        if value and self.pure:
+            raise ExecutionError("PureError", "A pure statement attempted to produce a side effect")
+        self.returned = value
 
     def setspawned(self, value=True):
         """Sets spawned."""
@@ -3311,6 +3316,24 @@ class evalfuncs(object):
                 out.append(self.readcall([x]))
             return diagmatrixlist(out)
 
+    def purecall(self, variables):
+        """Ensures Purity."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to pure")
+        elif len(variables) == 1:
+            original = self.e.prepare(variables[0], True, False)
+            pure, self.e.pure = self.e.pure, True
+            try:
+                out = self.e.calc(original, " | pure")
+            finally:
+                self.e.pure = pure
+            return out
+        else:
+            out = []
+            for arg in variables:
+                out.append(self.purecall([arg]))
+            return diagmatrixlist(out)
+
     def defcall(self, variables):
         """Defines A Variable."""
         if not variables:
@@ -3335,7 +3358,6 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to def")
         elif len(variables) == 1:
-            self.e.setreturned()
             original = self.e.prepare(variables[0], True, False)
             useclass, self.e.useclass = self.e.useclass, False
             try:
