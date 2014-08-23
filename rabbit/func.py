@@ -1935,8 +1935,8 @@ class rollfunc(strfunc):
 
     def calc(self, m=1.0):
         """Generates A Random Number."""
-        stop = self.stop*m
         self.e.setreturned()
+        stop = self.stop*m
         if stop > 1 and stop == int(stop):
             return 1+self.gen.chooseint(int(stop))
         else:

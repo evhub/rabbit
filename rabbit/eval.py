@@ -384,8 +384,8 @@ Global Operator Precedence List:
 
     def setspawned(self, value=True):
         """Sets spawned."""
-        self.spawned = bool(value)
         self.setreturned()
+        self.spawned = bool(value)
 
     def printdebug(self, message):
         """Prints Debug Output."""
@@ -2396,12 +2396,13 @@ class evalfuncs(object):
     def usecall(self, variables):
         """Uses A Default Statement."""
         if not variables:
+            self.e.setreturned()
             self.e.using = None
         elif len(variables) == 1:
+            self.e.setreturned()
             self.e.using = variables[0]
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to use")
-        self.e.setreturned()
         return matrix(0)
 
     def delcall(self, variables):
@@ -2409,6 +2410,7 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to del")
         elif len(variables) == 1:
+            self.e.setreturned()
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
                 out = self.e.variables[original]
@@ -2429,7 +2431,6 @@ class evalfuncs(object):
                 useclass.remove(item)
             else:
                 raise ExecutionError("VariableError", "Could not find "+original)
-            self.e.setreturned()
             return out
         else:
             out = []
@@ -2454,8 +2455,8 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to include")
         elif len(variables) == 1:
             if isinstance(variables[0], classcalc):
-                oldvars = self.e.setvars(variables[0].getvars())
                 self.e.setreturned()
+                oldvars = self.e.setvars(variables[0].getvars())
                 return classcalc(self.e, oldvars)
             else:
                 raise ValueError("Can only include a class")
@@ -2467,8 +2468,8 @@ class evalfuncs(object):
 
     def usingcall(self, variables):
         """Retrieves The Current Function Being Used."""
-        self.e.overflow = variables
         self.e.setreturned()
+        self.e.overflow = variables
         if self.e.using is None:
             return matrix(0)
         else:
@@ -2476,8 +2477,8 @@ class evalfuncs(object):
 
     def envcall(self, variables):
         """Retrieves A Class Of The Global Environment."""
-        self.e.overflow = variables
         self.e.setreturned()
+        self.e.overflow = variables
         return classcalc(self.e, self.e.getvars())
 
     def raisecall(self, variables):
@@ -2572,8 +2573,8 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to val")
         elif len(variables) == 1:
-            original = self.e.prepare(variables[0], False, False)
             self.e.setreturned()
+            original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
                 return self.e.funcfind(original)
             else:
@@ -2586,9 +2587,8 @@ class evalfuncs(object):
 
     def getparenscall(self, variables):
         """Retreives The Number Of Parentheses."""
-        if variables:
-            self.e.overflow = variables
         self.e.setreturned()
+        self.e.overflow = variables
         return float(len(self.e.parens))
 
     def getparenvarcall(self, variables):
@@ -2596,10 +2596,10 @@ class evalfuncs(object):
         if not variables:
             variables = [-1]
         if len(variables) == 1:
+            self.e.setreturned()
             original = getint(variables[0])
             if original < 0:
                 original += len(self.e.parens)
-            self.e.setreturned()
             if 0 < original and original < len(self.e.parens):
                 return rawstrcalc(self.e.prepare(self.e.getparen(original), True, True), self.e)
             else:
@@ -2615,8 +2615,8 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to var")
         elif len(variables) == 1:
-            original = self.e.prepare(variables[0], False, False)
             self.e.setreturned()
+            original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
                 return rawstrcalc(self.e.prepare(self.e.variables[original], True, True), self.e)
             else:
@@ -3271,12 +3271,12 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to d")
         else:
+            self.e.setreturned()
             stop = getnum(variables[0])
             key = None
             if len(variables) > 1:
                 key = self.e.prepare(variables[1], True, False)
                 self.e.overflow = variables[2:]
-            self.e.setreturned()
             return rollfunc(stop, self.e, key)
 
     def writecall(self, variables):
@@ -3284,12 +3284,12 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to write")
         elif len(variables) == 2:
+            self.e.setreturned()
             name = self.e.prepare(variables[0], False, False)
             if len(variables) == 1:
                 writer = ""
             else:
                 writer = self.e.prepare(variables[1], False, False)
-            self.e.setreturned()
             with openfile(name, "wb") as f:
                 writefile(f, writer)
             return matrix(0)
@@ -3301,8 +3301,8 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to read")
         elif len(variables) == 1:
-            name = self.e.prepare(variables[0], False, False)
             self.e.setreturned()
+            name = self.e.prepare(variables[0], False, False)
             with openfile(name) as f:
                 return rawstrcalc(readfile(f), self.e)
         else:
@@ -3316,13 +3316,13 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to def")
         elif len(variables) == 1:
+            self.e.setreturned()
             original = self.e.prepare(variables[0], True, False)
             redef, self.e.redef = self.e.redef, True
             try:
                 out = self.e.calc(original, " | def")
             finally:
                 self.e.redef = redef
-            self.e.setreturned()
             return out
         else:
             out = []
@@ -3335,13 +3335,13 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to def")
         elif len(variables) == 1:
+            self.e.setreturned()
             original = self.e.prepare(variables[0], True, False)
             useclass, self.e.useclass = self.e.useclass, False
             try:
                 out = self.e.calc(original, " | global")
             finally:
                 self.e.useclass = useclass
-            self.e.setreturned()
             return out
         else:
             out = []
@@ -3354,8 +3354,8 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to alias")
         elif len(variables) == 1:
-            key = self.e.prepare(variables[0], True, False)
             self.e.setreturned()
+            key = self.e.prepare(variables[0], True, False)
             if key in self.e.aliases:
                 out = rawstrcalc(self.e.aliases[key], self.e)
                 del self.e.aliases[key]
@@ -3363,9 +3363,9 @@ class evalfuncs(object):
                 out = matrix(0)
             return out
         elif len(variables) == 2:
+            self.e.setreturned()
             key = self.e.prepare(variables[0], True, False)
             value = self.e.prepare(variables[1], True, False)
-            self.e.setreturned()
             self.e.aliases[key] = value
             return diagmatrixlist([rawstrcalc(key, self.e), rawstrcalc(value, self.e)])
         else:

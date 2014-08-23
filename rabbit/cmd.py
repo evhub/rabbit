@@ -58,6 +58,7 @@ class mathbase(safebase):
 
     def setdebug(self, state):
         """Sets The Debugging State."""
+        self.e.setreturned()
         state = bool(state)
         self.e.debug = True
         if state:
@@ -135,8 +136,8 @@ class mathbase(safebase):
 
     def clear(self):
         """Clears The Console."""
-        self.app.clear()
         self.e.setreturned()
+        self.app.clear()
 
     def initialize(self, args=()):
         """Runs Any Files Fed To The Constructor."""
@@ -206,8 +207,8 @@ class mathbase(safebase):
         if not isnull(test):
             self.ans.append(test)
             if self.doshow:
-                self.show(self.e.prepare(self.ans[-1], True, True))
                 self.e.setreturned()
+                self.show(self.e.prepare(self.ans[-1], True, True))
 
     def debugcall(self, variables):
         """Controls Debugging."""
@@ -226,7 +227,6 @@ class mathbase(safebase):
                 out = bool(variables[0])
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to debug")
-        self.e.setreturned()
         self.setdebug(out)
         return float(out)
 
@@ -306,7 +306,8 @@ class mathbase(safebase):
 
     def printcall(self, variables, func=None):
         """Performs print."""
-        if variables is None or len(variables) == 0:
+        self.e.setreturned()
+        if not variables:
             out = self.e.prepare(matrix(0), True, False)
         else:
             out = []
@@ -317,7 +318,6 @@ class mathbase(safebase):
             self.show(out)
         else:
             func(out)
-        self.e.setreturned()
         return rawstrcalc(out, self.e)
 
     def showcall(self, variables):
@@ -353,6 +353,7 @@ class mathbase(safebase):
         if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
         elif len(variables) == 1:
+            self.e.setreturned()
             inputstring = self.e.prepare(variables[0], False, False)
             name = delspace(delspace(inputstring), self.e.reserved)
             try:
@@ -360,7 +361,6 @@ class mathbase(safebase):
             except IOError:
                 raise ExecutionError("IOError", "Could not find for install file "+inputstring)
             else:
-                self.e.setreturned()
                 if impclass is None:
                     return matrix(0)
                 elif iseval(impclass):
@@ -390,13 +390,12 @@ class mathbase(safebase):
         if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
         elif len(variables) == 1:
+            self.e.setreturned()
             original = self.e.prepare(variables[0], False, False)
             try:
                 writefile(getfile(original, "wb"), strlist(self.commands, "\n"))
             except IOError:
                 raise ExecutionError("IOError", "Could not find for save file "+original)
-            else:
-                self.e.setreturned()
         else:
             for x in variables:
                 self.savecall([x])
