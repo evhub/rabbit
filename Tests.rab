@@ -395,7 +395,7 @@ passert:: ! {x=1 ;; y=2} > {z=1}
 passert:: {x=1} >= {x=1}
 passert:: {x=1} <= {x=1}
 passert:: iserr((try::raise()):1)
-passert:: (try::except( (try::1/0) )) ?= :(1/0)
+passert:: (try::except( (try::1/0) )) ?= (try::(1/0))
 passert:: (try::raise( ComplicatedError() )):1 ?= ComplicatedError()
     $ ComplicatedError := error + {
                                    name := "ComplicatedError"
