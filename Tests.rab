@@ -353,8 +353,8 @@ passert:: a ?= 5                    $ proc("a = 5")
 passert:: num(i) ?= i
 passert:: real(i) ?= 0
 passert:: imag(i) ?= 1
-passert:: except( :(1/0), "ZeroDivisionError" ):1
-passert:: except( :(1/0), (try::(1/0)):1 ):1
+passert:: except( (try::1/0), "ZeroDivisionError" ):1
+passert:: except( (try::1/0), (try::(1/0)):1 ):1
 passert:: int(1.5) ?= 1
 passert:: class({}()) ?= {}
 passert:: type(class({}())) ?= "class"
@@ -395,7 +395,7 @@ passert:: ! {x=1 ;; y=2} > {z=1}
 passert:: {x=1} >= {x=1}
 passert:: {x=1} <= {x=1}
 passert:: iserr((try::raise()):1)
-passert:: :except( :(1/0) ) ?= :(1/0)
+passert:: (try::except( (try::1/0) )) ?= :(1/0)
 passert:: (try::raise( ComplicatedError() )):1 ?= ComplicatedError()
     $ ComplicatedError := error + {
                                    name := "ComplicatedError"
