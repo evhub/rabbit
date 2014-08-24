@@ -246,8 +246,9 @@ Global Operator Precedence List:
             "val":funcfloat(self.funcs.getvalcall, self, "val", reqargs=1),
             "paren":funcfloat(self.funcs.getparenvarcall, self, "paren"),
             "parens":funcfloat(self.funcs.getparenscall, self, "parens"),
-            "raise":funcfloat(self.funcs.raisecall, self, "raise", reqargs=1),
-            "except":funcfloat(self.funcs.exceptcall, self, "except", reqargs=1),
+            "try":funcfloat(self.funcs.trycall, self, "try"),
+            "raise":funcfloat(self.funcs.raisecall, self, "raise"),
+            "except":funcfloat(self.funcs.exceptcall, self, "except"),
             "real":funcfloat(self.funcs.realcall, self, "real"),
             "imag":funcfloat(self.funcs.imagcall, self, "imag"),
             "read":funcfloat(self.funcs.readcall, self, "read", reqargs=1),
@@ -1817,32 +1818,16 @@ Global Operator Precedence List:
         """Evaluates Colons."""
         if ":" in inputstring:
             inputlist = inputstring.split(":")
-            if inputlist[0]:
-                params = []
-                for x in xrange(1, len(inputlist)):
-                    if inputlist[x]:
-                        params.append(getcopy(self.eval_call(inputlist[x])))
-                item = self.funcfind(inputlist[0])
-                return self.call_colon_set(item, params)
-            else:
-                result, err = catch(self.eval_call, strlist(inputlist[1:], ":"))
-                if err:
-                    out = classcalc(self, {
-                        self.errorvar : 1.0,
-                        self.fatalvar : float(err[2])
-                        }).toinstance()
-                    out.store(self.namevar, strcalc(err[0], self))
-                    out.store(self.messagevar, strcalc(err[1], self))
-                    if len(err) > 3:
-                        for k,v in err[3].items():
-                            out.store(k, v)
-                    return rowmatrixlist([matrix(0), out])
-                else:
-                    return rowmatrixlist([result, matrix(0)])
+            item = self.funcfind(inputlist[0])
+            params = []
+            for x in xrange(1, len(inputlist)):
+                if inputlist[x]:
+                    params.append(getcopy(self.eval_call(inputlist[x])))
+            return self.call_colon_set(item, params)
 
     def call_colon_set(self, item, params):
         """Performs Colon Function Calls."""
-        self.overflow = []
+        overflow, self.overflow = self.overflow, []
         docalc = False
         if isnull(item):
             if len(params) == 0:
@@ -1946,6 +1931,7 @@ Global Operator Precedence List:
             temp = self.overflow[:]
             self.overflow = []
             value = self.call_colon_set(value, temp)
+        self.overflow = overflow
         return value
 
     def unusedarg(self):
@@ -2017,7 +2003,7 @@ Global Operator Precedence List:
         """Does Parentheses Calling."""
         x = 0
         while x < len(arglist):
-            self.overflow = []
+            overflow, self.overflow = self.overflow, []
             arg = getcopy(arglist[x])
             if not isfunc(item):
                 if isinstance(arg, funcfloat) and arg.infix:
@@ -2034,11 +2020,11 @@ Global Operator Precedence List:
             else:
                 item = getcall(item)([arg])
             if self.overflow:
-                out = self.overflow
-                self.overflow = []
+                out, self.overflow = self.overflow, overflow
                 raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(out) > 1)+" of "+strlist(out, ", ", lambda x: self.prepare(x, False, True, True)))
             else:
                 x += 1
+            self.overflow = overflow
         return item
 
     def call_comp(self, inputstring, count):
@@ -2486,6 +2472,28 @@ class evalfuncs(object):
         self.e.overflow = variables
         return classcalc(self.e, self.e.getvars())
 
+    def trycall(self, variables):
+        """Catches Errors."""
+        if not variables:
+            return matrix(0)
+        else:
+            self.e.overflow = variables[1:]
+            original = self.e.prepare(variables[0], True, False)
+            result, err = catch(self.e.calc, original)
+            if err:
+                out = classcalc(self.e, {
+                    self.e.errorvar : 1.0,
+                    self.e.fatalvar : float(err[2])
+                    }).toinstance()
+                out.store(self.e.namevar, strcalc(err[0], self.e))
+                out.store(self.e.messagevar, strcalc(err[1], self.e))
+                if len(err) > 3:
+                    for k,v in err[3].items():
+                        out.store(k, v)
+                return rowmatrixlist([matrix(0), out])
+            else:
+                return rowmatrixlist([result, matrix(0)])
+
     def raisecall(self, variables):
         """Raises An Error."""
         if not variables:
@@ -2517,14 +2525,14 @@ class evalfuncs(object):
                     del variables[self.e.fatalvar]
                 raise ExecutionError(name, message, fatal, variables)
             else:
-                raise ExecutionError(self.e.prepare(variables[0], False, False), "An error occured")
+                raise ExecutionError("Error", self.e.prepare(variables[0], False, False))
         else:
             raise ExecutionError(self.e.prepare(variables[0], False, False), strlist(variables[1:], "; ", lambda x: self.e.prepare(x, False, False)))
 
     def exceptcall(self, variables):
         """Excepts Errors."""
         if not variables:
-            return rowmatrixlist([0.0])
+            return rowmatrixlist([matrix(0), 0.0])
         elif isinstance(variables[0], matrix) and variables[0].y == 1 and variables[0].x == 2:
             items = variables[0].items()
             if self.iserrcall([items[1]]):

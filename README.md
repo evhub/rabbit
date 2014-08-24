@@ -323,29 +323,11 @@ nothing := {
 nil := nothing()
 ```
 
-#### Rabbits Make Errors
-
-Sometimes, errors will occur in your code. Not to fret, Rabbit will show you exactly the chain of evaluation that led to them. But sometimes, these errors are intentional, and you want to stop them from terminating your code. In that case, you should use error handling. The basic syntax for error handling is:
-```
-:(1/0)		# This will catch the error, returning a class with descriptive attributes
-:(1)		# If there is no error, this will just return the result (result = 1)
-```
-
 #### Rabbits Make Statements
 
 The design of Rabbit is intended to use as few "special words" as possible, so what would be "special words" in other languages are just functions in Rabbit.
 
 To call these special functions, the syntax is always kept consistent: they can only be used wherever a top-level call is being made, and their syntax is exactly like colon syntax, except with two colons instead of one.
-
-Statements can vary from interpreter to interpreter, but the ones implemented in basic Rabbit are:
-```
-assert :: <expression>	# Raises an error if <expression> isn't true
-debug :: [on|off]		# Turns verbose debug output on and off
-def :: <definition>		# Performs a definition, even if the variable name is already defined
-del :: <variable>		# Manually deletes the variable <variable>
-make :: <definition>	# Tags a definition as pre-compilation
-run :: <filename>		# Runs a Rabbit file
-```
 
 #### Other Rabbits
 
