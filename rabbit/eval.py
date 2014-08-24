@@ -1002,7 +1002,7 @@ Global Operator Precedence List:
                     if not isinstance(value, tuple):
                         value = sides[0], value
                     if docalc:
-                        value[1] = self.trycalc(value[1])
+                        value = value[0], self.trycalc(value[1])
                     self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.prepare(value[1], False, True, True))
                     if useclass is None:
                         if not self.redef and value[0] in self.variables:
