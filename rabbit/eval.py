@@ -1002,7 +1002,7 @@ Global Operator Precedence List:
                         value = sides[0], value
                     self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.prepare(value[1], False, True, True))
                     if useclass is None:
-                        if not self.redef and value[0] in self.variables:
+                        if not self.redef and value[0] in self.variables and self.variables[value[0]] is not value[1]:
                             raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
                         else:
                             if docalc:
@@ -1012,7 +1012,7 @@ Global Operator Precedence List:
                                 self.variables[value[0]] = value[1]
                                 out = strfloat(value[0], self, name=value[0])
                     else:
-                        if not self.redef and value[0] in useclass.variables:
+                        if not self.redef and value[0] in useclass.variables and useclass.variables[value[0]] is not value[1]:
                             raise ExecutionError("RedefinitionError", "The attribute "+value[0]+" already exists")
                         else:
                             if docalc:

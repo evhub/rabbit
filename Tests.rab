@@ -372,6 +372,8 @@ passert:: 3 bitxor 7 ?= 4
 passert:: 5 rshift 1 ?= 2
 passert:: 5 lshift 1 ?= 10
 passert:: call((\x\(x+1)), 5) ?= 6
+passert:: (pure:: ?5) ?= 1
+passert:: 2 ?= (pure:: 1+1)
 
 # New Feature Tests:
 passert:: f..g(1)g..f(2) ?= 20      $ f(x) = x^2 $ g(x) = x+1
@@ -471,6 +473,7 @@ passert:: 1,2++3,4 ?= 1,2,3,4
 passert:: 2x^2 ?= 50    $ x = 5
 passert:: (2x)^2 ?= 100 $ x = 5
 passert:: len("\\\\") ?= 2
+passert:: x=1 $ x=1
 
 # Final Testing:
 passert:: save("Tests.save");true
