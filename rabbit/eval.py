@@ -1001,27 +1001,33 @@ Global Operator Precedence List:
                 if value is not None:
                     if not isinstance(value, tuple):
                         value = sides[0], value
+                    if docalc:
+                        value[1] = self.trycalc(value[1])
                     self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.prepare(value[1], False, True, True))
                     if useclass is None:
-                        if not self.redef and value[0] in self.variables and self.variables[value[0]] is not value[1]:
-                            raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
+                        if not self.redef and value[0] in self.variables:
+                            if self.variables[value[0]] is not value[1]:
+                                raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
+                        elif docalc:
+                            self.variables[value[0]] = value[1]
                         else:
-                            if docalc:
-                                out = self.trycalc(value[1])
-                                self.variables[value[0]] = out
-                            else:
-                                self.variables[value[0]] = value[1]
-                                out = strfloat(value[0], self, name=value[0])
+                            self.variables[value[0]] = value[1]
+                        if docalc:
+                            out = value[1]
+                        else:
+                            out = strfloat(value[0], self, name=value[0])
                     else:
-                        if not self.redef and value[0] in useclass.variables and useclass.variables[value[0]] is not value[1]:
-                            raise ExecutionError("RedefinitionError", "The attribute "+value[0]+" already exists")
+                        if not self.redef and value[0] in useclass.variables:
+                            if useclass.variables[value[0]] is not value[1]:
+                                raise ExecutionError("RedefinitionError", "The attribute "+value[0]+" already exists")
+                        elif docalc:
+                            useclass.store(value[0], value[1])
                         else:
-                            if docalc:
-                                out = self.trycalc(value[1])
-                                useclass.store(value[0], out)
-                            else:
-                                useclass.store(value[0], value[1])
-                                out = strfunc(useclass.selfvar+"."+value[0], self, [], {useclass.selfvar:useclass}, value[0], overflow=False)
+                            useclass.store(value[0], value[1])
+                        if docalc:
+                            out = value[1]
+                        else:
+                            out = strfunc(useclass.selfvar+"."+value[0], self, [], {useclass.selfvar:useclass}, value[0])
                     if delfrom is not None and value[0] in delfrom:
                         del delfrom[value[0]]
                     return out

@@ -287,10 +287,9 @@ passert:: abs'(2) ?= 2 & abs'(0) ?= 0 & abs'(-2) ?= 2
     out@done;expr()
     $ done, out = list:parts
     )
-passert:: (( try:: 1/0 ):1).name ?= "ZeroDivisionError"
- $ try(expr) = :expr()
 
 # Built-Ins Tests:
+passert:: (( try:: 1/0 ):1).name ?= "ZeroDivisionError"
 passert:: a != b                    $ (def :: b.x = 2) $ b := copy(a) $ a := { x = 1 }
 passert:: type:(1,2,3) ?= "list"
 passert:: num"1" ?= 1
