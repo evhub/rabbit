@@ -58,7 +58,6 @@ class mathbase(safebase):
 
     def setdebug(self, state):
         """Sets The Debugging State."""
-        self.e.setreturned()
         state = bool(state)
         self.e.debug = True
         if state:
@@ -213,8 +212,10 @@ class mathbase(safebase):
     def debugcall(self, variables):
         """Controls Debugging."""
         if not variables:
+            self.e.setreturned()
             out = not self.debug
         elif len(variables) == 1:
+            self.e.setreturned()
             if isinstance(variables[0], strcalc):
                 original = str(variables[0])
                 if formatisyes(original):
@@ -235,6 +236,7 @@ class mathbase(safebase):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to run")
         elif len(variables) == 1:
+            self.e.setreturned()
             original = os.path.normcase(self.e.prepare(variables[0], False, False))
             while not os.path.isfile(original):
                 if "." not in original:
@@ -255,6 +257,7 @@ class mathbase(safebase):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to require")
         elif len(variables) == 1:
+            self.e.setreturned()
             out = classcalc(self.e)
             params = out.begin()
             self.runcall(variables)
@@ -326,6 +329,7 @@ class mathbase(safebase):
 
     def anscall(self, variables):
         """Performs ans."""
+        self.e.setreturned()
         if variables is None or len(variables) == 0:
             return self.ans[-1]
         else:
@@ -334,6 +338,7 @@ class mathbase(safebase):
 
     def grabcall(self, variables):
         """Performs grab."""
+        self.e.setreturned()
         if variables is None or len(variables) == 0:
             out = self.app.get().split("\n")[-1]
             if out in self.messages:
