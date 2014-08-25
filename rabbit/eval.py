@@ -390,8 +390,10 @@ Global Operator Precedence List:
 
     def setspawned(self, value=True):
         """Sets spawned."""
-        self.setreturned()
-        self.spawned = bool(value)
+        value = bool(value)
+        if value:
+            self.setreturned()
+        self.spawned = value
 
     def printdebug(self, message):
         """Prints Debug Output."""
