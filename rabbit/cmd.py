@@ -178,7 +178,7 @@ class mathbase(safebase):
         """Runs Text."""
         cmds = []
         for line in inputstring.splitlines():
-            item = self.e.remcomment(inputlist[x])
+            item = self.e.remcomment(line)
             if item:
                 if iswhite(item[0]):
                     if cmds:
