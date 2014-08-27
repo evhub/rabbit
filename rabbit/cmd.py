@@ -182,7 +182,7 @@ class mathbase(safebase):
             if item:
                 if iswhite(item[0]):
                     if cmds:
-                        cmds[-1] += "\n"+item[0]
+                        cmds[-1] += "\n"+item
                     else:
                         raise ExecutionError("IndentationError", "Illegal starting indent")
                 else:
