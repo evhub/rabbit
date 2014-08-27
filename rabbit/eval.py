@@ -68,6 +68,7 @@ Global Operator Precedence List:
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
     varname = "x"
+    formatchar = "\xb6"
     parenchar = "\xa7"
     aliases = {
         "\t":"    ",
@@ -96,7 +97,7 @@ Global Operator Precedence List:
     subparenops = ".^"
     callops = subparenops + "%/*:\\"
     multiargops = bools + callops + "+-@~|&;,$\u201c" + "".join(groupers.keys()) + "".join(aliases.keys())
-    reserved = string.digits + multiargops + '")]}`\u201d' + "".join(groupers.values()) + parenchar
+    reserved = string.digits + multiargops + '")]}`\u201d' + "".join(groupers.values()) + parenchar + formatchar
     errorvar = "__error__"
     fatalvar = "__fatal__"
     namevar = "name"
@@ -130,8 +131,13 @@ Global Operator Precedence List:
         self.fresh()
         if variables is not None:
             self.makevars(variables)
+        self.preprocs = [
+            self.preproc_alias,
+            self.preproc_format
+            ]
         self.tops = [
             self.top_string,
+            self.top_format,
             self.top_paren,
             self.top_class,
             self.top_brack
@@ -668,14 +674,54 @@ Global Operator Precedence List:
             top = command is not None
         else:
             top = top
+        item = inputstring
         if top:
-            inputstring = replaceall(inputstring, self.aliases, '"`', {"\u201c":"\u201d"})
-        for original in self.outersplit(self.remcomment(inputstring), ";;"):
+            for func in self.preprocs:
+                item = func(item)
+        for original in self.outersplit(self.remcomment(item), ";;"):
             original = basicformat(original)
             if not iswhite(original):
                 out = self.proc_top(original, info, top)
                 if command is not None:
                     command(out)
+
+    def preproc_alias(self, inputstring):
+        """Applies Aliases."""
+        return replaceall(inputstring, self.aliases, '"`', {"\u201c":"\u201d"})
+
+    def preproc_format(self, inputstring):
+        """Evaluates Indentation."""
+        inputlist = self.outersplit(inputstring, self.formatchar, None)
+        out = []
+        for x in xrange(0, len(inputlist)):
+            if x%2 == 0:
+                lines = []
+                for line in inputlist[x].splitlines():
+                    if not iswhite(line):
+                        lines.append(line)
+                new = []
+                levels = []
+                openstr, closestr = "(\n", "\n)"
+                for x in xrange(0, len(lines)):
+                    if levels:
+                        check = leading(lines[x])
+                        if check > levels[-1]:
+                            levels.append(check)
+                            lines[x-1] = openstr+lines[x-1]
+                        elif check in levels:
+                            point = levels.index(check)+1
+                            lines[x-1] += closestr*len(levels[point:])
+                            levels = levels[:point]
+                        else:
+                            raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level")
+                        new.append(lines[x-1])
+                    else:
+                        levels.append(leading(lines[x]))
+                new.append(lines[-1]+closestr*(len(levels)-1))
+                out.append("\n".join(new))
+            else:
+                out.append(inputlist[x])
+        return "".join(out)
 
     def proc_top(self, inputstring, info="", top=False):
         """Gets The Value Of An Expression."""
@@ -781,9 +827,9 @@ Global Operator Precedence List:
 
     def top_string(self, expression):
         """Evaluates The String Part Of An Expression."""
-        strlist = eithersplit(expression, '"`', {"\u201c":"\u201d"})
+        toplist = eithersplit(expression, '"`', {"\u201c":"\u201d"})
         command = ""
-        for item in strlist:
+        for item in toplist:
             if istext(item):
                 command += item
             elif item[0] in ['"', "\u201c", "\u201d"]:
@@ -791,6 +837,10 @@ Global Operator Precedence List:
             elif item[0] == "`":
                 command += self.wrap(rawstrcalc(item[1], self))
         return command
+
+    def top_format(self, expression):
+        """Removes Redundant Format Markers."""
+        return expression.replace(self.formatchar, "")
 
     def top_paren(self, expression):
         """Evaluates The Parenthetical Part Of An Expression."""
@@ -824,24 +874,7 @@ Global Operator Precedence List:
                 for line in original.splitlines():
                     if not iswhite(line):
                         lines.append(line)
-                cmds = []
-                last = ""
-                for x in xrange(0, len(lines)):
-                    if x == 0:
-                        num = leading(lines[x])
-                        last = lines[x]
-                    else:
-                        check = leading(lines[x])
-                        if check > num:
-                            last += "\n"+lines[x]
-                        elif check == num:
-                            cmds.append(last)
-                            last = lines[x]
-                        else:
-                            raise ExecutionError("IndentationError", "Unexpected dedent in line "+lines[x])
-                if last:
-                    cmds.append(last)
-                command += self.wrap(brace(self, cmds))
+                command += self.wrap(brace(self, lines))
             else:
                 raise SyntaxError("Error in evaluating curly braces len("+repr(x)+")>1")
         return command
@@ -1951,7 +1984,7 @@ Global Operator Precedence List:
 
     def call_paren(self, inputstring, count):
         """Evaluates Parentheses."""
-        inputstring = strlist(switchsplit(inputstring, string.digits, notstring=self.reserved), self.parenchar*2)        
+        inputstring = (self.parenchar*2).join(switchsplit(inputstring, string.digits, notstring=self.reserved))
         if self.parenchar in inputstring:
             self.printdebug("(|) "+inputstring) 
             templist = inputstring.split(self.parenchar)
