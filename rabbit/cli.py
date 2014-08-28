@@ -102,13 +102,12 @@ class commandline(mathbase):
         elif old is not None and not cmd == "":
             if iswhite(cmd[0]):
                 return whole
-            elif self.e.insideouter(old):
-                return 'raise("SyntaxError", "Unmatched tokens in "+ ' + self.e.prepare(rawstrcalc(old, self.e), False, True) + ' )\n;;\n'+cmd
             else:
-                return old+"\n;;\n"+cmd
+                if self.e.insideouter(old):
+                    old = 'raise("SyntaxError", "Unmatched tokens in "+ ' + self.e.prepare(rawstrcalc(old, self.e), False, True) + ' )'
+                return old+"\n"+cmd
         elif fcmd and endswithany(fcmd, self.e.multiargops):
             return whole
         elif self.e.insideouter(whole):
             return whole
-        self.reset()
-        self.process(whole)
+        self.evaltext(whole)
