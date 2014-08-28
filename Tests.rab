@@ -488,13 +488,15 @@ passert:: 5 ?= a.f(a.y) $ a = {
 
 # Final Testing:
 passert:: save("Tests.save");true
-passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents) $ contents = read("Tests.save")
+contents = read("Tests.save")
+passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents)
 passert:: ! using()
 use(calc) ;; use(using())
 passert:: using()
 passert:: {
            run :: Tests.save
            }
+passert:: calc: contents
 use() ;; use(using())
 passert:: ! using()
 passert:: paren(parens()-1) ?= "123"              $ (123)

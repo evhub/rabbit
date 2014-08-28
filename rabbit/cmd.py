@@ -182,7 +182,7 @@ class mathbase(safebase):
                     cmds[-1] += line
                 else:
                     raise ExecutionError("IndentationError", "Illegal starting indent in line "+line)
-        for cmds in cmd:
+        for cmd in cmds:
             self.reset()
             self.process(cmd)
 
