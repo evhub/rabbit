@@ -686,9 +686,9 @@ Global Operator Precedence List:
                 lines = original.splitlines()
                 for x in xrange(0, len(lines)):
                     if x:
-                        out.split(item, "\n")
+                        out.split(lines[x], "\n")
                     else:
-                        out.split(item)
+                        out.split(lines[x])
             else:
                 out.split(original)
         return out.get()
