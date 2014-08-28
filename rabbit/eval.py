@@ -68,7 +68,10 @@ Global Operator Precedence List:
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
     varname = "x"
-    formatchar = "\xb6"
+    directchar = "\xb6"
+    indentchar = "\u2021"
+    dedentchar = "\u2020"
+    formatchars = directchar + indentchar + dedentchar
     parenchar = "\xa7"
     aliases = {
         "\t":"    ",
@@ -87,6 +90,13 @@ Global Operator Precedence List:
         "\u2215":"/",
         "\u2044":"/"
         }
+    rawstringchars = "`"
+    stringchars = rawstringchars + '"'
+    strgroupers = {
+        "\u201c":"\u201d"
+        }
+    rawstrgroupers = {
+        }
     groupers = {
         "(":")",
         "{":"}",
@@ -96,8 +106,8 @@ Global Operator Precedence List:
     bools = unary + "<>=\u2260"
     subparenops = ".^"
     callops = subparenops + "%/*:\\"
-    multiargops = bools + callops + "+-@~|&;,$\u201c" + "".join(groupers.keys()) + "".join(aliases.keys())
-    reserved = string.digits + multiargops + '")]}`\u201d' + "".join(groupers.values()) + parenchar + formatchar
+    multiargops = bools + callops + "+-@~|&;,$" + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
+    reserved = string.digits + multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
     errorvar = "__error__"
     fatalvar = "__fatal__"
     namevar = "name"
@@ -133,20 +143,22 @@ Global Operator Precedence List:
             self.makevars(variables)
         self.preprocs = [
             self.preproc_alias,
+            self.preproc_string,
+            self.preproc_comment,
             self.preproc_format
             ]
+        self.precalcs = [
+            self.precalc_paren,
+            self.precalc_class,
+            self.precalc_brack,
+            self.precalc_format
+            ]
         self.tops = [
-            self.top_string,
-            self.top_format,
-            self.top_paren,
-            self.top_class,
-            self.top_brack
+            self.top_cmd,
+            self.top_with,
+            self.top_set
             ]
-        self.pre_calcs = [
-            self.pre_with,
-            self.pre_set
-            ]
-        self.set_calcs = [
+        self.sets = [
             self.set_def,
             self.set_normal
             ]
@@ -644,13 +656,16 @@ Global Operator Precedence List:
         """Determines If Inside A String Or Grouper."""
         if groupers is None:
             groupers = self.groupers
-        return isinside(inputstring, '"`', {"\u201c":"\u201d"}, groupers)
+        return isinside(inputstring, self.stringchars, self.strgroupers, groupers)
 
-    def outersplit(self, inputstring, splitstring, groupers=None):
+    def outersplit(self, inputstring, splitstring, groupers=None, top=True):
         """Splits By Something Not In A String Or Grouper."""
         if groupers is None:
             groupers = self.groupers
-        return carefulsplit(inputstring, splitstring, '"`', {"\u201c":"\u201d"}, groupers)
+        if top:
+            return carefulsplit(inputstring, splitstring, self.stringchars, self.strgroupers, groupers)
+        else:
+            return carefulsplit(inputstring, splitstring, closers=groupers)
 
     def remcomment(self, inputstring, commentstring="#"):
         """Removes A Comment."""
@@ -660,122 +675,57 @@ Global Operator Precedence List:
         """Sets calculated."""
         self.calculated = result
 
-    def calc(self, inputstring, info=""):
-        """Performs Top-Level Calculation."""
-        calculated, self.calculated = self.calculated, matrix(0)
-        self.process(inputstring, info, self.setcalculated, False)
-        out, self.calculated = self.calculated, calculated
-        return out
+    def remformat(self, inputstring):
+        """Removes All Formatting."""
+        return delspace(inputstring, self.formatchars)
 
-    def process(self, inputstring, info="", command=None, top=None):
-        """Performs Top-Level Evaluation."""
-        inputstring = str(inputstring)
-        if top is None:
-            top = command is not None
-        else:
-            top = top
-        item = inputstring
-        if top:
-            for func in self.preprocs:
-                item = func(item)
-        for original in self.outersplit(self.remcomment(item), ";;"):
-            original = basicformat(original)
-            if not iswhite(original):
-                out = self.proc_top(original, info, top)
-                if command is not None:
-                    command(out)
-
-    def preproc_alias(self, inputstring):
-        """Applies Aliases."""
-        return replaceall(inputstring, self.aliases, '"`', {"\u201c":"\u201d"})
-
-    def preproc_format(self, inputstring):
-        """Evaluates Indentation."""
-        inputlist = self.outersplit(inputstring, self.formatchar, None)
+    def splitdedent(self, inputlist):
+        """Splits And Unsplits By Dedents."""
         out = []
-        for x in xrange(0, len(inputlist)):
-            if x%2 == 0:
-                lines = []
-                for line in inputlist[x].splitlines():
-                    if not iswhite(line):
-                        lines.append(line)
-                new = []
-                levels = []
-                openstr, closestr = "(\n", "\n)"
-                for x in xrange(0, len(lines)):
-                    if levels:
-                        check = leading(lines[x])
-                        if check > levels[-1]:
-                            levels.append(check)
-                            lines[x-1] = openstr+lines[x-1]
-                        elif check in levels:
-                            point = levels.index(check)+1
-                            lines[x-1] += closestr*len(levels[point:])
-                            levels = levels[:point]
+        indented = 0
+        current = ""
+        for original in inputlist:
+            for item in original.splitlines():
+                x = 0
+                while x < len(item):
+                    c = item[x]
+                    if c == self.indentchar:
+                        indented += 1
+                    elif c == self.dedentchar:
+                        if indented > 0:
+                            indented -= 1
                         else:
-                            raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level")
-                        new.append(lines[x-1])
+                            if out:
+                                out[-1] += current
+                            else:
+                                out.append(current)
+                            out.append(item[:x])
+                            current = ""
+                            item = item[x:]
+                    x += 1
+                if indented:
+                    current += item
+                else:
+                    if out:
+                        out[-1] += current
                     else:
-                        levels.append(leading(lines[x]))
-                new.append(lines[-1]+closestr*(len(levels)-1))
-                out.append("\n".join(new))
-            else:
-                out.append(inputlist[x])
-        return "".join(out)
-
-    def proc_top(self, inputstring, info="", top=False):
-        """Gets The Value Of An Expression."""
-        if info is None:
-            info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
-        self.printdebug(">>> "+inputstring+str(info))
-        self.recursion += 1
-        if top and self.using:
-            func = self.prepare(self.using, False, True, True)
-            original = func+" :: "+inputstring
-            self.printdebug("::> "+original)
-            self.recursion += 1
-            out = getcall(self.using)([codestr(inputstring, self)])
-            prepped = self.prepare(out, False, True, True)
-            self.printdebug(prepped+" <:: "+original)
-            self.recursion -= 1
-        else:
-            out = self.proc_cmd(inputstring, top)
-            prepped = self.prepare(out, False, True, True)
-        self.printdebug(prepped+" <<< "+inputstring)
-        self.recursion -= 1
+                        out.append(current)
+                    out.append(item)
+                    current = ""
         return out
 
-    def proc_cmd(self, inputstring, top=False):
-        """Evaluates Statements."""
-        if top:
-            spawned = self.spawned
-            self.setspawned(False)
-        inputlist = self.outersplit(inputstring, "::")
-        func, args = inputlist[0], inputlist[1:]
-        func = basicformat(func)
-        if len(args) == 0:
-            out = self.proc_calc(func)
-        else:
-            original = func+" :: "+strlist(args, " :: ")
-            self.printdebug("::> "+original)
-            self.recursion += 1
-            if func:
-                item = self.funcfind(func)
-                params = []
-                for x in xrange(0, len(args)):
-                    arg = basicformat(args[x])
-                    if x != len(args)-1 or arg:
-                        params.append(codestr(arg, self))
-                out = self.call_colon_set(item, params)
-            else:
-                out = codestr(strlist(args, "::"), self)
-            self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
-            self.recursion -= 1
-        if top:
-            if not self.spawned:
-                self.processor.addcommand(inputstring)
-            self.setspawned(self.spawned or spawned)
-        return out
+    def iseq(self, a, b):
+        """Determines Whether Two Evaluator Objects Are Really Equal."""
+        return type(a) is type(b) and itemstate(a) == itemstate(b)
+
+    def wrap(self, item):
+        """Wraps An Item In Parentheses."""
+        for x in xrange(0, len(self.parens)):
+            if self.iseq(self.parens[x], item):
+                return self.parenchar+str(x)+self.parenchar
+        indexstr = self.parenchar+str(len(self.parens))+self.parenchar
+        self.parens.append(item)
+        return indexstr
 
     def trycalc(self, inputobject):
         """Attempts To Calculate A Variable."""
@@ -796,53 +746,145 @@ Global Operator Precedence List:
         """Ensures That A Variable Exists."""
         self.variables[variable] = self.getitem(variable)
 
-    def proc_calc(self, inputstring):
-        """Performs Full Evaluation On An Expression."""
+    def calc(self, inputstring, info=""):
+        """Performs Top-Level Calculation."""
+        calculated, self.calculated = self.calculated, matrix(0)
+        self.process(inputstring, info, self.setcalculated, False)
+        out, self.calculated = self.calculated, calculated
+        return out
+
+    def process(self, inputstring, info="", command=None, top=None):
+        """Performs Top-Level Evaluation."""
+        inputstring = str(inputstring)
+        if top is None:
+            top = command is not None
+        else:
+            top = top
+        if top:
+            spawned = self.spawned
+            self.setspawned(False)
+        if info is None:
+            info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
+        else:
+            info = str(info)
+        self.printdebug(">>> "+inputstring+info)
+        self.recursion += 1
+        self.proc_pre(inputstring, top, command)
+        self.recursion -= 1
+        if top:
+            if not self.spawned:
+                self.processor.addcommand(inputstring)
+            self.setspawned(self.spawned or spawned)
+
+    def proc_pre(self, item, top, command):
+        """Performs Pre-Processing."""
+        last = item
+        for func in self.preprocs:
+            item = func(item, top)
+        if last is not item:
+            self.printdebug("| "+str(item))
+        last = item
+        for func in self.precalcs:
+            item = func(item)
+        if last is not item:
+            self.printdebug("| "+str(item))
+        self.proc_calc(item, command)
+
+    def proc_calc(self, item, command):
+        """Gets The Value Of An Expression."""
+        for original in self.splitdedent(item.split(";;")):
+            original = basicformat(original)
+            if not iswhite(original):
+                self.printdebug(":>> "+original)
+                self.recursion += 1
+                out = self.calc_top(original)
+                self.printdebug(self.prepare(out, False, True, True)+" <<: "+original)
+                self.recursion -= 1
+                if command is not None:
+                    command(out)
+
+    def calc_top(self, expression):
+        """Performs Pre-Format Evaluation."""
+        for func in self.tops:
+            test = func(expression)
+            if test is not None:
+                return test
+        return self.calc_post(expression)
+
+    def calc_post(self, inputstring):
+        """Formats Expressions."""
         self.printdebug("=>> "+inputstring)
         self.recursion += 1
-        out = self.calc_top(inputstring)
+        out = self.calc_pieces(delspace(inputstring))
         self.printdebug(self.prepare(out, False, True, True)+" <<= "+inputstring)
         self.recursion -= 1
         return out
 
-    def calc_top(self, value):
-        """Begins Calculation."""
-        for func in self.tops:
-            value = func(value)
-        self.printdebug("| "+self.prepare(value, False, True, True))
-        return self.calc_pre(value)
+    def preproc_alias(self, inputstring, top=True):
+        """Applies Aliases."""
+        if top:
+            return replaceall(inputstring, self.aliases, self.stringchars, self.strgroupers)
+        else:
+            return inputstring
 
-    def iseq(self, a, b):
-        """Determines Whether Two Evaluator Objects Are Really Equal."""
-        return type(a) is type(b) and itemstate(a) == itemstate(b)
-
-    def wrap(self, item):
-        """Wraps An Item In Parentheses."""
-        for x in xrange(0, len(self.parens)):
-            if self.iseq(self.parens[x], item):
-                return self.parenchar+str(x)+self.parenchar
-        indexstr = self.parenchar+str(len(self.parens))+self.parenchar
-        self.parens.append(item)
-        return indexstr
-
-    def top_string(self, expression):
+    def preproc_string(self, expression, top=None):
         """Evaluates The String Part Of An Expression."""
-        toplist = eithersplit(expression, '"`', {"\u201c":"\u201d"})
+        toplist = eithersplit(expression, self.stringchars, self.strgroupers)
         command = ""
         for item in toplist:
             if istext(item):
                 command += item
-            elif item[0] in ['"', "\u201c", "\u201d"]:
-                command += self.wrap(strcalc(item[1], self))
-            elif item[0] == "`":
+            elif item[0] in self.rawstringchars + "".join(self.rawstrgroupers.keys()) + "".join(self.rawstrgroupers.values()):
                 command += self.wrap(rawstrcalc(item[1], self))
+            elif item[0] in self.stringchars + "".join(self.strgroupers.keys()) + "".join(self.strgroupers.values()):
+                command += self.wrap(strcalc(item[1], self))
         return command
 
-    def top_format(self, expression):
-        """Removes Redundant Format Markers."""
-        return expression.replace(self.formatchar, "")
+    def preproc_comment(self, inputstring, top=None):
+        """Wraps remcomment."""
+        out = []
+        for line in inputstring.splitlines():
+            out.append(self.remcomment(line))
+        return "\n".join(out)
 
-    def top_paren(self, expression):
+    def preproc_format(self, inputstring, top=True):
+        """Evaluates Indentation."""
+        if top:
+            inputlist = inputstring.split(self.directchar)
+            out = []
+            for x in xrange(0, len(inputlist)):
+                if x%2 == 0:
+                    lines = []
+                    for line in inputlist[x].splitlines():
+                        if not iswhite(line):
+                            lines.append(line)
+                    new = []
+                    levels = []
+                    openstr, closestr = self.indentchar+"\n", "\n"+self.dedentchar
+                    for x in xrange(0, len(lines)):
+                        if levels:
+                            check = leading(lines[x])
+                            if check > levels[-1]:
+                                levels.append(check)
+                                lines[x-1] = openstr+lines[x-1]
+                            elif check in levels:
+                                point = levels.index(check)+1
+                                lines[x-1] += closestr*len(levels[point:])
+                                levels = levels[:point]
+                            else:
+                                raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level")
+                            new.append(lines[x-1])
+                        else:
+                            levels.append(leading(lines[x]))
+                    new.append(lines[-1]+closestr*(len(levels)-1))
+                    out.append("\n".join(new))
+                else:
+                    out.append(inputlist[x])
+            return "".join(out)
+        else:
+            return inputstring
+
+    def precalc_paren(self, expression):
         """Evaluates The Parenthetical Part Of An Expression."""
         parenlist = fullsplit(expression, "(", ")", 1)
         command = ""
@@ -858,7 +900,7 @@ Global Operator Precedence List:
                 raise SyntaxError("Error in evaluating parentheses len("+repr(x)+")>1")
         return command
 
-    def top_class(self, expression):
+    def precalc_class(self, expression):
         """Evaluates The Curly Brackets In An Expression."""
         curlylist = fullsplit(expression, "{", "}", 1)
         command = ""
@@ -870,16 +912,12 @@ Global Operator Precedence List:
                     original = ""
                 else:
                     original = x[0]
-                lines = []
-                for line in original.splitlines():
-                    if not iswhite(line):
-                        lines.append(line)
-                command += self.wrap(brace(self, lines))
+                command += self.wrap(brace(self, self.splitdedent([original])))
             else:
                 raise SyntaxError("Error in evaluating curly braces len("+repr(x)+")>1")
         return command
 
-    def top_brack(self, expression):
+    def precalc_brack(self, expression):
         """Evaluates The Brackets In An Expression."""
         bracklist = fullsplit(expression, "[", "]", 1)
         command = ""
@@ -896,15 +934,45 @@ Global Operator Precedence List:
                 raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
         return command
 
-    def calc_pre(self, expression):
-        """Performs Pre-Format Evaluation."""
-        for func in self.pre_calcs:
-            test = func(expression)
-            if test is not None:
-                return test
-        return self.calc_post(expression)
+    def precalc_format(self, expression):
+        """Wraps remformat."""
+        return self.remformat(expression)
 
-    def pre_with(self, expression):
+    def top_cmd(self, inputstring, top=False):
+        """Evaluates Statements."""
+        if top and self.using:
+            func = self.prepare(self.using, False, True, True)
+            original = func+" :: "+inputstring
+            self.printdebug("::> "+original)
+            self.recursion += 1
+            out = getcall(self.using)([codestr(inputstring, self)])
+            self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
+            self.recursion -= 1
+        else:
+            inputlist = inputstring.split("::")
+            func, args = inputlist[0], inputlist[1:]
+            func = basicformat(func)
+            if len(args) > 0:
+                original = func+" :: "+strlist(args, " :: ")
+                self.printdebug("::> "+original)
+                self.recursion += 1
+                if func:
+                    item = self.funcfind(func)
+                    params = []
+                    for x in xrange(0, len(args)):
+                        arg = basicformat(args[x])
+                        if x != len(args)-1 or arg:
+                            params.append(codestr(arg, self))
+                    out = self.call_colon_set(item, params)
+                else:
+                    out = codestr(strlist(args, "::"), self)
+                self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
+                self.recursion -= 1
+            else:
+                out = None
+        return out
+
+    def top_with(self, expression):
         """Evaluates With Clauses."""
         inputlist = expression.split("$")
         if len(inputlist) > 1:
@@ -915,7 +983,7 @@ Global Operator Precedence List:
                 withclass.process(x)
             return withclass.calc(item)
 
-    def pre_set(self, inputstring):
+    def top_set(self, inputstring):
         """Evaluates Setting."""
         test = self.calc_set(inputstring)
         if test is not None:
@@ -932,7 +1000,7 @@ Global Operator Precedence List:
                 if sides[0].endswith(":"):
                     sides[0] = sides[0][:-1]
                     docalc = True
-                sides[0] = self.outersplit(sides[0], ",")
+                sides[0] = self.outersplit(sides[0], ",", top=False)
                 if len(sides[0]) > 1:
                     test = True
                     for x in sides[0]:
@@ -1031,7 +1099,7 @@ Global Operator Precedence List:
             elif self.useclass:
                 useclass = self.funcfind(self.useclass)
             sides[1] = basicformat(sides[1])
-            for func in self.set_calcs:
+            for func in self.sets:
                 value = func(sides)
                 if value is not None:
                     if not isinstance(value, tuple):
@@ -1069,12 +1137,8 @@ Global Operator Precedence List:
 
     def readytofunc(self, expression, extra="", allowed=""):
         """Determines If An Expression Could Be Turned Into A Function."""
-        funcparts = expression.split("(", 1)
-        top = True
-        if len(funcparts) == 1 and self.parenchar in funcparts[0]:
-                funcparts = funcparts[0].split(self.parenchar, 1)
-                top = False
-        out = funcparts[0] != "" and (not self.isreserved(funcparts[0], extra, allowed)) and (len(funcparts) == 1 or funcparts[1].endswith(")"*top or self.parenchar))
+        funcparts = expression.split(self.parenchar, 1)
+        out = funcparts[0] != "" and (not self.isreserved(funcparts[0], extra, allowed)) and (len(funcparts) == 1 or funcparts[1].endswith(self.parenchar))
         if out and len(funcparts) != 1:
             return not self.insideouter(funcparts[1][:-1])
         else:
@@ -1082,28 +1146,16 @@ Global Operator Precedence List:
 
     def set_def(self, sides):
         """Creates Functions."""
-        top = None
-        if "(" in sides[0] and sides[0].endswith(")"):
-            top = True
-        elif self.parenchar in sides[0] and sides[0].endswith(self.parenchar):
-            top = False
-        if top is not None:
-            if top:
-                sides[0] = sides[0][:-1].split("(", 1)
-            else:
-                sides[0] = sides[0].split(self.parenchar, 1)
-                sides[0][1] = self.namefind(self.parenchar+sides[0][1])
-            params, personals, allargs, reqargs = self.eval_set(self.outersplit(sides[0][1], ","))
+        if self.parenchar in sides[0] and sides[0].endswith(self.parenchar):
+            sides[0] = sides[0].split(self.parenchar, 1)
+            sides[0][1] = self.namefind(self.parenchar+sides[0][1])
+            params, personals, allargs, reqargs = self.eval_set(self.outersplit(sides[0][1], ",", top=False))
             return (sides[0][0], strfunc(sides[1], self, params, personals, allargs=allargs, reqargs=reqargs))
 
     def set_normal(self, sides):
         """Performs =."""
         if not self.isreserved(sides[0]):
             return sides[1]
-
-    def calc_post(self, expression):
-        """Formats Expressions."""
-        return self.calc_pieces(delspace(expression))
 
     def calc_pieces(self, expression):
         """Evaluates Piecewise Expressions."""
@@ -1388,7 +1440,7 @@ Global Operator Precedence List:
             elif out[0] == "":
                 return strfloat(out[1], self, check=False)
             else:
-                params, personals, allargs, reqargs = self.eval_set(self.outersplit(self.namefind(out[0]), ","))
+                params, personals, allargs, reqargs = self.eval_set(self.outersplit(self.namefind(out[0]), ",", top=False))
                 if out[1].startswith("\\"):
                     return strfloat(out[1][1:], self, params, personals, check=False, allargs=allargs, reqargs=reqargs)
                 else:

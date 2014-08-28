@@ -153,15 +153,12 @@ class mathbase(safebase):
 
     def handler(self, event=None):
         """Handles A Return Event."""
-        self.reset()
         original = self.box.output()
-        cmd = self.e.remcomment(original)
-        if delspace(cmd) == "":
-            if len(self.box.commands) > 1:
-                self.process(self.box.commands[-2])
-        else:
+        if not iswhite(original):
             self.box.add(original)
-            self.process(cmd)
+            self.evaltext(cmd)
+        elif len(self.box.commands) > 1:
+            self.evaltext(self.box.commands[-2])
 
     def evalfile(self, name):
         """Runs A File."""
@@ -176,20 +173,8 @@ class mathbase(safebase):
 
     def evaltext(self, inputstring):
         """Runs Text."""
-        cmds = []
-        for line in inputstring.splitlines():
-            item = self.e.remcomment(line)
-            if item:
-                if iswhite(item[0]):
-                    if cmds:
-                        cmds[-1] += "\n"+item
-                    else:
-                        raise ExecutionError("IndentationError", "Illegal starting indent")
-                else:
-                    cmds.append(item)
-        for cmd in cmds:
-            self.reset()
-            self.process(cmd)
+        self.reset()
+        self.process(inputstring)
 
     def process(self, inputstring):
         """Processes A Command."""
