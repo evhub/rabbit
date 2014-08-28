@@ -123,7 +123,8 @@ class mathbase(safebase):
             "run":funcfloat(self.runcall, self.e, "run", reqargs=1),
             "require":funcfloat(self.requirecall, self.e, "require", reqargs=1),
             "assert":funcfloat(self.assertcall, self.e, "assert", reqargs=1),
-            "make":funcfloat(self.makecall, self.e, "make", reqargs=1),
+            "make":funcfloat(self.e.docalc, self.e, "make", reqargs=1),
+            "cmd":funcfloat(self.e.docalc, self.e, "cmd", reqargs=1),
             "save":funcfloat(self.savecall, self.e, "save", reqargs=1),
             "install":funcfloat(self.installcall, self.e, "install", reqargs=1),
             "print":funcfloat(self.printcall, self.e, "print"),
@@ -156,7 +157,7 @@ class mathbase(safebase):
         original = self.box.output()
         if not iswhite(original):
             self.box.add(original)
-            self.evaltext(cmd)
+            self.evaltext(original)
         elif len(self.box.commands) > 1:
             self.evaltext(self.box.commands[-2])
 
@@ -288,23 +289,6 @@ class mathbase(safebase):
             return out
         else:
             raise ExecutionError("AssertionError", "Assertion failed that "+original, {"Result":out})
-
-    def makecall(self, variables):
-        """Sets A Variable."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to make")
-        elif len(variables) == 1:
-            if isinstance(variables[0], codestr):
-                original = str(variables[0])
-                out = self.e.calc(original, " | make")
-                return out
-            else:
-                raise ExecutionError("StatementError", "Can only call make as a statement")
-        else:
-            out = []
-            for arg in variables:
-                out.append(self.makecall([arg]))
-            return diagmatrixlist(out)
 
     def printcall(self, variables, func=None):
         """Performs print."""

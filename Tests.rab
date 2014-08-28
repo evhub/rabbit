@@ -274,7 +274,7 @@ passert:: z ?= 3
    z = 3
   )
  $ x = 0
- $ if (cond) = proc @ cond
+ $ if (cond) = calc @ cond
 passert:: abs'(2) ?= 2 & abs'(0) ?= 0 & abs'(-2) ?= 2
  $ abs'(x) = if (x<0) (\-x) elif (x?0) (\0) else (x)
  $ if(cond, expr) =
@@ -349,7 +349,7 @@ passert:: iserr((try::raise()):1)
 passert:: from(error, error())
 passert:: from(error, (try::raise()):1)
 passert:: var:"a" ?= "b"            $ a = b
-passert:: a ?= 5                    $ proc("a = 5")
+passert:: a ?= 5                    $ exec("a = 5")
 passert:: num(i) ?= i
 passert:: real(i) ?= 0
 passert:: imag(i) ?= 1
@@ -497,7 +497,7 @@ passert:: {
            run :: Tests.save
            }
 passert:: {
-           calc: contents
+           exec: contents
            }
 use() ;; use(using())
 passert:: ! using()

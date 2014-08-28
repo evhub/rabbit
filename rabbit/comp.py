@@ -35,6 +35,7 @@ class compiler(commandline):
     doshow = False
     compiling = False
     normcommand = always(None)
+    addcommand = always(None)
     protocol = 0
 
     def __init__(self, debugcolor="lightred", mainprompt=addcolor("Rabbit:", "pink")+" ", prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", *initializers):
@@ -166,6 +167,7 @@ class compiler(commandline):
             "require":funcfloat(self.requirecall, self.e, "require", reqargs=1),
             "assert":funcfloat(self.assertcall, self.e, "assert", reqargs=1),
             "make":funcfloat(self.makecall, self.e, "make", reqargs=1),
+            "cmd":funcfloat(self.cmdcall, self.e, "cmd", reqargs=1),
             "install":funcfloat(self.installcall, self.e, "install", reqargs=1),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show")
@@ -173,39 +175,31 @@ class compiler(commandline):
         self.commands = []
         self.makes = []
 
-    def comp_assertcall(self, variables):
-        """Wrapper around assertcall."""
-        out = self.assertcall(variables)
-        self.e.setspawned()
-        return out
-
-    def pre_set(self, inputstring):
-        """Replaces self.e.pre_set."""
-        test = self.e.calc_set(inputstring)
-        if test is not None:
-            self.e.setspawned()
-            return test
-
     def makecall(self, variables):
         """Adds To Make Commands."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to make")
-        elif len(variables) == 1:
-            if isinstance(variables[0], codestr):
-                original = str(variables[0])
-                test = self.e.cmd_set(original)
-                if test is None:
-                    raise ExecutionError("DefinitionError", "No definition was done in the statement "+original)
-                else:
-                    self.makes.append(original)
-                    self.e.setspawned()
-                    return test
-            else:
-                raise ExecutionError("StatementError", "Can only call make as a statement")
+        self.e.setreturned()
+        out = []
+        for x in variables:
+            inputstring = self.e.prepare(x, False, False)
+            self.makes.append(inputstring)
+            out.append(self.e.calc(inputstring, " | calc"))
+        if len(out) == 1:
+            return out[0]
         else:
-            for arg in variables:
-                self.makecall([arg])
-        return matrix(0)
+            return diagmatrixlist(out)
+
+    def cmdcall(self, variables):
+        """Adds To Make Commands."""
+        self.e.setreturned()
+        out = []
+        for x in variables:
+            inputstring = self.e.prepare(x, False, False)
+            self.commands.append(inputstring)
+            out.append(self.e.calc(inputstring, " | calc"))
+        if len(out) == 1:
+            return out[0]
+        else:
+            return diagmatrixlist(out)
 
     def assemble(self):
         """Compiles Code."""

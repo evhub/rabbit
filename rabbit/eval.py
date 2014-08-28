@@ -231,7 +231,7 @@ Global Operator Precedence List:
             "repr":funcfloat(self.funcs.reprcall, self, "repr"),
             "code":funcfloat(self.funcs.codecall, self, "code"),
             "calc":funcfloat(self.funcs.docalc, self, "calc", reqargs=1),
-            "proc":funcfloat(self.funcs.cmdcall, self, "proc", reqargs=1),
+            "exec":funcfloat(self.funcs.cmdcall, self, "exec", reqargs=1),
             "fold":funcfloat(self.funcs.foldcall, self, "fold", reqargs=1),
             "row":funcfloat(rowmatrixlist, self, "row"),
             "list":funcfloat(self.funcs.listcall, self, "list", reqargs=1),
@@ -3251,7 +3251,7 @@ class evalfuncs(object):
             return diagmatrixlist(out)
 
     def cmdcall(self, variables):
-        """Performs proc."""
+        """Performs exec."""
         for item in variables:
             inputstring = self.e.prepare(item, False, False)
             self.e.processor.evaltext(inputstring)
