@@ -43,7 +43,6 @@ class compiler(commandline):
         self.startup()
         self.app = terminal()
         self.populator(debugcolor)
-        self.e.pre_set = self.pre_set
         self.mainprompt = str(mainprompt)
         self.prompt = str(prompt)
         self.moreprompt = str(moreprompt)

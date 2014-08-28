@@ -150,8 +150,7 @@ Global Operator Precedence List:
         self.precalcs = [
             self.precalc_paren,
             self.precalc_class,
-            self.precalc_brack,
-            self.precalc_format
+            self.precalc_brack
             ]
         self.tops = [
             self.top_cmd,
@@ -679,13 +678,17 @@ Global Operator Precedence List:
         """Removes All Formatting."""
         return delspace(inputstring, self.formatchars)
 
-    def splitdedent(self, inputlist, splitlines=True):
+    def splitdedent(self, inputlist, splitby="", splitlines=True):
         """Splits And Unsplits By Dedents."""
-        out = modifiedsplit(self.indentchar, self.dedentchar)
+        out = modifiedsplit(self.indentchar, self.dedentchar, splitby)
         for original in inputlist:
             if splitlines:
-                for item in original.splitlines():
-                    out.split(item)
+                lines = original.splitlines()
+                for x in xrange(0, len(lines)):
+                    if x:
+                        out.split(item, "\n")
+                    else:
+                        out.split(item)
             else:
                 out.split(original)
         return out.get()
@@ -763,8 +766,8 @@ Global Operator Precedence List:
 
     def proc_calc(self, item, top, command):
         """Gets The Value Of An Expression."""
-        for original in self.splitdedent(item.split(";;"), top):
-            original = basicformat(original)
+        for original in self.splitdedent(item.split(";;"), ";;", top):
+            original = self.remformat(basicformat(original))
             if not iswhite(original):
                 self.printdebug(":>> "+original)
                 self.recursion += 1
@@ -906,10 +909,6 @@ Global Operator Precedence List:
             else:
                 raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
         return command
-
-    def precalc_format(self, expression):
-        """Wraps remformat."""
-        return self.remformat(expression)
 
     def top_cmd(self, inputstring, top=False):
         """Evaluates Statements."""
