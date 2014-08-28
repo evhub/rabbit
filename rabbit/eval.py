@@ -759,11 +759,11 @@ Global Operator Precedence List:
         for func in self.precalcs:
             item = func(item)
         self.printdebug("| "+str(item))
-        self.proc_calc(item, command)
+        self.proc_calc(item, top, command)
 
-    def proc_calc(self, item, command):
+    def proc_calc(self, item, top, command):
         """Gets The Value Of An Expression."""
-        for original in self.splitdedent(item.split(";;"), False):
+        for original in self.splitdedent(item.split(";;"), top):
             original = basicformat(original)
             if not iswhite(original):
                 self.printdebug(":>> "+original)
