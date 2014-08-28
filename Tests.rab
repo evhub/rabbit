@@ -496,7 +496,9 @@ passert:: using()
 passert:: {
            run :: Tests.save
            }
-passert:: calc: contents
+passert:: {
+           calc: contents
+           }
 use() ;; use(using())
 passert:: ! using()
 passert:: paren(parens()-1) ?= "123"              $ (123)

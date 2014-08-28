@@ -179,7 +179,7 @@ class mathbase(safebase):
                 if not iswhite(line[0]):
                     cmds.append(line)
                 elif cmds:
-                    cmds[-1] += line
+                    cmds[-1] += "\n"+line
                 else:
                     raise ExecutionError("IndentationError", "Illegal starting indent in line "+line)
         for cmd in cmds:
