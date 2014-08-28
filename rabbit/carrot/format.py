@@ -523,8 +523,6 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
 
 class modifiedsplit(object):
     """Performs Modified Splits."""
-    joinlen = 0
-
     def __init__(self, pushchar, popchar, joinchar=""):
         """Sets Up A Modified Split."""
         self.indentchar = str(pushchar)
@@ -532,16 +530,17 @@ class modifiedsplit(object):
         self.joinchar = str(joinchar)
         self.out = []
         self.indented = 0
-        self.current = ""
+        self.current = [None, ""]
 
     def end(self):
         """Deals With self.current."""
-        if self.out:
-            self.out[-1] += self.current
-        else:
-            self.out.append(self.current[self.joinlen:])
-        self.current = ""
-        self.joinlen = 0
+        if self.current[0] is not None:
+            if self.out:
+                self.out[-1] += self.current[1]+self.current[0]
+            else:
+                self.out.append(self.current[0])
+            self.current[0] = None
+            self.current[1] = ""
 
     def split(self, item, join=None):
         """Splits The Next Item."""
@@ -563,12 +562,14 @@ class modifiedsplit(object):
                     self.out.append(item[:x])
                     item = item[x:]
             x += 1
-        if self.indented:
-            self.joinlen = len(join)
-            self.current += join+item
-        else:
+        if not self.indented:
             self.end()
             self.out.append(item)
+        elif self.current[0] is None:
+            self.current[0] = item
+            self.current[1] = join
+        else:
+            self.current[0] += join+item
 
     def get(self):
         """Gets The Result Of The Modified Split."""
