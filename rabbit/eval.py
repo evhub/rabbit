@@ -845,7 +845,7 @@ Global Operator Precedence List:
                                 lines[x-1] += closestr*len(levels[point:])
                                 levels = levels[:point]
                             else:
-                                raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level")
+                                raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level in line "+lines[x])
                             new.append(lines[x-1])
                         else:
                             levels.append(leading(lines[x]))
