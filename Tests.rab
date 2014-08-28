@@ -474,6 +474,17 @@ passert:: (2x)^2 ?= 100 $ x = 5
 passert:: len("\\\\") ?= 2
 passert:: x=1 $ x=1
 passert:: (pure::(calc::1))
+passert:: [12] ?= [
+                   1
+                   2
+                   ]
+passert:: 5 ?= a.f(a.y) $ a = {
+ f(x) = (
+  g(x) $ g(x) =
+   x+3
+  )
+ y = 2
+ }
 
 # Final Testing:
 passert:: save("Tests.save");true

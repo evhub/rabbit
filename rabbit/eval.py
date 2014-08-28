@@ -679,40 +679,16 @@ Global Operator Precedence List:
         """Removes All Formatting."""
         return delspace(inputstring, self.formatchars)
 
-    def splitdedent(self, inputlist):
+    def splitdedent(self, inputlist, splitlines=True):
         """Splits And Unsplits By Dedents."""
-        out = []
-        indented = 0
-        current = ""
+        out = modifiedsplit(self.indentchar, self.dedentchar)
         for original in inputlist:
-            for item in original.splitlines():
-                x = 0
-                while x < len(item):
-                    c = item[x]
-                    if c == self.indentchar:
-                        indented += 1
-                    elif c == self.dedentchar:
-                        if indented > 0:
-                            indented -= 1
-                        else:
-                            if out:
-                                out[-1] += current
-                            else:
-                                out.append(current)
-                            out.append(item[:x])
-                            current = ""
-                            item = item[x:]
-                    x += 1
-                if indented:
-                    current += item
-                else:
-                    if out:
-                        out[-1] += current
-                    else:
-                        out.append(current)
-                    out.append(item)
-                    current = ""
-        return out
+            if splitlines:
+                for item in original.splitlines():
+                    out.split(item)
+            else:
+                out.split(original)
+        return out.get()
 
     def iseq(self, a, b):
         """Determines Whether Two Evaluator Objects Are Really Equal."""
@@ -778,21 +754,16 @@ Global Operator Precedence List:
 
     def proc_pre(self, item, top, command):
         """Performs Pre-Processing."""
-        last = item
         for func in self.preprocs:
             item = func(item, top)
-        if last is not item:
-            self.printdebug("| "+str(item))
-        last = item
         for func in self.precalcs:
             item = func(item)
-        if last is not item:
-            self.printdebug("| "+str(item))
+        self.printdebug("| "+str(item))
         self.proc_calc(item, command)
 
     def proc_calc(self, item, command):
         """Gets The Value Of An Expression."""
-        for original in self.splitdedent(item.split(";;")):
+        for original in self.splitdedent(item.split(";;"), False):
             original = basicformat(original)
             if not iswhite(original):
                 self.printdebug(":>> "+original)
@@ -858,6 +829,8 @@ Global Operator Precedence List:
                     for line in inputlist[x].splitlines():
                         if not iswhite(line):
                             lines.append(line)
+                    if not lines:
+                        lines.append("")
                     new = []
                     levels = []
                     openstr, closestr = self.indentchar+"\n", "\n"+self.dedentchar
