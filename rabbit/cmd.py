@@ -173,8 +173,18 @@ class mathbase(safebase):
 
     def evaltext(self, inputstring):
         """Runs Text."""
-        self.reset()
-        self.process(inputstring)
+        cmds = []
+        for line in inputstring.splitlines():
+            if line:
+                if not iswhite(line[0]):
+                    cmds.append(line)
+                elif cmds:
+                    cmds[-1] += line
+                else:
+                    raise ExecutionError("IndentationError", "Illegal starting indent in line "+line)
+        for cmds in cmd:
+            self.reset()
+            self.process(cmd)
 
     def process(self, inputstring):
         """Processes A Command."""

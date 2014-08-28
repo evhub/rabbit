@@ -34,6 +34,10 @@ import re
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+def normalize(inputstring):
+    """Normalizes Line Breaks."""
+    return strlist(inputstring.splitlines(), "\n")
+
 def basicformat(inputstring, leading=True, tailing=True):
     """Performs Basic Formatting On A String."""
     out = str(inputstring)
