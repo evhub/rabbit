@@ -115,6 +115,7 @@ Global Operator Precedence List:
     autoarg = "____"
     recursion = 0
     laxnull = True
+    laxindent = False
     redef = False
     useclass = None
     returned = True
@@ -144,8 +145,8 @@ Global Operator Precedence List:
         self.preprocs = [
             self.preproc_alias,
             self.preproc_string,
-            self.preproc_comment,
-            self.preproc_format
+            self.preproc_format,
+            self.preproc_indent
             ]
         self.precalcs = [
             self.precalc_paren,
@@ -668,7 +669,7 @@ Global Operator Precedence List:
 
     def remcomment(self, inputstring, commentstring="#"):
         """Removes A Comment."""
-        return self.outersplit(inputstring, commentstring, {})[0]
+        return basicformat(self.outersplit(inputstring, commentstring, {})[0], leading=False)
 
     def setcalculated(self, result):
         """Sets calculated."""
@@ -678,20 +679,28 @@ Global Operator Precedence List:
         """Removes All Formatting."""
         return delspace(inputstring, self.formatchars)
 
-    def splitdedent(self, inputlist, splitby="", splitlines=True):
+    def splitdedent(self, inputstring, splitfunc, top=True):
         """Splits And Unsplits By Dedents."""
-        out = modifiedsplit(self.indentchar, self.dedentchar, splitby)
-        for original in inputlist:
-            if splitlines:
-                lines = original.splitlines()
-                for x in xrange(0, len(lines)):
-                    if x:
-                        out.split(lines[x], "\n")
-                    else:
-                        out.split(lines[x])
-            else:
-                out.split(original)
-        return out.get()
+        inputstring = str(inputstring)
+        split = fullsplit(inputstring, self.indentchar, self.dedentchar, 1, not top)
+        if not top or len(split) > 1 or (split and istext(split[0])):
+            out = []
+            for item in split:
+                if istext(item):
+                    out += splitfunc(item)
+                elif not out:
+                    raise ExecutionError("IndentationError", "Illegal starting indent in "+inputstring)
+                elif len(item) == 1:
+                    out[-1] += item[0]
+                elif item:
+                    raise SyntaxError("Error in evaluating indentation len("+repr(item)+")>1")
+        elif not split or not split[0]:
+            out = [""]
+        elif len(split[0]) == 1:
+            out = self.splitdedent(split[0][0], splitfunc, False)
+        else:
+            raise SyntaxError("Error in evaluating indentation len("+repr(split[0])+")>1")
+        return out
 
     def iseq(self, a, b):
         """Determines Whether Two Evaluator Objects Are Really Equal."""
@@ -766,7 +775,11 @@ Global Operator Precedence List:
 
     def proc_calc(self, item, top, command):
         """Gets The Value Of An Expression."""
-        for original in self.splitdedent(item.split(";;"), ";;", top):
+        if top:
+            splitfunc = lambda x: splitany(x, [";;", "\n"])
+        else:
+            splitfunc = lambda x: x.split(";;")
+        for original in self.splitdedent(item, splitfunc):
             original = self.remformat(basicformat(original))
             if not iswhite(original):
                 self.printdebug(":>> "+original)
@@ -814,14 +827,14 @@ Global Operator Precedence List:
                 command += self.wrap(strcalc(item[1], self))
         return command
 
-    def preproc_comment(self, inputstring, top=None):
-        """Wraps remcomment."""
+    def preproc_format(self, inputstring, top=None):
+        """Performs Pre-Formatting."""
         out = []
         for line in inputstring.splitlines():
             out.append(self.remcomment(line))
         return "\n".join(out)
 
-    def preproc_format(self, inputstring, top=True):
+    def preproc_indent(self, inputstring, top=True):
         """Evaluates Indentation."""
         if top:
             inputlist = inputstring.split(self.directchar)
@@ -836,14 +849,14 @@ Global Operator Precedence List:
                         lines.append("")
                     new = []
                     levels = []
-                    openstr, closestr = "\n"+self.indentchar, "\n"+self.dedentchar
+                    openstr, closestr = self.indentchar, self.dedentchar
                     for x in xrange(0, len(lines)):
                         if levels:
                             check = leading(lines[x])
                             if check > levels[-1]:
                                 levels.append(check)
                                 lines[x-1] = lines[x-1]+openstr
-                            elif check in levels:
+                            elif self.laxindent or check in levels:
                                 point = levels.index(check)+1
                                 lines[x-1] += closestr*len(levels[point:])
                                 levels = levels[:point]
@@ -888,7 +901,7 @@ Global Operator Precedence List:
                     original = ""
                 else:
                     original = x[0]
-                command += self.wrap(brace(self, self.splitdedent([original])))
+                command += self.wrap(brace(self, self.splitdedent(original, lambda x: self.outersplit(x, "\n", top=False))))
             else:
                 raise SyntaxError("Error in evaluating curly braces len("+repr(x)+")>1")
         return command

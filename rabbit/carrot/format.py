@@ -269,20 +269,26 @@ def reassemble(inputlist, seperators):
     else:
         return strlist(inputlist, seperators[0], lambda x: reassemble(x, seperators[1:]))
 
-def splitany(inputstring, inputlist):
+def splitany(inputstring, inputlist, func=None):
     """Splits A String By Any Of The Items In A List."""
     if len(inputlist) == 0:
         return [inputstring]
     else:
-        out = inputstring.split(inputlist[0])
+        if func is None:
+            out = inputstring.split(inputlist[0])
+        else:
+            out = func(inputstring, inputlist[0])
         for x in xrange(1, len(inputlist)):
             new = []
             for item in out:
-                new += item.split(inputlist[x])
+                if func is None:
+                    new += item.split(inputlist[x])
+                else:
+                    new += func(item, inputlist[x])
             out = new
         return out
 
-def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf")):
+def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf"), catch=True):
     """Splits A List By An Open And A Close."""
     outlist = [""]
     feed = outlist
@@ -290,29 +296,34 @@ def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf")):
     level = 0
     for x in expression:
         if x == openstr:
-            if -level < maxlevel:
+            if -level >= maxlevel:
+                feed[len(feed)-1] += openstr
+            else:
                 feed.append([""])
                 feed = feed[len(feed)-1]
                 directory.append(feed)
-            else:
-                feed[len(feed)-1] += openstr
             level -= 1
         elif x == closestr:
-            if -(1+level) < maxlevel:
-                if len(directory) <= 1:
-                    raise ExecutionError("SyntaxError", "Unmatched close token "+str(closestr))
-                else:
-                    directory.pop()
-                    feed = directory[-1]
-                    feed.append("")
-            else:
+            if -(1+level) >= maxlevel:
                 feed[len(feed)-1] += closestr
+            elif len(directory) > 1:
+                directory.pop()
+                feed = directory[-1]
+                feed.append("")
+            elif catch:
+                raise ExecutionError("SyntaxError", "Unmatched close token "+str(closestr)+" in "+str(expression))
+            else:
+                outlist = [outlist]
+                feed = outlist
+                directory = [feed]
+                feed.append("")
             level += 1
         else:
             feed[len(feed)-1] += x
-    if len(directory) > 1:
-        raise ExecutionError("SyntaxError", "Unmatched open token "+str(openstr))
-    return clean(outlist)
+    if catch and len(directory) > 1:
+        raise ExecutionError("SyntaxError", "Unmatched open token "+str(openstr)+" in "+str(expression))
+    else:
+        return clean(outlist)
 
 def splitinplace(inputlist, findstr, reserved="", domod=None):
     """Splits A List In-Place By A String."""
@@ -384,6 +395,22 @@ def carefulsplit(inputstring, splitstring, holdstrings="", closers={}, counters=
             out[-1] += x
     out[-1] += splitstring[:check]
     return out
+
+def carefulsplitany(inputstring, splitstrings, *args, **kwargs):
+    """Splits A String By Any Of splitstrings Not Inside Something Else."""
+    if len(splitstrings) == 0:
+        return [inputstring]
+    else:
+        out = carefulsplit(inputstring, splitstrings[0], *args, **kwargs)
+        for x in xrange(1, len(splitstrings)):
+            new = []
+            for item in out:
+                if isinside(strlist(new, ""), *args, **kwargs):
+                    new.append(item)
+                else:
+                    new += carefulsplit(item, splitstrings[x], *args, **kwargs)
+            out = new
+        return out
 
 def isinside(inputstring, holdstrings="", closers={}, counters={}):
     """Determins Whether An Inputstring Is Currently At The Top Level."""
@@ -520,58 +547,3 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
                 new = v,i
         out.append(new[0])
     return "".join(out)
-
-class modifiedsplit(object):
-    """Performs Modified Splits."""
-    def __init__(self, pushchar, popchar, joinchar=""):
-        """Sets Up A Modified Split."""
-        self.indentchar = str(pushchar)
-        self.dedentchar = str(popchar)
-        self.joinchar = str(joinchar)
-        self.out = []
-        self.indented = 0
-        self.current = [None, ""]
-
-    def end(self):
-        """Deals With self.current."""
-        if self.current[0] is not None:
-            if self.out:
-                self.out[-1] += self.current[1]+self.current[0]
-            else:
-                self.out.append(self.current[0])
-            self.current[0] = None
-            self.current[1] = ""
-
-    def split(self, item, join=None):
-        """Splits The Next Item."""
-        item = str(item)
-        if join is None:
-            join = self.joinchar
-        else:
-            join = str(join)
-        x = 0
-        while x < len(item):
-            c = item[x]
-            if c == self.indentchar:
-                self.indented += 1
-            elif c == self.dedentchar:
-                if self.indented > 0:
-                    self.indented -= 1
-                else:
-                    self.end()
-                    self.out.append(item[:x])
-                    item = item[x:]
-            x += 1
-        if not self.indented:
-            self.end()
-            self.out.append(item)
-        elif self.current[0] is None:
-            self.current[0] = item
-            self.current[1] = join
-        else:
-            self.current[0] += join+item
-
-    def get(self):
-        """Gets The Result Of The Modified Split."""
-        self.end()
-        return self.out
