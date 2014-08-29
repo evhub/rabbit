@@ -288,7 +288,7 @@ def splitany(inputstring, inputlist, func=None):
             out = new
         return out
 
-def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf"), catch=True):
+def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf"), catch=True, *args, **kwargs):
     """Splits A List By An Open And A Close."""
     outlist = [""]
     feed = outlist
@@ -324,7 +324,7 @@ def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf"), catc
     if catch and len(directory) > 1:
         raise ExecutionError("SyntaxError", "Unmatched open token "+str(openstr)+" in "+str(expression))
     else:
-        return clean(outlist)
+        return clean(outlist, *args, **kwargs)
 
 def splitinplace(inputlist, findstr, reserved="", domod=None):
     """Splits A List In-Place By A String."""

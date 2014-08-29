@@ -682,7 +682,7 @@ Global Operator Precedence List:
     def splitdedent(self, inputstring, splitfunc, top=True):
         """Splits And Unsplits By Dedents."""
         inputstring = str(inputstring)
-        split = fullsplit(inputstring, self.indentchar, self.dedentchar, 1, not top)
+        split = fullsplit(inputstring, self.indentchar, self.dedentchar, 1, not top, iswhite, True)
         if not top or len(split) > 1 or (split and istext(split[0])):
             out = []
             for item in split:
@@ -859,14 +859,14 @@ Global Operator Precedence List:
                                 lines[x-1] = lines[x-1]+openstr
                             elif self.laxindent or check in levels:
                                 point = levels.index(check)+1
-                                lines[x-1] += closestr*len(levels[point:])
+                                lines[x-1] = closestr*len(levels[point:])+lines[x-1]
                                 levels = levels[:point]
                             else:
                                 raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level in line "+lines[x]+" (#"+str(x)+")")
                             new.append(lines[x-1])
                         else:
                             levels.append(leading(lines[x]))
-                    new.append(lines[-1]+closestr*(len(levels)-1))
+                    new.append(closestr*(len(levels)-1)+lines[-1])
                     out.append("\n".join(new))
                 else:
                     out.append(inputlist[x])
