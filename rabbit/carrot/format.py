@@ -312,11 +312,12 @@ def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf"), catc
                 feed.append("")
             elif catch:
                 raise ExecutionError("SyntaxError", "Unmatched close token "+str(closestr)+" in "+str(expression))
-            else:
+            elif -level < maxlevel:
                 outlist = [outlist]
                 feed = outlist
                 directory = [feed]
                 feed.append("")
+                level -= 1
             level += 1
         else:
             feed[len(feed)-1] += x

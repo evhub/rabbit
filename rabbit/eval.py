@@ -688,10 +688,11 @@ Global Operator Precedence List:
             for item in split:
                 if istext(item):
                     out += splitfunc(item)
-                elif not out:
-                    raise ExecutionError("IndentationError", "Illegal starting indent in "+inputstring)
                 elif len(item) == 1:
-                    out[-1] += item[0]
+                    if out:
+                        out[-1] += item[0]
+                    else:
+                        out.append(item[0])
                 elif item:
                     raise SyntaxError("Error in evaluating indentation len("+repr(item)+")>1")
         elif not split or not split[0]:
