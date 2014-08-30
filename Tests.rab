@@ -344,10 +344,11 @@ passert:: lcm:4:6 ?= 12
 passert:: perm:5:2 ?= 20
 passert:: comb:4:2 ?= 6
 passert:: env().a ?= a ?= 2         $ a = 2
-passert:: iserr(error())
+passert:: iserr(Error())
 passert:: iserr((try::raise()):1)
-passert:: from(error, error())
-passert:: from(error, (try::raise()):1)
+passert:: iserr(Warning())
+passert:: from(Error, Error())
+passert:: from(Error, (try::raise()):1)
 passert:: var:"a" ?= "b"            $ a = b
 passert:: a ?= 5                    $ exec("a = 5")
 passert:: num(i) ?= i
@@ -397,7 +398,7 @@ passert:: class<<x=1>> <= class<<x=1>>
 passert:: iserr((try::raise()):1)
 passert:: (try::except( (try::1/0) )) ?= (try::(1/0))
 passert:: (try::raise( ComplicatedError() )):1 ?= ComplicatedError()
-    $ ComplicatedError := error + class <<
+    $ ComplicatedError := Error + class <<
                                    name := "ComplicatedError"
                                    message := "A complicated error occurred"
                                    metadata := class <<
