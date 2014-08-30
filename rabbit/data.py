@@ -963,7 +963,7 @@ class multidata(mctobject):
         if len(params) == 0:
             value = item.x.units[0]
         else:
-            self.overflow = params[1:]
+            item.overflow = params[1:]
             if params[0] in item.x.units:
                 value = item.y.units[item.x.units.index(params[0])]
             else:
