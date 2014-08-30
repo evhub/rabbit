@@ -692,12 +692,13 @@ Global Operator Precedence List:
                 if istext(item):
                     new = splitfunc(item)
                 elif len(item) == 1:
-                    if istext(item[0]):
-                        new = item[0]
-                    elif len(item[0]) == 1 and istext(item[0][0]):
-                        new = item[0][0]
-                    else:
-                        raise SyntaxError("Error in evaluating indentation len("+repr(item[0])+")>1")
+                    while not istext(new):
+                        if istext(item[0]):
+                            new = item[0]
+                        elif len(item[0]) == 1:
+                            new = item[0][0]
+                        else:
+                            raise SyntaxError("Error in evaluating indentation len("+repr(item[0])+")>1")
                     join = True
                 elif item:
                     raise SyntaxError("Error in evaluating indentation len("+repr(item)+")>1")
@@ -719,7 +720,16 @@ Global Operator Precedence List:
         elif not split or not split[0]:
             out = [""]
         elif len(split[0]) == 1:
-            out = self.splitdedent(split[0][0], splitfunc, False)
+            item = split[0]
+            new = None
+            while not istext(new):
+                if istext(item[0]):
+                    new = item[0]
+                elif len(item[0]) == 1:
+                    new = item[0][0]
+                else:
+                    raise SyntaxError("Error in evaluating indentation len("+repr(item[0])+")>1")
+            out = self.splitdedent(new, splitfunc, False)
         else:
             raise SyntaxError("Error in evaluating indentation len("+repr(split[0])+")>1")
         return out

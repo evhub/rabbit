@@ -231,6 +231,16 @@ def strlist(inputlist, delimeter=" ", converter=str):
     """Formats A List Into A String."""
     return str(delimeter).join(map(converter, inputlist))
 
+def condense(inputlist, delimeter=""):
+    """Joins All Parts Of A List Together."""
+    out = []
+    for item in inputlist:
+        if istext(item):
+            out.append(item)
+        else:
+            out.append(condense(item, delimeter))
+    return str(delimeter).join(out)
+
 def strdict(inputdict, seperator=":", delimeter=" ", termconverter=str, keyconverter=str):
     """Formats A Dictionary Into A String."""
     outstring = ""
@@ -313,7 +323,7 @@ def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf"), catc
             elif catch:
                 raise ExecutionError("SyntaxError", "Unmatched close token "+str(closestr)+" in "+str(expression))
             elif -level < maxlevel:
-                outlist = [outlist]
+                outlist = [[condense(outlist)]]
                 feed = outlist
                 directory = [feed]
                 feed.append("")
