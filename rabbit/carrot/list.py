@@ -299,7 +299,7 @@ def clean(haystack, needle="", func=False):
     cleaned = []
     for x in haystack:
         if islist(x):
-            cleaned.append(clean(x, needle))
+            cleaned.append(clean(x, needle, func))
         elif (not func and x != needle) or (func and not needle(x)):
             cleaned.append(x)
     return cleaned

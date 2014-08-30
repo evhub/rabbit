@@ -685,16 +685,37 @@ Global Operator Precedence List:
         split = fullsplit(inputstring, self.indentchar, self.dedentchar, 1, not top, iswhite, True)
         if not top or len(split) > 1 or (split and istext(split[0])):
             out = []
+            join = False
             for item in split:
+                new = None
+                new_join, join = join, False
                 if istext(item):
-                    out += splitfunc(item)
+                    new = splitfunc(item)
                 elif len(item) == 1:
-                    if out:
-                        out[-1] += item[0]
+                    if istext(item[0]):
+                        new = item[0]
+                    elif len(item[0]) == 1 and istext(item[0][0]):
+                        new = item[0][0]
                     else:
-                        out.append(item[0])
+                        raise SyntaxError("Error in evaluating indentation len("+repr(item[0])+")>1")
+                    join = True
                 elif item:
                     raise SyntaxError("Error in evaluating indentation len("+repr(item)+")>1")
+                else:
+                    join = True
+                if new is not None:
+                    if new_join:
+                        if istext(new):
+                            out[-1] += new
+                        elif new:
+                            out[-1] += new[0]
+                            out += new[1:]
+                    elif not istext(new):
+                        out += new
+                    elif out:
+                        out[-1] += new
+                    else:
+                        out.append(new)
         elif not split or not split[0]:
             out = [""]
         elif len(split[0]) == 1:
