@@ -1974,7 +1974,7 @@ Global Operator Precedence List:
                 raise ExecutionError("NoneError", "Nothing cannot be called")
             else:
                 return item
-        elif hasattr(item, "itemcall"):
+        elif hasattr(item, "itemcall") and item.itemcall is not None:
             value = item.itemcall(params)
         elif ismatrix(item):
             item = getmatrix(item)

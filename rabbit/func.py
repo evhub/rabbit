@@ -720,13 +720,9 @@ class rawstrcalc(strcalc):
 
 class codestr(rawstrcalc):
     """A Code Evaluator String."""
+    itemcall = None
     evaltype = "code"
     check = 1
-
-    def __init__(self, *args, **kwargs):
-        """Creates The Code Evaluator String."""
-        del self.itemcall
-        return rawstrcalc.__init__(self, *args, **kwargs)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
