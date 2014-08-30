@@ -722,7 +722,11 @@ class codestr(rawstrcalc):
     """A Code Evaluator String."""
     evaltype = "code"
     check = 1
-    del itemcall
+
+    def __init__(self, *args, **kwargs):
+        """Creates The Code Evaluator String."""
+        del self.itemcall
+        return rawstrcalc.__init__(self, *args, **kwargs)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -1067,7 +1071,12 @@ class classcalc(cotobject):
     def __init__(self, e, variables=None):
         """Initializes The Class."""
         self.e = e
-        self.variables = {self.selfvar : self}
+        self.restricted = [
+            self.selfvar
+            ]
+        self.variables = {
+            self.selfvar : self
+            }
         if variables is not None:
             self.add(variables)
 
@@ -1160,8 +1169,8 @@ class classcalc(cotobject):
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if test == self.selfvar:
-            raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined")
+        if test in self.restricted:
+            raise ExecutionError("RedefinitionError", "The "+test+" variable cannot be redefined")
         elif bypass:
             self.variables[test] = value
         elif self.e.isreserved(test):
@@ -1249,7 +1258,8 @@ class classcalc(cotobject):
     def getvars(self):
         """Gets Original Variables."""
         out = self.variables.copy()
-        del out[self.selfvar]
+        for var in self.restricted:
+            del out[var]
         return out
 
     def calcall(self):
@@ -1351,7 +1361,7 @@ class namespace(classcalc):
 
     def getrepr(self, *args, **kwargs):
         """Wraps classcalc.getrepr."""
-        return "namespace:"+classcalc.getrepr(self, *args, **kwargs)
+        return "namespace: "+classcalc.getrepr(self, *args, **kwargs)
 
     def call(self, variables):
         """Calls The Namespace."""
@@ -1364,33 +1374,38 @@ class namespace(classcalc):
 class instancecalc(numobject, classcalc):
     """An Evaluator Class Instance."""
     evaltype = "instance"
+    parentvar = "__parent__"
 
     def __init__(self, e, variables, parent=None):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
         if parent is None:
-            self.parent = variables
+            parent = classcalc(self.e)
+            parent.variables = variables
             variables = variables.copy()
             del variables[self.selfvar]
-        else:
-            self.parent = parent
-        self.variables = {self.selfvar : self}
+        self.restricted = [
+            self.selfvar,
+            self.parentvar
+            ]
+        self.variables = {
+            self.selfvar : self,
+            self.parentvar : parent
+            }
         if variables is not None:
             self.add(variables)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("instancecalc", getstates(self.getvars()), getstates(self.parent))
+        return ("instancecalc", getstates(self.getvars()), getstates(self.getparent().getvars()))
 
     def copy(self):
         """Copies The Instance."""
-        return instancecalc(self.e, getcopy(self.getvars()), self.parent)
+        return instancecalc(self.e, getcopy(self.getvars()), self.getparent())
 
     def getparent(self):
         """Reconstructs The Parent Class."""
-        out = classcalc(self.e)
-        out.variables = self.parent
-        return out
+        return self.variables[self.parentvar]
 
     def toclass(self):
         """Converts To A Normal Class."""
@@ -1401,16 +1416,7 @@ class instancecalc(numobject, classcalc):
     def isfrom(self, parent):
         """Determines Whether The Instance Is From The Parent."""
         if isinstance(parent, classcalc):
-            parent = parent.variables
-        if isinstance(parent, dict):
-            if parent[self.selfvar] is self.parent[self.selfvar]:
-                return True
-            else:
-                parent = parent.copy()
-                del parent[self.selfvar]
-                variables = self.parent.copy()
-                del variables[self.selfvar]
-                return variables == parent
+            return self.getparent() == parent
         else:
             return False
 

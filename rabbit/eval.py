@@ -91,7 +91,7 @@ Global Operator Precedence List:
         "usefunc": lambda args: usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], args[7], self.devariables(args[8])),
         "classcalc": lambda args: classcalc(self, self.devariables(args[0])),
         "namespace": lambda args: namespace(self, self.devariables(args[0])),
-        "instancecalc": lambda args: instancecalc(self, self.devariables(args[0]), self.devariables(args[1])),
+        "instancecalc": lambda args: instancecalc(self, self.devariables(args[0]), classcalc(self, self.devariables(args[1]))),
         "makefunc": lambda args: makefunc(args[0], self, args[1], args[2], self.devariables(args[3])),
         "brace": lambda args: brace(self, args[0]),
         "bracket": lambda args: bracket(self, args[0])
@@ -2658,7 +2658,7 @@ class evalfuncs(object):
         elif isinstance(variables[0], namespace):
             return variables[0]
         elif isinstance(variables[0], classcalc):
-            return namespace(variables[0].e, variables[0].variables)
+            return namespace(variables[0].e, variables[0].getvars())
         else:
             raise ExecutionError("ClassError", "Cannot convert non-class to namespace")
 
