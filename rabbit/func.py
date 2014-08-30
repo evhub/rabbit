@@ -1991,7 +1991,7 @@ class atom(evalobject):
         """Always Returns self."""
         return self
 
-    def __repr__(self):
+    def __str__(self):
         """Gets A Representation."""
         return "_"
 

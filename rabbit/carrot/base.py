@@ -36,10 +36,6 @@ class evalobject(object):
     """A Base Class For Evaluator Objects."""
     check = 1
 
-    def getrepr(self, *args, **kwargs):
-        """Gets A Representation."""
-        return repr(self)
-
     def __ne__(self, other):
         """Implements !=."""
         return not self == other
