@@ -876,9 +876,10 @@ Global Operator Precedence List:
     def preproc_alias(self, inputstring, top=True):
         """Applies Aliases."""
         if top:
-            return replaceall(inputstring, self.aliases, self.stringchars, self.strgroupers)
+            out = replaceall(inputstring, self.aliases, self.stringchars, self.strgroupers)
         else:
-            return inputstring
+            out = inputstring
+        return out
 
     def preproc_string(self, expression, top=None):
         """Evaluates The String Part Of An Expression."""

@@ -494,6 +494,7 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
     out = []
     hold = None
     for x in inputstring:
+        check_hold = not hold
         new = x
         if hold:
             if x == hold:
@@ -540,7 +541,7 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
                         found[k] = (1, 0, "")
         if not found:
             out.append(new)
-            if not hold:
+            if check_hold:
                 for c in new:
                     if hold:
                         if c == hold:
