@@ -1345,7 +1345,6 @@ class classcalc(cotobject):
 class namespace(classcalc):
     """A Class For Namespaces."""
     evaltype = "namespace"
-    notmatrix = False
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -1365,7 +1364,7 @@ class namespace(classcalc):
             return self
         else:
             self.e.overflow = variables[1:]
-            return self.calc(self.e.prepare(variables[0], True, True))
+            return self.calc(self.e.prepare(variables[0], True, False))
 
 class instancecalc(numobject, classcalc):
     """An Evaluator Class Instance."""
@@ -1405,8 +1404,7 @@ class instancecalc(numobject, classcalc):
 
     def toclass(self):
         """Converts To A Normal Class."""
-        out = classcalc(self.e)
-        out.variables = self.variables
+        out = classcalc(self.e, self.getvars())
         return out
 
     def isfrom(self, parent):
