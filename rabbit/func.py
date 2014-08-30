@@ -711,6 +711,13 @@ class strcalc(numobject):
             self.e.overflow = params[2:]
         return value
 
+    def getrepr(self, top, bottom, indebug, maxrecursion):
+        """Gets A Representation."""
+        if bottom:
+            return repr(item)
+        else:
+            return str(item)
+
 class rawstrcalc(strcalc):
     """A Raw Evaluator String."""
     def __init__(self, calcstr, e):
@@ -740,6 +747,13 @@ class codestr(rawstrcalc):
         """Calls The Code String."""
         self.e.overflow = variables
         return self.calc()
+
+    def getrepr(self, top, bottom, indebug, maxrecursion):
+        """Gets A Representation."""
+        if bottom:
+            return "::"+str(self)
+        else:
+            return str(self)
 
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
@@ -1147,7 +1161,7 @@ class classcalc(cotobject):
                 elif maxrecursion <= 0 and isinstance(v, classcalc):
                     out += self.e.speedyprep(v, False, bottom, indebug, maxrecursion)
                 else:
-                    out += self.e.prepare(v, False, True, indebug, maxrecursion-1)
+                    out += self.e.prepare(v, False, True, indebug, maxrecursion)
             if top:
                 out += "\n"
             else:
@@ -1802,14 +1816,6 @@ class instancecalc(numobject, classcalc):
         else:
             return self.getrepr(True)
 
-    def getrepr(self, top=False, maxrecursion=10):
-        """Retrieves A Representation."""
-        check_repr = self.tryget("__repr__")
-        if check_repr:
-            return self.e.prepare(self.domethod(check_repr), top, False, maxrecursion=maxrecursion-1)
-        else:
-            return self.e.prepare(self.toclass(), top, True, maxrecursion=maxrecursion-1)+" ( )"
-
     def __len__(self):
         """Retrieves The Length."""
         out = None
@@ -1866,6 +1872,19 @@ class instancecalc(numobject, classcalc):
         else:
             return NotImplemented
 
+    def getrepr(self, top, bottom, indebug, maxrecursion):
+        """Gets A Representation."""
+        if maxrecursion <= 0:
+            return self.speedyprep(self, False, bottom, indebug, maxrecursion)
+        elif not indebug and not bottom:
+            return str(self)
+        else:
+            check_repr = self.tryget("__repr__")
+            if check_repr:
+                return self.e.prepare(self.domethod(check_repr), top, False, indebug, maxrecursion)
+            else:
+                return classcalc.getrepr(self, top, bottom, indebug, maxrecursion)+" ( )"
+
 class atom(evalobject):
     """Implements Atoms."""
     evaltype = "atom"
@@ -1873,84 +1892,105 @@ class atom(evalobject):
     def getstate(self):
         """Returns A Pickleable Reference Object."""
         return ("atom", )
+
     def copy(self):
         """Makes Another Atom."""
         return atom()
+
     def calc(self):
         """Converts To Nothing."""
         return matrix(0)
+
     def __eq__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
             return True
         else:
             return False
+
     def __ne__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
             return True
         else:
             return False
+
     def __gt__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
             return True
         else:
             return False
+
     def __lt__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
             return True
         else:
             return False
+
     def __ge__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
             return True
         else:
             return False
+
     def __le__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
             return True
         else:
             return False
+
     def __iadd__(self, other):
         """Always Returns self."""
         return self
+
     def __radd__(self, other):
         """Always Returns self."""
         return self
+
     def __isub__(self, other):
         """Always Returns self."""
         return self
+
     def __rsub__(self, other):
         """Always Returns self."""
         return self
+
     def __imul__(self, other):
         """Always Returns self."""
         return self
+
     def __rmul__(self, other):
         """Always Returns self."""
         return self
+
     def __idiv__(self, other):
         """Always Returns self."""
         return self
+
     def __rdiv__(self, other):
         """Always Returns self."""
         return self
+
     def __ipow__(self, other):
         """Always Returns self."""
         return self
+
     def __rpow__(self, other):
         """Always Returns self."""
         return self
+
     def __imod__(self, other):
         """Always Returns self."""
         return self
+
     def __rmod__(self, other):
         """Always Returns self."""
         return self
+
     def __repr__(self):
         """Gets A Representation."""
         return "_"

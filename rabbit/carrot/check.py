@@ -137,6 +137,8 @@ def catch(function, *args, **kwargs):
         err = ("AttributeError", detail, True)
     except IndexError as detail:
         err = ("IndexError", detail, True)
+    except NotImplementedError as detail:
+        err = ("NotImplementedError", detail, False)
     except RuntimeError as detail:
         err = ("RuntimeError", detail, False)
     except AssertionError as detail:

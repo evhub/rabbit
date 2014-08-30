@@ -244,11 +244,11 @@ Global Operator Precedence List:
         """Resets The Variables To Their Defaults."""
         self.parens = []
         self.variables = {
-            "warning":classcalc(self, {
+            "Warning":classcalc(self, {
                 self.errorvar: 1.0,
                 self.fatalvar: 0.0
                 }),
-            "error":classcalc(self, {
+            "Error":classcalc(self, {
                 self.errorvar: 1.0,
                 self.fatalvar: 1.0
                 }),
@@ -326,7 +326,7 @@ Global Operator Precedence List:
             "frac":funcfloat(self.funcs.fractcall, self, "frac"),
             "simp":funcfloat(self.funcs.simpcall, self, "simp"),
             "det":funcfloat(self.funcs.detcall, self, "det", reqargs=1),
-            "math":classcalc(self, {
+            "Math":classcalc(self, {
                 "floor":usefunc(math.floor, self, "floor", ["x"]),
                 "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
                 "log":usefunc(math.log10, self, "log", ["x"]),
@@ -350,7 +350,7 @@ Global Operator Precedence List:
                 "e":math.e,
                 "pi":math.pi
                 }),
-            "stats":classcalc(self, {
+            "Stats":classcalc(self, {
                 "normdist":usefunc(normdist, self, "normdist", ["x", "mean", "stdev"]),
                 "binomP":usefunc(binomP, self, "binomP", ["n", "p", "x"]),
                 "poissonP":usefunc(poissonP, self, "poissonP", ["lambda", "x"]),
@@ -376,15 +376,15 @@ Global Operator Precedence List:
             "\xf8" : "none",
             "\u221e" : "inf",
             "\u2211" : "sum",
-            "\u03c0" : "math.pi",
-            "\u221a" : "math.sqrt",
-            "\u222b" : "math.S",
-            "\u0393" : "math.gamma",
-            "\u220f" : "math.prod",
+            "\u03c0" : "Math.pi",
+            "\u221a" : "Math.sqrt",
+            "\u222b" : "Math.S",
+            "\u0393" : "Math.gamma",
+            "\u220f" : "Math.prod",
             "\u2208" : "in",
             "\u230a" : "min",
             "\u2308" : "max",
-            "\xb0" : "math.rad",
+            "\xb0" : "Math.rad",
             "\xbd" : 0.5,
             "\xbc" : 0.25,
             "\xbe" : 0.75,
@@ -428,9 +428,9 @@ Global Operator Precedence List:
             "\u220b" : strfunc("\u2208(rev(__))", self, name="\u220b", overflow=False),
             "\u220c" : strfunc("!\u220b(__)", self, name="\u220c", overflow=False),
             "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
-            "\u221c" : strfunc("math.sqrt(math.sqrt(x))", self, ["x"], name="\u221c"),
-            "\u222c" : strfunc("math.S(math.S(f,++args),++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
-            "\u222d" : strfunc("math.S(math.S(math.S(f,++args),++args),++args)", self, ["f", "args"], reqargs=1, name="\u222d")
+            "\u221c" : strfunc("Math.sqrt(Math.sqrt(x))", self, ["x"], name="\u221c"),
+            "\u222c" : strfunc("S(S(f,++args),++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
+            "\u222d" : strfunc("S(S(S(f,++args),++args),++args)", self, ["f", "args"], reqargs=1, name="\u222d")
             })
 
     def setreturned(self, value=True):
@@ -501,7 +501,7 @@ Global Operator Precedence List:
 
     def speedyprep(self, item, top=False, bottom=False, indebug=False, maxrecursion=0):
         """Speedily Prepares The Output Of An Evaluation."""
-        out = "{"+"\n"*top
+        out = "class \xab"+"\n"*top
         if not indebug and bottom and not top:
             out += 'raise("RuntimeError", "Maximum recursion depth exceeded in object preparation")'
         else:
@@ -510,7 +510,7 @@ Global Operator Precedence List:
                 out += "= "+str(item)
             else:
                 out += ":= `"+self.evaltypestr(item)+"`"
-        out += "\n"*top+" }"
+        out += "\n"*top+" \xbb"
         return out
 
     def prepare(self, item, top=False, bottom=True, indebug=False, maxrecursion=None):
@@ -519,17 +519,6 @@ Global Operator Precedence List:
             maxrecursion = self.maxrecursion
         if istext(item):
             out = str(item)
-        elif isinstance(item, atom):
-            out = repr(item)
-        elif isinstance(item, codestr):
-            out = str(item)
-            if bottom:
-                out = "::"+out
-        elif isinstance(item, strcalc):
-            if bottom:
-                out = repr(item)
-            else:
-                out = str(item)
         elif item is None:
             out = "none"
         elif isinstance(item, bool):
@@ -557,15 +546,6 @@ Global Operator Precedence List:
                 out = out[:-1]
         elif self.speedy and indebug:
             out = self.speedyprep(item, top, bottom, True, maxrecursion)
-        elif isinstance(item, instancecalc):
-            if maxrecursion <= 0:
-                out = self.speedyprep(item, False, bottom, indebug, maxrecursion)
-            elif indebug or bottom:
-                out = item.getrepr(top, maxrecursion-1)
-            else:
-                out = str(item)
-        elif isinstance(item, classcalc):
-            out = item.getrepr(top, bottom, indebug, maxrecursion)
         elif isinstance(item, (data, multidata)):
             if bottom:
                 out = "data:(" + self.prepare(getmatrix(item), False, True, indebug, maxrecursion) + ")"
@@ -670,18 +650,15 @@ Global Operator Precedence List:
                         out += ":"+str(item.n)
             else:
                 out = "\\"+str(item)
-        elif isinstance(item, funcfloat) or getcheck(item) >= 1:
+        elif hasattr(item, "getrepr"):
+            out = item.getrepr(top, bottom, indebug, maxrecursion-1)
+        elif getcheck(item) >= 1:
             out = str(item)
         elif indebug:
             if indebug > 1:
                 out = str(item)
             else:
-                try:
-                    item.getrepr
-                except AttributeError:
-                    out = repr(item)
-                else:
-                    out = item.getrepr(top, maxrecursion-1)
+                out = repr(item)
         else:
             raise ExecutionError("DisplayError", "Unable to display "+repr(item))
         return str(out)
@@ -979,7 +956,7 @@ Global Operator Precedence List:
             if istext(x):
                 command += x
             else:
-                raise NotImplementedError("Dictionaries are not yet supported.") #TODO
+                raise NotImplementedError("Dictionaries are not yet supported") #TODO
         return command
 
     def precalc_brack(self, expression):
