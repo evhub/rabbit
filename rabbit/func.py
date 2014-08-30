@@ -1132,7 +1132,7 @@ class classcalc(cotobject):
 
     def getrepr(self, top=True, bottom=True, indebug=True, maxrecursion=5):
         """Finds A Representation."""
-        out = "{"
+        out = "class \xab"
         if top:
             out += "\n"
         variables = self.getvars()
@@ -1159,7 +1159,7 @@ class classcalc(cotobject):
                 out = out[:-3]
         elif top:
             out = out[:-1]
-        out += " }"
+        out += " \xbb"
         return out
 
     def store(self, key, value, bypass=False):
@@ -2018,20 +2018,17 @@ class rollfunc(strfunc):
             return False
 
 class brace(object):
-    """A To-Be-Calculated Class."""
-    def __init__(self, e, cmds):
-        """Constructs The Class."""
+    """A To-Be-Calculated Dictionary."""
+    def __init__(self, e, items):
+        """Constructs The Dictionary."""
         self.e = e
-        self.cmds = cmds
+        self.items = items
     def calc(self):
-        """Calculates The Class."""
-        out = classcalc(self.e)
-        for cmd in self.cmds:
-            out.process(cmd)
-        return out
+        """Calculates The Dictionary."""
+        raise NotImplementedError("This will be added.") #TODO
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("brace", self.cmds)
+        return ("brace", self.items)
 
 class bracket(object):
     """A To-Be-Calculated Row."""

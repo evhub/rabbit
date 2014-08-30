@@ -103,6 +103,8 @@ Global Operator Precedence List:
     formatchars = directchar + indentchar + dedentchar
     parenchar = "\xa7"
     aliases = {
+        "<<":"\xab",
+        ">>":"\xbb",
         "\t":"    ",
         "\xac":"!",
         "\xf7":"/",
@@ -128,6 +130,7 @@ Global Operator Precedence List:
         }
     groupers = {
         "(":")",
+        "\xab":"\xbb",
         "{":"}",
         "[":"]"
         }
@@ -138,7 +141,7 @@ Global Operator Precedence List:
     multiargops = bools + callops + "+-@~|&;,$" + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
     errorvar = "__error__"
-    fatalvar = "__fatal__"
+    fatalvar = "fatal"
     namevar = "name"
     messagevar = "message"
     autoarg = "____"
@@ -179,7 +182,8 @@ Global Operator Precedence List:
             ]
         self.precalcs = [
             self.precalc_paren,
-            self.precalc_class,
+            self.precalc_block,
+            self.precalc_dict,
             self.precalc_brack
             ]
         self.tops = [
@@ -951,21 +955,30 @@ Global Operator Precedence List:
                 raise SyntaxError("Error in evaluating parentheses len("+repr(x)+")>1")
         return command
 
-    def precalc_class(self, expression):
+    def precalc_block(self, expression):
+        """Creates A Code Block."""
+        blocklist = fullsplit(expression, "\xab", "\xbb", 1)
+        command = ""
+        for x in blocklist:
+            if istext(x):
+                command += x
+            elif not x:
+                command += self.wrap(codestr("", self))
+            elif len(x) == 1:
+                command += self.wrap(codestr(x[0], self))
+            else:
+                raise SyntaxError("Error in evaluating block len("+repr(x)+")>1")
+        return command
+
+    def precalc_dict(self, expression):
         """Evaluates The Curly Brackets In An Expression."""
         curlylist = fullsplit(expression, "{", "}", 1)
         command = ""
         for x in curlylist:
             if istext(x):
                 command += x
-            elif len(x) <= 1:
-                if len(x) < 1:
-                    original = ""
-                else:
-                    original = x[0]
-                command += self.wrap(brace(self, self.splitdedent(original, lambda x: self.outersplit(x, "\n", top=False))))
             else:
-                raise SyntaxError("Error in evaluating curly braces len("+repr(x)+")>1")
+                raise NotImplementedError("Dictionaries are not yet supported.") #TODO
         return command
 
     def precalc_brack(self, expression):
@@ -2214,7 +2227,7 @@ Global Operator Precedence List:
                                                     raise ValueError("Invalid Rabbit wrapper of "+name)
                             if new is None:
                                 raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
-                                # This is where whatever test is should be wrapped regardless in a special full-conversion wrapper
+                                #TODO: This is where whatever test is should be wrapped regardless in a special full-conversion wrapper
                         else:
                             raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                     out = new
@@ -2647,8 +2660,14 @@ class evalfuncs(object):
             return variables[0].toclass()
         elif isinstance(variables[0], classcalc):
             return variables[0]
+        elif isinstance(variables[0], strcalc):
+            original = self.e.prepare(variables[0], True, False)
+            out = classcalc(self.e)
+            for cmd in self.e.splitdedent(original, lambda x: x.splitlines()):
+                out.process(cmd)
+            return out
         else:
-            raise ExecutionError("ClassError", "Cannot convert non-class to class")
+            raise ExecutionError("ClassError", "Cannot convert "+self.e.prepare(variables[0], False, True, True)+" to class")
 
     def namespacecall(self, variables):
         """Converts To A Namespace."""
@@ -2660,7 +2679,7 @@ class evalfuncs(object):
         elif isinstance(variables[0], classcalc):
             return namespace(variables[0].e, variables[0].getvars())
         else:
-            raise ExecutionError("ClassError", "Cannot convert non-class to namespace")
+            raise ExecutionError("ClassError", "Cannot convert "+self.e.prepare(variables[0], False, True, True)+" to namespace")
 
     def getvalcall(self, variables):
         """Calculates A Variable Without Changing It."""
