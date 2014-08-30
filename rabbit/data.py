@@ -958,14 +958,14 @@ class multidata(mctobject):
         else:
             return self.items() == other
 
-    def itemcall(item, params):
+    def itemcall(self, params):
         """Performs A Colon Call."""
         if len(params) == 0:
-            value = item.x.units[0]
+            value = self.x.units[0]
         else:
-            item.overflow = params[1:]
-            if params[0] in item.x.units:
-                value = item.y.units[item.x.units.index(params[0])]
+            self.overflow = params[1:]
+            if params[0] in self.x.units:
+                value = self.y.units[self.x.units.index(params[0])]
             else:
                 value = matrix(0)
         return value

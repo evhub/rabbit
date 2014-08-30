@@ -26,7 +26,7 @@ from .carrot.file import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def matrixconstructor(args):
+def matrixconstructor(self, args):
     """Reconstructs A Matrix."""
     value = matrix(args[1], args[2], converter=args[3], fake=args[4])
     for y in xrange(0, len(args[0])):
@@ -76,25 +76,25 @@ Global Operator Precedence List:
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
     constructors = {
-        "atom": lambda args: atom(),
-        "reciprocal": lambda args: reciprocal(self.deitem(args[0])),
-        "fraction": lambda args: fraction(self.deitem(args[0]), self.deitem(args[1])),
-        "data": lambda args: data(args[0], args[1]),
-        "multidata": lambda args: multidata(args[0], args[1]),
-        "rollfunc": lambda args: rollfunc(args[0], self, args[1], args[2], args[3]),
+        "atom": lambda self, args: atom(),
+        "reciprocal": lambda self, args: reciprocal(self.deitem(args[0])),
+        "fraction": lambda self, args: fraction(self.deitem(args[0]), self.deitem(args[1])),
+        "data": lambda self, args: data(args[0], args[1]),
+        "multidata": lambda self, args: multidata(args[0], args[1]),
+        "rollfunc": lambda self, args: rollfunc(args[0], self, args[1], args[2], args[3]),
         "matrix": matrixconstructor,
-        "strfunc": lambda args: strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]), args[9]),
-        "codestr": lambda args: codestr(args[0], self),
-        "strcalc": lambda args: rawstrcalc(args[0], self),
-        "derivfunc": lambda args: derivfunc(args[0], args[1], args[2], args[3], self, args[4], args[5], args[6], args[7], self.devariables(args[8])),
-        "integfunc": lambda args: integfunc(args[0], args[1], self, args[2], args[3], args[4], self.devariables(args[5])),
-        "usefunc": lambda args: usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], args[7], self.devariables(args[8])),
-        "classcalc": lambda args: classcalc(self, self.devariables(args[0])),
-        "namespace": lambda args: namespace(self, self.devariables(args[0])),
-        "instancecalc": lambda args: instancecalc(self, self.devariables(args[0]), classcalc(self, self.devariables(args[1]))),
-        "makefunc": lambda args: makefunc(args[0], self, args[1], args[2], self.devariables(args[3])),
-        "brace": lambda args: brace(self, args[0]),
-        "bracket": lambda args: bracket(self, args[0])
+        "strfunc": lambda self, args: strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]), args[9]),
+        "codestr": lambda self, args: codestr(args[0], self),
+        "strcalc": lambda self, args: rawstrcalc(args[0], self),
+        "derivfunc": lambda self, args: derivfunc(args[0], args[1], args[2], args[3], self, args[4], args[5], args[6], args[7], self.devariables(args[8])),
+        "integfunc": lambda self, args: integfunc(args[0], args[1], self, args[2], args[3], args[4], self.devariables(args[5])),
+        "usefunc": lambda self, args: usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], args[7], self.devariables(args[8])),
+        "classcalc": lambda self, args: classcalc(self, self.devariables(args[0])),
+        "namespace": lambda self, args: namespace(self, self.devariables(args[0])),
+        "instancecalc": lambda self, args: instancecalc(self, self.devariables(args[0]), classcalc(self, self.devariables(args[1]))),
+        "makefunc": lambda self, args: makefunc(args[0], self, args[1], args[2], self.devariables(args[3])),
+        "brace": lambda self, args: brace(self, args[0]),
+        "bracket": lambda self, args: bracket(self, args[0])
         }
     varname = "x"
     directchar = "\xb6"
@@ -2411,7 +2411,7 @@ Global Operator Precedence List:
             name = str(item[0])
             args = item[1:]
             if name in self.constructors:
-                value = self.constructors[name](args)
+                value = self.constructors[name](self, args)
             elif name == "find":
                 tofind = str(args[0])
                 if tofind in self.variables:

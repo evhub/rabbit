@@ -708,7 +708,7 @@ class strcalc(numobject):
             value = rawstrcalc(item[int(params[0])], self)
         else:
             value = rawstrcalc(item[int(params[0]):int(params[1])], self)
-            self.overflow = params[2:]
+            self.e.overflow = params[2:]
         return value
 
 class rawstrcalc(strcalc):
