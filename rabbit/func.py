@@ -2065,7 +2065,7 @@ class brace(object):
         self.items = items
     def calc(self):
         """Calculates The Dictionary."""
-        raise NotImplementedError("This will be added.") #TODO
+        raise NotImplementedError("This will be added") #TODO
     def getstate(self):
         """Returns A Pickleable Reference Object."""
         return ("brace", self.items)
