@@ -27,25 +27,33 @@ from .carrot.math import *
 
 class reciprocal(numobject):
     """Implements Curried Division."""
+    evaltype = "fraction"
     n = 1.0
+
     def __init__(self, base):
         """Creates The Reciprocal Object."""
         self.d = base
+
     def getstate(self):
         """Returns A Pickleable Reference Object."""
         return ("reciprocal", self.d)
+
     def copy(self):
         """Copies The Reciprocal Object."""
         return reciprocal(self.d)
+
     def calc(self):
         """Calculates The Reciprocal."""
         return self.n/self.d
+
     def __imul__(self, other):
         """Does The Curried Division."""
         return self.n*other/self.d
 
 class fraction(numobject):
     """Implements A Fraction."""
+    evaltype = "fraction"
+
     def __init__(self, n=0, d=1):
         """Constructs The Fraction."""
         self.n = n

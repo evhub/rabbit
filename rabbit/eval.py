@@ -26,6 +26,14 @@ from .carrot.file import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+def matrixconstructor(args):
+    """Reconstructs A Matrix."""
+    value = matrix(args[1], args[2], converter=args[3], fake=args[4])
+    for y in xrange(0, len(args[0])):
+        for x in xrange(0, len(args[0][y])):
+            value.store(y,x, self.deitem(args[0][y][x]))
+    return value
+
 class evaluator(object):
     """Evaluates Equations And Expressions.
 
@@ -67,6 +75,27 @@ Global Operator Precedence List:
     ..      Performs function composition.
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
+    constructors = {
+        "atom": lambda args: atom(),
+        "reciprocal": lambda args: reciprocal(self.deitem(args[0])),
+        "fraction": lambda args: fraction(self.deitem(args[0]), self.deitem(args[1])),
+        "data": lambda args: data(args[0], args[1]),
+        "multidata": lambda args: multidata(args[0], args[1]),
+        "rollfunc": lambda args: rollfunc(args[0], self, args[1], args[2], args[3]),
+        "matrix": matrixconstructor,
+        "strfunc": lambda args: strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]), args[9]),
+        "codestr": lambda args: codestr(args[0], self),
+        "strcalc": lambda args: rawstrcalc(args[0], self),
+        "derivfunc": lambda args: derivfunc(args[0], args[1], args[2], args[3], self, args[4], args[5], args[6], args[7], self.devariables(args[8])),
+        "integfunc": lambda args: integfunc(args[0], args[1], self, args[2], args[3], args[4], self.devariables(args[5])),
+        "usefunc": lambda args: usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], args[7], self.devariables(args[8])),
+        "classcalc": lambda args: classcalc(self, self.devariables(args[0])),
+        "namespace": lambda args: namespace(self, self.devariables(args[0])),
+        "instancecalc": lambda args: instancecalc(self, self.devariables(args[0]), self.devariables(args[1])),
+        "makefunc": lambda args: makefunc(args[0], self, args[1], args[2], self.devariables(args[3])),
+        "brace": lambda args: brace(self, args[0]),
+        "bracket": lambda args: bracket(self, args[0])
+        }
     varname = "x"
     directchar = "\xb6"
     indentchar = "\u2021"
@@ -259,7 +288,8 @@ Global Operator Precedence List:
             "d":funcfloat(self.funcs.randcall, self, "d", reqargs=1),
             "from":funcfloat(self.funcs.instanceofcall, self, "from", reqargs=2),
             "iserr":funcfloat(self.funcs.iserrcall, self, "iserr", reqargs=1),
-            "class":funcfloat(self.funcs.classcall, self, "class", reqargs=1),
+            "class":funcfloat(self.funcs.classcall, self, "class"),
+            "namespace":funcfloat(self.funcs.namespacecall, self, "namespace"),
             "var":funcfloat(self.funcs.getvarcall, self, "var", reqargs=1),
             "val":funcfloat(self.funcs.getvalcall, self, "val", reqargs=1),
             "paren":funcfloat(self.funcs.getparenvarcall, self, "paren"),
@@ -1940,37 +1970,15 @@ Global Operator Precedence List:
         overflow, self.overflow = self.overflow, []
         docalc = False
         if isnull(item):
-            if len(params) == 0:
-                return item
-            else:
+            if params:
                 raise ExecutionError("NoneError", "Nothing cannot be called")
-        elif isinstance(item, strcalc) and not isinstance(item, codestr):
-            item = item.calcstr
-            if len(params) == 0:
-                value = rawstrcalc(item[-1], self)
-            elif len(params) == 1:
-                value = rawstrcalc(item[int(params[0])], self)
             else:
-                value = rawstrcalc(item[int(params[0]):int(params[1])], self)
-                self.overflow = params[2:]
-        elif isinstance(item, classcalc) and not isinstance(item, instancecalc):
-            if len(params) == 0:
-                value = item.toinstance()
-            else:
-                self.overflow = params[1:]
-                value = item.calc(self.prepare(params[0], False, False))
-        elif isinstance(item, multidata):
-            if len(params) == 0:
-                value = item.x.units[0]
-            else:
-                self.overflow = params[1:]
-                if params[0] in item.x.units:
-                    value = item.y.units[item.x.units.index(params[0])]
-                else:
-                    value = matrix(0)
-        elif hasmatrix(item):
+                return item
+        elif hasattr(item, "itemcall"):
+            value = item.itemcall(params)
+        elif ismatrix(item):
             item = getmatrix(item)
-            if len(params) == 0:
+            if not params:
                 value = item.retrieve(0)
             elif len(params) == 1:
                 if isinstance(params[0], matrix):
@@ -2335,34 +2343,13 @@ Global Operator Precedence List:
         return self.call(out, value, varname)
 
     def evaltypestr(self, item):
-        """Finds A String For A Type."""
-        if isinstance(item, instancecalc):
-            return "instance"
-        elif isinstance(item, classcalc):
-            return "class"
-        elif isinstance(item, data):
-            return "data"
-        elif isinstance(item, multidata):
-            return "multidata"
-        elif isnull(item):
+        if isnull(item):
             return "none"
-        elif isinstance(item, matrix):
-            if item.onlydiag():
-                return "list"
-            elif item.onlyrow():
-                return "row"
+        elif hasattr(item, "evaltype"):
+            if istext(item.evaltype):
+                return item.evaltype
             else:
-                return "matrix"
-        elif isinstance(item, (fraction, reciprocal)):
-            return "fraction"
-        elif isinstance(item, codestr):
-            return "code"
-        elif isinstance(item, strcalc):
-            return "string"
-        elif isinstance(item, funcfloat):
-            return "function"
-        elif isinstance(item, atom):
-            return "atom"
+                return item.evaltype()
         elif isinstance(item, complex):
             return "complex"
         elif isnum(item):
@@ -2423,45 +2410,8 @@ Global Operator Precedence List:
         if isinstance(item, tuple):
             name = str(item[0])
             args = item[1:]
-            if name == "atom":
-                value = atom()
-            elif name == "reciprocal":
-                value = reciprocal(self.deitem(args[0]))
-            elif name == "fraction":
-                value = fraction(self.deitem(args[0]), self.deitem(args[1]))
-            elif name == "data":
-                value = data(args[0], args[1])
-            elif name == "multidata":
-                value = multidata(args[0], args[1])
-            elif name == "rollfunc":
-                value = rollfunc(args[0], self, args[1], args[2], args[3])
-            elif name == "matrix":
-                value = matrix(args[1], args[2], converter=args[3], fake=args[4])
-                for y in xrange(0, len(args[0])):
-                    for x in xrange(0, len(args[0][y])):
-                        value.store(y,x, self.deitem(args[0][y][x]))
-            elif name == "strfunc":
-                value = strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]), args[9])
-            elif name == "codestr":
-                value = codestr(args[0], self)
-            elif name == "strcalc":
-                value = rawstrcalc(args[0], self)
-            elif name == "derivfunc":
-                value = derivfunc(args[0], args[1], args[2], args[3], self, args[4], args[5], args[6], args[7], self.devariables(args[8]))
-            elif name == "integfunc":
-                value = integfunc(args[0], args[1], self, args[2], args[3], args[4], self.devariables(args[5]))
-            elif name == "usefunc":
-                value = usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]))
-            elif name == "classcalc":
-                value = classcalc(self, self.devariables(args[0]))
-            elif name == "instancecalc":
-                value = instancecalc(self, self.devariables(args[0]), self.devariables(args[1]))
-            elif name == "makefunc":
-                value = makefunc(args[0], self, args[1], args[2], self.devariables(args[3]))
-            elif name == "brace":
-                value = brace(self, args[0])
-            elif name == "bracket":
-                value = bracket(self, args[0])
+            if name in self.constructors:
+                value = self.constructors[name](args)
             elif name == "find":
                 tofind = str(args[0])
                 if tofind in self.variables:
@@ -2490,6 +2440,16 @@ Global Operator Precedence List:
 
 class evalfuncs(object):
     """Implements Evaluator Functions."""
+    typefuncs = {
+        "number": "num",
+        "list": "cont",
+        "row": "cont",
+        "matrix": "cont",
+        "multidata": "data",
+        "fraction": "frac",
+        "string": "str"
+        }
+
     def __init__(self, e):
         """Initializes The Functions."""
         self.e = e
@@ -2680,16 +2640,27 @@ class evalfuncs(object):
 
     def classcall(self, variables):
         """Converts To A Class."""
+        self.e.overflow = variables[1:]
         if not variables:
             return classcalc(self.e)
+        elif isinstance(variables[0], instancecalc):
+            return variables[0].toclass()
+        elif isinstance(variables[0], classcalc):
+            return variables[0]
         else:
-            if isinstance(variables[0], instancecalc):
-                self.e.overflow = variables[1:]
-                return variables[0].toclass()
-            elif isinstance(variables[0], classcalc):
-                return variables[0]
-            else:
-                raise ExecutionError("ArgumentError", "Cannot convert non-class to class")
+            raise ExecutionError("ClassError", "Cannot convert non-class to class")
+
+    def namespacecall(self, variables):
+        """Converts To A Namespace."""
+        self.e.overflow = variables[1:]
+        if not variables:
+            return namespace(self.e)
+        elif isinstance(variables[0], namespace):
+            return variables[0]
+        elif isinstance(variables[0], classcalc):
+            return namespace(variables[0].e, variables[0].variables)
+        else:
+            raise ExecutionError("ClassError", "Cannot convert non-class to namespace")
 
     def getvalcall(self, variables):
         """Calculates A Variable Without Changing It."""
@@ -3168,17 +3139,10 @@ class evalfuncs(object):
     def typestr(self, item):
         """Processes A Type Identifier."""
         item = self.e.prepare(item, False, False)
-        if item == "number":
-            item = "num"
-        elif item in ["list", "row", "matrix"]:
-            item = "cont"
-        elif item == "multidata":
-            item = "data"
-        elif item == "fraction":
-            item = "frac"
-        elif item == "string":
-            item = "str"
-        return item
+        if item in self.typefuncs:
+            return self.typefuncs[item]
+        else:
+            return item
 
     def codecall(self, variables):
         """Converts To Code."""

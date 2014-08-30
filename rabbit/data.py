@@ -59,6 +59,8 @@ def FP(stop, dfT, dfE, e):
 
 class data(mctobject):
     """Implements A Data Set."""
+    evaltype = "data"
+
     def __init__(self, units=None, gotsort=False):
         """Initializes The Data."""
         self.units = []
@@ -671,6 +673,8 @@ class data(mctobject):
 
 class multidata(mctobject):
     """Implements A Multivariate Data Set."""
+    evaltype = "multidata"
+
     def __init__(self, x=None, y=None):
         """Creates A Joint Data Set."""
         if y is None and x is not None:
@@ -953,6 +957,18 @@ class multidata(mctobject):
             return self.x == other.x and self.y == other.y
         else:
             return self.items() == other
+
+    def itemcall(item, params):
+        """Performs A Colon Call."""
+        if len(params) == 0:
+            value = item.x.units[0]
+        else:
+            self.overflow = params[1:]
+            if params[0] in item.x.units:
+                value = item.y.units[item.x.units.index(params[0])]
+            else:
+                value = matrix(0)
+        return value
 
 def datamatrix(inputmatrix):
     """Converts A Matrix Into Data."""

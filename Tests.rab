@@ -82,7 +82,7 @@ passert:: { y = 2 ;; x = 1 }.y ?= 2
 passert:: a.x ?= 1                             $ a = { x = 1 }
 passert:: a.x ?= 1                             $ a := { x = 1 }
 passert:: a.f(2) ?= a.f:2 ?= 3                 $ a = { f(x) = x+1 }
-passert:: a:"x+1" ?= 2                         $ a = { x = 1 }
+passert:: a:"x+1" ?= 2                         $ a = namespace: { x = 1 }
 passert:: b ?= { z = 5 }                       $ b = a + {z=5} $ a = {}
 passert:: { x = 1 } + { z = 5 } ?= { x = 1 ;; z = 5 }
 
@@ -165,9 +165,9 @@ passert:: a.f(1) ?= 1
 
 # With Clause Tests:
 passert:: f(1.5) ?= 5        $ f(x) = (gx*floor(gx) $ gx = g(x)) $ g(x) = x+1
-passert:: f(1.5) ?= 5        $ f(x) = { g(x) = x+1 ;; gx = g(x) } : "gx*floor(gx)"
+passert:: f(1.5) ?= 5        $ f(x) = namespace({ g(x) = x+1 ;; gx = g(x) }) : "gx*floor(gx)"
 passert:: g(4) ?= 6          $ g(x) = (m(z) $ z = x^2 $ m(z) = z%10)
-passert:: g(4) ?= 6          $ g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
+passert:: g(4) ?= 6          $ g(x) = namespace({ m(z) = z%10 ;; z = x^2 }) : "m(z)"
 
 # Loop Tests:
 passert:: 1,2,3~ \x\x ?= 1,2,3

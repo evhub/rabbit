@@ -649,6 +649,15 @@ class matrix(mctobject):
         """Returns self."""
         return self
 
+    def evaltype(item):
+        """Calculates The Type."""
+        if item.onlydiag():
+            return "list"
+        elif item.onlyrow():
+            return "row"
+        else:
+            return "matrix"
+
 def diagmatrix(size=2, full=1.0, empty=0.0, converter=float, fake=True):
     """Constructs Matrix I."""
     size = int(size)

@@ -50,10 +50,12 @@ def isfunc(inputobject):
 
 def hasmatrix(inputobject):
     """Determines If An Object Could Be A Matrix."""
-    if hasattr(inputobject, "ismatrix"):
-        return inputobject.ismatrix()
-    else:
+    if not hasattr(inputobject, "ismatrix"):
         return getcheck(inputobject) == 2
+    elif isinstance(inputobject.ismatrix, bool):
+        return inputobject.ismatrix
+    else:
+        return inputobject.ismatrix()
 
 def isreal(value, start=float("-inf"), end=float("inf"), mid=0.0):
     """Tests To See If A Value Is A Real."""

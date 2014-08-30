@@ -42,7 +42,7 @@ def isbuiltin(inputobject):
 
 def ismatrix(inputobject):
     """Checks Whether An Object Is A Matrix."""
-    return hasmatrix(inputobject) and not isinstance(inputobject, strcalc)
+    return hasmatrix(inputobject) and (not hasattr(inputobject, "notmatrix") or not inputobject.notmatrix)
 
 def getmatrix(inputobject, func=diagmatrixlist):
     """Converts The Object To A Matrix."""
@@ -89,6 +89,7 @@ def varproc(variables):
 
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
+    evaltype = "function"
     overflow = False
     memoize = True
     allargs = "__"
@@ -546,6 +547,8 @@ class strfloat(strfunc):
 
 class strcalc(numobject):
     """Allows Strings Inside Evaluation."""
+    evaltype = "string"
+    notmatrix = True
     check = 2
 
     def __init__(self, calcstr, e):
@@ -696,6 +699,18 @@ class strcalc(numobject):
             out.append(strcalc(x, self.e))
         return diagmatrixlist(out)
 
+    def itemcall(self, params):
+        """Performs A Colon Splice."""
+        item = self.calcstr
+        if len(params) == 0:
+            value = rawstrcalc(item[-1], self)
+        elif len(params) == 1:
+            value = rawstrcalc(item[int(params[0])], self)
+        else:
+            value = rawstrcalc(item[int(params[0]):int(params[1])], self)
+            self.overflow = params[2:]
+        return value
+
 class rawstrcalc(strcalc):
     """A Raw Evaluator String."""
     def __init__(self, calcstr, e):
@@ -705,6 +720,9 @@ class rawstrcalc(strcalc):
 
 class codestr(rawstrcalc):
     """A Code Evaluator String."""
+    evaltype = "code"
+    check = 1
+    del itemcall
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -1041,6 +1059,8 @@ class integfuncfloat(integbase, funcfloat):
 
 class classcalc(cotobject):
     """Implements An Evaluator Class."""
+    evaltype = "class"
+    notmatrix = True
     doset = False
     selfvar = "__self__"
 
@@ -1099,7 +1119,6 @@ class classcalc(cotobject):
 
     def __len__(self):
         """Finds The Number Of Variables."""
-        self.e.setreturned()
         return len(self.variables)
 
     def items(self):
@@ -1317,8 +1336,35 @@ class classcalc(cotobject):
         else:
             return False
 
+class namespace(classcalc):
+    """A Class For Namespaces."""
+    evaltype = "namespace"
+    notmatrix = False
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("namespace", getstates(self.getvars()))
+
+    def copy(self):
+        """Copies The Class."""
+        return namespace(self.e, getcopy(self.getvars()))
+
+    def getrepr(self, *args, **kwargs):
+        """Wraps classcalc.getrepr."""
+        return "namespace:"+classcalc.getrepr(self, *args, **kwargs)
+
+    def call(self, variables):
+        """Calls The Namespace."""
+        if not variables:
+            return self
+        else:
+            self.e.overflow = variables[1:]
+            return self.calc(self.e.prepare(variables[0], True, True))
+
 class instancecalc(numobject, classcalc):
     """An Evaluator Class Instance."""
+    evaltype = "instance"
+
     def __init__(self, e, variables, parent=None):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
@@ -1822,6 +1868,8 @@ class instancecalc(numobject, classcalc):
 
 class atom(evalobject):
     """Implements Atoms."""
+    evaltype = "atom"
+
     def getstate(self):
         """Returns A Pickleable Reference Object."""
         return ("atom", )
