@@ -714,9 +714,9 @@ class strcalc(numobject):
     def getrepr(self, top, bottom, indebug, maxrecursion):
         """Gets A Representation."""
         if bottom:
-            return repr(item)
+            return repr(self)
         else:
-            return str(item)
+            return str(self)
 
 class rawstrcalc(strcalc):
     """A Raw Evaluator String."""
