@@ -2093,15 +2093,22 @@ Global Operator Precedence List:
             for x in xrange(0, len(templist)):
                 if x%2 == 1:
                     if templist[x]:
-                        feed.append(self.parenchar+templist[x]+self.parenchar)
+                        last = True
+                        if feed and feed[-1] and feed[-1][-1] in self.multiargops:
+                            feed[-1] += self.parenchar+templist[x]+self.parenchar
+                        else:
+                            feed.append(self.parenchar+templist[x]+self.parenchar)
                         last = True
                     else:
                         last = False
                 elif templist[x]:
-                    if last:
-                        inputlist.append([])
-                        feed = inputlist[-1]
-                    feed.append(templist[x])
+                    if feed and ((templist[x] and templist[x][0] in self.multiargops) or (feed[-1] and feed[-1][-1] in self.multiargops)):
+                        feed[-1] += templist[x]
+                    else:
+                        if last:
+                            inputlist.append([])
+                            feed = inputlist[-1]
+                        feed.append(templist[x])
             temp = "("+strlist(inputlist, ") * (", lambda l: strlist(l, " : "))+")"
             self.printdebug("(>) "+temp)
             self.recursion += 1
@@ -2115,8 +2122,9 @@ Global Operator Precedence List:
                         l[x-1] += l.pop(x)
                         x -= 1
                     x += 1
-                item = matrix(0)
-                if len(values) > 0 and startswithany(l[0], self.subparenops):
+                if not l:
+                    item = matrix(0)
+                elif len(values) > 0 and startswithany(l[0], self.subparenops):
                     autoarg = self.unusedarg()
                     item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
                 else:
