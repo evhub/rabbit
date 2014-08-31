@@ -468,7 +468,7 @@ passert:: (class<<x=1>>()) from (class<<x=1>>)
 passert:: 5 // 2 ?= 2
 passert:: ! (1,2,3,4) ~ \x\($)
 passert:: len( [1,2,3,4] ~ \x\($) ) ?= 4
-passert:: 1 ?= call:\1
+passert:: 1 ?= call:\\1
 passert:: 1,2++3,4 ?= 1,2,3,4
 passert:: 2x^2 ?= 50    $ x = 5
 passert:: (2x)^2 ?= 100 $ x = 5
