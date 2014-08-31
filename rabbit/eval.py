@@ -840,14 +840,19 @@ Global Operator Precedence List:
                 self.processor.addcommand(inputstring)
             self.setspawned(self.spawned or spawned)
 
-    def proc_pre(self, item, top, command):
+    def proc_pre(self, original, top, command):
         """Performs Pre-Processing."""
+        item = self.do_pre(original)
+        self.printdebug("| "+str(item))
+        self.proc_calc(item, top, command)
+
+    def do_pre(self, item, top=False):
+        """Does The Pre-Processing."""
         for func in self.preprocs:
             item = func(item, top)
         for func in self.precalcs:
             item = func(item)
-        self.printdebug("| "+str(item))
-        self.proc_calc(item, top, command)
+        return item
 
     def proc_calc(self, item, top, command):
         """Gets The Value Of An Expression."""
@@ -899,9 +904,9 @@ Global Operator Precedence List:
             if istext(item):
                 command += item
             elif item[0] in self.lambdachars:
-                item[1] = basicformat(item[1])
-                if item[1]:
-                    command += self.lambdamarker+self.wrap(item[1])+self.lambdamarker
+                value = self.do_pre(item[1])
+                if value:
+                    command += self.lambdamarker+self.wrap(value)+self.lambdamarker
                 else:
                     command += self.lambdamarker*2
             elif item[0] in self.rawstringchars:
