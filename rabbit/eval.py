@@ -141,9 +141,9 @@ Global Operator Precedence List:
         }
     unary = "!?"
     bools = unary + "<>=\u2260"
-    subparenops = ".^"
     lambdamarker = "\u03bb"
-    callops = lambdamarker + subparenops + "%/*:"
+    subparenops = ".^"
+    callops = subparenops + lambdamarker + "%/*:"
     multiargops = bools + callops + "+-@~|&;,$" + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
     errorvar = "__error__"
@@ -174,12 +174,19 @@ Global Operator Precedence List:
         self.speedy = bool(speedy)
         self.maxrecursion = int(maxrecursion)
         self.color = color
-        self.debuglog = []
-        self.overflow = []
-        self.funcs = evalfuncs(self)
+        self.setup()
         self.fresh()
         if variables is not None:
             self.makevars(variables)
+
+    def new(self):
+        """Makes A New Identically-Configured Evaluator."""
+        return evaluator(None, self.processor, self.color, self.speedy, self.maxrecursion)
+
+    def setup(self):
+        """Performs Basic Setup."""
+        self.debuglog = []
+        self.overflow = []
         self.preprocs = [
             self.preproc_alias,
             self.preproc_string,
@@ -250,10 +257,7 @@ Global Operator Precedence List:
             self.call_var,
             self.call_normal
             ]
-
-    def new(self):
-        """Makes A New Identically-Configured Evaluator."""
-        return evaluator(None, self.processor, self.color, self.speedy, self.maxrecursion)
+        self.funcs = evalfuncs(self)
 
     def fresh(self):
         """Resets The Variables To Their Defaults."""
