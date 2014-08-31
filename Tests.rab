@@ -59,7 +59,7 @@ passert:: f(2,)*3 ?= f:2*3 ?= f(2)*3 ?= 9      $ f(x) = x+1
 passert:: g(2,3)-5 ?= g:2:3-5 ?= 7             $ g(x,y) = 2*x*y
 passert:: add(a) ?= 6                          $ a = 1,2,3 $ add(x,y,z) = x+y+z
 passert:: plusone(1,2,3) ?= 2,3,4              $ plusone(l) = l+1
-passert:: \1 ?= one                            $ one() = 1
+passert:: \\1 ?= one                            $ one() = 1
 passert:: (\x\x+1):5 ?= (\x\(x+1)):5 ?= 6
 passert:: (\(x,y)\(x+y))(1,2) ?= 3
 passert:: (\(-x:1)\x): ?= 1
@@ -112,7 +112,7 @@ nothing := class <<
  __ge__(self, other) = other <= 0
  __le__(self, other) = other >= 0
  __str__(self) = "nil"
- __repr__(self) = `\nil`
+ __repr__(self) = `\\nil`
  __len__(self) = 0
  __bool__(self) = 0
  __rep__(self, other) = [self]**other
@@ -141,7 +141,7 @@ passert:: nil <= .5 >= nil
 passert:: num(nil) ?= 0
 passert:: abs(nil) ?= 0
 passert:: str(nil) ?= "nil"
-passert:: repr(nil) ?= `\nil`
+passert:: repr(nil) ?= `\\nil`
 passert:: len(nil) ?= 0
 passert:: (?nil) ?= 0
 passert:: nil**2 ?= [nil,nil]
@@ -212,7 +212,7 @@ passert:: parts:(1,2,3,4) ?= 1,(2,3,4)
   a,as
   $ a,as = l
  )
-passert:: max(1,0,9,6,8,3) ?= 9
+passert:: max(1,0,9,6) ?= 9
  $ max(l) = (
   (
    a @ a > maxtail;
@@ -276,7 +276,7 @@ passert:: z ?= 3
  $ x = 0
  $ if (cond) = calc @ cond
 passert:: abs'(2) ?= 2 & abs'(0) ?= 0 & abs'(-2) ?= 2
- $ abs'(x) = if (x<0) (\-x) elif (x?0) (\0) else (x)
+ $ abs'(x) = if (x<0) (\\ -x) elif (x?0) (\\ 0) else (x)
  $ if(cond, expr) =
     [1, expr()]@cond; [0]
  $ elif(cond, expr, parts) = (
@@ -313,7 +313,7 @@ passert:: merge:(1,(2,2)):(3,4) ?= 1,2,2,3,4
 passert:: sort(1,0,9,5) ?= 0,1,5,9
 passert:: rev(1,2,3) ?= 3,2,1
 passert:: round(1.5) ?= 2
-passert:: eval:\1 ?= 1
+passert:: eval:\\1 ?= 1
 passert:: find:"a":(0,1,"a",3,4) ?= 2
 passert:: split:"abcde":"c" ?= "ab","de"
 passert:: replace:"abc":"b":"" ?= "ac"

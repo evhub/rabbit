@@ -68,7 +68,7 @@ Global Operator Precedence List:
     //      Performs floor division.
     */      Performs multiplication and division.
 
-    \\       Denotes a lambda.
+    \u03bb       Denotes a lambda.
     -       Denotes negatives.
     /       Denotes reciprocals.
     ^       Performs exponentiation.
@@ -122,14 +122,16 @@ Global Operator Precedence List:
         "\u22c1":"|",
         "\u2212":"-",
         "\u2215":"/",
-        "\u2044":"/"
+        "\u2044":"/",
+        "\u2237":"::",
+        "\u2192":"->",
+        "\u2254":":="
         }
     rawstringchars = "`"
-    stringchars = rawstringchars + '"'
+    lambdachars = "\\"
+    stringchars = rawstringchars + lambdachars + '"'
     strgroupers = {
         "\u201c":"\u201d"
-        }
-    rawstrgroupers = {
         }
     groupers = {
         "(":")",
@@ -140,7 +142,8 @@ Global Operator Precedence List:
     unary = "!?"
     bools = unary + "<>=\u2260"
     subparenops = ".^"
-    callops = subparenops + "%/*:\\"
+    lambdamarker = "\u03bb"
+    callops = lambdamarker + subparenops + "%/*:"
     multiargops = bools + callops + "+-@~|&;,$" + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
     errorvar = "__error__"
@@ -210,7 +213,7 @@ Global Operator Precedence List:
             ]
         self.eval_splits = [
             ("~", True),
-            ("\\", False),
+            (self.lambdamarker, False),
             ("--", True),
             ("++", True),
             ("**", True),
@@ -245,7 +248,6 @@ Global Operator Precedence List:
             self.call_method,
             self.call_parenvar,
             self.call_var,
-            self.call_none,
             self.call_normal
             ]
 
@@ -398,6 +400,8 @@ Global Operator Precedence List:
             "\u230a" : "min",
             "\u2308" : "max",
             "\xb0" : "Math.rad",
+            "\u22d8" : "lshift",
+            "\u22d9" : "rshift",
             "\xbd" : 0.5,
             "\xbc" : 0.25,
             "\xbe" : 0.75,
@@ -649,7 +653,8 @@ Global Operator Precedence List:
                     out += self.prepare(y, False, True, indebug, maxrecursion-1)
                 out += "),"
             if len(variables) > 0 or len(personals) > 0:
-                out = out[:-1]+"\\"
+                out = out[:-1]
+            out += "\\"
             test = self.prepare(item.funcstr, False, True, indebug, maxrecursion)
             if self.isreserved(test, allowed=string.digits):
                 out += "("+test+")"
@@ -677,7 +682,7 @@ Global Operator Precedence List:
                     if item.n != 1:
                         out += ":"+str(item.n)
             else:
-                out = "\\"+str(item)
+                out = "\\\\"+str(item)
         elif hasattr(item, "getrepr"):
             out = item.getrepr(top, bottom, indebug, maxrecursion-1)
         elif getcheck(item) >= 1:
@@ -893,7 +898,13 @@ Global Operator Precedence List:
         for item in toplist:
             if istext(item):
                 command += item
-            elif item[0] in self.rawstringchars + "".join(self.rawstrgroupers.keys()) + "".join(self.rawstrgroupers.values()):
+            elif item[0] in self.lambdachars:
+                item[1] = basicformat(item[1])
+                if item[1]:
+                    command += self.lambdamarker+self.wrap(item[1])+self.lambdamarker
+                else:
+                    command += self.lambdamarker*2
+            elif item[0] in self.rawstringchars:
                 command += self.wrap(rawstrcalc(item[1], self))
             elif item[0] in self.stringchars + "".join(self.strgroupers.keys()) + "".join(self.strgroupers.values()):
                 command += self.wrap(strcalc(item[1], self))
@@ -1490,33 +1501,15 @@ Global Operator Precedence List:
             return self.eval_next(inputlist[0], eval_funcs)
         else:
             inputstring = inputlist[0]
-            out = inputstring[1:].split("\\", 1)
+            out = inputstring[1:].split(self.lambdamarker, 1)
+            out[0] = self.namefind(out[0])
             if len(out) == 1:
-                test = self.find(out[0], True)
-                if isinstance(test, funcfloat):
-                    return test
-                elif hascall(test):
-                    return test.call(None)
-                else:
-                    while out[0].startswith(self.parenchar) and out[0].endswith(self.parenchar) and out[0] in self.variables and (istext(self.variables[out[0]]) or isinstance(self.variables[out[0]], strcalc)):
-                        if isinstance(self.variables[out[0]], strcalc):
-                            out[0] = repr(self.variables[out[0]])
-                        else:
-                            out[0] = str(self.variables[out[0]])
                 return strfloat(out[0], self, check=False)
-            elif out[0] == "":
+            elif not out[0]:
                 return strfloat(out[1], self, check=False)
             else:
                 params, personals, allargs, reqargs = self.eval_set(self.outersplit(self.namefind(out[0]), ",", top=False))
-                if out[1].startswith("\\"):
-                    return strfloat(out[1][1:], self, params, personals, check=False, allargs=allargs, reqargs=reqargs)
-                else:
-                    while out[1].startswith(self.parenchar) and out[1].endswith(self.parenchar) and out[1] in self.variables and (istext(self.variables[out[1]]) or isinstance(self.variables[out[1]], strcalc)):
-                        if isinstance(self.variables[out[1]], strcalc):
-                            out[1] = repr(self.variables[out[1]])
-                        else:
-                            out[1] = str(self.variables[out[1]])
-                    return strfloat(out[1], self, params, personals, allargs=allargs, reqargs=reqargs)
+                return strfloat(out[1], self, params, personals, check=False, allargs=allargs, reqargs=reqargs)
 
     def eval_set(self, temp):
         """Performs Setting."""
@@ -1934,7 +1927,7 @@ Global Operator Precedence List:
 
     def call_lambda(self, inputstring, count=None):
         """Wraps Lambda Evaluation."""
-        if inputstring.startswith("\\"):
+        if inputstring.startswith(self.lambdamarker):
             return self.eval_lambda([inputstring])
 
     def call_neg(self, inputstring, count):
@@ -2177,9 +2170,9 @@ Global Operator Precedence List:
 
     def call_lambdacoeff(self, inputstring, count=None):
         """Evaluates Lambda Coefficients."""
-        parts = inputstring.split("\\", 1)
+        parts = inputstring.split(self.lambdamarker, 1)
         if len(parts) > 1:
-            return self.eval_call(parts[0]+self.wrap(self.eval_lambda(["\\"+parts[1]])))
+            return self.eval_call(parts[0]+self.wrap(self.eval_lambda([self.lambdamarker+parts[1]])))
 
     def call_method(self, inputstring, count=None):
         """Returns Method Instances."""
@@ -2239,14 +2232,6 @@ Global Operator Precedence List:
                             raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                     out = new
                 return out
-
-    def call_none(self, inputstring, count=None):
-        """Evaluates A Null."""
-        if inputstring == "":
-            if self.laxnull:
-                return matrix(0)
-            else:
-                raise ExecutionError("NoneError", "Cannot evaluate the empty string")
 
     def call_normal(self, inputstring, count=None):
         """Returns Argument."""
@@ -3296,9 +3281,9 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to fold")
         elif len(variables) == 1:
-            return self.getcall(self.e.funcfind(variables[0]))(self.e.variables)
+            return self.e.getcall(self.e.funcfind(variables[0]))(self.e.variables)
         else:
-            func = func or self.getcall(self.e.funcfind(variables[0]))
+            func = func or self.e.getcall(self.e.funcfind(variables[0]))
             item = variables[1]
             if len(variables) >= 3:
                 start = variables[2]
