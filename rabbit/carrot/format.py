@@ -557,5 +557,11 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
                 v,i,ex = replaces[k], i+1, None
             if ex is None and i > new[1]:
                 new = v,i
-        out.append(new[0])
+        if new[0]:
+            last = new[0]
+        elif istext(v):
+            last = v
+        else:
+            last = k[:v]
+        out.append(last)
     return "".join(out)

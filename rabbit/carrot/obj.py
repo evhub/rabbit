@@ -128,18 +128,27 @@ def namestr(obj):
 def hascall(func):
     """Determines If An Object Has A Call Method."""
     if hasattr(func, "isfunc"):
-        return func.isfunc()
+        if isinstance(func.isfunc, bool):
+            return func.isfunc
+        else:
+            return func.isfunc()
     elif hasattr(func, "call"):
+        return True
+    elif hasattr(func, "getcall"):
         return True
     else:
         return False
 
-def getcall(func):
+def getcall(func, *args, **kwargs):
     """Gets The Callable Part Of A Function."""
-    if hascall(func):
-        return func.call
-    else:
+    if not hascall(func):
         return func
+    elif hasattr(func, "call"):
+        return func.call
+    elif hasattr(func, "getcall"):
+        return func.getcall(*args, **kwargs)
+    else:
+        raise AttributeError("Function has no call method")
 
 def istext(inputobject):
     """Determines If An Object Is A String."""

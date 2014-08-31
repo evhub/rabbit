@@ -1437,7 +1437,7 @@ class instancecalc(numobject, classcalc):
                 item.curryself(self)
                 if item.overflow and args is not None and len(args) > len(item.variables):
                     args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
-            return getcall(item)(args)
+            return self.e.getcall(item)(args)
         else:
             return item
 
@@ -2054,6 +2054,57 @@ class rollfunc(strfunc):
         """Performs Equals."""
         if isinstance(other, rollfunc):
             return self.stop == other.stop and self.name == other.name and self.gen.key == other.gen.key and self.gen.counter == other.gen.counter
+        else:
+            return False
+
+class pair(cotobject):
+    """A Key-Value Pair."""
+    evaltype = "pair"
+    notmatrix = True
+
+    def __init__(self, key, value):
+        """Creates The Key-Value Pair."""
+        self.k = key
+        self.v = value
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("pair", itemstate(self.k), itemstate(self.v))
+
+    def copy(self):
+        """Copies The Key-Value Pair."""
+        return pair(getcopy(self.k), getcopy(self.v))
+
+    def getcall(self, e):
+        """Returns A Call Function."""
+        return curry(self._call, e)
+
+    def _call(self, e, variables):
+        """Retrieves A Value."""
+        e.overflow = variables[1:]
+        if not variables:
+            return self
+        elif self.k == variables[0]:
+            return self.v
+        else:
+            raise ExecutionError("KeyError", "Could not find key "+e.prepare(variables[0])+" in "+e.prepare(self))
+
+    def items(self):
+        """Gets A List Containing The Key And The Value."""
+        return [self.k, self.v]
+
+    def remove(self, item):
+        """Removes An Item."""
+        raise ExecutionError("TypeError", "Pairs don't support subtraction")
+
+    def extend(self, item):
+        """Extends With An Item."""
+        raise ExecutionError("TypeError", "Pairs don't support addition")
+
+    def __eq__(self, other):
+        """Performs Equality."""
+        if isinstance(other, pair):
+            return self.k == other.k and self.v == other.v
         else:
             return False
 

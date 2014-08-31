@@ -39,15 +39,16 @@ class evaluator(object):
 
 Global Operator Precedence List:
     ;;      Separates top-level commands.
-    ::      Calls a meta-function.
 
     "       Opens and closes strings.
     `       Opens and closes raw strings.
-    {}      Opens and closes classes.
-    []      Opens and closes matrix rows.
     ()      Opens and closes parentheses.
+    \xab\xbb      Opens and closes code blocks.
+    {}      Opens and closes dictionaries.
+    []      Opens and closes matrix rows.
 
     $       Seperates with clauses (read as 'with' or 'where').
+    ::      Calls a meta-function.
     ;       Seperates conditionals (read as 'else').
     @       Checks a conditional (read as 'at' or 'if').
 
@@ -55,6 +56,7 @@ Global Operator Precedence List:
     &       Performs logical 'and'.
     >?!=<   Performs equality or inequality checks.
 
+    ->      Creates a key-value pair.
     ~       Applies a list to a function for looping.
     \\       Creates a lambda.
     --      Performs removal.
@@ -79,6 +81,7 @@ Global Operator Precedence List:
         "atom": lambda self, args: atom(),
         "reciprocal": lambda self, args: reciprocal(self.deitem(args[0])),
         "fraction": lambda self, args: fraction(self.deitem(args[0]), self.deitem(args[1])),
+        "pair": lambda self, args: pair(self.deitem(args[0]), self.deitem(args[1])),
         "data": lambda self, args: data(args[0], args[1]),
         "multidata": lambda self, args: multidata(args[0], args[1]),
         "rollfunc": lambda self, args: rollfunc(args[0], self, args[1], args[2], args[3]),
@@ -194,6 +197,16 @@ Global Operator Precedence List:
         self.sets = [
             self.set_def,
             self.set_normal
+            ]
+        self.calc_funcs = [
+            self.calc_pair,
+            self.calc_pieces,
+            self.calc_condo,
+            self.calc_or,
+            self.calc_and,
+            self.calc_unary,
+            self.calc_eq,
+            self.calc_eval
             ]
         self.eval_splits = [
             ("~", True),
@@ -492,6 +505,10 @@ Global Operator Precedence List:
         """Retrieves A Variable."""
         return self.variables[basicformat(name)]
 
+    def getcall(self, item):
+        """Gets The Callable Part Of An Item."""
+        return getcall(item, self)
+
     def forshow(self, arg):
         """Prepares An Item For Showing."""
         if not istext(arg):
@@ -585,15 +602,26 @@ Global Operator Precedence List:
                         out += self.prepare(x, False, bottom, indebug, maxrecursion)+","
                     out = out[:-1]+"]:["
                 out = out[:-2]
-        elif isinstance(item, (fraction, reciprocal)):
+        elif isinstance(item, (fraction, reciprocal, pair)):
+            if isinstance(item, pair):
+                part_a = item.k
+            else:
+                part_a = item.n
+            if isinstance(item, pair):
+                part_b = item.v
+            else:
+                part_b = item.d
             out = ""
-            a = self.prepare(item.n, False, bottom, indebug, maxrecursion)
+            a = self.prepare(part_a, False, bottom, indebug, maxrecursion)
             if not bottom or madeof(a, string.digits) or not self.isreserved(a):
                 out += a
             else:
                 out += "("+a+")"
-            out += "/"
-            b = self.prepare(item.d, False, bottom, indebug, maxrecursion)
+            if isinstance(item, pair):
+                out += " -> "
+            else:
+                out += "/"
+            b = self.prepare(part_b, False, bottom, indebug, maxrecursion)
             if not bottom or madeof(b, string.digits) or not self.isreserved(b):
                 out += b
             else:
@@ -845,7 +873,7 @@ Global Operator Precedence List:
         """Formats Expressions."""
         self.printdebug("=>> "+inputstring)
         self.recursion += 1
-        out = self.calc_pieces(delspace(inputstring))
+        out = self.calc_next(delspace(inputstring))
         self.printdebug(self.prepare(out, False, True, True)+" <<= "+inputstring)
         self.recursion -= 1
         return out
@@ -983,7 +1011,7 @@ Global Operator Precedence List:
             original = func+" :: "+inputstring
             self.printdebug("::> "+original)
             self.recursion += 1
-            out = getcall(self.using)([codestr(inputstring, self)])
+            out = self.getcall(self.using)([codestr(inputstring, self)])
             self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
             self.recursion -= 1
         else:
@@ -1195,79 +1223,80 @@ Global Operator Precedence List:
         if not self.isreserved(sides[0]):
             return sides[1]
 
-    def calc_pieces(self, expression):
+    def calc_next(self, arg, calc_funcs=None):
+        """Calls The Next eval_func."""
+        if calc_funcs is None:
+            calc_funcs = self.calc_funcs
+        return self.eval_next(arg, calc_funcs)
+
+    def calc_pair(self, expression, calc_funcs):
+        """Evaluates Key-Value Pairs."""
+        itemlist = []
+        for item in expression.split("->"):
+            itemlist.append(self.calc_next(item, calc_funcs))
+        out = itemlist[-1]
+        for x in reversed(xrange(0, len(itemlist)-1)):
+            out = pair(itemlist[x], out)
+        return out
+
+    def calc_pieces(self, expression, calc_funcs):
         """Evaluates Piecewise Expressions."""
         for item in expression.split(";"):
-            test = self.calc_condo(item)
+            test = self.calc_next(item, calc_funcs)
             if not isnull(test):
                 return test
         return matrix(0)
 
-    def calc_condo(self, item):
+    def calc_condo(self, item, calc_funcs):
         """Evaluates Conditions."""
         item = item.rsplit("@", 1)
         if len(item) == 1:
-            return self.calc_check(item[0])
-        elif bool(self.calc_bool(item[1])):
-            return self.calc_condo(item[0])
+            value = self.calc_next(item[0], calc_funcs)
+            if isinstance(value, bool):
+                return float(value)
+            else:
+                return value
+        elif bool(self.calc_next(item[1], calc_funcs)):
+            return self.calc_condo(item[0], calc_funcs)
         else:
             return matrix(0)
 
-    def calc_check(self, inputlist):
-        """Handles Booleans."""
-        value = self.calc_bool(inputlist)
-        if isinstance(value, bool):
-            return float(value)
-        else:
-            return value
-
-    def calc_bool(self, equation):
-        """Evaluates The Expression Part Of A Boolean Expression."""
-        top = equation.split("|")
-        for a in xrange(0, len(top)):
-            top[a] = top[a].split("&")
-        value = reassemble(top, ["|", "&"])
-        self.printdebug("==> "+value)
-        self.recursion += 1
-        out = self.bool_or(top)
-        self.printdebug(self.prepare(out, False, True, True)+" <== "+value)
-        self.recursion -= 1
-        return out
-
-    def bool_or(self, inputlist):
+    def calc_or(self, inputstring, calc_funcs):
         """Evaluates The Or Part Of A Boolean Expression."""
-        value = self.bool_and(inputlist[0])
+        inputlist = inputstring.split("|")
+        value = self.calc_next(inputlist[0], calc_funcs)
         for x in xrange(1, len(inputlist)):
             if value:
                 break
-            value = value or self.bool_and(inputlist[x])
+            value = value or self.calc_next(inputlist[x], calc_funcs)
         return value
 
-    def bool_and(self, inputlist):
+    def calc_and(self, inputstring, calc_funcs):
         """Evaluates The And Part Of A Boolean Expression."""
-        value = self.bool_unary(inputlist[0])
+        inputlist = inputstring.split("&")
+        value = self.calc_next(inputlist[0], calc_funcs)
         for x in xrange(1, len(inputlist)):
             if not value:
                 break
-            value = value and self.bool_unary(inputlist[x])
+            value = value and self.calc_next(inputlist[x], calc_funcs)
         return value
 
-    def bool_unary(self, inputstring):
+    def calc_unary(self, inputstring, calc_funcs):
         """Evaluates The Unary Part Of A Boolean Expression."""
         if inputstring.startswith("!"):
-            return not self.bool_unary(inputstring[1:])
+            return not self.calc_unary(inputstring[1:], calc_funcs)
         elif inputstring.startswith("?"):
-            return bool(self.bool_unary(inputstring[1:]))
+            return bool(self.calc_unary(inputstring[1:], calc_funcs))
         else:
-            return self.bool_eq(inputstring)
+            return self.calc_next(inputstring, calc_funcs)
 
-    def bool_eq(self, inputstring):
+    def calc_eq(self, inputstring, calc_funcs):
         """Evaluates The Equation Part Of A Boolean Expression."""
         inputlist = switchsplit(inputstring, self.bools)
         if len(inputlist) == 0:
             return matrix(0)
         elif len(inputlist) == 1 and not madeof(inputlist[0], self.bools):
-            return self.calc_eval(inputlist[0])
+            return self.calc_next(inputlist[0], calc_funcs)
         else:
             for x in xrange(0, len(inputlist)):
                 if istext(inputlist[x]) and madeof(inputlist[x], self.bools):
@@ -1276,13 +1305,13 @@ Global Operator Precedence List:
                         args.append(matrix(0))
                     else:
                         if istext(inputlist[x-1]):
-                            inputlist[x-1] = self.calc_eval(inputlist[x-1])
+                            inputlist[x-1] = self.calc_next(inputlist[x-1], calc_funcs)
                         args.append(inputlist[x-1])
                     if x == len(inputlist)-1:
                         args.append(matrix(0))
                     else:
                         if istext(inputlist[x+1]):
-                            inputlist[x+1] = self.calc_eval(inputlist[x+1])
+                            inputlist[x+1] = self.calc_next(inputlist[x+1], calc_funcs)
                         args.append(inputlist[x+1])
                     out = False
                     haseq = False
@@ -1327,10 +1356,10 @@ Global Operator Precedence List:
         """Evaluates An Expression."""
         top, ops = self.eval_split(expression)
         value = reassemble(top, ops)
-        self.printdebug("=> "+value)
+        self.printdebug("==> "+value)
         self.recursion += 1
         out = self.eval_check(self.eval_next(top), True)
-        self.printdebug(self.prepare(out, False, True, True)+" <= "+value)
+        self.printdebug(self.prepare(out, False, True, True)+" <== "+value)
         self.recursion -= 1
         return out
 
@@ -1420,7 +1449,7 @@ Global Operator Precedence List:
                     args.append(units[argnum*x+y])
                 if len(lists) == 0:
                     if isfunc(func):
-                        item = getcall(func)(args)
+                        item = self.getcall(func)(args)
                     else:
                         item = func
                 else:
@@ -1447,7 +1476,7 @@ Global Operator Precedence List:
             args.append(value)
             if len(lists) == 0:
                 if isfunc(func):
-                    out = getcall(func)(args)
+                    out = self.getcall(func)(args)
                 else:
                     out = func
             else:
@@ -1831,7 +1860,7 @@ Global Operator Precedence List:
 
     def eval_call(self, inputstring, start=-1):
         """Evaluates A Variable."""
-        self.printdebug("-> "+inputstring)
+        self.printdebug("=> "+inputstring)
         self.recursion += 1
         start += 1
         for func in self.calls[start:]:
@@ -1841,7 +1870,7 @@ Global Operator Precedence List:
             else:
                 start += 1
         out = self.eval_check(value)
-        self.printdebug(self.prepare(out, False, True, True)+" <- "+inputstring+" | "+namestr(func).split("_")[-1])
+        self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring+" | "+namestr(func).split("_")[-1])
         self.recursion -= 1
         return out
 
@@ -1885,7 +1914,7 @@ Global Operator Precedence List:
             elif self.convertable(item):
                 value = item
             else:
-                value = getcall(item)(None)
+                value = self.getcall(item)(None)
             if not self.isreserved(key):
                 self.variables[key] = value
             return value
@@ -1900,7 +1929,7 @@ Global Operator Precedence List:
                 elif self.convertable(item):
                     value = item
                 else:
-                    value = getcall(item)(None)
+                    value = self.getcall(item)(None)
                 return value
 
     def call_lambda(self, inputstring, count=None):
@@ -2030,7 +2059,7 @@ Global Operator Precedence List:
                     value = diagmatrixlist(out)
             self.overflow = params[2:]
         elif isfunc(item):
-            value = getcall(item)(params)
+            value = self.getcall(item)(params)
         elif len(params) == 0:
             value = item
         else:
@@ -2125,9 +2154,9 @@ Global Operator Precedence List:
                 args = arg.getdiag()
                 if isinstance(item, (strfunc, usefunc)) and item.overflow and len(args) > len(item.variables):
                     args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
-                item = getcall(item)(args)
+                item = self.getcall(item)(args)
             else:
-                item = getcall(item)([arg])
+                item = self.getcall(item)([arg])
             if self.overflow:
                 out, self.overflow = self.overflow, overflow
                 raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(out) > 1)+" of "+strlist(out, ", ", lambda x: self.prepare(x, False, True, True)))
@@ -2322,13 +2351,13 @@ Global Operator Precedence List:
             finally:
                 self.setvars(oldvars)
         elif isfunc(item):
-            out = getcall(item)(varproc(value))
+            out = self.getcall(item)(varproc(value))
         elif hasnum(item):
             return item
         else:
             oldvars = self.setvars({varname: value})
             try:
-                out = getcall(item)(None)
+                out = self.getcall(item)(None)
             finally:
                 self.setvars(oldvars)
         return self.call(out, value, varname)
@@ -3129,7 +3158,7 @@ class evalfuncs(object):
                     out = out[:-1]
                 return strfloat(out, self.e, args)
             else:
-                raise ExecutionError("ValueError", "Unable to create a converter for "+repr(variables[0]))
+                raise ExecutionError("TypeError", "Unable to create a converter for "+repr(variables[0]))
         else:
             return self.tocall([diagmatrixlist(variables)])
 
@@ -3267,9 +3296,9 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to fold")
         elif len(variables) == 1:
-            return getcall(self.e.funcfind(variables[0]))(self.e.variables)
+            return self.getcall(self.e.funcfind(variables[0]))(self.e.variables)
         else:
-            func = func or getcall(self.e.funcfind(variables[0]))
+            func = func or self.getcall(self.e.funcfind(variables[0]))
             item = variables[1]
             if len(variables) >= 3:
                 start = variables[2]
@@ -3541,4 +3570,4 @@ class evalfuncs(object):
         elif len(variables) == 1:
             return collapse(variables[0])
         else:
-            return getcall(variables[0])(variables[1:])
+            return self.e.getcall(variables[0])(variables[1:])
