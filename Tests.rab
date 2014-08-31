@@ -486,6 +486,9 @@ passert:: 5 ?= a.f(a.y) $ a = class <<
   )
  y = 2
  >>
+passert:: f() ?= 5 & f(3) ?= 3
+ $ f(x=5) =
+  x
 
 # Final Testing:
 passert:: save("Tests.save");true

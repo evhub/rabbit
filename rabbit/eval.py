@@ -1540,38 +1540,39 @@ Global Operator Precedence List:
                     else:
                         raise ExecutionError("ArgumentError", "Catch all argument must come last")
                 elif x.startswith("-"):
+                    x = x[1:]
                     inopt = True
                     if reqargs is None:
                         reqargs = len(params)
-                    x = x[1:]
                 elif inopt:
                     raise ExecutionError("ArgumentError", "Cannot have required args after optional args")
                 elif x.startswith("+"):
                     x = x[1:]
                 else:
                     special = False
-                if ":" in x:
+                equal_test = x.split("=", 1)
+                colon_test = x.split(":", 1)
+                if len(equal_test) > 1 and equal_test[0] and not self.isreserved(equal_test[0]):
+                    inopt = True
+                    if reqargs is None:
+                        reqargs = len(params)
+                    equal_test[0] = delspace(equal_test[0])
+                    personals[equal_test[0]] = self.calc(equal_test[1], " <\\=")
+                    x = equal_test[0]
+                elif len(colon_test) > 1 and colon_test[0] and not self.isreserved(colon_test[0]):
                     if not special:
                         doparam = False
-                    x = x.split(":", 1)
-                    x[0] = delspace(x[0])
-                    if not x[0] or self.isreserved(x[0]):
-                        raise ExecutionError("VariableError", "Could not set to invalid personal "+x[0])
-                    else:
-                        personals[x[0]] = self.calc(x[1], " <\\")
-                    x = x[0]
+                    colon_test[0] = delspace(colon_test[0])
+                    personals[colon_test[0]] = self.calc(colon_test[1], " <\\:")
+                    x = colon_test[0]
+                elif not x or self.isreserved(x):
+                    raise ExecutionError("VariableError", "Could not set to invalid variable "+x)
                 else:
                     x = delspace(x)
                 if doallargs:
-                    if not x or self.isreserved(x):
-                        raise ExecutionError("VariableError", "Could not set to invalid allargs "+x)
-                    else:
-                        allargs = x
+                    allargs = x
                 if doparam:
-                    if not x or self.isreserved(x):
-                        raise ExecutionError("VariableError", "Could not set to invalid variable "+x)
-                    else:
-                        params.append(x)
+                    params.append(x)
         return params, personals, allargs, reqargs
 
     def eval_join(self, inputlist, eval_funcs):
