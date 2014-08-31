@@ -45,11 +45,11 @@ File List:
 
     list (check) : Utilities for managing lists and other containers.
 
-    sys (list) : Functions for interfacing with the operating system.
+    ctrl (list) : Functions for interfacing with the operating system.
     format (list) : Utilities for managing and formatting strings.
 
-    rand (sys, math) : Random number generation utilities.
-    file (format, sys) : Utilities for managing different types of files.
+    rand (ctrl, math) : Random number generation utilities.
+    file (format, ctrl) : Utilities for managing different types of files.
 
     gui (file) : Utilities for creating and managing basic windows.
     crypto (format, rand) : Cryptographic utilities.

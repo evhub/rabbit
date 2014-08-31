@@ -18,7 +18,7 @@
 
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
-from .sys import *
+from .ctrl import *
 from .math import *
 import hashlib
 

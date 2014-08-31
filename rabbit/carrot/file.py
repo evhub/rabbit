@@ -19,7 +19,7 @@
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
 from .format import *
-from .sys import *
+from .ctrl import *
 import codecs
 import zipfile
 try:
