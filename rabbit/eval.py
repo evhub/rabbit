@@ -2087,6 +2087,7 @@ Global Operator Precedence List:
         if self.parenchar in inputstring:
             self.printdebug("(|) "+inputstring) 
             templist = inputstring.split(self.parenchar)
+            checkops = delspace(self.callops, self.subparenops)
             inputlist = [[]]
             feed = inputlist[0]
             last = False
@@ -2094,7 +2095,7 @@ Global Operator Precedence List:
                 if x%2 == 1:
                     if templist[x]:
                         last = True
-                        if feed and feed[-1] and feed[-1][-1] in self.multiargops:
+                        if feed and feed[-1] and feed[-1][-1] in checkops:
                             feed[-1] += self.parenchar+templist[x]+self.parenchar
                         else:
                             feed.append(self.parenchar+templist[x]+self.parenchar)
@@ -2102,7 +2103,7 @@ Global Operator Precedence List:
                     else:
                         last = False
                 elif templist[x]:
-                    if feed and ((templist[x] and templist[x][0] in self.multiargops) or (feed[-1] and feed[-1][-1] in self.multiargops)):
+                    if feed and ((templist[x] and templist[x][0] in checkops) or (feed[-1] and feed[-1][-1] in checkops)):
                         feed[-1] += templist[x]
                     else:
                         if last:
