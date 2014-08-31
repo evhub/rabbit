@@ -842,7 +842,7 @@ Global Operator Precedence List:
 
     def proc_pre(self, original, top, command):
         """Performs Pre-Processing."""
-        item = self.do_pre(original)
+        item = self.do_pre(original, top)
         self.printdebug("| "+str(item))
         self.proc_calc(item, top, command)
 
