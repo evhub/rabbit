@@ -846,7 +846,7 @@ Global Operator Precedence List:
         self.printdebug("| "+str(item))
         self.proc_calc(item, top, command)
 
-    def do_pre(self, item, top=False):
+    def do_pre(self, item, top):
         """Does The Pre-Processing."""
         for func in self.preprocs:
             item = func(item, top)
@@ -904,7 +904,7 @@ Global Operator Precedence List:
             if istext(item):
                 command += item
             elif item[0] in self.lambdachars:
-                value = self.do_pre(item[1])
+                value = self.do_pre(item[1], True)
                 if value:
                     command += self.lambdamarker+self.wrap(value)+self.lambdamarker
                 else:
