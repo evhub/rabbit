@@ -33,19 +33,20 @@ passert:: 1+2-3 ?= 0
 passert:: 3*4/5 ?= 2.4
 
 # Matrix Tests:
-passert:: 1,2,3 ?= (1,2,3)
-passert:: (1,2,3)*2 ?= 2,4,6
-passert:: (1,2,3)+10 ?= 11,12,13
-passert:: (1,2)+(10,20) ?= 11,22
-passert:: (1,2)*(10,20) ?= 10,40
+passert:: (1,2,3) ?= (1,2,3)
+passert:: (1,2,3,4) != (1,2,3)
+passert:: (1,2,3)*2 ?= (2,4,6)
+passert:: (1,2,3)+10 ?= (11,12,13)
+passert:: (1,2)+(10,20) ?= (11,22)
+passert:: (1,2)*(10,20) ?= (10,40)
 passert:: [1,2]*[10,20] ?= 50
 passert:: [1,0,0]%[0,1,0] ?= [0,0,1]
 passert:: [1,2] ++ [3,4] ?= [1,2,3,4]
 passert:: [2] ?= [1,2] -- 1
-passert:: (1,2) ** 2 ?= 1,2,1,2
+passert:: (1,2) ** 2 ?= (1,2,1,2)
 passert:: (1,2,3):2 ?= 3
 passert:: [1,2,3,4]:1 ?= 2
-passert:: (1,2,3):0:2 ?= 1,2
+passert:: (1,2,3):0:2 ?= (1,2)
 
 # Variable Setting Tests:
 passert:: x ?= 1        $ x = 1
@@ -57,15 +58,15 @@ passert:: 2x ?= 2       $ x = 1
 passert:: t()+1 ?= (t:)+1 ?= 2                 $ t() = 1
 passert:: f(2,)*3 ?= f:2*3 ?= f(2)*3 ?= 9      $ f(x) = x+1
 passert:: g(2,3)-5 ?= g:2:3-5 ?= 7             $ g(x,y) = 2*x*y
-passert:: add(a) ?= 6                          $ a = 1,2,3 $ add(x,y,z) = x+y+z
-passert:: plusone(1,2,3) ?= 2,3,4              $ plusone(l) = l+1
-passert:: \\1 ?= one                            $ one() = 1
+passert:: add(a) ?= 6                          $ a = (1,2,3) $ add(x,y,z) = x+y+z
+passert:: plusone(1,2,3) ?= (2,3,4)            $ plusone(l) = l+1
+passert:: \\1 ?= one                           $ one() = 1
 passert:: (\x\x+1):5 ?= (\x\(x+1)):5 ?= 6
 passert:: (\(x,y)\(x+y))(1,2) ?= 3
 passert:: (\(-x:1)\x): ?= 1
 passert:: gen_func:2:5 ?= 1                    $ gen_func(n) = \x\(x%n)
 passert:: gen_func:2:5 ?= 1                    $ gen_func(n) = \x,n:n\(x%n)
-passert:: inlist[1,2,3] ?= [1,2,3],            $ inlist(l) = l,
+passert:: inlist[1,2,3] ?= ([1,2,3],)          $ inlist(l) = l,
 
 # String Tests:
 passert:: "hello, "+"world" ?= "hello, world"
@@ -83,7 +84,7 @@ passert:: a.x ?= 1                             $ a = class << x = 1 >>
 passert:: a.x ?= 1                             $ a := class << x = 1 >>
 passert:: a.f(2) ?= a.f:2 ?= 3                 $ a = class << f(x) = x+1 >>
 passert:: a:"x+1" ?= 2                         $ a = namespace: class << x = 1 >>
-passert:: b ?= class << z = 5 >>                       $ b = a + class<<z=5>> $ a = class<<>>
+passert:: b ?= class << z = 5 >>               $ b = a + class<<z=5>> $ a = class<<>>
 passert:: class << x = 1 >> + class << z = 5 >> ?= class << x = 1 ;; z = 5 >>
 
 # Instance Tests:
@@ -121,7 +122,7 @@ nothing := class <<
 nil := nothing()
 passert:: type(nil) ?= "nil"
 passert:: nil.thing ?= "thing"
-passert:: nil(1,2) ?= 1,2
+passert:: nil(1,2) ?= (1,2)
 passert:: cont(nil) ?= []
 passert:: nil+1 ?= 1 ?= 1+nil
 passert:: nil-1 ?= -1 ?= -(1-nil)
@@ -170,16 +171,16 @@ passert:: g(4) ?= 6          $ g(x) = (m(z) $ z = x^2 $ m(z) = z%10)
 passert:: g(4) ?= 6          $ g(x) = namespace(class << m(z) = z%10 ;; z = x^2 >>) : "m(z)"
 
 # Loop Tests:
-passert:: 1,2,3~ \x\x ?= 1,2,3
-passert:: 1,2,3,4~~ \(x,y)\(x+y) ?= 3,7
-passert:: 10,20~ 1,2~ \(x,y)\(x+y) ?= (11,12),(21,22)
+passert:: (1,2,3)~ \x\x ?= (1,2,3)
+passert:: (1,2,3,4)~~ \(x,y)\(x+y) ?= (3,7)
+passert:: (10,20)~ (1,2)~ \(x,y)\(x+y) ?= ((11,12),(21,22))
 
 # Multi-Set Tests:
-passert:: a,b ?= 1,2                      $ a,b = 1,2
-passert:: a ?= 1 & b ?= 2                 $ a,b = 1,2
-passert:: a ?= 1 & b ?= 2,3               $ a,b = 1,2,3
+passert:: (a,b) ?= (1,2)                  $ a,b = (1,2)
+passert:: a ?= 1 & b ?= 2                 $ a,b = (1,2)
+passert:: a ?= 1 & b ?= (2,3)             $ a,b = (1,2,3)
 passert:: a ?= 1 & ! b                    $ a,b = 1
-passert:: smoosh((1,2),(3,4)) ?= 1,2,3,4
+passert:: smoosh((1,2),(3,4)) ?= (1,2,3,4)
  $ smoosh(a) = (
   x ++ smoosh(xs) @ xs;
   x
@@ -188,16 +189,16 @@ passert:: smoosh((1,2),(3,4)) ?= 1,2,3,4
 
 # Miscellaneous Tests:
 passert:: f..g(2) ?= 9                       $ f(x) = x^2 $ g(x) = x+1
-passert:: applyplus(0,-2) ?= 1,-1            $ applyplus(__) = __~\x\(x+1)
+passert:: applyplus(0,-2) ?= (1,-1)          $ applyplus(__) = __~\x\(x+1)
 passert:: (x $ x = 1) ?= 1
 
 # Expression Tests:
-passert:: (1,2,3) ?= 1,2,3~ \x\x
+passert:: (1,2,3) ?= (1,2,3)~ \x\x
 passert:: \x\(x+1) ?= \x\x+1
-passert:: (1,2,3,4) ?= 1,2 ++ 3,4
-passert:: (2,) ?= 1,2 -- 1
-passert:: (1,2,1,2) ?= 1,2 ** 2
-passert:: (1,2,3,4) ?= 1,2,3,4
+passert:: (1,2,3,4) ?= (1,2) ++ (3,4)
+passert:: (2,) ?= (1,2) -- 1
+passert:: (1,2,1,2) ?= (1,2) ** 2
+passert:: (1,2,3,4) ?= (1,2,3,4)
 passert:: 0 ?= 1+2-3
 passert:: 0 ?= 6 % 3
 passert:: 2.4 ?= 3*4/5
@@ -230,16 +231,16 @@ passert:: zip:(1,2):(10,20) ?= (1,10),(2,20)
    $ b,bs = lb
    )
   @ len:la & len:lb
-passert:: qsort(9,0,6,3,8) ?= 0,3,6,8,9
+passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9)
  $ qsort(l) = (
    qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
    $ a,as = l
    ) @ len:l
-passert:: qsort(9,0,6,3,8) ?= 0,3,6,8,9
+passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9)
  $ qsort(l) = (
    qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
    $ a,as = l
-   ) @ l,
+   ) @ (l,)
 passert:: range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop")
  $ crackle pop (x) = (
     "CracklePop"
@@ -309,9 +310,9 @@ passert:: sum(2,2,3) ?= 7
 passert:: prod(2,2,3) ?= 12
 passert:: join:",":[1,2] ?= "1,2"
 passert:: connect:[1,2]:[3,4] ?= matrix:[1,2]:[3,4]
-passert:: merge:(1,(2,2)):(3,4) ?= 1,2,2,3,4
-passert:: sort(1,0,9,5) ?= 0,1,5,9
-passert:: rev(1,2,3) ?= 3,2,1
+passert:: merge:(1,(2,2)):(3,4) ?= (1,2,2,3,4)
+passert:: sort(1,0,9,5) ?= (0,1,5,9)
+passert:: rev(1,2,3) ?= (3,2,1)
 passert:: round(1.5) ?= 2
 passert:: eval:\\1 ?= 1
 passert:: find:"a":(0,1,"a",3,4) ?= 2

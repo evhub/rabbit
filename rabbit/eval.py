@@ -209,6 +209,7 @@ Global Operator Precedence List:
             self.set_normal
             ]
         self.calc_funcs = [
+            self.calc_list,
             self.calc_pair,
             self.calc_pieces,
             self.calc_condo,
@@ -224,7 +225,6 @@ Global Operator Precedence List:
             ("--", True),
             ("++", True),
             ("**", True),
-            (",", True),
             ("+", True, ["-", self.callops, 2]),
             ("%", True),
             ("//", True),
@@ -236,7 +236,6 @@ Global Operator Precedence List:
             self.eval_remove,
             self.eval_join,
             self.eval_repeat,
-            self.eval_list,
             self.eval_add,
             self.eval_mod,
             self.eval_intdiv,
@@ -1249,6 +1248,24 @@ Global Operator Precedence List:
             calc_funcs = self.calc_funcs
         return self.eval_next(arg, calc_funcs)
 
+    def calc_list(self, inputstring, calc_funcs):
+        """Evaluates Matrices."""
+        inputlist = inputstring.split(",")
+        out = []
+        for x in xrange(0, len(inputlist)):
+            item = self.calc_next(inputlist[x], calc_funcs)
+            if not isnull(item):
+                out.append(item)
+        if len(out) == 0:
+            return matrix(0)
+        elif len(out) == 1:
+            if len(inputlist) > 1:
+                return matrix(1,1, out[0], fake=True)
+            else:
+                return out[0]
+        else:
+            return diagmatrixlist(out)
+
     def calc_pair(self, expression, calc_funcs):
         """Evaluates Key-Value Pairs."""
         itemlist = []
@@ -1801,23 +1818,6 @@ Global Operator Precedence List:
                     return diagmatrixlist(out)
             else:
                 return out
-
-    def eval_list(self, inputlist, eval_funcs):
-        """Evaluates Matrices."""
-        out = []
-        for x in xrange(0, len(inputlist)):
-            item = self.eval_next(inputlist[x], eval_funcs)
-            if not isnull(item):
-                out.append(item)
-        if len(out) == 0:
-            return matrix(0)
-        elif len(out) == 1:
-            if len(inputlist) > 1:
-                return matrix(1,1, out[0], fake=True)
-            else:
-                return out[0]
-        else:
-            return diagmatrixlist(out)
 
     def eval_add(self, inputlist, eval_funcs):
         """Evaluates The Addition Part Of An Expression."""
