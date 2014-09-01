@@ -52,17 +52,18 @@ Global Operator Precedence List:
     ;       Seperates conditionals (read as 'else').
     @       Checks a conditional (read as 'at' or 'if').
 
+    ,       Seperates list elements.
+    ->      Creates a key-value pair.
+    ?!      Performs logical unary operations.
     |       Performs logical 'or'.
     &       Performs logical 'and'.
     >?!=<   Performs equality or inequality checks.
 
-    ->      Creates a key-value pair.
     ~       Applies a list to a function for looping.
     \\       Creates a lambda.
     --      Performs removal.
     ++      Performs concatenation.
     **      Performs repeat.
-    ,       Seperates list elements.
     +-      Performs addition and subtraction.
     %       Performs modulo.
     //      Performs floor division.
