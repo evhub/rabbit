@@ -1675,10 +1675,10 @@ Global Operator Precedence List:
             elif dodict == len(items):
                 out = {}
                 for x in items:
-                    if isinstance(item, dictionary):
-                        out.update(item.a)
+                    if isinstance(x, dictionary):
+                        out.update(x.a)
                     else:
-                        out[item.k] = item.v
+                        out[x.k] = x.v
                 return dictionary(self, out)
             elif doclass == len(items):
                 out = items[0].copy()
