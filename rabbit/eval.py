@@ -1672,15 +1672,6 @@ Global Operator Precedence List:
                 for x in items:
                     out += x
                 return out
-            elif domultidata == len(items):
-                out = []
-                for x in items:
-                    if isinstance(x, matrix):
-                        for l in x.a:
-                            out.append((l[0], l[1]))
-                    else:
-                        out += x.items()
-                return multidata(out)
             elif dodict == len(items):
                 out = {}
                 for x in items:
@@ -1725,6 +1716,15 @@ Global Operator Precedence List:
                     else:
                         out.append(x)
                 return data(out)
+            elif domultidata == len(items):
+                out = []
+                for x in items:
+                    if isinstance(x, matrix):
+                        for l in x.a:
+                            out.append((l[0], l[1]))
+                    else:
+                        out += x.items()
+                return multidata(out)
             else:
                 raise ExecutionError("TypeError", "Could not concatenate items "+repr(items))
 
