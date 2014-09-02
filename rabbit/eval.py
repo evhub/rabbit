@@ -1882,6 +1882,8 @@ Global Operator Precedence List:
                 item = self.eval_next(inputlist[x], eval_funcs)
                 if isnull(value):
                     value = item
+                elif isnum(item) and item < 0:
+                    value = value - (-item)
                 elif not isnull(item):
                     value = value + item
             return value

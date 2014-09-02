@@ -398,7 +398,7 @@ class cotobject(evalobject):
 
     def __isub__(self, other):
         """Wraps remove."""
-        self.remove(other)
+        self.extend(-other)
         return self
 
     def __eq__(self, other):
