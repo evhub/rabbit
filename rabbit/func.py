@@ -2169,14 +2169,6 @@ class dictionary(pair):
         """Removes An Item."""
         if arg in self.a:
             del self.a[arg]
-        elif isinstance(arg, pair):
-            if arg.k in self.a and self.a[arg.k] == arg.v:
-                del self.a[arg.k]
-            elif isnull(arg.k):
-                temp = flip(self.a)
-                if arg.v in temp:
-                    del temp[arg.v]
-                    self.a = flip(temp)
 
     def __iadd__(self, other):
         """Wraps extend."""

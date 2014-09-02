@@ -333,6 +333,7 @@ Global Operator Precedence List:
             "def":funcfloat(self.funcs.defcall, self, "def", reqargs=1),
             "global":funcfloat(self.funcs.globalcall, self, "global", reqargs=1),
             "alias":funcfloat(self.funcs.aliascall, self, "alias", reqargs=1),
+            "aliases":funcfloat(self.funcs.aliasescall, self, "aliases"),
             "effect":usefunc(self.setreturned, self, "effect"),
             "bitnot":funcfloat(self.funcs.bitnotcall, self, "bitnot", reqargs=1),
             "bitor":funcfloat(self.funcs.bitorcall, self, "bitor", reqargs=2),
@@ -1798,7 +1799,20 @@ Global Operator Precedence List:
                         item.units.remove(arg)
             elif isinstance(item, dictionary):
                 for arg in params:
-                    item.remove(arg)
+                    if isinstance(arg, dictionary):
+                        for k,v in arg.a.items():
+                            if k in item.a and item.a[k] == v:
+                                del item.a[k]
+                    elif isinstance(arg, pair):
+                        if arg.k in item.a and item.a[arg.k] == arg.v:
+                            del item.a[arg.k]
+                        elif isnull(arg.k):
+                            temp = flip(item.a)
+                            if arg.v in temp:
+                                del temp[arg.v]
+                                item.a = flip(temp)
+                    else:
+                        raise ExecutionError("TypeError", "Can only remove pairs and dictionaries from dictionaries")
             else:
                 raise ExecutionError("TypeError", "Could not remove from item "+self.prepare(item, False, True, True))
         return item
@@ -3540,6 +3554,14 @@ class evalfuncs(object):
             return diagmatrixlist([rawstrcalc(key, self.e), rawstrcalc(value, self.e)])
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to alias")
+
+    def aliasescall(self, variables):
+        """Gets Aliases."""
+        self.e.overflow = variables
+        out = dictionary(self.e)
+        for k,v in self.e.aliases.items():
+            out.store(rawstrcalc(k, self.e), rawstrcalc(v, self.e))
+        return out
 
     def bitnotcall(self, variables):
         """Wraps ~."""

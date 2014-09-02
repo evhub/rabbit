@@ -205,6 +205,23 @@ passert:: 0 ?= 1+2-3
 passert:: 0 ?= 6 % 3
 passert:: 2.4 ?= 3*4/5
 
+# Dictionary Tests:
+passert:: 1 -> 2
+passert:: { 1 -> 2 }
+passert:: (1->2)+(2->3) ?= {1 -> 2, 2 -> 3}
+passert:: {"a" -> "b", "c" -> "d" }
+passert:: {0 -> 5, 1 -> 10} ?= {
+                                0 -> 5,
+                                1 -> 10,
+                                } ?= {
+                                      0 -> 5
+                                      1 -> 10
+                                      }
+passert:: {1->2, 2->3} ++ {2->4} ?= {1->2, 2->4}
+passert:: {1->2} - 1 ?= {}
+passert:: {1->2} -- (1->2) ?= {}
+passert:: {1->2} -- (1->3) ?= {1->2}
+
 # Complex Tests:
 passert:: mod:3:2 ?= 1
  $ mod(x,y) = (xy+-1*floor:(xy))*y $ xy = x/y
@@ -377,6 +394,7 @@ passert:: 5 lshift 1 ?= 10
 passert:: call((\x\(x+1)), 5) ?= 6
 passert:: (pure:: ?5) ?= 1
 passert:: 2 ?= (pure:: 1+1)
+passert:: aliases()
 
 # New Feature Tests:
 passert:: f..g(1)g..f(2) ?= 20      $ f(x) = x^2 $ g(x) = x+1
@@ -493,17 +511,6 @@ passert:: f() ?= 5 & f(3) ?= 3
  $ f(x=5) =
   x
 passert:: 1,2++3,4 ?= 1,(2,3),4
-passert:: 1 -> 2
-passert:: { 1 -> 2 }
-passert:: (1->2)+(2->3) ?= {1 -> 2, 2 -> 3}
-passert:: {"a" -> "b", "c" -> "d" }
-passert:: {0 -> 5, 1 -> 10} ?= {
-                                0 -> 5,
-                                1 -> 10,
-                                } ?= {
-                                      0 -> 5
-                                      1 -> 10
-                                      }
 
 # Final Testing:
 passert:: save("Tests.save");true
