@@ -87,6 +87,30 @@ def varproc(variables):
     else:
         return [variables]
 
+class negative(numobject):
+    """Implements Curried Subtraction."""
+    evaltype = "-"
+
+    def __init__(self, item):
+        """Creates The Negative Object."""
+        self.n = item
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("negative", itemstate(self.n))
+
+    def copy(self):
+        """Copies The Negative Object."""
+        return negative(getcopy(self.n))
+
+    def calc(self):
+        """Calculates The Negative Object."""
+        return -self.n
+
+    def __iadd__(self, other):
+        """Does The Curried Subtraction."""
+        return other - self.n
+
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
     evaltype = "function"
