@@ -146,7 +146,8 @@ Global Operator Precedence List:
     lambdamarker = "\u03bb"
     subparenops = ".^"
     callops = subparenops + lambdamarker + "%/*:"
-    multiargops = bools + callops + "+-@~|&;,$" + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
+    calcops = "$"
+    multiargops = bools + callops + "+-@~|&;," + calcops + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
     errorvar = "__error__"
     fatalvar = "fatal"
@@ -203,8 +204,8 @@ Global Operator Precedence List:
             ]
         self.tops = [
             self.top_cmd,
-            self.top_with,
-            self.top_set
+            self.top_set,
+            self.top_with
             ]
         self.sets = [
             self.set_def,
@@ -1108,7 +1109,7 @@ Global Operator Precedence List:
         if len(sides) > 1:
             sides[0] = basicformat(sides[0])
             sides[1] = basicformat(sides[1])
-            if not endswithany(sides[0], self.bools) and not startswithany(sides[1], self.bools):
+            if not containsany(sides[0], self.calcops) and not endswithany(sides[0], self.bools) and not startswithany(sides[1], self.bools):
                 docalc = False
                 if sides[0].endswith(":"):
                     sides[0] = sides[0][:-1]
