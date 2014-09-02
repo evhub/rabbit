@@ -391,7 +391,6 @@ Global Operator Precedence List:
                 }),
             "i":complex(0.0, 1.0),
             "none":matrix(0),
-            "empty":rowmatrixlist([matrix(0)]),
             "true":1.0,
             "false":0.0,
             "_":atom(),

@@ -221,6 +221,8 @@ passert:: {1->2, 2->3} ++ {2->4} ?= {1->2, 2->4}
 passert:: {1->2} - 1 ?= {}
 passert:: {1->2} -- (1->2) ?= {}
 passert:: {1->2} -- (1->3) ?= {1->2}
+passert:: {1->2} + {3->4} ?= {1->2, 3->4}
+passert:: {"a" -> "b", "c" -> "d"} : "c" ?= "d"
 
 # Complex Tests:
 passert:: mod:3:2 ?= 1
@@ -513,6 +515,8 @@ passert:: f() ?= 5 & f(3) ?= 3
  $ f(x=5) =
   x
 passert:: 1,2++3,4 ?= 1,(2,3),4
+passert:: len:[] ?= 0
+passert:: len:[()] ?= 1
 
 # Final Testing:
 passert:: save("Tests.save");true
