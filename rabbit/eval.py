@@ -2629,15 +2629,16 @@ class evalfuncs(object):
             original = self.e.prepare(variables[0], True, False)
             result, err = catch(self.e.calc, original)
             if err:
-                out = classcalc(self.e, {
+                out = instancecalc(self.e, {
+                    classcalc.selfvar : None,
                     self.e.errorvar : 1.0,
                     self.e.fatalvar : float(err[2])
-                    }).toinstance()
+                    })
                 out.store(self.e.namevar, strcalc(err[0], self.e))
                 out.store(self.e.messagevar, strcalc(err[1], self.e))
                 if len(err) > 3:
                     for k,v in err[3].items():
-                        out.store(k, v)
+                        out.variables[k] = v
                 return rowmatrixlist([matrix(0), out])
             else:
                 return rowmatrixlist([result, matrix(0)])
@@ -2647,7 +2648,7 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("Error", "An error occured")
         elif len(variables) == 1:
-            if isinstance(variables[0], classcalc) and self.iserrcall(variables):
+            if isinstance(variables[0], instancecalc) and self.iserrcall(variables):
                 name = variables[0].tryget(self.e.namevar)
                 if name:
                     name = self.e.prepare(name, False, False)
@@ -2671,6 +2672,7 @@ class evalfuncs(object):
                     del variables[self.e.messagevar]
                 if self.e.fatalvar in variables:
                     del variables[self.e.fatalvar]
+                variables[variables[0].parentvar] = variables[0].getparent()
                 raise ExecutionError(name, message, fatal, variables)
             else:
                 raise ExecutionError("Error", self.e.prepare(variables[0], False, False))
