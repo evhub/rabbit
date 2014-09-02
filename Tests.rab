@@ -517,6 +517,7 @@ passert:: f() ?= 5 & f(3) ?= 3
 passert:: 1,2++3,4 ?= 1,(2,3),4
 passert:: len:[] ?= 0
 passert:: len:[()] ?= 1
+passert:: "321"+0 ?= "3210"
 
 # Final Testing:
 passert:: save("Tests.save");true

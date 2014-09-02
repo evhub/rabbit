@@ -81,6 +81,7 @@ Global Operator Precedence List:
     constructors = {
         "atom": lambda self, args: atom(),
         "reciprocal": lambda self, args: reciprocal(self.deitem(args[0])),
+        "negative": lambda self, args: negative(self.deitem(args[0])),
         "fraction": lambda self, args: fraction(self.deitem(args[0]), self.deitem(args[1])),
         "pair": lambda self, args: pair(self, self.deitem(args[0]), self.deitem(args[1])),
         "dictionary": lambda self, args: dictionary(self, self.devariables(args[0])),
@@ -101,6 +102,7 @@ Global Operator Precedence List:
         "brace": lambda self, args: brace(self, args[0]),
         "bracket": lambda self, args: bracket(self, args[0])
         }
+    tempobjects = negative, reciprocal
     varname = "x"
     directchar = "\xb6"
     indentchar = "\u2021"
@@ -632,7 +634,11 @@ Global Operator Precedence List:
                 if top:
                     out += "\n"
             out += " }"
-        elif isinstance(item, (fraction, reciprocal, pair)):
+        elif isinstance(item, negative):
+            out = "-"+self.prepare(item.n, top, bottom, indebug, maxrecursion)
+        elif isinstance(item, reciprocal):
+            out = "/"+self.prepare(item.d, top, bottom, indebug, maxrecursion)
+        elif isinstance(item, (fraction, pair)):
             if isinstance(item, pair):
                 part_a = item.k
             else:
@@ -1883,8 +1889,6 @@ Global Operator Precedence List:
                 item = self.eval_next(inputlist[x], eval_funcs)
                 if isnull(value):
                     value = item
-                elif isnum(item) and item < 0:
-                    value = value - (-item)
                 elif not isnull(item):
                     value = value + item
             return value
@@ -1937,7 +1941,7 @@ Global Operator Precedence List:
         """Checks A Value."""
         if value is None:
             return matrix(0)
-        elif top and isinstance(value, reciprocal):
+        elif top and isinstance(value, self.tempobjects):
             return value.calc()
         elif islist(value):
             return domatrixlist(value)
@@ -2003,7 +2007,7 @@ Global Operator Precedence List:
             if isnull(item):
                 return -1.0
             else:
-                return -1.0*item
+                return negative(item)
 
     def call_reciproc(self, inputstring, count):
         """Evaluates /."""

@@ -204,28 +204,28 @@ class funcfloat(numobject):
 
     def __idiv__(self, other):
         """Performs Division."""
-        if other == 1.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc("("+self.funcstr+"("+self.allargs+"))/"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
 
     def __imul__(self, other):
         """Performs Multiplication."""
-        if other == 1.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc("("+self.funcstr+"("+self.allargs+"))*"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
 
     def __ipow__(self, other):
         """Performs Exponentiation."""
-        if other == 1.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc("("+self.funcstr+"("+self.allargs+"))^"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
-        if other == 0.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc(self.e.wrap(other)+"+("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
@@ -364,7 +364,7 @@ class strfunc(funcfloat):
 
     def __iadd__(self, other):
         """Performs Addition."""
-        if other == 0.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc("("+self.name+":"+strlist(self.variables,":")+")+"+self.e.wrap(other), self.e, self.variables, {self.name:self})
@@ -378,21 +378,21 @@ class strfunc(funcfloat):
 
     def __imul__(self, other):
         """Performs Multiplication."""
-        if other == 1.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc("("+self.name+":"+strlist(self.variables,":")+")*"+self.e.wrap(other), self.e, self.variables, {self.name:self})
 
     def __ipow__(self, other):
         """Performs Exponentiation."""
-        if other == 1.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc("("+self.name+":"+strlist(self.variables,":")+")^"+self.e.wrap(other), self.e, self.variables, {self.name:self})
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
-        if other == 0.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc(self.e.wrap(other)+"+("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
@@ -627,19 +627,19 @@ class strcalc(numobject):
 
     def __iadd__(self, other):
         """Performs Addition."""
-        if other != 0 and not isnull(other):
+        if not isnull(other):
             self.calcstr += self.e.prepare(other, True, False)
         return self
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
-        if other != 0 and not isnull(other):
+        if not isnull(other):
             self.calcstr = self.e.prepare(other, True, False)+self.calcstr
         return self
 
     def __idiv__(self, other):
         """Performs Division."""
-        if other != 1 and not isnull(other):
+        if not isnull(other):
             self.calcstr = self.calcstr[:int(len(self.calcstr)/other)]
         return self
 
@@ -672,7 +672,7 @@ class strcalc(numobject):
         return self.calcstr == other
 
     def __cmp__(self, other):
-        """Performs comparison."""
+        """Performs Comparison."""
         if ismatrix(other):
             other = getmatrix(other).retrieve(0)
         if isinstance(other, strcalc):
@@ -691,6 +691,10 @@ class strcalc(numobject):
     def __contains__(self, other):
         """Performs in."""
         return self.e.prepare(other, True, False) in self.calcstr
+
+    def __isub__(self, other):
+        """Performs Subtraction."""
+        self.calcstr.replace(self.e.prepare(other, True, False), "")
 
     def tomatrix(self):
         """Returns A Matrix Of The Characters."""
@@ -1262,7 +1266,8 @@ class classcalc(cotobject):
         if isinstance(other, (dict, classcalc)):
             self.add(other.getvars())
             return self
-        elif other == 0:
+        elif isinstance(other, negative):
+            self -= other.n
             return self
         else:
             raise ExecutionError("ClassError", "Could not extend class with "+repr(other))
@@ -2182,6 +2187,8 @@ class dictionary(pair):
             self.a.update(item.a)
         elif isinstance(item, pair):
             self.store(item.k, item.v)
+        elif isinstance(item, negative):
+            self -= item.n
         else:
             raise TypeError("Dictionaries only support addition with pairs and other dictionaries")
 
