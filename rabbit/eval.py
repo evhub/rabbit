@@ -619,13 +619,18 @@ Global Operator Precedence List:
             if top:
                 out += "\n"
             for k,v in item.a.items():
-                out += " "+self.prepare(pair(self,k,v), False, bottom, indebug, maxrecursion)+" "
+                out += " "+self.prepare(pair(self,k,v), False, bottom, indebug, maxrecursion)+","
                 if top:
                     out += "\n"
                 else:
-                    out += ","
-            if (top and not item.a) or (not top and item.a):
-                out = out[:-1]
+                    out += " "
+            if not item.a:
+                if top:
+                    out = out[:-1]
+            else:
+                out = out[:-2]
+                if top:
+                    out += "\n"
             out += " }"
         elif isinstance(item, (fraction, reciprocal, pair)):
             if isinstance(item, pair):

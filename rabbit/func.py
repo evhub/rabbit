@@ -2118,7 +2118,8 @@ class pair(cotobject):
 
     def __imul__(self, item):
         """Extends With An Item."""
-        return self += item
+        self += item
+        return self
 
     def __eq__(self, other):
         """Performs Equality."""
@@ -2231,6 +2232,7 @@ class dictionary(pair):
 
     def __ge__(self, other):
         """Determines If Subset."""
+        if isinstance(other, dictionary):
             for item in other.a:
                 if not item in self.a:
                     return False
@@ -2262,7 +2264,12 @@ class bracket(object):
 
     def calc(self):
         """Calculates The Row."""
-        return rowmatrixlist(map(self.e.calc, self.items))
+        out = []
+        for item in self.items:
+            item = basicformat(item)
+            if item:
+                out.append(self.e.calc(item))
+        return rowmatrixlist(out)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -2274,14 +2281,16 @@ class brace(bracket):
     def calc(self):
         """Calculates The Dictionary."""
         out = {}
-        for original in items:
-            item = self.e.calc(original)
-            if isinstance(item, dictionary):
-                out.update(item.a)
-            elif isinstance(item, pair):
-                out[item.k] = item.v
-            else:
-                raise ValueError("Dictionary got non-pair item "+self.e.prepare(item, False, True, True))
+        for item in self.items:
+            item = basicformat(item)
+            if item:
+                value = self.e.calc(item)
+                if isinstance(value, dictionary):
+                    out.update(value.a)
+                elif isinstance(value, pair):
+                    out[value.k] = value.v
+                else:
+                    raise ValueError("Dictionary got non-pair item "+self.e.prepare(value, False, True, True))
         return dictionary(self.e, out)
 
     def getstate(self):

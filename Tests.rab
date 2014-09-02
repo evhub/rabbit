@@ -212,10 +212,10 @@ passert:: (1->2)+(2->3) ?= {1 -> 2, 2 -> 3}
 passert:: {"a" -> "b", "c" -> "d" }
 passert:: {0 -> 5, 1 -> 10} ?= {
                                 0 -> 5,
-                                1 -> 10,
+                                1 -> 10
                                 } ?= {
-                                      0 -> 5
-                                      1 -> 10
+                                      0 -> 5,
+                                      1 -> 10,
                                       }
 passert:: {1->2, 2->3} ++ {2->4} ?= {1->2, 2->4}
 passert:: {1->2} - 1 ?= {}
@@ -395,6 +395,8 @@ passert:: call((\x\(x+1)), 5) ?= 6
 passert:: (pure:: ?5) ?= 1
 passert:: 2 ?= (pure:: 1+1)
 passert:: aliases()
+passert:: pair() ?= (->)
+passert:: dict() ?= {}
 
 # New Feature Tests:
 passert:: f..g(1)g..f(2) ?= 20      $ f(x) = x^2 $ g(x) = x+1
