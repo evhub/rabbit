@@ -32,6 +32,18 @@ def round(x, *args, **kwargs):
     else:
         return old_round(x, *args, **kwargs)
 
+try:
+    cmp
+except NameError:
+    def cmp(a, b):
+        """Mimics cmp."""
+        if hasattr(a, "__cmp__"):
+            return a.__cmp__(b)
+        elif hasattr(b, "__cmp__"):
+            return b.__cmp__(a)
+        else:
+            return (a > b) - (a < b)
+
 class evalobject(object):
     """A Base Class For Evaluator Objects."""
     check = 1
@@ -142,6 +154,34 @@ class evalobject(object):
     def __ilshift__(self, other):
         """Raises An Error."""
         raise ExecutionError("OperatorError", "Bitwise left shift not defined for object")
+
+    def __gt__(self, other):
+        """Wraps cmp."""
+        return cmp(self, other) > 0
+
+    def __lt__(self, other):
+        """Wraps cmp."""
+        return cmp(self, other) < 0
+
+    def __ge__(self, other):
+        """Wraps cmp."""
+        return cmp(self, other) >= 0
+
+    def __le__(self, other):
+        """Wraps cmp."""
+        return cmp(self, other) <= 0
+
+    def __eq__(self, other):
+        """Wraps cmp."""
+        return cmp(self, other) == 0
+
+    def __cmp__(self, other):
+        """Raises An Error."""
+        return NotImplemented
+
+    def __index__(self):
+        """Wraps int."""
+        return int(self)
 
 class numobject(evalobject):
     """A Base Class For Objects."""

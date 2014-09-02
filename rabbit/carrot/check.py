@@ -157,6 +157,8 @@ def catch(function, *args, **kwargs):
         err = (detail.name, detail.message, detail.fatal, detail.variables)
     except Exception as detail:
         err = ("Error", detail or "An error occured", True)
+    except BaseException as detail:
+        err = ("PythonError", detail or "An error occured", True)
     else:
         err = None
     return result, err

@@ -718,6 +718,15 @@ class strcalc(numobject):
         else:
             return str(self)
 
+    def __imod__(self, other):
+        """Performs String Formatting."""
+        if isinstance(other, dictionary):
+            self.calcstr %= other.a
+        elif ismatrix(other):
+            self.calcstr %= tuple(getmatrix(other).getitems())
+        else:
+            raise TypeError("Strings can only be formatted by dictionaries and matrices")
+
 class rawstrcalc(strcalc):
     """A Raw Evaluator String."""
     def __init__(self, calcstr, e):
@@ -1166,13 +1175,11 @@ class classcalc(cotobject):
                 out += "\n"
             else:
                 out += " ;;"
-        if len(variables) > 0:
-            if top:
-                out = out[:-1]+"\n"
-            else:
-                out = out[:-3]
-        elif top:
-            out = out[:-1]
+        if top:
+            if not variables:
+                out = out[:-1]
+        elif variables:
+            out = out[:-3]
         out += " \xbb"
         return out
 
@@ -2062,8 +2069,9 @@ class pair(cotobject):
     evaltype = "pair"
     notmatrix = True
 
-    def __init__(self, key, value):
+    def __init__(self, e, key, value):
         """Creates The Key-Value Pair."""
+        self.e = e
         self.k = key
         self.v = value
 
@@ -2073,21 +2081,17 @@ class pair(cotobject):
 
     def copy(self):
         """Copies The Key-Value Pair."""
-        return pair(getcopy(self.k), getcopy(self.v))
+        return pair(self.e, getcopy(self.k), getcopy(self.v))
 
-    def getcall(self, e):
-        """Returns A Call Function."""
-        return curry(self._call, e)
-
-    def _call(self, e, variables):
+    def call(self, variables):
         """Retrieves A Value."""
-        e.overflow = variables[1:]
+        self.e.overflow = variables[1:]
         if not variables:
             return self
         elif self.k == variables[0]:
             return self.v
         else:
-            raise ExecutionError("KeyError", "Could not find key "+e.prepare(variables[0])+" in "+e.prepare(self))
+            raise ExecutionError("KeyError", "Could not find key "+self.e.prepare(variables[0])+" in "+self.e.prepare(self))
 
     def items(self):
         """Gets A List Containing The Key And The Value."""
@@ -2095,46 +2099,199 @@ class pair(cotobject):
 
     def remove(self, item):
         """Removes An Item."""
-        raise ExecutionError("TypeError", "Pairs don't support subtraction")
+        raise TypeError("Pairs don't support subtraction")
 
-    def extend(self, item):
+    def __iadd__(self, item):
         """Extends With An Item."""
-        raise ExecutionError("TypeError", "Pairs don't support addition")
+        if isinstance(item, dictionary):
+            out = item.copy()
+            out.store(self.k, self.v)
+            return out
+        elif isinstance(item, pair):
+            out = {
+                self.k : self.v,
+                item.k : item.v
+                }
+            return dictionary(self.e, out)
+        else:
+            raise TypeError("Pairs only support addition by other pairs")
+
+    def __imul__(self, item):
+        """Extends With An Item."""
+        return self += item
 
     def __eq__(self, other):
         """Performs Equality."""
-        if isinstance(other, pair):
+        if isinstance(other, pair) and not isinstance(other, dictionary):
             return self.k == other.k and self.v == other.v
         else:
             return False
 
-class brace(object):
-    """A To-Be-Calculated Dictionary."""
-    def __init__(self, e, items):
-        """Constructs The Dictionary."""
+class dictionary(pair):
+    """A Key-Value Dictionary."""
+    evaltype = "dictionary"
+
+    def __init__(self, e, items=None):
+        """Creates The Dictionary."""
         self.e = e
-        self.items = items
-    def calc(self):
-        """Calculates The Dictionary."""
-        raise NotImplementedError("This will be added") #TODO
+        if items is None:
+            self.a = {}
+        else:
+            self.a = items.copy()
+
+    def copy(self):
+        """Copies The Dictionary."""
+        return dictionary(self.e, self.a)
+
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("brace", self.items)
+        return ("dictionary", getstates(self.a))
+
+    def store(self, key, value):
+        """Stores An Item."""
+        self.a[key] = value
+
+    def items(self):
+        """Gets Items."""
+        return self.a.items()
+
+    def call(self, variables):
+        """Retrieves A Value."""
+        self.e.overflow = variables[1:]
+        if not variables:
+            return self
+        elif variables[0] in self.a:
+            return self.a[variables[0]]
+        else:
+            raise ExecutionError("KeyError", "Could not find key "+self.e.prepare(variables[0])+" in "+self.e.prepare(self))
+
+    def remove(self, arg):
+        """Removes An Item."""
+        if arg in self.a:
+            del self.a[arg]
+        elif isinstance(arg, pair):
+            if arg.k in self.a and self.a[arg.k] == arg.v:
+                del self.a[arg.k]
+            elif isnull(arg.k):
+                temp = flip(self.a)
+                if arg.v in temp:
+                    del temp[arg.v]
+                    self.a = flip(temp)
+
+    def __iadd__(self, other):
+        """Wraps extend."""
+        self.update(other)
+        return self
+
+    def update(self, item):
+        """Extends The Dictionary."""
+        if isinstance(item, dictionary):
+            self.a.update(item.a)
+        elif isinstance(item, pair):
+            self.store(item.k, item.v)
+        else:
+            raise TypeError("Dictionaries only support addition with pairs and other dictionaries")
+
+    def __eq__(self, other):
+        """Performs Equality."""
+        if isinstance(other, dictionary):
+            return self.a == other.a
+        else:
+            return False
+
+    def __len__(self):
+        """Finds A Length."""
+        return len(self.a)
+
+    def __contains__(self, other):
+        """Performs in."""
+        return other in self.a
+
+    def tomatrix(self):
+        """Converts To A Matrix."""
+        items = self.a.items()
+        out = matrix(len(items), 2)
+        for x in xrange(0, len(items)):
+            out.store(x, 0, items[x][0])
+            out.store(x, 1, items[x][1])
+        return out
+
+    def __delitem__(self, key):
+        """Deletes An Item."""
+        del self.a[key]
+
+    def __cmp__(self, other):
+        """Performs Comparison."""
+        if isinstance(other, dictionary):
+            return cmp(self.a, other.a)
+        else:
+            raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
+
+    def __gt__(self, other):
+        """Determines If Proper Subset."""
+        if isinstance(other, dictionary):
+            if len(self.a) > len(other.a):
+                return self >= other
+            else:
+                return False
+        else:
+            raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
+
+    def __ge__(self, other):
+        """Determines If Subset."""
+            for item in other.a:
+                if not item in self.a:
+                    return False
+            return True
+        else:
+            raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
+
+    def __lt__(self, other):
+        """Wraps Greater Than."""
+        if isinstance(other, dictionary):
+            return other > self
+        else:
+            raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
+
+    def __le__(self, other):
+        """Wraps Greater Than Or Equal."""
+        if isinstance(other, dictionary):
+            return other >= self
+        else:
+            raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
+
 
 class bracket(object):
     """A To-Be-Calculated Row."""
-    def __init__(self, e, original):
+    def __init__(self, e, items):
         """Constructs The Row."""
         self.e = e
-        self.original = original
+        self.items = items
+
     def calc(self):
         """Calculates The Row."""
-        out = self.e.calc(self.original)
-        if isinstance(out, matrix) and out.onlydiag():
-            out = out.getdiag()
-        else:
-            out = [out]
-        return rowmatrixlist(out)
+        return rowmatrixlist(map(self.e.calc, self.items))
+
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("bracket", self.original)
+        return ("bracket", self.items)
+
+class brace(bracket):
+    """A To-Be-Calculated Dictionary."""
+
+    def calc(self):
+        """Calculates The Dictionary."""
+        out = {}
+        for original in items:
+            item = self.e.calc(original)
+            if isinstance(item, dictionary):
+                out.update(item.a)
+            elif isinstance(item, pair):
+                out[item.k] = item.v
+            else:
+                raise ValueError("Dictionary got non-pair item "+self.e.prepare(item, False, True, True))
+        return dictionary(self.e, out)
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        return ("brace", self.items)

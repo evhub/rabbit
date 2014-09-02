@@ -38,8 +38,6 @@ class evaluator(object):
     """Evaluates Equations And Expressions.
 
 Global Operator Precedence List:
-    ;;      Separates top-level commands.
-
     "       Opens and closes strings.
     `       Opens and closes raw strings.
     ()      Opens and closes parentheses.
@@ -47,16 +45,18 @@ Global Operator Precedence List:
     {}      Opens and closes dictionaries.
     []      Opens and closes matrix rows.
 
+    ;;      Separates top-level commands.
+
     $       Seperates with clauses (read as 'with' or 'where').
     ::      Calls a meta-function.
-    ;       Seperates conditionals (read as 'else').
-    @       Checks a conditional (read as 'at' or 'if').
 
     ,       Seperates list elements.
     ->      Creates a key-value pair.
+    ;       Seperates conditionals (read as 'else').
+    @       Checks a conditional (read as 'at' or 'if').
     ?!      Performs logical unary operations.
-    |       Performs logical 'or'.
-    &       Performs logical 'and'.
+    |       Performs logical or.
+    &       Performs logical and.
     >?!=<   Performs equality or inequality checks.
 
     ~       Applies a list to a function for looping.
@@ -82,7 +82,8 @@ Global Operator Precedence List:
         "atom": lambda self, args: atom(),
         "reciprocal": lambda self, args: reciprocal(self.deitem(args[0])),
         "fraction": lambda self, args: fraction(self.deitem(args[0]), self.deitem(args[1])),
-        "pair": lambda self, args: pair(self.deitem(args[0]), self.deitem(args[1])),
+        "pair": lambda self, args: pair(self, self.deitem(args[0]), self.deitem(args[1])),
+        "dictionary": lambda self, args: dictionary(self, self.devariables(args[0])),
         "data": lambda self, args: data(args[0], args[1]),
         "multidata": lambda self, args: multidata(args[0], args[1]),
         "rollfunc": lambda self, args: rollfunc(args[0], self, args[1], args[2], args[3]),
@@ -299,6 +300,8 @@ Global Operator Precedence List:
             "round":funcfloat(self.funcs.roundcall, self, "round", reqargs=1),
             "num":funcfloat(self.funcs.numcall, self, "num"),
             "int":funcfloat(self.funcs.intcall, self, "int"),
+            "pair":funcfloat(self.funcs.paircall, self, "pair"),
+            "dict":funcfloat(self.funcs.dictcall, self, "dict"),
             "eval":funcfloat(self.funcs.evalcall, self, "eval", reqargs=1),
             "find":funcfloat(self.funcs.findcall, self, "find", reqargs=2),
             "split":funcfloat(self.funcs.splitcall, self, "split", reqargs=1),
@@ -610,6 +613,19 @@ Global Operator Precedence List:
                         out += self.prepare(x, False, bottom, indebug, maxrecursion)+","
                     out = out[:-1]+"]:["
                 out = out[:-2]
+        elif isinstance(item, dictionary):
+            out = "{"
+            if top:
+                out += "\n"
+            for k,v in item.a.items():
+                out += " "+self.prepare(pair(self,k,v), False, bottom, indebug, maxrecursion)+" "
+                if top:
+                    out += "\n"
+                else:
+                    out += ","
+            if (top and not item.a) or (not top and item.a):
+                out = out[:-1]
+            out += " }"
         elif isinstance(item, (fraction, reciprocal, pair)):
             if isinstance(item, pair):
                 part_a = item.k
@@ -1003,8 +1019,14 @@ Global Operator Precedence List:
         for x in curlylist:
             if istext(x):
                 command += x
+            elif len(x) <= 1:
+                if len(x) < 1:
+                    original = ""
+                else:
+                    original = x[0]
+                command += self.wrap(brace(self, self.splitdedent(original, lambda x: x.split(","))))
             else:
-                raise NotImplementedError("Dictionaries are not yet supported") #TODO
+                raise SyntaxError("Error in evaluating braces len("+repr(x)+")>1")
         return command
 
     def precalc_brack(self, expression):
@@ -1019,7 +1041,7 @@ Global Operator Precedence List:
                     original = ""
                 else:
                     original = x[0]
-                command += self.wrap(bracket(self, original))
+                command += self.wrap(bracket(self, self.splitdedent(original, lambda x: x.split(","))))
             else:
                 raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
         return command
@@ -1274,7 +1296,7 @@ Global Operator Precedence List:
             itemlist.append(self.calc_next(item, calc_funcs))
         out = itemlist[-1]
         for x in reversed(xrange(0, len(itemlist)-1)):
-            out = pair(itemlist[x], out)
+            out = pair(self, itemlist[x], out)
         return out
 
     def calc_pieces(self, expression, calc_funcs):
@@ -1612,6 +1634,7 @@ Global Operator Precedence List:
             domultidata = 0
             domatrix = 0
             doclass = 0
+            dodict = 0
             rowlen = None
             tot = len(items)
             for x in items:
@@ -1635,14 +1658,36 @@ Global Operator Precedence List:
                     dodata += 1
                 elif isinstance(x, classcalc):
                     doclass += 1
+                elif isinstance(x, pair):
+                    dodict += 1
                 else:
-                    domatrix -= 1
-                    domultidata -= 1
                     tot -= 1
             if dostr > 0:
                 out = rawstrcalc("", self)
                 for x in items:
                     out += x
+                return out
+            elif domultidata == len(items):
+                out = []
+                for x in items:
+                    if isinstance(x, matrix):
+                        for l in x.a:
+                            out.append((l[0], l[1]))
+                    else:
+                        out += x.items()
+                return multidata(out)
+            elif dodict == len(items):
+                out = {}
+                for x in items:
+                    if isinstance(item, dictionary):
+                        out.update(item.a)
+                    else:
+                        out[item.k] = item.v
+                return dictionary(self, out)
+            elif doclass == len(items):
+                out = items[0].copy()
+                for x in xrange(1, len(items)):
+                    out.extend(items[x])
                 return out
             elif dolist == tot:
                 out = []
@@ -1660,20 +1705,11 @@ Global Operator Precedence List:
                     else:
                         out.append(x)
                 return rowmatrixlist(out)
-            elif domatrix == tot:
+            elif domatrix == len(items):
                 out = []
                 for x in items:
                     out += x.a
                 return matrixlist(out, float)
-            elif domultidata == tot:
-                out = []
-                for x in items:
-                    if isinstance(x, matrix):
-                        for l in x.a:
-                            out.append((l[0], l[1]))
-                    else:
-                        out += x.items()
-                return multidata(out)
             elif dodata == tot:
                 out = []
                 for x in items:
@@ -1684,11 +1720,6 @@ Global Operator Precedence List:
                     else:
                         out.append(x)
                 return data(out)
-            elif doclass == len(items):
-                out = items[0].copy()
-                for x in xrange(1, len(items)):
-                    out.extend(items[x])
-                return out
             else:
                 raise ExecutionError("TypeError", "Could not concatenate items "+repr(items))
 
@@ -1765,6 +1796,9 @@ Global Operator Precedence List:
                 for arg in params:
                     if arg in item.units:
                         item.units.remove(arg)
+            elif isinstance(item, dictionary):
+                for arg in params:
+                    item.remove(arg)
             else:
                 raise ExecutionError("TypeError", "Could not remove from item "+self.prepare(item, False, True, True))
         return item
@@ -2260,7 +2294,7 @@ Global Operator Precedence List:
     def getparen(self, num):
         """Gets A Parenthesis."""
         test = self.parens[num]
-        if isinstance(test, (bracket, brace)):
+        if isinstance(test, bracket):
             return test.calc()
         else:
             return test
@@ -2453,7 +2487,7 @@ Global Operator Precedence List:
         """Decompiles Variables."""
         out = {}
         for k,v in variables.items():
-            out[k] = self.deitem(v)
+            out[self.deitem(k)] = self.deitem(v)
         return out
 
     def delist(self, inputlist):
@@ -2472,7 +2506,8 @@ class evalfuncs(object):
         "matrix": "cont",
         "multidata": "data",
         "fraction": "frac",
-        "string": "str"
+        "string": "str",
+        "dictionary": "dict"
         }
 
     def __init__(self, e):
@@ -3576,3 +3611,28 @@ class evalfuncs(object):
             return collapse(variables[0])
         else:
             return self.e.getcall(variables[0])(variables[1:])
+
+    def paircall(self, variables):
+        """Creates A Pair."""
+        if not variables:
+            return pair(self.e, matrix(0), matrix(0))
+        elif len(variables) == 1:
+            return pair(self.e, variables[0], matrix(0))
+        else:
+            self.e.overflow = variables[2:]
+            return pair(self.e, variables[0], variables[1])
+
+    def dictcall(self, variables):
+        """Creates A Dictionary."""
+        if not variables:
+            return dictionary(self.e)
+        elif len(variables) == 1:
+            if isinstance(variables[0], dictionary):
+                return variables[0]
+            else:
+                raise TypeError("Received non-dictionary object "+self.e.prepare(variables[0], False, True, True))
+        else:
+            out = []
+            for arg in variables:
+                out.append(self.dictcall([arg]))
+            return diagmatrixlist(out)

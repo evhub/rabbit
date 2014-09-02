@@ -217,7 +217,7 @@ def getstates(variables):
     """Compiles Variables."""
     out = {}
     for k,v in variables.items():
-        out[k] = itemstate(v)
+        out[itemstate(k)] = itemstate(v)
     return out
 
 class memoizer(object):
