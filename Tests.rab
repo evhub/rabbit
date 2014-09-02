@@ -498,7 +498,7 @@ passert:: 1,2++3,4 ?= (1,2,3,4)
 passert:: 2x^2 ?= 50    $ x = 5
 passert:: (2x)^2 ?= 100 $ x = 5
 passert:: len("\\\\") ?= 2
-passert:: x=1 $ x=1
+passert:: x ?= 1 $ (x = x $ x=1)
 passert:: (pure::(calc::1))
 passert:: [12] ?= [
                    1
