@@ -1808,7 +1808,7 @@ Global Operator Precedence List:
                             if k in item.a and item.a[k] == v:
                                 del item.a[k]
                     elif isinstance(arg, pair):
-                        if arg.k in item.a and item.a[arg.k] == arg.v:
+                        if arg.k in item.a and (isnull(arg.v) or item.a[arg.k] == arg.v):
                             del item.a[arg.k]
                         elif isnull(arg.k):
                             temp = flip(item.a)
@@ -2666,16 +2666,16 @@ class evalfuncs(object):
                     fatal = bool(fatal)
                 else:
                     fatal = False
-                variables = variables[0].getvars()
-                del variables[self.e.errorvar]
-                if self.e.namevar in variables:
-                    del variables[self.e.namevar]
-                if self.e.messagevar in variables:
-                    del variables[self.e.messagevar]
-                if self.e.fatalvar in variables:
-                    del variables[self.e.fatalvar]
-                variables[variables[0].parentvar] = variables[0].getparent()
-                raise ExecutionError(name, message, fatal, variables)
+                extras = variables[0].getvars()
+                del extras[self.e.errorvar]
+                if self.e.namevar in extras:
+                    del extras[self.e.namevar]
+                if self.e.messagevar in extras:
+                    del extras[self.e.messagevar]
+                if self.e.fatalvar in extras:
+                    del extras[self.e.fatalvar]
+                extras[variables[0].parentvar] = variables[0].getparent()
+                raise ExecutionError(name, message, fatal, extras)
             else:
                 raise ExecutionError("Error", self.e.prepare(variables[0], False, False))
         else:
