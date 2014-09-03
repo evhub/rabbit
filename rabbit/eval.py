@@ -2536,18 +2536,18 @@ class evalfuncs(object):
         if not variables:
             self.e.setreturned()
             self.e.using = None
-        elif len(variables) == 1:
+        else:
+            self.e.overflow = variables[1:]
             self.e.setreturned()
             self.e.using = variables[0]
-        else:
-            raise ExecutionError("ArgumentError", "Too many arguments to use")
         return matrix(0)
 
     def delcall(self, variables):
         """Deletes A Variable."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to del")
-        elif len(variables) == 1:
+        else:
+            self.e.overflow = variables[1:]
             self.e.setreturned()
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
@@ -2570,11 +2570,6 @@ class evalfuncs(object):
             else:
                 raise ExecutionError("VariableError", "Could not find "+original)
             return out
-        else:
-            out = []
-            for arg in variables:
-                out.append(self.delcall([arg]))
-            return diagmatrixlist(out)
 
     def iseqcall(self, variables):
         """Determins Whether All Arguments Are Equal."""
@@ -2751,18 +2746,14 @@ class evalfuncs(object):
         """Calculates A Variable Without Changing It."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to val")
-        elif len(variables) == 1:
+        else:
+            self.e.overflow = variables[1:]
             self.e.setreturned()
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
                 return self.e.funcfind(original)
             else:
                 return matrix(0)
-        else:
-            out = []
-            for x in variables:
-                out.append(self.getvalcall([x]))
-            return diagmatrixlist(out)
 
     def getparenscall(self, variables):
         """Retreives The Number Of Parentheses."""
@@ -2774,52 +2765,39 @@ class evalfuncs(object):
         """Gets The Value Of A Paren."""
         if not variables:
             variables = [-1]
-        if len(variables) == 1:
-            self.e.setreturned()
-            original = getint(variables[0])
-            if original < 0:
-                original += len(self.e.parens)
-            if 0 < original and original < len(self.e.parens):
-                return rawstrcalc(self.e.prepare(self.e.getparen(original), True, True), self.e)
-            else:
-                return matrix(0)
+        self.e.overflow = variables[1:]
+        self.e.setreturned()
+        original = getint(variables[0])
+        if original < 0:
+            original += len(self.e.parens)
+        if 0 < original and original < len(self.e.parens):
+            return rawstrcalc(self.e.prepare(self.e.getparen(original), True, True), self.e)
         else:
-            out = []
-            for x in variables:
-                out.append(self.getparenvarcall([x]))
-            return diagmatrixlist(out)
+            return matrix(0)
 
     def getvarcall(self, variables):
         """Gets The Value Of A Variable."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to var")
-        elif len(variables) == 1:
+        else:
+            self.e.overflow = variables[1:]
             self.e.setreturned()
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
                 return rawstrcalc(self.e.prepare(self.e.variables[original], True, True), self.e)
             else:
                 return matrix(0)
-        else:
-            out = []
-            for x in variables:
-                out.append(self.getvarcall([x]))
-            return diagmatrixlist(out)
 
     def copycall(self, variables):
         """Makes Copies Of Items."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to copy")
-        elif len(variables) == 1:
+        else:
+            self.e.overflow = variables[1:]
             if iseval(variables[0]):
                 return variables[0].copy()
             else:
                 return variables[0]
-        else:
-            out = []
-            for x in variables:
-                out.append(self.copycall([x]))
-            return diagmatrixlist(out)
 
     def getmatrixcall(self, variables):
         """Converts To Matrices."""
@@ -2828,10 +2806,7 @@ class evalfuncs(object):
         elif len(variables) == 1:
             return getmatrix(variables[0])
         else:
-            out = []
-            for x in variables:
-                out.append(self.getmatrixcall([x]))
-            return diagmatrixlist(out)
+            return diagmatrixlist(variables)
 
     def matrixcall(self, variables):
         """Constructs A Matrix."""
@@ -3233,13 +3208,9 @@ class evalfuncs(object):
         """Converts To Code."""
         if not variables:
             return codestr("", self.e)
-        elif len(variables) == 1:
-            return codestr(self.e.prepare(variables[0], True, False), self.e)
         else:
-            out = []
-            for arg in variables:
-                out.append(self.codecall([arg]))
-            return diagmatrixlist(out)
+            self.e.overflow = variables[1:]
+            return codestr(self.e.prepare(variables[0], True, False), self.e)
 
     def strcall(self, variables):
         """Finds A String."""
@@ -3455,7 +3426,8 @@ class evalfuncs(object):
         """Writes To A File."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to write")
-        elif len(variables) == 2:
+        else:
+            self.e.overflow = variables[2:]
             self.e.setreturned()
             name = self.e.prepare(variables[0], False, False)
             if len(variables) == 1:
@@ -3465,29 +3437,24 @@ class evalfuncs(object):
             with openfile(name, "wb") as f:
                 writefile(f, writer)
             return matrix(0)
-        else:
-            raise ExecutionError("ArgumentError", "Too many arguments to write")
 
     def readcall(self, variables):
         """Reads From A File."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to read")
-        elif len(variables) == 1:
+        else:
+            self.e.overflow = variables[1:]
             self.e.setreturned()
             name = self.e.prepare(variables[0], False, False)
             with openfile(name) as f:
                 return rawstrcalc(readfile(f), self.e)
-        else:
-            out = []
-            for x in variables:
-                out.append(self.readcall([x]))
-            return diagmatrixlist(out)
 
     def purecall(self, variables):
         """Ensures Purity."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to pure")
-        elif len(variables) == 1:
+        else:
+            self.e.overflow = variables[1:]
             original = self.e.prepare(variables[0], True, False)
             pure, self.e.pure = self.e.pure, True
             try:
@@ -3495,17 +3462,13 @@ class evalfuncs(object):
             finally:
                 self.e.pure = pure
             return out
-        else:
-            out = []
-            for arg in variables:
-                out.append(self.purecall([arg]))
-            return diagmatrixlist(out)
 
     def defcall(self, variables):
         """Defines A Variable."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to def")
-        elif len(variables) == 1:
+        else:
+            self.e.overflow = variables[1:]
             self.e.setreturned()
             original = self.e.prepare(variables[0], True, False)
             redef, self.e.redef = self.e.redef, True
@@ -3514,17 +3477,13 @@ class evalfuncs(object):
             finally:
                 self.e.redef = redef
             return out
-        else:
-            out = []
-            for arg in variables:
-                out.append(self.defcall([arg]))
-            return diagmatrixlist(out)
 
     def globalcall(self, variables):
         """Defines A Global Variable."""
         if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to def")
-        elif len(variables) == 1:
+            raise ExecutionError("ArgumentError", "Not enough arguments to global")
+        else:
+            self.e.overflow = variables[1:]
             original = self.e.prepare(variables[0], True, False)
             useclass, self.e.useclass = self.e.useclass, False
             try:
@@ -3532,14 +3491,10 @@ class evalfuncs(object):
             finally:
                 self.e.useclass = useclass
             return out
-        else:
-            out = []
-            for arg in variables:
-                out.append(self.globalcall([arg]))
-            return diagmatrixlist(out)
 
     def aliascall(self, variables):
         """Makes Aliases."""
+        self.e.overflow = variables[2:]
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to alias")
         elif len(variables) == 1:
@@ -3551,14 +3506,12 @@ class evalfuncs(object):
             else:
                 out = matrix(0)
             return out
-        elif len(variables) == 2:
+        else:
             self.e.setreturned()
             key = self.e.prepare(variables[0], True, False)
             value = self.e.prepare(variables[1], True, False)
             self.e.aliases[key] = value
             return diagmatrixlist([rawstrcalc(key, self.e), rawstrcalc(value, self.e)])
-        else:
-            raise ExecutionError("ArgumentError", "Too many arguments to alias")
 
     def aliasescall(self, variables):
         """Gets Aliases."""
