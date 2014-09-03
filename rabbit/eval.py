@@ -208,7 +208,7 @@ Global Operator Precedence List:
             self.calc_cmd,
             self.calc_format,
             self.calc_set,
-            self.calc_with
+            self.calc_with,
             self.calc_list,
             self.calc_pair,
             self.calc_pieces,
@@ -896,7 +896,7 @@ Global Operator Precedence List:
             if not iswhite(original):
                 self.printdebug("=>> "+original)
                 self.recursion += 1
-                out = self.calc_next(original, top)
+                out = self.calc_proc(original, top)
                 self.printdebug(self.prepare(out, False, True, True)+" <<= "+original)
                 self.recursion -= 1
                 if command is not None:
