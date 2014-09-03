@@ -1,6 +1,6 @@
 # Assertion Tests:
 x = "don't touch me"
-passert(statement) = ( assert:code(statement) ;; str(statement) )
+passert(statement) = ( assert:code(statement) ;; statement )
 assert:: (passert::"abc")
 assert:: iserr((try::(passert::0)):1)
 

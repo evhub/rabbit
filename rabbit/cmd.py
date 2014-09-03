@@ -380,17 +380,15 @@ class mathbase(safebase):
         """Performs save."""
         if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
-        elif len(variables) == 1:
+        else:
+            self.e.overflow = variables[1:]
             self.e.setreturned()
             original = self.e.prepare(variables[0], False, False)
             try:
                 writefile(getfile(original, "wb"), strlist(self.commands, "\n"))
             except IOError:
                 raise ExecutionError("IOError", "Could not find for save file "+original)
-        else:
-            for x in variables:
-                self.savecall([x])
-        return matrix(0)
+            return matrix(0)
 
     def call(self, item, value, varname="x"):
         """Evaluates An Item With A Value."""
