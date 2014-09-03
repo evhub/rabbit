@@ -520,6 +520,9 @@ passert:: len:[()] ?= 1
 passert:: "321"+0 ?= "3210"
 passert:: {1->2} - 1 ?= {}
 passert:: class<<a=1>> - "a" ?= class()
+passert:: class<<x=1;;y=2>> ?= class ::
+ x=1
+ y=2
 
 # Final Testing:
 passert:: save("Tests.save");true

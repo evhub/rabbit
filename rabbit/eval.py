@@ -962,7 +962,7 @@ Global Operator Precedence List:
                                 levels.append(check)
                                 lines[x-1] = lines[x-1]+openstr
                             elif self.laxindent or check in levels:
-                                point = levels.index(check)+1
+                                point = levels.index(check)
                                 lines[x-1] += closestr*len(levels[point:])
                                 levels = levels[:point]
                             else:
