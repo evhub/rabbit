@@ -36,15 +36,6 @@ except NameError:
 
 encoding = "UTF"
 
-try:
-    raw_input
-except NameError:
-    raw_input = input
-else:
-    old_input = raw_input
-    raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode(encoding)
-    input = raw_input
-
 old_print = print
 def_str = str
 try:

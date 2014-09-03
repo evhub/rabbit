@@ -23,10 +23,21 @@ import os
 import subprocess
 import imp
 import time
+import readline
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+try:
+    raw_input
+except NameError:
+    raw_input = input
+    old_input = lambda *args, **kwargs: eval(raw_input(*args, **kwargs))
+else:
+    old_input = raw_input
+    raw_input = lambda *args, **kwargs: old_input(*args, **kwargs).decode(encoding)
+    input = raw_input
 
 def compute(inputstring, extras=None, builtins=None):
     """Evaluates Code In A Safe Environment."""
