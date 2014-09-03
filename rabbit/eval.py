@@ -963,7 +963,7 @@ Global Operator Precedence List:
                                 lines[x-1] = lines[x-1]+openstr
                             elif self.laxindent or check in levels:
                                 point = levels.index(check)
-                                lines[x-1] += closestr*len(levels[point:])
+                                lines[x-1] += closestr*(1+len(levels[point:]))
                                 levels = levels[:point]
                             else:
                                 raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level in line "+lines[x]+" (#"+str(x)+")")
