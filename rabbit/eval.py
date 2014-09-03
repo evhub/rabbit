@@ -204,16 +204,11 @@ Global Operator Precedence List:
             self.precalc_dict,
             self.precalc_brack
             ]
-        self.tops = [
-            self.top_cmd,
-            self.top_set,
-            self.top_with
-            ]
-        self.sets = [
-            self.set_def,
-            self.set_normal
-            ]
         self.calc_funcs = [
+            self.calc_cmd,
+            self.calc_format,
+            self.calc_set,
+            self.calc_with
             self.calc_list,
             self.calc_pair,
             self.calc_pieces,
@@ -223,6 +218,10 @@ Global Operator Precedence List:
             self.calc_unary,
             self.calc_eq,
             self.calc_eval
+            ]
+        self.sets = [
+            self.set_def,
+            self.set_normal
             ]
         self.eval_splits = [
             ("~", True),
@@ -893,32 +892,29 @@ Global Operator Precedence List:
         else:
             splitfunc = lambda x: x.split(";;")
         for original in self.splitdedent(item, splitfunc):
-            original = self.remformat(basicformat(original))
+            original = basicformat(original)
             if not iswhite(original):
-                self.printdebug(":>> "+original)
+                self.printdebug("=>> "+original)
                 self.recursion += 1
-                out = self.calc_top(original)
-                self.printdebug(self.prepare(out, False, True, True)+" <<: "+original)
+                out = self.calc_next(original, top)
+                self.printdebug(self.prepare(out, False, True, True)+" <<= "+original)
                 self.recursion -= 1
                 if command is not None:
                     command(out)
 
-    def calc_top(self, expression):
-        """Performs Pre-Format Evaluation."""
-        for func in self.tops:
-            test = func(expression)
-            if test is not None:
-                return test
-        return self.calc_post(expression)
-
-    def calc_post(self, inputstring):
-        """Formats Expressions."""
-        self.printdebug("=>> "+inputstring)
-        self.recursion += 1
-        out = self.calc_next(delspace(inputstring))
-        self.printdebug(self.prepare(out, False, True, True)+" <<= "+inputstring)
-        self.recursion -= 1
-        return out
+    def calc_proc(self, inputstring, top=True):
+        """Calculates Use Functions."""
+        if top and self.using:
+            func = self.prepare(self.using, False, True, True)
+            original = func+" :: "+inputstring
+            self.printdebug("::> "+original)
+            self.recursion += 1
+            out = self.getcall(self.using)([codestr(inputstring, self)])
+            self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
+            self.recursion -= 1
+            return out
+        else:
+            return self.calc_next(inputstring)
 
     def preproc_alias(self, inputstring, top=True):
         """Applies Aliases."""
@@ -978,14 +974,14 @@ Global Operator Precedence List:
                                 lines[x-1] = lines[x-1]+openstr
                             elif self.laxindent or check in levels:
                                 point = levels.index(check)+1
-                                lines[x-1] = closestr*len(levels[point:])+lines[x-1]
+                                lines[x-1] += closestr*len(levels[point:])
                                 levels = levels[:point]
                             else:
                                 raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level in line "+lines[x]+" (#"+str(x)+")")
                             new.append(lines[x-1])
                         else:
                             levels.append(leading(lines[x]))
-                    new.append(closestr*(len(levels)-1)+lines[-1])
+                    new.append(lines[-1]+closestr*(len(levels)-1))
                     out.append("\n".join(new))
                 else:
                     out.append(inputlist[x])
@@ -1058,41 +1054,36 @@ Global Operator Precedence List:
                 raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
         return command
 
-    def top_cmd(self, inputstring, top=False):
+    def calc_cmd(self, inputstring, calc_funcs):
         """Evaluates Statements."""
-        if top and self.using:
-            func = self.prepare(self.using, False, True, True)
-            original = func+" :: "+inputstring
+        inputlist = inputstring.split("::")
+        func, args = inputlist[0], inputlist[1:]
+        func = basicformat(func)
+        if len(args) > 0:
+            original = func+" :: "+strlist(args, " :: ")
             self.printdebug("::> "+original)
             self.recursion += 1
-            out = self.getcall(self.using)([codestr(inputstring, self)])
+            if func:
+                item = self.funcfind(func)
+                params = []
+                for x in xrange(0, len(args)):
+                    arg = basicformat(args[x])
+                    if x != len(args)-1 or arg:
+                        params.append(codestr(arg, self))
+                out = self.call_colon_set(item, params)
+            else:
+                out = codestr(strlist(args, "::"), self)
             self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
             self.recursion -= 1
+            return out
         else:
-            inputlist = inputstring.split("::")
-            func, args = inputlist[0], inputlist[1:]
-            func = basicformat(func)
-            if len(args) > 0:
-                original = func+" :: "+strlist(args, " :: ")
-                self.printdebug("::> "+original)
-                self.recursion += 1
-                if func:
-                    item = self.funcfind(func)
-                    params = []
-                    for x in xrange(0, len(args)):
-                        arg = basicformat(args[x])
-                        if x != len(args)-1 or arg:
-                            params.append(codestr(arg, self))
-                    out = self.call_colon_set(item, params)
-                else:
-                    out = codestr(strlist(args, "::"), self)
-                self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
-                self.recursion -= 1
-            else:
-                out = None
-        return out
+            return self.calc_next(inputstring, calc_funcs)
 
-    def top_with(self, expression):
+    def calc_format(self, expression, calc_funcs):
+        """Removes Unwanted Characters."""
+        return self.calc_next(delspace(self.remformat(expression)), calc_funcs)
+
+    def calc_with(self, expression, calc_funcs):
         """Evaluates With Clauses."""
         inputlist = expression.split("$")
         if len(inputlist) > 1:
@@ -1102,14 +1093,10 @@ Global Operator Precedence List:
             for x in inputlist:
                 withclass.process(x)
             return withclass.calc(item)
+        else:
+            return self.calc_next(expression, calc_funcs)
 
-    def top_set(self, inputstring):
-        """Evaluates Setting."""
-        test = self.calc_set(inputstring)
-        if test is not None:
-            return test
-
-    def calc_set(self, original):
+    def calc_set(self, original, calc_funcs):
         """Evaluates Definition Commands."""
         sides = original.split("=", 1)
         if len(sides) > 1:
@@ -1165,6 +1152,7 @@ Global Operator Precedence List:
                 else:
                     sides[0] = sides[0][0]
                     return self.calc_set_do(sides, docalc)
+        return self.calc_next(original, calc_funcs)
                 
     def calc_set_do(self, sides, docalc):
         """Performs The Definition Command."""
@@ -1889,6 +1877,8 @@ Global Operator Precedence List:
                 item = self.eval_next(inputlist[x], eval_funcs)
                 if isnull(value):
                     value = item
+                elif isinstance(item, negative):
+                    value = item + value
                 elif not isnull(item):
                     value = value + item
             return value
@@ -1917,6 +1907,8 @@ Global Operator Precedence List:
                 item = self.eval_next(inputlist[x], eval_funcs)
                 if isnull(value):
                     value = item
+                elif isinstance(item, reciprocal):
+                    value = item * value
                 elif not isnull(item):
                     value = value * item
             return value

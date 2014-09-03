@@ -1270,7 +1270,37 @@ class classcalc(cotobject):
     def call(self, variables):
         """Calculates An Item."""
         variables = varproc(variables)
-        return self.toinstance().init(variables)
+        return self.init(variables)
+
+    def domethod(self, item, args=[]):
+        """Calls A Method Function."""
+        if isfunc(item):
+            if not islist(args) and args is not None:
+                args = [args]
+            if isinstance(item, strfunc):
+                item.curryself(self)
+                if item.overflow and args is not None and len(args) > len(item.variables):
+                    args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
+            return self.e.getcall(item)(args)
+        else:
+            return item
+
+    def init(self, params):
+        """Initializes The Instance."""
+        if "__init__" in self.variables:
+            item = self.calc("__init__")
+            if isfunc(item):
+                value = self.domethod(item, params)
+            else:
+                self.e.overflow = params
+                value = item
+        else:
+            self.e.overflow = params
+            value = self
+        if isinstance(value, classcalc) and not isinstance(value, instancecalc):
+            return value.toinstance()
+        else:
+            raise ExecutionError("ClassError", "Constructor returned non-class object "+self.e.prepare(value, False, True, True))
 
     def __delitem__(self, key):
         """Wraps remove."""
@@ -1289,9 +1319,6 @@ class classcalc(cotobject):
         """Extends The Class."""
         if isinstance(other, (dict, classcalc)):
             self.add(other.getvars())
-            return self
-        elif isinstance(other, negative):
-            self -= other.n
             return self
         else:
             raise ExecutionError("ClassError", "Could not extend class with "+repr(other))
@@ -1464,19 +1491,6 @@ class instancecalc(numobject, classcalc):
         else:
             return False
 
-    def domethod(self, item, args=[]):
-        """Calls A Method Function."""
-        if isfunc(item):
-            if not islist(args) and args is not None:
-                args = [args]
-            if isinstance(item, strfunc):
-                item.curryself(self)
-                if item.overflow and args is not None and len(args) > len(item.variables):
-                    args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
-            return self.e.getcall(item)(args)
-        else:
-            return item
-
     def getitem(self, test):
         """Retrieves An Item At The Base Level."""
         if istext(self.variables[test]):
@@ -1527,19 +1541,6 @@ class instancecalc(numobject, classcalc):
             if self.doset:
                 self.doset[test] = haskey(self.e.variables, test)
                 self.e.variables[test] = self.variables[test]
-
-    def init(self, params):
-        """Initializes The Instance."""
-        if "__init__" in self.variables:
-            item = self.calc("__init__")
-            if isfunc(item):
-                value = self.domethod(item, params)
-            else:
-                self.e.overflow = params
-                value = item
-            return value
-        else:
-            return self
 
     def isfunc(self):
         """Determines Whether The Class Is A Function."""
@@ -2211,8 +2212,6 @@ class dictionary(pair):
             self.a.update(item.a)
         elif isinstance(item, pair):
             self.store(item.k, item.v)
-        elif isinstance(item, negative):
-            self -= item.n
         else:
             raise TypeError("Dictionaries only support addition with pairs and other dictionaries")
 
