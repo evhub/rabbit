@@ -1175,6 +1175,7 @@ class classcalc(cotobject):
 
     def __len__(self):
         """Finds The Number Of Variables."""
+        self.e.setreturned()
         return len(self.variables)
 
     def items(self):
@@ -1183,7 +1184,7 @@ class classcalc(cotobject):
 
     def getrepr(self, top=True, bottom=True, indebug=True, maxrecursion=5):
         """Finds A Representation."""
-        out = "class \xab"
+        out = "class ::"
         if top:
             out += "\n"
         variables = self.getvars()
@@ -1208,7 +1209,6 @@ class classcalc(cotobject):
                 out = out[:-1]
         elif variables:
             out = out[:-3]
-        out += " \xbb"
         return out
 
     def store(self, key, value, bypass=False):
