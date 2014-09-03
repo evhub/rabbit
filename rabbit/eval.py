@@ -974,14 +974,14 @@ Global Operator Precedence List:
                                 lines[x-1] = lines[x-1]+openstr
                             elif self.laxindent or check in levels:
                                 point = levels.index(check)+1
-                                lines[x-1] += closestr*len(levels[point:])
+                                lines[x-1] = closestr*len(levels[point:])+lines[x-1]
                                 levels = levels[:point]
                             else:
                                 raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level in line "+lines[x]+" (#"+str(x)+")")
                             new.append(lines[x-1])
                         else:
                             levels.append(leading(lines[x]))
-                    new.append(lines[-1]+closestr*(len(levels)-1))
+                    new.append(closestr*(len(levels)-1)+lines[-1])
                     out.append("\n".join(new))
                 else:
                     out.append(inputlist[x])
@@ -1056,7 +1056,7 @@ Global Operator Precedence List:
 
     def calc_cmd(self, inputstring, calc_funcs):
         """Evaluates Statements."""
-        inputlist = inputstring.split("::")
+        inputlist = self.splitdedent(inputstring, lambda x: x.split("::"))
         func, args = inputlist[0], inputlist[1:]
         func = basicformat(func)
         if len(args) > 0:
