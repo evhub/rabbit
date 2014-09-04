@@ -911,16 +911,22 @@ Global Operator Precedence List:
             splitfunc = lambda x: splitany(x, [";;", "\n"])
         else:
             splitfunc = lambda x: x.split(";;")
+        inputlist = []
         for original in self.splitdedent(item, splitfunc):
             original = basicformat(original)
             if not iswhite(original):
-                self.printdebug("=>> "+original)
-                self.recursion += 1
-                out = self.calc_proc(original, top)
-                self.printdebug(self.prepare(out, False, True, True)+" <<= "+original)
-                self.recursion -= 1
-                if command is not None:
-                    command(out)
+                inputlist.append(original)
+        cleaned = self.clean_begin()
+        for x in xrange(0, len(inputlist)):
+            if x == len(inputlist)-1:
+                self.clean_end(cleaned)
+            self.printdebug("=>> "+inputlist[x])
+            self.recursion += 1
+            out = self.calc_proc(inputlist[x], top)
+            self.printdebug(self.prepare(out, False, True, True)+" <<= "+inputlist[x])
+            self.recursion -= 1
+            if command is not None:
+                command(out)
 
     def calc_proc(self, inputstring, top=True):
         """Calculates Use Functions."""
@@ -1138,17 +1144,18 @@ Global Operator Precedence List:
         func, args = inputlist[0], inputlist[1:]
         func = basicformat(func)
         if len(args) > 0:
-            self.unclean()
             original = func+" :: "+strlist(args, " :: ")
             self.printdebug("::> "+original)
             self.recursion += 1
             if func:
+                cleaned = self.clean_begin()
                 item = self.funcfind(func)
                 params = []
                 for x in xrange(0, len(args)):
                     arg = basicformat(args[x])
                     if x != len(args)-1 or arg:
                         params.append(codestr(arg, self))
+                self.clean_end(cleaned)
                 out = self.call_colon_set(item, params)
             else:
                 out = codestr(strlist(args, "::"), self)
@@ -1389,12 +1396,12 @@ Global Operator Precedence List:
         if len(inputlist) == 1:
             return self.calc_next(inputlist[0], calc_funcs)
         else:
-            self.unclean()
+            cleaned = self.clean_begin()
             for x in xrange(0, len(inputlist)):
                 if x == len(inputlist)-1:
+                    self.clean_end(cleaned)
                     return self.calc_next(inputlist[x], calc_funcs)
                 else:
-                    self.unclean()
                     test = self.calc_next(inputlist[x], calc_funcs)
                     if not isnull(test):
                         return test

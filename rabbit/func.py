@@ -362,7 +362,9 @@ class strfunc(funcfloat):
         variables.update(personals)
         while True:
             if self.e.tailing and self.e.all_clean:
-                raise TailRecursion(funcstr, variables)
+                newvars = self.e.variables.copy()
+                newvars.update(variables)
+                raise TailRecursion(funcstr, newvars)
             else:
                 self.e.tailing, self.e.all_clean = True, True
                 oldvars = self.e.setvars(variables)
