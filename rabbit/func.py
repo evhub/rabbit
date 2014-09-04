@@ -366,7 +366,8 @@ class strfunc(funcfloat):
                 newvars.update(variables)
                 raise TailRecursion(funcstr, newvars)
             else:
-                self.e.tailing, self.e.all_clean = True, True
+                cleaned = self.e.clean_begin(True, True)
+                self.e.tailing = True
                 oldvars = self.e.setvars(variables)
                 try:
                     out = self.e.calc(funcstr, " \\>")
@@ -377,6 +378,7 @@ class strfunc(funcfloat):
                     return out
                 finally:
                     self.e.tailing = False
+                    self.e.clean_end(cleaned)
                     self.e.setvars(oldvars)
 
     def call(self, variables):
@@ -1201,7 +1203,6 @@ class classcalc(cotobject):
 
     def __len__(self):
         """Finds The Number Of Variables."""
-        self.e.setreturned()
         return len(self.variables)
 
     def items(self):
