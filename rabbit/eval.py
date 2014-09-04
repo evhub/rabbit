@@ -753,7 +753,7 @@ Global Operator Precedence List:
         """Removes All Formatting."""
         return delspace(inputstring, self.formatchars)
 
-    def splitdedent(self, inputstring, splitfunc, top=True):
+    def splitdedent(self, inputstring, splitfunc=lambda x: x.split("\n"), top=True):
         """Splits And Unsplits By Dedents."""
         inputstring = str(inputstring)
         split = fullsplit(inputstring, self.indentchar, self.dedentchar, 1, not top, iswhite, True)
@@ -962,7 +962,15 @@ Global Operator Precedence List:
                                 lines[x-1] = lines[x-1]+openstr
                             elif check in levels:
                                 point = levels.index(check)+1
-                                lines[x-1] += closestr*(len(levels[point:]))
+                                closers = closestr*(len(levels[point:]))
+                                newline = ""
+                                for c in lines[x-1]:
+                                    if c in self.groupers.values():
+                                        newline += closers+c
+                                        closers = ""
+                                    else:
+                                        newline += c
+                                lines[x-1] = newline+closers
                                 levels = levels[:point]
                             else:
                                 raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level in line "+lines[x]+" (#"+str(x)+")")
