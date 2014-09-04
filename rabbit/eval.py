@@ -138,7 +138,12 @@ Global Operator Precedence List:
         "\u2044":"/",
         "\u2237":"::",
         "\u2192":"->",
-        "\u2254":":="
+        "\u2254":":=",
+        "\u2282":"<",
+        "\u2283":">",
+        "\u2286":"<=",
+        "\u2287":"<=",
+        "\u225f":"?="
         }
     rawstringchars = "`"
     lambdachars = "\\"
@@ -422,6 +427,8 @@ Global Operator Precedence List:
             "\xb0" : "Math.rad",
             "\u22d8" : "lshift",
             "\u22d9" : "rshift",
+            "\u22c3" : "union",
+            "\u22c2" : "intersect",
             "\xbd" : 0.5,
             "\xbc" : 0.25,
             "\xbe" : 0.75,
