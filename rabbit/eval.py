@@ -1087,12 +1087,14 @@ Global Operator Precedence List:
                 else:
                     return func(arg)
             elif self.clean:
-                self.clean = False
                 raise Evaluate(arg, funcs)
             else:
                 func = funcs.pop(0)
                 if funcs:
-                    return func(arg, funcs)
+                    clean, self.clean = self.clean, False
+                    out = func(arg, funcs)
+                    self.clean = clean
+                    return out
                 else:
                     return func(arg)
 
@@ -2001,7 +2003,7 @@ Global Operator Precedence List:
         """Evaluates A Variable."""
         self.printdebug("=> "+inputstring)
         self.recursion += 1
-        out = self.eval_check(self.calc_next(inputstring, self.calls[:], True))
+        out = self.calc_next(inputstring, self.calls[:], True)
         self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring)
         self.recursion -= 1
         return out
@@ -2414,7 +2416,7 @@ Global Operator Precedence List:
 
     def call_normal(self, inputstring):
         """Returns Argument."""
-        return inputstring
+        return self.eval_check(inputstring)
 
     def getparen(self, num):
         """Gets A Parenthesis."""
