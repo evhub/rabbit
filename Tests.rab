@@ -234,7 +234,7 @@ passert:: parts:(1,2,3,4) ?= 1,(2,3,4)
   a,as
   $ a,as = l
   )
-passert:: max(0,9,6) ?= 9
+passert:: max(0,1,9,6,8,2) ?= 9
  $ max(l) = (
   (
    a @ a > maxtail;
@@ -274,7 +274,7 @@ passert:: range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Cra
     $ div by three = x%3 ?= 0
     $ div by five = x%5 ?= 0
     )
-passert:: crackle pop (5) ?= (1,2,"Crackle",4,"Pop")
+passert:: crackle pop (10) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop")
  $ crackle pop (end, -x:1, -mod three:1, -mod five:1) =
   sg(
    "CracklePop"
