@@ -158,7 +158,6 @@ Global Operator Precedence List:
     autoarg = "____"
     recursion = 0
     laxnull = True
-    laxindent = False
     redef = False
     useclass = None
     returned = True
@@ -956,20 +955,20 @@ Global Operator Precedence List:
                     levels = []
                     openstr, closestr = self.indentchar, self.dedentchar
                     for x in xrange(0, len(lines)):
+                        check = leading(lines[x])
                         if levels:
-                            check = leading(lines[x])
                             if check > levels[-1]:
                                 levels.append(check)
                                 lines[x-1] = lines[x-1]+openstr
-                            elif self.laxindent or check in levels:
-                                point = levels.index(check)
-                                lines[x-1] += closestr*(1+len(levels[point:]))
+                            elif check in levels:
+                                point = levels.index(check)+1
+                                lines[x-1] += closestr*(len(levels[point:]))
                                 levels = levels[:point]
                             else:
                                 raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level in line "+lines[x]+" (#"+str(x)+")")
                             new.append(lines[x-1])
                         else:
-                            levels.append(leading(lines[x]))
+                            levels.append(check)
                     new.append(lines[-1]+closestr*(len(levels)-1))
                     out.append("\n".join(new))
                 else:
