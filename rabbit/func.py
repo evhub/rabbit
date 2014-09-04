@@ -1203,6 +1203,7 @@ class classcalc(cotobject):
 
     def __len__(self):
         """Finds The Number Of Variables."""
+        self.e.setreturned()
         return len(self.variables)
 
     def items(self):

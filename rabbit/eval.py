@@ -1261,7 +1261,6 @@ Global Operator Precedence List:
             if self.useclass is False and classcalc.selfvar in self.variables and isinstance(self.variables[classcalc.selfvar], classcalc):
                 delfrom = self.variables[classcalc.selfvar].doset
             if "." in sides[0]:
-                inplace = False
                 classlist += sides[0].split(".")
                 for x in xrange(0, len(classlist)-1):
                     if self.isreserved(classlist[x]):
@@ -1294,7 +1293,6 @@ Global Operator Precedence List:
                 else:
                     raise ExecutionError("VariableError", "Could not find class "+self.prepare(classlist[0], False, True, True))
             elif self.useclass:
-                inplace = True
                 useclass = self.funcfind(self.useclass)
             sides[1] = basicformat(sides[1])
             for func in self.sets:
@@ -1315,7 +1313,7 @@ Global Operator Precedence List:
                             out = value[1]
                         else:
                             out = strfloat(value[0], self, name=value[0])
-                    elif inplace:
+                    else:
                         if not self.redef and value[0] in useclass.variables:
                             if useclass.variables[value[0]] is not value[1]:
                                 raise ExecutionError("RedefinitionError", "The attribute "+value[0]+" already exists")
@@ -1325,9 +1323,6 @@ Global Operator Precedence List:
                             out = value[1]
                         else:
                             out = strfunc(useclass.selfvar+"."+value[0], self, [], {useclass.selfvar:useclass}, value[0])
-                    else:
-                        out = useclass.copy()
-                        out.store(value[0], value[1]
                     if delfrom is not None and value[0] in delfrom:
                         del delfrom[value[0]]
                     return out
