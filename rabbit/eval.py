@@ -109,6 +109,8 @@ Global Operator Precedence List:
         "brace": lambda self, args: brace(self, args[0]),
         "bracket": lambda self, args: bracket(self, args[0])
         }
+    testers = {
+        }
     tempobjects = negative, reciprocal
     varname = "x"
     directchar = "\xb6"
@@ -1453,6 +1455,7 @@ Global Operator Precedence List:
                     haslt = False
                     hasne = False
                     inv = False
+                    found = {}
                     for c in inputlist[x]:
                         if c == "=":
                             haseq = True
@@ -1464,6 +1467,8 @@ Global Operator Precedence List:
                             hasne = True
                         elif c == "!":
                             inv = not inv
+                        elif c in self.testers:
+                            found[c] = testers[c]
                     if haseq and hasne:
                         out = args[0] != args[1] or args[0] == args[1]
                     elif haseq and hasgt and haslt:
@@ -1480,6 +1485,8 @@ Global Operator Precedence List:
                         out = args[0] < args[1]
                     else:
                         out = args[0] == args[1]
+                    for test in found.values():
+                        out = out or test(args[0], args[1])
                     if inv:
                         out = not out
                     if not out:
