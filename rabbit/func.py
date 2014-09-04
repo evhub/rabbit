@@ -367,7 +367,7 @@ class strfunc(funcfloat):
                 raise TailRecursion(funcstr, newvars)
             else:
                 cleaned = self.e.clean_begin(True, True)
-                self.e.tailing = True
+                tailing, self.e.tailing = self.e.tailing, True
                 oldvars = self.e.setvars(variables)
                 try:
                     out = self.e.calc(funcstr, " \\>")
@@ -377,7 +377,7 @@ class strfunc(funcfloat):
                 else:
                     return out
                 finally:
-                    self.e.tailing = False
+                    self.e.tailing = tailing
                     self.e.clean_end(cleaned)
                     self.e.setvars(oldvars)
 

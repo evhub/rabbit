@@ -1117,6 +1117,7 @@ Global Operator Precedence List:
     def unclean(self):
         """Sets clean."""
         self.clean = False
+        self.all_clean = False
 
     def clean_begin(self, new_clean=False, new_all_clean=False):
         """Starts A Clean Block."""
