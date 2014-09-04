@@ -2082,7 +2082,7 @@ Global Operator Precedence List:
             if istext(item):
                 item = str(item)
                 if self.tailing and self.all_clean:
-                    raise TailRecursion(item)
+                    raise TailRecursion(item, self.variables.copy())
                 else:
                     value = self.calc(item, " | var")
             elif self.convertable(item):
@@ -2104,7 +2104,7 @@ Global Operator Precedence List:
                 if istext(item):
                     item = str(item)
                     if self.tailing and self.all_clean:
-                        raise TailRecursion(item)
+                        raise TailRecursion(item, self.variables.copy())
                     else:
                         value = self.calc(item, " | parenvar")
                 elif self.convertable(item):
