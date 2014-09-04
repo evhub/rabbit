@@ -26,6 +26,13 @@ from .carrot.file import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+class Evaluate(BaseException):
+    """A Stack-Killer Evaluation Exception."""
+    def __init__(self, arg, funcs):
+        """Creates The Evaluation."""
+        self.funcs = funcs
+        self.arg = arg
+
 def matrixconstructor(self, args):
     """Reconstructs A Matrix."""
     value = matrix(args[1], args[2], converter=args[3], fake=args[4])
@@ -165,6 +172,7 @@ Global Operator Precedence List:
     calculated = None
     using = None
     pure = False
+    clean = False
 
     def __init__(self, variables=None, processor=None, color=None, speedy=False, maxrecursion=10):
         """Initializes The Evaluator."""
@@ -913,7 +921,7 @@ Global Operator Precedence List:
             self.recursion -= 1
             return out
         else:
-            return self.calc_next(inputstring)
+            return self.calc_next(inputstring, self.calc_funcs, True)
 
     def preproc_alias(self, inputstring, top=True):
         """Applies Aliases."""
@@ -1061,12 +1069,44 @@ Global Operator Precedence List:
                 raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
         return command
 
+    def calc_next(self, arg, funcs, top=False):
+        """Calls The Next Function."""
+        while True:
+            funcs = funcs[:]
+            if top:
+                func = funcs.pop(0)
+                if funcs:
+                    clean, self.clean = self.clean, True
+                    try:
+                        return func(arg, funcs)
+                    except Evaluate as params:
+                        arg = params.arg
+                        funcs = params.funcs
+                    finally:
+                        self.clean = clean
+                else:
+                    return func(arg)
+            elif self.clean:
+                self.clean = False
+                raise Evaluate(arg, funcs)
+            else:
+                func = funcs.pop(0)
+                if funcs:
+                    return func(arg, funcs)
+                else:
+                    return func(arg)
+
+    def unclean(self):
+        """Sets clean."""
+        self.clean = False
+
     def calc_cmd(self, inputstring, calc_funcs):
         """Evaluates Statements."""
         inputlist = self.splitdedent(inputstring, lambda x: x.split("::"))
         func, args = inputlist[0], inputlist[1:]
         func = basicformat(func)
         if len(args) > 0:
+            self.unclean()
             original = func+" :: "+strlist(args, " :: ")
             self.printdebug("::> "+original)
             self.recursion += 1
@@ -1094,6 +1134,7 @@ Global Operator Precedence List:
         """Evaluates With Clauses."""
         inputlist = expression.split("$")
         if len(inputlist) > 1:
+            self.unclean()
             inputlist.reverse()
             item = inputlist.pop()
             withclass = classcalc(self)
@@ -1110,11 +1151,12 @@ Global Operator Precedence List:
             sides[0] = basicformat(sides[0])
             sides[1] = basicformat(sides[1])
             if not containsany(sides[0], self.calcops) and not endswithany(sides[0], self.bools) and not startswithany(sides[1], self.bools):
+                self.unclean()
                 docalc = False
                 if sides[0].endswith(":"):
                     sides[0] = sides[0][:-1]
                     docalc = True
-                sides[0] = self.outersplit(sides[0], ",", top=False)
+                sides[0] = sides[0].split(",")
                 if len(sides[0]) > 1:
                     test = True
                     for x in sides[0]:
@@ -1272,88 +1314,110 @@ Global Operator Precedence List:
         if not self.isreserved(sides[0]):
             return sides[1]
 
-    def calc_next(self, arg, calc_funcs=None):
-        """Calls The Next eval_func."""
-        if calc_funcs is None:
-            calc_funcs = self.calc_funcs
-        return self.eval_next(arg, calc_funcs)
-
     def calc_list(self, inputstring, calc_funcs):
         """Evaluates Matrices."""
         inputlist = inputstring.split(",")
-        out = []
-        for x in xrange(0, len(inputlist)):
-            item = self.calc_next(inputlist[x], calc_funcs)
-            if not isnull(item):
-                out.append(item)
-        if len(out) == 0:
-            return matrix(0)
-        elif len(out) == 1:
-            if len(inputlist) > 1:
-                return matrix(1,1, out[0], fake=True)
-            else:
-                return out[0]
+        if len(inputlist) == 1:
+            return self.calc_next(inputlist[0], calc_funcs)
         else:
-            return diagmatrixlist(out)
+            self.unclean()
+            out = []
+            for x in xrange(0, len(inputlist)):
+                item = self.calc_next(inputlist[x], calc_funcs)
+                if not isnull(item):
+                    out.append(item)
+            if len(out) == 0:
+                return matrix(0)
+            elif len(out) == 1:
+                if len(inputlist) > 1:
+                    return matrix(1,1, out[0], fake=True)
+                else:
+                    return out[0]
+            else:
+                return diagmatrixlist(out)
 
     def calc_pair(self, expression, calc_funcs):
         """Evaluates Key-Value Pairs."""
-        itemlist = []
-        for item in expression.split("->"):
-            itemlist.append(self.calc_next(item, calc_funcs))
-        out = itemlist[-1]
-        for x in reversed(xrange(0, len(itemlist)-1)):
-            out = pair(self, itemlist[x], out)
-        return out
+        inputlist = expression.split("->")
+        if len(inputlist) == 1:
+            return self.calc_next(inputlist[0], calc_funcs)
+        else:
+            self.unclean()
+            itemlist = []
+            for item in inputlist:
+                itemlist.append(self.calc_next(item, calc_funcs))
+            out = itemlist[-1]
+            for x in reversed(xrange(0, len(itemlist)-1)):
+                out = pair(self, itemlist[x], out)
+            return out
 
     def calc_pieces(self, expression, calc_funcs):
         """Evaluates Piecewise Expressions."""
-        for item in expression.split(";"):
-            test = self.calc_next(item, calc_funcs)
-            if not isnull(test):
-                return test
-        return matrix(0)
+        inputlist = expression.split(";")
+        if len(inputlist) == 1:
+            return self.calc_next(inputlist[0], calc_funcs)
+        else:
+            self.unclean()
+            for x in xrange(0, len(inputlist)):
+                if x == len(inputlist)-1:
+                    return self.calc_next(inputlist[x], calc_funcs)
+                else:
+                    self.unclean()
+                    test = self.calc_next(inputlist[x], calc_funcs)
+                    if not isnull(test):
+                        return test
 
     def calc_condo(self, item, calc_funcs):
         """Evaluates Conditions."""
         item = item.rsplit("@", 1)
         if len(item) == 1:
-            value = self.calc_next(item[0], calc_funcs)
-            if isinstance(value, bool):
-                return float(value)
-            else:
-                return value
-        elif bool(self.calc_next(item[1], calc_funcs)):
-            return self.calc_condo(item[0], calc_funcs)
+            self.unclean()
+            return self.calc_next(item[0], calc_funcs)
         else:
-            return matrix(0)
+            clean, self.clean = self.clean, False
+            check = bool(self.calc_next(item[1], calc_funcs))
+            self.clean = clean
+            if check:
+                return self.calc_next(item[0], [self.calc_condo]+calc_funcs)
+            else:
+                return matrix(0)
 
     def calc_or(self, inputstring, calc_funcs):
         """Evaluates The Or Part Of A Boolean Expression."""
         inputlist = inputstring.split("|")
-        value = self.calc_next(inputlist[0], calc_funcs)
-        for x in xrange(1, len(inputlist)):
-            if value:
-                break
-            value = value or self.calc_next(inputlist[x], calc_funcs)
-        return value
+        if len(inputlist) == 1:
+            return self.calc_next(inputlist[0], calc_funcs)
+        else:
+            self.unclean()
+            value = self.calc_next(inputlist[0], calc_funcs)
+            for x in xrange(1, len(inputlist)):
+                if value:
+                    break
+                value = value or self.calc_next(inputlist[x], calc_funcs)
+            return value
 
     def calc_and(self, inputstring, calc_funcs):
         """Evaluates The And Part Of A Boolean Expression."""
         inputlist = inputstring.split("&")
-        value = self.calc_next(inputlist[0], calc_funcs)
-        for x in xrange(1, len(inputlist)):
-            if not value:
-                break
-            value = value and self.calc_next(inputlist[x], calc_funcs)
-        return value
+        if len(inputlist) == 1:
+            return self.calc_next(inputlist[0], calc_funcs)
+        else:
+            self.unclean()
+            value = self.calc_next(inputlist[0], calc_funcs)
+            for x in xrange(1, len(inputlist)):
+                if not value:
+                    break
+                value = value and self.calc_next(inputlist[x], calc_funcs)
+            return value
 
     def calc_unary(self, inputstring, calc_funcs):
         """Evaluates The Unary Part Of A Boolean Expression."""
         if inputstring.startswith("!"):
-            return not self.calc_unary(inputstring[1:], calc_funcs)
+            self.unclean()
+            return not self.calc_next(inputstring[1:], [self.calc_unary]+calc_funcs)
         elif inputstring.startswith("?"):
-            return bool(self.calc_unary(inputstring[1:], calc_funcs))
+            self.unclean()
+            return bool(self.calc_next(inputstring[1:], [self.calc_unary]+calc_funcs))
         else:
             return self.calc_next(inputstring, calc_funcs)
 
@@ -1365,6 +1429,7 @@ Global Operator Precedence List:
         elif len(inputlist) == 1 and not madeof(inputlist[0], self.bools):
             return self.calc_next(inputlist[0], calc_funcs)
         else:
+            self.unclean()
             for x in xrange(0, len(inputlist)):
                 if istext(inputlist[x]) and madeof(inputlist[x], self.bools):
                     args = []
@@ -1416,8 +1481,8 @@ Global Operator Precedence List:
                     if inv:
                         out = not out
                     if not out:
-                        return False
-            return True
+                        return 0.0
+            return 1.0
 
     def calc_eval(self, expression):
         """Evaluates An Expression."""
@@ -1425,7 +1490,7 @@ Global Operator Precedence List:
         value = reassemble(top, ops)
         self.printdebug("==> "+value)
         self.recursion += 1
-        out = self.eval_check(self.eval_next(top), True)
+        out = self.eval_check(self.calc_next(top, self.eval_funcs, True), True)
         self.printdebug(self.prepare(out, False, True, True)+" <== "+value)
         self.recursion -= 1
         return out
@@ -1473,31 +1538,20 @@ Global Operator Precedence List:
                     top[x], ops = self.eval_split_do(top[x], ops, eval_splits[:])
         return top, ops
 
-    def eval_next(self, arg, eval_funcs=None):
-        """Calls The Next eval_func."""
-        if eval_funcs is None:
-            funcs = self.eval_funcs[:]
-        else:
-            funcs = eval_funcs[:]
-        func = funcs.pop(0)
-        if funcs:
-            return func(arg, funcs)
-        else:
-            return func(arg)
-
     def eval_loop(self, complist, eval_funcs):
         """Performs List Comprehension."""
         if len(complist) == 1:
-            return self.eval_next(complist[0], eval_funcs)
+            return self.calc_next(complist[0], eval_funcs)
         else:
-            item = self.eval_next(complist.pop(), eval_funcs)
+            self.unclean()
+            item = self.calc_next(complist.pop(), eval_funcs)
             lists = []
             argnum = 1
             for x in reversed(xrange(0, len(complist))):
                 if not delist(complist[x]):
                     argnum += 1
                 else:
-                    lists.append((self.eval_next(complist[x], eval_funcs), argnum))
+                    lists.append((self.calc_next(complist[x], eval_funcs), argnum))
                     argnum = 1
             if argnum > 1:
                 lists.append((matrix(0), argnum))
@@ -1554,8 +1608,9 @@ Global Operator Precedence List:
     def eval_lambda(self, inputlist, eval_funcs=None):
         """Evaluates Lambdas."""
         if islist(inputlist[0]):
-            return self.eval_next(inputlist[0], eval_funcs)
+            return self.calc_next(inputlist[0], eval_funcs)
         else:
+            self.unclean()
             inputstring = inputlist[0]
             out = inputstring[1:].split(self.lambdamarker, 1)
             out[0] = self.namefind(out[0])
@@ -1624,119 +1679,126 @@ Global Operator Precedence List:
 
     def eval_join(self, inputlist, eval_funcs):
         """Performs Concatenation."""
-        items = []
-        for item in inputlist:
-            item = self.eval_next(item, eval_funcs)
-            if not isnull(item):
-                items.append(item)
-        if len(items) == 0:
-            return matrix(0)
-        elif len(items) == 1:
-            return items[0]
+        if len(inputlist) == 1:
+            return self.calc_next(inputlist[0], eval_funcs)
         else:
-            dostr = 0
-            dolist = 0
-            dobrack = 0
-            dodata = 0
-            domultidata = 0
-            domatrix = 0
-            doclass = 0
-            dodict = 0
-            rowlen = None
-            tot = len(items)
-            for x in items:
-                if isinstance(x, strcalc):
-                    dostr += 1
-                elif isinstance(x, matrix):
-                    dodata += 1
-                    if rowlen is None:
-                        rowlen = x.x
-                    if x.x == rowlen:
-                        domatrix += 1
-                        if rowlen == 2:
-                            domultidata += 1
-                    if x.onlydiag():
-                        dolist += 1
-                    elif x.onlyrow():
-                        dobrack += 1
-                elif isinstance(x, multidata):
-                    domultidata += 1
-                elif isinstance(x, data):
-                    dodata += 1
-                elif isinstance(x, classcalc):
-                    doclass += 1
-                elif isinstance(x, pair):
-                    dodict += 1
-                else:
-                    tot -= 1
-            if dostr > 0:
-                out = rawstrcalc("", self)
-                for x in items:
-                    out += x
-                return out
-            elif dodict == len(items):
-                out = {}
-                for x in items:
-                    if isinstance(x, dictionary):
-                        out.update(x.a)
-                    else:
-                        out[x.k] = x.v
-                return dictionary(self, out)
-            elif doclass == len(items):
-                out = items[0].copy()
-                for x in xrange(1, len(items)):
-                    out.extend(items[x])
-                return out
-            elif dolist == tot:
-                out = []
-                for x in items:
-                    if isinstance(x, matrix):
-                        out += x.getdiag()
-                    else:
-                        out.append(x)
-                return diagmatrixlist(out)
-            elif dobrack == tot:
-                out = []
-                for x in items:
-                    if isinstance(x, matrix):
-                        out += x[0]
-                    else:
-                        out.append(x)
-                return rowmatrixlist(out)
-            elif domatrix == len(items):
-                out = []
-                for x in items:
-                    out += x.a
-                return matrixlist(out, float)
-            elif dodata == tot:
-                out = []
-                for x in items:
-                    if isinstance(x, data):
-                        out += x.items()
-                    elif isinstance(x, matrix):
-                        out += x.getitems()
-                    else:
-                        out.append(x)
-                return data(out)
-            elif domultidata == len(items):
-                out = []
-                for x in items:
-                    if isinstance(x, matrix):
-                        for l in x.a:
-                            out.append((l[0], l[1]))
-                    else:
-                        out += x.items()
-                return multidata(out)
+            self.unclean()
+            items = []
+            for item in inputlist:
+                item = self.calc_next(item, eval_funcs)
+                if not isnull(item):
+                    items.append(item)
+            if len(items) == 0:
+                return matrix(0)
+            elif len(items) == 1:
+                return items[0]
             else:
-                raise ExecutionError("TypeError", "Could not concatenate items "+repr(items))
+                dostr = 0
+                dolist = 0
+                dobrack = 0
+                dodata = 0
+                domultidata = 0
+                domatrix = 0
+                doclass = 0
+                dodict = 0
+                rowlen = None
+                tot = len(items)
+                for x in items:
+                    if isinstance(x, strcalc):
+                        dostr += 1
+                    elif isinstance(x, matrix):
+                        dodata += 1
+                        if rowlen is None:
+                            rowlen = x.x
+                        if x.x == rowlen:
+                            domatrix += 1
+                            if rowlen == 2:
+                                domultidata += 1
+                        if x.onlydiag():
+                            dolist += 1
+                        elif x.onlyrow():
+                            dobrack += 1
+                    elif isinstance(x, multidata):
+                        domultidata += 1
+                    elif isinstance(x, data):
+                        dodata += 1
+                    elif isinstance(x, classcalc):
+                        doclass += 1
+                    elif isinstance(x, pair):
+                        dodict += 1
+                    else:
+                        tot -= 1
+                if dostr > 0:
+                    out = rawstrcalc("", self)
+                    for x in items:
+                        out += x
+                    return out
+                elif dodict == len(items):
+                    out = {}
+                    for x in items:
+                        if isinstance(x, dictionary):
+                            out.update(x.a)
+                        else:
+                            out[x.k] = x.v
+                    return dictionary(self, out)
+                elif doclass == len(items):
+                    out = items[0].copy()
+                    for x in xrange(1, len(items)):
+                        out.extend(items[x])
+                    return out
+                elif dolist == tot:
+                    out = []
+                    for x in items:
+                        if isinstance(x, matrix):
+                            out += x.getdiag()
+                        else:
+                            out.append(x)
+                    return diagmatrixlist(out)
+                elif dobrack == tot:
+                    out = []
+                    for x in items:
+                        if isinstance(x, matrix):
+                            out += x[0]
+                        else:
+                            out.append(x)
+                    return rowmatrixlist(out)
+                elif domatrix == len(items):
+                    out = []
+                    for x in items:
+                        out += x.a
+                    return matrixlist(out, float)
+                elif dodata == tot:
+                    out = []
+                    for x in items:
+                        if isinstance(x, data):
+                            out += x.items()
+                        elif isinstance(x, matrix):
+                            out += x.getitems()
+                        else:
+                            out.append(x)
+                    return data(out)
+                elif domultidata == len(items):
+                    out = []
+                    for x in items:
+                        if isinstance(x, matrix):
+                            for l in x.a:
+                                out.append((l[0], l[1]))
+                        else:
+                            out += x.items()
+                    return multidata(out)
+                else:
+                    raise ExecutionError("TypeError", "Could not concatenate items "+repr(items))
 
     def eval_remove(self, inputlist, eval_funcs):
         """Performs Removal."""
-        item = self.eval_next(inputlist[0], eval_funcs)
-        if len(inputlist) > 1:
+        if len(inputlist) == 1:
+            return self.calc_next(inputlist[0], eval_funcs)
+        else:
+            self.unclean()
+            item = self.calc_next(inputlist[0], eval_funcs)
             params = []
             for x in xrange(1, len(inputlist)):
-                params.append(self.eval_next(inputlist[x], eval_funcs))
+                params.append(self.calc_next(inputlist[x], eval_funcs))
             item = getcopy(item)
             if isinstance(item, classcalc):
                 item.calcall()
@@ -1821,17 +1883,18 @@ Global Operator Precedence List:
                         raise ExecutionError("TypeError", "Can only remove pairs and dictionaries from dictionaries")
             else:
                 raise ExecutionError("TypeError", "Could not remove from item "+self.prepare(item, False, True, True))
-        return item
+            return item
 
     def eval_repeat(self, inputlist, eval_funcs):
         """Evaluates Repeats."""
         if len(inputlist) == 1:
-            return self.eval_next(inputlist[0], eval_funcs)
+            return self.calc_next(inputlist[0], eval_funcs)
         else:
-            out = self.eval_next(inputlist[0], eval_funcs)
+            self.unclean()
+            out = self.calc_next(inputlist[0], eval_funcs)
             for x in xrange(1, len(inputlist)):
                 done = False
-                num = self.eval_next(inputlist[x], eval_funcs)
+                num = self.calc_next(inputlist[x], eval_funcs)
                 if hasattr(out, "op_repeat"):
                     try:
                         test = out.op_repeat(num)
@@ -1876,12 +1939,15 @@ Global Operator Precedence List:
 
     def eval_add(self, inputlist, eval_funcs):
         """Evaluates The Addition Part Of An Expression."""
-        if len(inputlist) == 0:
+        if not inputlist:
             return matrix(0)
+        elif len(inputlist) == 1:
+            return self.calc_next(inputlist[0], eval_funcs)
         else:
-            value = self.eval_next(inputlist[0], eval_funcs)
+            self.unclean()
+            value = self.calc_next(inputlist[0], eval_funcs)
             for x in xrange(1, len(inputlist)):
-                item = self.eval_next(inputlist[x], eval_funcs)
+                item = self.calc_next(inputlist[x], eval_funcs)
                 if isnull(value):
                     value = item
                 elif isinstance(item, negative):
@@ -1892,26 +1958,37 @@ Global Operator Precedence List:
 
     def eval_mod(self, inputlist, eval_funcs):
         """Evaluates The Modulus Part Of An Expression."""
-        value = self.eval_next(inputlist[0], eval_funcs)
-        for x in xrange(1, len(inputlist)):
-            value = value % self.eval_next(inputlist[x], eval_funcs)
-        return value
+        if len(inputlist) == 1:
+            return self.calc_next(inputlist[0], eval_funcs)
+        else:
+            self.unclean()
+            value = self.calc_next(inputlist[0], eval_funcs)
+            for x in xrange(1, len(inputlist)):
+                value = value % self.calc_next(inputlist[x], eval_funcs)
+            return value
 
     def eval_intdiv(self, inputlist, eval_funcs):
         """Evaluates The Floor Division Part Of An Expression."""
-        value = self.eval_next(inputlist[0], eval_funcs)
-        for x in xrange(1, len(inputlist)):
-            value = value // self.eval_next(inputlist[x], eval_funcs)
-        return value
+        if len(inputlist) == 1:
+            return self.calc_next(inputlist[0], eval_funcs)
+        else:
+            self.unclean()
+            value = self.calc_next(inputlist[0], eval_funcs)
+            for x in xrange(1, len(inputlist)):
+                value = value // self.calc_next(inputlist[x], eval_funcs)
+            return value
 
     def eval_mul(self, inputlist, eval_funcs):
         """Evaluates The Multiplication Part Of An Expression."""
-        if len(inputlist) == 0:
+        if not inputlist:
             return matrix(0)
+        elif len(inputlist) == 1:
+            return self.calc_next(inputlist[0], eval_funcs)
         else:
-            value = self.eval_next(inputlist[0], eval_funcs)
+            self.unclean()
+            value = self.calc_next(inputlist[0], eval_funcs)
             for x in xrange(1, len(inputlist)):
-                item = self.eval_next(inputlist[x], eval_funcs)
+                item = self.calc_next(inputlist[x], eval_funcs)
                 if isnull(value):
                     value = item
                 elif isinstance(item, reciprocal):
@@ -1920,19 +1997,12 @@ Global Operator Precedence List:
                     value = value * item
             return value
 
-    def eval_call(self, inputstring, start=-1):
+    def eval_call(self, inputstring):
         """Evaluates A Variable."""
         self.printdebug("=> "+inputstring)
         self.recursion += 1
-        start += 1
-        for func in self.calls[start:]:
-            value = func(inputstring, start)
-            if value is not None:
-                break
-            else:
-                start += 1
-        out = self.eval_check(value)
-        self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring+" | "+namestr(func).split("_")[-1])
+        out = self.eval_check(self.calc_next(inputstring, self.calls[:], True))
+        self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring)
         self.recursion -= 1
         return out
 
@@ -1967,9 +2037,10 @@ Global Operator Precedence List:
         """Determines If An Item Can Be Converted By eval_check."""
         return hasnum(item) or islist(item) or isinstance(item, bool) or item is None
 
-    def call_var(self, inputstring, count=None):
+    def call_var(self, inputstring, call_funcs):
         """Checks If Variable."""
         if inputstring in self.variables:
+            self.unclean()
             item, key = self.getfind(inputstring, True)
             if istext(item):
                 value = self.calc(str(item), " | var")
@@ -1980,10 +2051,13 @@ Global Operator Precedence List:
             if not self.isreserved(key):
                 self.variables[key] = value
             return value
+        else:
+            return self.calc_next(inputstring, call_funcs)
 
-    def call_parenvar(self, inputstring, count=None):
+    def call_parenvar(self, inputstring, call_funcs):
         """Checks If Parentheses."""
         if inputstring.startswith(self.parenchar) and inputstring.endswith(self.parenchar):
+            self.unclean()
             item = self.namefind(inputstring, True)
             if item is not inputstring:
                 if istext(item):
@@ -1993,52 +2067,66 @@ Global Operator Precedence List:
                 else:
                     value = self.getcall(item)(None)
                 return value
+        else:
+            return self.calc_next(inputstring, call_funcs)
 
-    def call_lambda(self, inputstring, count=None):
+    def call_lambda(self, inputstring, call_funcs):
         """Wraps Lambda Evaluation."""
         if inputstring.startswith(self.lambdamarker):
+            self.unclean()
             return self.eval_lambda([inputstring])
+        else:
+            return self.calc_next(inputstring, call_funcs)
 
-    def call_neg(self, inputstring, count):
+    def call_neg(self, inputstring, call_funcs):
         """Evaluates Unary -."""
         if inputstring.startswith("-"):
-            item = self.eval_call(inputstring[1:], count)
+            self.unclean()
+            item = self.calc_next(inputstring[1:], call_funcs)
             if isnull(item):
                 return -1.0
             else:
                 return negative(item)
+        else:
+            return self.calc_next(inputstring, call_funcs)
 
-    def call_reciproc(self, inputstring, count):
+    def call_reciproc(self, inputstring, call_funcs):
         """Evaluates /."""
         if inputstring.startswith("/"):
-            item = self.eval_call(inputstring[1:], count)
+            self.unclean()
+            item = self.calc_next(inputstring[1:], call_funcs)
             if isnull(item):
                 return item
             else:
                 return reciprocal(item)
+        else:
+            return self.calc_next(inputstring, call_funcs)
 
-    def call_exp(self, inputstring, count):
+    def call_exp(self, inputstring, call_funcs):
         """Evaluates The Exponential Part Of An Expression."""
         if "^" in inputstring:
+            self.unclean()
             inputlist = inputstring.split("^")
             value = 1.0
             level = 1
             for x in reversed(xrange(0, len(inputlist))):
                 item = inputlist[x]
                 if item:
-                    value = knuth(self.eval_call(item, count), value, level)
+                    value = knuth(self.calc_next(item, call_funcs), value, level)
                     level = 1
                 else:
                     if x == 0 or x == len(inputlist)-1:
-                        value = knuth(self.eval_call(""), value, level)
-                        level = 1
+                        raise ExecutionError("NoneError", "Cannot exponentiate nothing")
                     else:
                         level += 1
             return value
+        else:
+            return self.calc_next(inputstring, call_funcs)
 
-    def call_colon(self, inputstring, count=None):
+    def call_colon(self, inputstring, call_funcs):
         """Evaluates Colons."""
         if ":" in inputstring:
+            self.unclean()
             inputlist = inputstring.split(":")
             item = self.funcfind(inputlist[0])
             params = []
@@ -2046,6 +2134,8 @@ Global Operator Precedence List:
                 if inputlist[x]:
                     params.append(getcopy(self.eval_call(inputlist[x])))
             return self.call_colon_set(item, params)
+        else:
+            return self.calc_next(inputstring, call_funcs)
 
     def call_colon_set(self, item, params):
         """Performs Colon Function Calls."""
@@ -2141,10 +2231,11 @@ Global Operator Precedence List:
             out = "_"+out
         return out
 
-    def call_paren(self, inputstring, count):
+    def call_paren(self, inputstring, call_funcs):
         """Evaluates Parentheses."""
         inputstring = (self.parenchar*2).join(switchsplit(inputstring, string.digits, notstring=self.reserved))
         if self.parenchar in inputstring:
+            self.unclean()
             self.printdebug("(|) "+inputstring) 
             templist = inputstring.split(self.parenchar)
             checkops = delspace(self.callops, self.subparenops)
@@ -2189,10 +2280,10 @@ Global Operator Precedence List:
                     autoarg = self.unusedarg()
                     item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
                 else:
-                    item = self.eval_call(l[0], count)
+                    item = self.calc_next(l[0], call_funcs)
                 args = []
                 for x in xrange(1, len(l)):
-                    args.append(self.eval_call(l[x], count))
+                    args.append(self.calc_next(l[x], call_funcs))
                 item = self.call_paren_do(item, args)
                 if values and isinstance(item, funcfloat) and item.infix:
                     values.append(self.call_paren_do(item, [values.pop()]))
@@ -2207,6 +2298,8 @@ Global Operator Precedence List:
             self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
             self.recursion -= 1
             return value
+        else:
+            return self.calc_next(inputstring, call_funcs)
 
     def call_paren_do(self, item, arglist):
         """Does Parentheses Calling."""
@@ -2236,23 +2329,29 @@ Global Operator Precedence List:
             self.overflow = overflow
         return item
 
-    def call_comp(self, inputstring, count):
+    def call_comp(self, inputstring, call_funcs):
         """Performs Function Composition."""
         if ".." in inputstring:
+            self.unclean()
             funclist = []
             for item in inputstring.split(".."):
-                func = self.eval_call(item, count)
+                func = self.calc_next(item, call_funcs)
                 if not isnull(func):
                     funclist.append(self.wrap(func))
             return strfunc(strlist(funclist, "(")+"("*bool(funclist)+strfunc.allargs+")"*len(funclist), self, overflow=False)
+        else:
+            return self.calc_next(inputstring, call_funcs)
 
-    def call_lambdacoeff(self, inputstring, count=None):
+    def call_lambdacoeff(self, inputstring, call_funcs):
         """Evaluates Lambda Coefficients."""
         parts = inputstring.split(self.lambdamarker, 1)
-        if len(parts) > 1:
+        if len(parts) == 1:
+            return self.calc_next(parts[0], call_funcs)
+        else:
+            self.unclean()
             return self.eval_call(parts[0]+self.wrap(self.eval_lambda([self.lambdamarker+parts[1]])))
 
-    def call_method(self, inputstring, count=None):
+    def call_method(self, inputstring, call_funcs):
         """Returns Method Instances."""
         if "." in inputstring:
             itemlist = inputstring.split(".")
@@ -2260,6 +2359,7 @@ Global Operator Precedence List:
             for item in itemlist:
                 isfloat = isfloat and (not item or madeof(item, string.digits))
             if not isfloat:
+                self.unclean()
                 itemlist[0] = self.funcfind(itemlist[0])
                 out = itemlist[0]
                 for x in xrange(1, len(itemlist)):
@@ -2310,8 +2410,9 @@ Global Operator Precedence List:
                             raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                     out = new
                 return out
+        return self.calc_next(inputstring, call_funcs)
 
-    def call_normal(self, inputstring, count=None):
+    def call_normal(self, inputstring):
         """Returns Argument."""
         return inputstring
 
