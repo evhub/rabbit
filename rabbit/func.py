@@ -1184,7 +1184,7 @@ class classcalc(cotobject):
 
     def getrepr(self, top=True, bottom=True, indebug=True, maxrecursion=5):
         """Finds A Representation."""
-        out = "class ::"
+        out = "class (::"
         if top:
             out += "\n"
         variables = self.getvars()
@@ -1209,6 +1209,7 @@ class classcalc(cotobject):
                 out = out[:-1]
         elif variables:
             out = out[:-3]
+        out += " )"
         return out
 
     def store(self, key, value, bypass=False):
