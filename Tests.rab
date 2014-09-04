@@ -525,6 +525,8 @@ passert:: class<<x=1;;y=2>> ?= (
   x=1
   y=2
  )
+passert:: [1,2,3] union [1,2,4] ?= [1,2,3,4]
+passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
 
 # Final Testing:
 passert:: save("Tests.save");true

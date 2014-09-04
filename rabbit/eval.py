@@ -352,6 +352,8 @@ Global Operator Precedence List:
             "bitxor":funcfloat(self.funcs.bitxorcall, self, "bitxor", reqargs=2),
             "rshift":funcfloat(self.funcs.rshiftcall, self, "rshift", reqargs=2),
             "lshift":funcfloat(self.funcs.lshiftcall, self, "lshift", reqargs=2),
+            "union":funcfloat(self.funcs.unioncall, self, "union", reqargs=2),
+            "intersect":funcfloat(self.funcs.intersectcall, self, "intersect", reqargs=2),
             "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "E":usefunc(E10, self, "E", ["x"]),
             "D":funcfloat(self.funcs.derivcall, self, "D", reqargs=1),
@@ -2576,6 +2578,11 @@ Global Operator Precedence List:
             out = diagmatrixlist(map(self.frompython, item))
         elif islist(item):
             out = rowmatrixlist(map(self.frompython, item))
+        elif isinstance(item, dict):
+            out = {}
+            for k,v in item.items():
+                out[self.frompython(k)] = self.frompython(v)
+            out = dictionary(self, out)
         elif isfunc(item):
             out = item
         else:
@@ -2594,6 +2601,10 @@ Global Operator Precedence List:
                 out = tuple(out)
             else:
                 out = list(out)
+        elif isinstance(item, dictionary):
+            out = {}
+            for k,v in item.a:
+                out[self.topython(k)] = self.topython(v)
         else:
             out = item
         return out
@@ -3733,3 +3744,37 @@ class evalfuncs(object):
             for arg in variables:
                 out.append(self.dictcall([arg]))
             return diagmatrixlist(out)
+
+    def unioncall(self, variables):
+        """Performs union."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to union")
+        elif len(variables) == 2:
+            a,b = getmatrix(variables[0]), getmatrix(variables[1])
+            out = list(set(a.getitems()) | set(b.getitems()))
+            if a.onlyrow():
+                return rowmatrixlist(out)
+            else:
+                return diagmatrixlist(out)
+        else:
+            out = variables[0]
+            for x in xrange(1, len(variables)):
+                out = self.unioncall([out, variables[x]])
+            return out
+
+    def intersectcall(self, variables):
+        """Performs intersect."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to union")
+        elif len(variables) == 2:
+            a,b = getmatrix(variables[0]), getmatrix(variables[1])
+            out = list(set(a.getitems()) & set(b.getitems()))
+            if a.onlyrow():
+                return rowmatrixlist(out)
+            else:
+                return diagmatrixlist(out)
+        else:
+            out = variables[0]
+            for x in xrange(1, len(variables)):
+                out = self.intersectcall([out, variables[x]])
+            return out

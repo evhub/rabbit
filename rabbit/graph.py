@@ -318,7 +318,7 @@ class grapher(mathbase):
             "invcum":funcfloat(self.invcumcall, self.e, "invcum"),
             "at":funcfloat(self.atcall, self.e, "at"),
             "invat":funcfloat(self.invatcall, self.e, "invat"),
-            "sect":funcfloat(self.sectcall, self.e, "sect"),
+            "overlap":funcfloat(self.sectcall, self.e, "overlap"),
             "para":funcfloat(self.paracall, self.e, "para"),
             "polar":funcfloat(self.polarcall, self.e, "polar"),
             "scroll":funcfloat(self.scrollcall, self.e, "scroll"),
