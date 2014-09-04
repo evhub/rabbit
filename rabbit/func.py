@@ -24,6 +24,13 @@ from .matrix import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+class TailRecursion(BaseException):
+    """A Stack-Killer Tail Recursion Exception."""
+    def __init__(self, funcstr, variables=None):
+        """Creates The Tail Recursion."""
+        self.funcstr = funcstr
+        self.variables = variables or {}
+
 def collapse(item):
     """Collapses An Argument."""
     if isinstance(item, funcfloat):
@@ -177,17 +184,18 @@ class funcfloat(numobject):
             self.e.setreturned(False)
             try:
                 out = self.base_func(*args, **kwargs)
-            except:
+            except Exception:
                 self.e.setreturned()
                 raise
             else:
+                self.e.setreturned(returned or self.e.returned)
                 if not self.e.returned:
                     if arghash is None:
                         arghash = (self.keyhash(args), self.keyhash(kwargs))
                     self.memo[arghash] = out
-                self.e.setreturned(returned or self.e.returned)
                 return out
-        return self.base_func(*args, **kwargs)
+        else:
+            return self.base_func(*args, **kwargs)
 
     def calc(self, variables=None):
         """Calculates The Float Function."""
@@ -348,15 +356,26 @@ class strfunc(funcfloat):
         return self.func(personals)
 
     def base_func(self, personals):
-        """The Unmemoed Function."""
+        """Allows For Tail Recursion."""
+        funcstr = self.funcstr
         variables = self.snapshot.copy()
         variables.update(personals)
-        oldvars = self.e.setvars(variables)
-        try:
-            out = self.e.calc(self.funcstr, " \\>")
-        finally:
-            self.e.setvars(oldvars)
-        return out
+        while True:
+            if self.e.tailing and self.e.all_clean:
+                raise TailRecursion(funcstr, variables)
+            else:
+                self.e.tailing, self.e.all_clean = True, True
+                oldvars = self.e.setvars(variables)
+                try:
+                    out = self.e.calc(funcstr, " \\>")
+                except TailRecursion as params:
+                    funcstr = params.funcstr
+                    variables = params.variables
+                else:
+                    return out
+                finally:
+                    self.e.tailing = False
+                    self.e.setvars(oldvars)
 
     def call(self, variables):
         """Calls The String Function."""

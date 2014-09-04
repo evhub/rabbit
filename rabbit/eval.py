@@ -30,8 +30,8 @@ class Evaluate(BaseException):
     """A Stack-Killer Evaluation Exception."""
     def __init__(self, arg, funcs):
         """Creates The Evaluation."""
-        self.funcs = funcs
         self.arg = arg
+        self.funcs = funcs
 
 def matrixconstructor(self, args):
     """Reconstructs A Matrix."""
@@ -180,6 +180,8 @@ Global Operator Precedence List:
     using = None
     pure = False
     clean = False
+    all_clean = False
+    tailing = False
 
     def __init__(self, variables=None, processor=None, color=None, speedy=False, maxrecursion=10):
         """Initializes The Evaluator."""
@@ -1087,14 +1089,14 @@ Global Operator Precedence List:
             if top:
                 func = funcs.pop(0)
                 if funcs:
-                    clean, self.clean = self.clean, True
+                    cleaned = self.clean_begin(True, None)
                     try:
                         return func(arg, funcs)
                     except Evaluate as params:
                         arg = params.arg
                         funcs = params.funcs
                     finally:
-                        self.clean = clean
+                        self.clean_end(cleaned)
                 else:
                     return func(arg)
             elif self.clean:
@@ -1102,16 +1104,33 @@ Global Operator Precedence List:
             else:
                 func = funcs.pop(0)
                 if funcs:
-                    clean, self.clean = self.clean, False
-                    out = func(arg, funcs)
-                    self.clean = clean
-                    return out
+                    return func(arg, funcs)
                 else:
                     return func(arg)
 
     def unclean(self):
         """Sets clean."""
         self.clean = False
+
+    def clean_begin(self, new_clean=False, new_all_clean=False):
+        """Starts A Clean Block."""
+        if new_clean is None:
+            new_clean = self.clean
+        if new_all_clean is None:
+            new_all_clean = self.all_clean
+        clean, self.clean = self.clean, new_clean
+        all_clean, self.all_clean = self.all_clean, new_all_clean
+        return clean, all_clean
+
+    def clean_end(self, cleaned, all_clean_check=False, clean_check=False):
+        """Ends A Clean Block."""
+        clean, all_clean = cleaned
+        if all_clean_check:
+            all_clean = all_clean and self.all_clean
+        if clean_check:
+            clean = clean and self.clean
+        self.clean = clean
+        self.all_clean = all_clean
 
     def calc_cmd(self, inputstring, calc_funcs):
         """Evaluates Statements."""
@@ -1387,9 +1406,9 @@ Global Operator Precedence List:
             self.unclean()
             return self.calc_next(item[0], calc_funcs)
         else:
-            clean, self.clean = self.clean, False
+            cleaned = self.clean_begin()
             check = bool(self.calc_next(item[1], calc_funcs))
-            self.clean = clean
+            self.clean_end(cleaned)
             if check:
                 return self.calc_next(item[0], [self.calc_condo]+calc_funcs)
             else:
@@ -2061,7 +2080,11 @@ Global Operator Precedence List:
             self.unclean()
             item, key = self.getfind(inputstring, True)
             if istext(item):
-                value = self.calc(str(item), " | var")
+                item = str(item)
+                if self.tailing and self.all_clean:
+                    raise TailRecursion(item)
+                else:
+                    value = self.calc(item, " | var")
             elif self.convertable(item):
                 value = item
             else:
@@ -2079,7 +2102,11 @@ Global Operator Precedence List:
             item = self.namefind(inputstring, True)
             if item is not inputstring:
                 if istext(item):
-                    value = self.calc(str(item), " | parenvar")
+                    item = str(item)
+                    if self.tailing and self.all_clean:
+                        raise TailRecursion(item)
+                    else:
+                        value = self.calc(item, " | parenvar")
                 elif self.convertable(item):
                     value = item
                 else:
