@@ -3481,7 +3481,7 @@ class evalfuncs(object):
         out = []
         for x in variables:
             inputstring = self.e.prepare(x, False, False)
-            out.append(self.e.calc(inputstring, " | calc"))
+            out.append(self.e.calc(self.e.do_pre(inputstring, True), " | calc"))
         if len(out) == 1:
             return out[0]
         else:
@@ -3493,7 +3493,7 @@ class evalfuncs(object):
         e = self.e.new()
         for x in variables:
             inputstring = self.e.prepare(x, False, False)
-            out.append(self.e.calc(inputstring, " | eval"))
+            out.append(self.e.calc(self.e.do_pre(inputstring, True), " | eval"))
         if len(out) == 1:
             return out[0]
         else:
