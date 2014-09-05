@@ -372,8 +372,11 @@ class strfunc(funcfloat):
                 try:
                     out = self.e.calc(funcstr, " \\>")
                 except TailRecursion as params:
-                    funcstr = params.funcstr
-                    variables = params.variables
+                    if not self.e.returned and funcstr == params.funcstr and variables == params.variables:
+                        raise ExecutionError("RuntimeError", "Illegal infinite recursive loop")
+                    else:
+                        funcstr = params.funcstr
+                        variables = params.variables
                 else:
                     return out
                 finally:
