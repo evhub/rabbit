@@ -890,7 +890,7 @@ Global Operator Precedence List:
         if top:
             spawned = self.spawned
             self.setspawned(False)
-        cleaned = self.clean_begin(True)
+        cleaned = self.clean_begin(True, True)
         if info is None:
             info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
         else:
@@ -1190,12 +1190,13 @@ Global Operator Precedence List:
         """Evaluates With Clauses."""
         inputlist = expression.split("$")
         if len(inputlist) > 1:
-            self.unclean()
+            cleaned = self.clean_begin()
             inputlist.reverse()
             item = inputlist.pop()
             withclass = classcalc(self)
             for x in inputlist:
                 withclass.process(x)
+            self.clean_end(cleaned)
             return withclass.calc(item)
         else:
             return self.calc_next(expression, calc_funcs)
@@ -1253,7 +1254,7 @@ Global Operator Precedence List:
                                 raise ExecutionError("VariableError", "Could not multi-set to invalid variable "+sides[0][x])
                         return diagmatrixlist(out)
                     else:
-                        raise ExecutionError("SyntaxError", "Could not set to invalid variable "+strlist(sides[0], ","))
+                        raise ExecutionError("SyntaxError", "Could not set to invalid variable list "+strlist(sides[0], ","))
                 else:
                     sides[0] = sides[0][0]
                     return self.calc_set_do(sides, docalc)
