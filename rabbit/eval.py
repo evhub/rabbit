@@ -888,9 +888,9 @@ Global Operator Precedence List:
         else:
             top = top
         if top:
+            cleaned = self.clean_begin(True, True)
             spawned = self.spawned
             self.setspawned(False)
-        cleaned = self.clean_begin(True, True)
         if info is None:
             info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
         else:
@@ -899,11 +899,11 @@ Global Operator Precedence List:
         self.recursion += 1
         self.proc_calc(inputstring, top, command)
         self.recursion -= 1
-        self.clean_end(cleaned)
         if top:
             if not self.spawned:
                 self.processor.addcommand(inputstring)
             self.setspawned(self.spawned or spawned)
+            self.clean_end(cleaned)
 
     def do_pre(self, item, top):
         """Does The Pre-Processing."""
