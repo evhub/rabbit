@@ -2101,17 +2101,17 @@ Global Operator Precedence List:
         if inputstring in self.variables:
             self.unclean()
             item, key = self.getfind(inputstring, True)
+            store = not self.isreserved(key)
             if istext(item):
-                item = str(item)
-                if self.tailing and self.all_clean:
-                    raise TailRecursion(item, self.variables.copy())
-                else:
-                    value = self.calc(item, " | var")
+                value = self.calc(str(item), " | var")
             elif self.convertable(item):
                 value = item
             else:
-                value = self.getcall(item)(None)
-            if not self.isreserved(key):
+                raise ValueError("Unconvertable variable value of "+repr(item))
+            if isprop(value):
+                value = self.deprop(value)
+                store = False
+            if store:
                 self.variables[key] = value
             return value
         else:
@@ -2132,10 +2132,16 @@ Global Operator Precedence List:
                 elif self.convertable(item):
                     value = item
                 else:
-                    value = self.getcall(item)(None)
+                    raise ValueError("Unconvertable variable value of "+repr(item))
                 return value
         else:
             return self.calc_next(inputstring, call_funcs)
+
+    def deprop(self, value):
+        """Evaluates Property Objects."""
+        while isprop(value):
+            value = self.getcall(value)(None)
+        return value
 
     def call_lambda(self, inputstring, call_funcs):
         """Wraps Lambda Evaluation."""

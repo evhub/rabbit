@@ -46,12 +46,24 @@ def iseval(inputobject):
 def isfunc(inputobject):
     """Tests If An Object Is A Function."""
     check = getcheck(inputobject)
-    return (check > 0 and hascall(inputobject)) or check == -2
+    if check == -2:
+        return True
+    elif check <= 0:
+        return False
+    elif not hasattr(inputobject, "isfunc"):
+        return hascall(inputobject)
+    elif isinstance(inputobject.isfunc, bool):
+        return inputobject.isfunc
+    else:
+        return inputobject.isfunc()
 
 def hasmatrix(inputobject):
     """Determines If An Object Could Be A Matrix."""
-    if not hasattr(inputobject, "ismatrix"):
-        return getcheck(inputobject) == 2
+    check = getcheck(inputobject)
+    if check <= 0:
+        return False
+    elif not hasattr(inputobject, "ismatrix"):
+        return check == 2
     elif isinstance(inputobject.ismatrix, bool):
         return inputobject.ismatrix
     else:

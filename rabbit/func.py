@@ -51,6 +51,10 @@ def ismatrix(inputobject):
     """Checks Whether An Object Is A Matrix."""
     return hasmatrix(inputobject) and (not hasattr(inputobject, "notmatrix") or not inputobject.notmatrix)
 
+def isprop(inputobject):
+    """Checks Whether An Object Is A Property."""
+    return hasnum(inputobject) and hasattr(inputobject, "isprop") and ((isinstance(inputobject.isprop, bool) and inputobject.isprop) or inputobject.isprop())
+
 def getmatrix(inputobject, func=diagmatrixlist):
     """Converts The Object To A Matrix."""
     inputobject = collapse(inputobject)
@@ -360,7 +364,8 @@ class strfunc(funcfloat):
         funcstr = self.funcstr
         variables = self.snapshot.copy()
         variables.update(personals)
-        while True:
+        out = None
+        while out is None:
             if self.e.tailing and self.e.all_clean:
                 newvars = self.e.variables.copy()
                 newvars.update(variables)
@@ -377,12 +382,11 @@ class strfunc(funcfloat):
                     else:
                         funcstr = params.funcstr
                         variables = params.variables
-                else:
-                    return out
                 finally:
                     self.e.tailing = tailing
                     self.e.clean_end(cleaned)
                     self.e.setvars(oldvars)
+        return out
 
     def call(self, variables):
         """Calls The String Function."""
@@ -813,8 +817,11 @@ class codestr(rawstrcalc):
 
     def call(self, variables):
         """Calls The Code String."""
-        self.e.overflow = variables
-        return self.calc()
+        if variables is None:
+            return self
+        else:
+            self.e.overflow = variables
+            return self.calc()
 
     def getrepr(self, top, bottom, indebug, maxrecursion):
         """Gets A Representation."""
@@ -1301,8 +1308,10 @@ class classcalc(cotobject):
 
     def call(self, variables):
         """Calculates An Item."""
-        variables = varproc(variables)
-        return self.init(variables)
+        if variables is None:
+            return self
+        else:
+            return self.init(varproc(variables))
 
     def domethod(self, item, args=[]):
         """Calls A Method Function."""
@@ -1574,6 +1583,10 @@ class instancecalc(numobject, classcalc):
                 self.doset[test] = haskey(self.e.variables, test)
                 self.e.variables[test] = self.variables[test]
 
+    def isprop(self):
+        """Determines Whether The Class Is A Property."""
+        return bool(self.tryget("__value__"))
+
     def isfunc(self):
         """Determines Whether The Class Is A Function."""
         return bool(self.tryget("__call__"))
@@ -1581,7 +1594,11 @@ class instancecalc(numobject, classcalc):
     def call(self, variables):
         """Calls The Function."""
         if variables is None:
-            return self
+            func = self.tryget("__value__")
+            if func is None:
+                return self
+            else:
+                return self.domethod(func)
         else:
             func = self.tryget("__call__")
             if func is None:
