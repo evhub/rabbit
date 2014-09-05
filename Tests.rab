@@ -93,7 +93,6 @@ passert:: class << x = 1 >> + class << z = 5 >> ?= class << x = 1 ;; z = 5 >>
 nothing := class <<
  __type__(self) = "nil"
  __init__(self) = self
- __get__(self, key) = key
  __call__(self, args) = args
  __cont__(self) = []
  __add__(self, other) = other
@@ -123,7 +122,6 @@ nothing := class <<
  >>
 nil := nothing()
 passert:: type(nil) ?= "nil"
-passert:: nil.thing ?= "thing"
 passert:: nil(1,2) ?= (1,2)
 passert:: cont(nil) ?= []
 passert:: nil+1 ?= 1 ?= 1+nil
