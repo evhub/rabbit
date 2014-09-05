@@ -341,7 +341,6 @@ Global Operator Precedence List:
             "len":funcfloat(self.funcs.lencall, self, "len", reqargs=1),
             "size":funcfloat(self.funcs.sizecall, self, "size", reqargs=1),
             "abs":funcfloat(self.funcs.abscall, self, "abs", reqargs=1),
-            "d":funcfloat(self.funcs.randcall, self, "d", reqargs=1),
             "from":funcfloat(self.funcs.instanceofcall, self, "from", reqargs=2),
             "iserr":funcfloat(self.funcs.iserrcall, self, "iserr", reqargs=1),
             "class":funcfloat(self.funcs.classcall, self, "class"),
@@ -373,10 +372,6 @@ Global Operator Precedence List:
             "lshift":funcfloat(self.funcs.lshiftcall, self, "lshift", reqargs=2),
             "union":funcfloat(self.funcs.unioncall, self, "union", reqargs=2),
             "intersect":funcfloat(self.funcs.intersectcall, self, "intersect", reqargs=2),
-            "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
-            "E":usefunc(E10, self, "E", ["x"]),
-            "D":funcfloat(self.funcs.derivcall, self, "D", reqargs=1),
-            "S":funcfloat(self.funcs.integcall, self, "S", reqargs=1),
             "data":funcfloat(self.funcs.datacall, self, "data"),
             "frac":funcfloat(self.funcs.fractcall, self, "frac"),
             "simp":funcfloat(self.funcs.simpcall, self, "simp"),
@@ -421,6 +416,11 @@ Global Operator Precedence List:
                 "chisqP":usefunc(chisqP, self, "chisqP", ["x", "df"], evalinclude="e"),
                 "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], evalinclude="e")
                 }),
+            "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
+            "d":funcfloat(self.funcs.randcall, self, "d", reqargs=1),
+            "E":usefunc(E10, self, "E", ["x"]),
+            "D":funcfloat(self.funcs.derivcall, self, "D", reqargs=1),
+            "S":funcfloat(self.funcs.integcall, self, "S", reqargs=1),
             "i":complex(0.0, 1.0),
             "none":matrix(0),
             "true":1.0,
@@ -482,7 +482,6 @@ Global Operator Precedence List:
             "\u2421" : rawstrcalc("\x21", self)
             }
         self.variables.update({
-            "property" : strfunc("class\xab__value__(self,func:func)=func()\xbb()", self, ["func"], name="property"),
             "\u2209" : strfunc("!\u2208(__)", self, name="\u2209", overflow=False),
             "\u220b" : strfunc("\u2208(rev(__))", self, name="\u220b", overflow=False),
             "\u220c" : strfunc("!\u220b(__)", self, name="\u220c", overflow=False),
@@ -889,6 +888,7 @@ Global Operator Precedence List:
         else:
             top = top
         if top:
+            tailing, self.tailing = self.tailing, False
             cleaned = self.clean_begin(True, True)
             spawned = self.spawned
             self.setspawned(False)
@@ -906,6 +906,7 @@ Global Operator Precedence List:
             if not self.spawned:
                 self.processor.addcommand(inputstring)
             self.setspawned(self.spawned or spawned)
+            self.tailing = tailing
         self.clean_end(cleaned)
 
     def do_pre(self, item, top):
