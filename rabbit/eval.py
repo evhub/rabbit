@@ -880,34 +880,64 @@ Global Operator Precedence List:
         out, self.calculated = self.calculated, calculated
         return out
 
-    def process(self, inputstring, info="", command=None, top=None):
+    def process(self, inputstring, info="", command=None, top=None, variables=None):
         """Performs Top-Level Evaluation."""
         inputstring = str(inputstring)
         if top is None:
             top = command is not None
         else:
             top = top
-        if top:
-            tailing, self.tailing = self.tailing, False
-            cleaned = self.clean_begin(True, True)
-            spawned = self.spawned
-            self.setspawned(False)
-        else:
-            cleaned = self.clean_begin(None, None)
         if info is None:
             info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
         else:
             info = str(info)
-        self.printdebug(">>> "+inputstring+info)
-        self.recursion += 1
-        self.proc_calc(inputstring, top, command)
-        self.recursion -= 1
         if top:
-            if not self.spawned:
-                self.processor.addcommand(inputstring)
-            self.setspawned(self.spawned or spawned)
-            self.tailing = tailing
-        self.clean_end(cleaned)
+            while True:
+                self.printdebug(">>> "+inputstring+info)
+                self.recursion += 1
+                cleaned = self.clean_begin(True, True)
+                tailing, self.tailing = self.tailing, True
+                spawned = self.spawned
+                self.setspawned(False)
+                if variables is not None:
+                    oldvars = self.setvars(variables)
+                else:
+                    oldvars = None
+                try:
+                    self.proc_calc(inputstring, top, command)
+                except TailRecursion as params:
+                    if (variables or {}) == params.variables and inputstring == params.funcstr:
+                        raise ExecutionError("RuntimeError", "Illegal infinite recursive loop")
+                    else:
+                        inputstring = params.funcstr
+                        variables = params.variables
+                        info = " <:"
+                else:
+                    break
+                finally:
+                    if oldvars is not None:
+                        self.setvars(oldvars)
+                    if not self.spawned:
+                        self.processor.addcommand(inputstring)
+                    self.setspawned(self.spawned or spawned)
+                    self.tailing = tailing
+                    self.clean_end(cleaned)
+                    self.recursion -= 1
+        else:
+            self.printdebug(":>> "+inputstring+info)
+            self.recursion += 1
+            cleaned = self.clean_begin(None, None)
+            if variables is not None:
+                oldvars = self.setvars(variables)
+            else:
+                oldvars = None
+            try:
+                self.proc_calc(inputstring, top, command)
+            finally:
+                if oldvars is not None:
+                    self.setvars(oldvars)
+                self.clean_end(cleaned)
+                self.recursion -= 1
 
     def do_pre(self, item, top):
         """Does The Pre-Processing."""
