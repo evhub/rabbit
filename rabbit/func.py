@@ -1281,11 +1281,11 @@ class classcalc(cotobject):
         if istext(self.variables[test]):
             out = self.calc(self.variables[test])
             self.store(test, out)
-            return out
         elif self.variables[test] is None:
-            return matrix(0)
+            out = matrix(0)
         else:
-            return self.variables[test]
+            out = self.variables[test]
+        return self.e.deprop(out)
 
     def getmethod(self, key):
         """Retrieves A Method."""
@@ -1535,10 +1535,15 @@ class instancecalc(numobject, classcalc):
     def getitem(self, test):
         """Retrieves An Item At The Base Level."""
         if istext(self.variables[test]):
-            self.store(test, self.calc(self.variables[test]))
-        if isinstance(self.variables[test], strfunc):
-            self.variables[test].curryself(self)
-        return self.variables[test]
+            out = self.calc(self.variables[test])
+            self.store(test, out)
+        elif self.variables[test] is None:
+            out = matrix(0)
+        else:
+            if isinstance(self.variables[test], strfunc):
+                self.variables[test].curryself(self)
+            out = self.variables[test]
+        return self.e.deprop(out)
 
     def getmethod(self, key):
         """Retrieves A Method."""
