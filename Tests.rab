@@ -534,7 +534,7 @@ contents = read("Tests.save")
 passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents)
 passert:: ! using()
 use(calc) ;; use(using())
-passert:: using()
+passert:: calc ?= using() ?= used             $ used = property(using) $ property(func) = class<<__value__(self)=func()>>()
 passert:: class <<
            run :: Tests.save
            >>
@@ -543,6 +543,6 @@ passert:: class <<
            exec: contents
            >>
 passert:: ! using()
-passert:: paren(parens()-1) ?= "123"              $ (123)
+passert:: paren(parens()-1) ?= "123"          $ (123)
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
-passert:: printdone() ?= printdone()              $ printdone() = print("    Message sent.")
+passert:: printdone() ?= printdone()          $ printdone() = print("    Message sent.")
