@@ -527,6 +527,7 @@ passert:: [1,2,3] union [1,2,4] ?= [1,2,3,4]
 passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
 
 # Final Testing:
+passert:: print("<#> Make sure you see this message three times")
 passert:: save("Tests.save");true
 contents = read("Tests.save")
 passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents)
