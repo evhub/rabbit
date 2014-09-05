@@ -911,6 +911,8 @@ Global Operator Precedence List:
                     else:
                         inputstring = params.funcstr
                         variables = params.variables
+                        command = None
+                        top = False
                         info = " <:"
                 else:
                     break
