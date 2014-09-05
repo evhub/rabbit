@@ -204,10 +204,22 @@ Global Operator Precedence List:
         """Makes A New Identically-Configured Evaluator."""
         return evaluator(None, self.processor, self.color, self.speedy, self.maxrecursion)
 
+    @property
+    def overflow(self):
+        """Gets The Overflow."""
+        return self._overflow
+
+    @overflow.setter
+    def overflow(self, inputlist):
+        """Sets The Overflow."""
+        if inputlist:
+            self.unclean()
+        self._overflow = inputlist
+
     def setup(self):
         """Performs Basic Setup."""
+        self._overflow = []
         self.debuglog = []
-        self.overflow = []
         self.preprocs = [
             self.preproc_alias,
             self.preproc_string,
@@ -878,24 +890,20 @@ Global Operator Precedence List:
         if top:
             spawned = self.spawned
             self.setspawned(False)
+        cleaned = self.clean_begin(True)
         if info is None:
             info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
         else:
             info = str(info)
         self.printdebug(">>> "+inputstring+info)
         self.recursion += 1
-        self.proc_pre(inputstring, top, command)
+        self.proc_calc(inputstring, top, command)
         self.recursion -= 1
+        self.clean_end(cleaned)
         if top:
             if not self.spawned:
                 self.processor.addcommand(inputstring)
             self.setspawned(self.spawned or spawned)
-
-    def proc_pre(self, original, top, command):
-        """Performs Pre-Processing."""
-        item = self.do_pre(original, top)
-        self.printdebug("| "+str(item))
-        self.proc_calc(item, top, command)
 
     def do_pre(self, item, top):
         """Does The Pre-Processing."""
@@ -905,8 +913,10 @@ Global Operator Precedence List:
             item = func(item)
         return item
 
-    def proc_calc(self, item, top, command):
+    def proc_calc(self, original, top, command):
         """Gets The Value Of An Expression."""
+        item = self.do_pre(original, top)
+        self.printdebug("| "+str(item))
         if top:
             splitfunc = lambda x: splitany(x, [";;", "\n"])
         else:
@@ -1104,15 +1114,21 @@ Global Operator Precedence List:
                     finally:
                         self.clean_end(cleaned)
                 else:
-                    return func(arg)
+                    cleaned = self.clean_begin(None, None)
+                    out = func(arg)
+                    self.clean_end(cleaned)
+                    return out
             elif self.clean:
                 raise Evaluate(arg, funcs)
             else:
                 func = funcs.pop(0)
+                cleaned = self.clean_begin(None, None)
                 if funcs:
-                    return func(arg, funcs)
+                    out = func(arg, funcs)
                 else:
-                    return func(arg)
+                    out = func(arg)
+                self.clean_end(cleaned)
+                return out
 
     def unclean(self):
         """Sets clean."""
@@ -1407,7 +1423,6 @@ Global Operator Precedence List:
         """Evaluates Conditions."""
         item = item.rsplit("@", 1)
         if len(item) == 1:
-            self.unclean()
             return self.calc_next(item[0], calc_funcs)
         else:
             cleaned = self.clean_begin()
@@ -2175,13 +2190,14 @@ Global Operator Precedence List:
     def call_colon(self, inputstring, call_funcs):
         """Evaluates Colons."""
         if ":" in inputstring:
-            self.unclean()
+            cleaned = self.clean_begin()
             inputlist = inputstring.split(":")
             item = self.funcfind(inputlist[0])
             params = []
             for x in xrange(1, len(inputlist)):
                 if inputlist[x]:
                     params.append(getcopy(self.eval_call(inputlist[x])))
+            self.clean_end(cleaned)
             return self.call_colon_set(item, params)
         else:
             return self.calc_next(inputstring, call_funcs)
@@ -2258,7 +2274,7 @@ Global Operator Precedence List:
                     out = item.getdiag()[int(params[1]):int(params[0])]
                     out.reverse()
                     value = diagmatrixlist(out)
-            self.overflow = params[2:]
+            self._overflow = params[2:]
         elif isfunc(item):
             value = self.getcall(item)(params)
         elif len(params) == 0:
@@ -2270,7 +2286,7 @@ Global Operator Precedence List:
             temp = self.overflow[:]
             self.overflow = []
             value = self.call_colon_set(value, temp)
-        self.overflow = overflow
+        self._overflow = overflow
         return value
 
     def unusedarg(self):
@@ -2375,7 +2391,7 @@ Global Operator Precedence List:
                 raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(out) > 1)+" of "+strlist(out, ", ", lambda x: self.prepare(x, False, True, True)))
             else:
                 x += 1
-            self.overflow = overflow
+            self._overflow = overflow
         return item
 
     def call_comp(self, inputstring, call_funcs):
