@@ -2017,7 +2017,7 @@ Global Operator Precedence List:
                     value = item
                 elif isinstance(item, negative):
                     value = item + value
-                elif not isnull(item):
+                else:
                     value = value + item
             return value
 
@@ -2054,11 +2054,9 @@ Global Operator Precedence List:
             value = self.calc_next(inputlist[0], eval_funcs)
             for x in xrange(1, len(inputlist)):
                 item = self.calc_next(inputlist[x], eval_funcs)
-                if isnull(value):
-                    value = item
-                elif isinstance(item, reciprocal):
+                if isinstance(item, reciprocal):
                     value = item * value
-                elif not isnull(item):
+                else:
                     value = value * item
             return value
 
