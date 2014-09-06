@@ -162,9 +162,6 @@ class compiler(commandline):
         if not top:
             self.e.fresh()
         self.e.makevars({
-            "run":funcfloat(self.runcall, self.e, "run", reqargs=1),
-            "require":funcfloat(self.requirecall, self.e, "require", reqargs=1),
-            "assert":funcfloat(self.assertcall, self.e, "assert", reqargs=1),
             "make":funcfloat(self.makecall, self.e, "make", reqargs=1),
             "cmd":funcfloat(self.cmdcall, self.e, "cmd", reqargs=1),
             "install":funcfloat(self.installcall, self.e, "install", reqargs=1),

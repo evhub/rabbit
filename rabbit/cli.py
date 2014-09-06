@@ -58,9 +58,6 @@ class commandline(mathbase):
             self.e.fresh()
         self.e.makevars({
             "debug":funcfloat(self.debugcall, self.e, "debug"),
-            "run":funcfloat(self.runcall, self.e, "run", reqargs=1),
-            "require":funcfloat(self.requirecall, self.e, "require", reqargs=1),
-            "assert":funcfloat(self.assertcall, self.e, "assert", reqargs=1),
             "make":funcfloat(self.e.funcs.docalc, self.e, "make", reqargs=1),
             "cmd":funcfloat(self.e.funcs.docalc, self.e, "cmd", reqargs=1),
             "save":funcfloat(self.savecall, self.e, "save", reqargs=1),

@@ -364,6 +364,9 @@ Global Operator Precedence List:
             "alias":funcfloat(self.funcs.aliascall, self, "alias", reqargs=1),
             "aliases":funcfloat(self.funcs.aliasescall, self, "aliases"),
             "effect":usefunc(self.setreturned, self, "effect"),
+            "run":funcfloat(self.funcs.runcall, self, "run", reqargs=1),
+            "require":funcfloat(self.funcs.requirecall, self, "require", reqargs=1),
+            "assert":funcfloat(self.funcs.assertcall, self, "assert"),
             "bitnot":funcfloat(self.funcs.bitnotcall, self, "bitnot", reqargs=1),
             "bitor":funcfloat(self.funcs.bitorcall, self, "bitor", reqargs=2),
             "bitand":funcfloat(self.funcs.bitandcall, self, "bitand", reqargs=2),
@@ -3845,3 +3848,62 @@ class evalfuncs(object):
             for x in xrange(1, len(variables)):
                 out = self.intersectcall([out, variables[x]])
             return out
+
+    def runcall(self, variables):
+        """Performs run."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to run")
+        elif len(variables) == 1:
+            self.esetreturned()
+            original = os.path.normcase(self.e.prepare(variables[0], False, False))
+            while not os.path.isfile(original):
+                if "." not in original:
+                    original += ".rab"
+                else:
+                    raise ExecutionError("IOError", "Could not find file "+str(original))
+            if not self.e.processor.evalfile(original):
+                raise ExecutionError("IOError", "Failed to execute file "+str(original))
+            else:
+                self.e.processor.dumpdebug(True)
+        else:
+            for arg in variables:
+                self.runcall([arg])
+        return matrix(0)
+
+    def requirecall(self, variables):
+        """Performs require."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to require")
+        elif len(variables) == 1:
+            self.e.setreturned()
+            out = classcalc(self.e)
+            params = out.begin()
+            self.runcall(variables)
+            out.end(params)
+            return out
+        else:
+            out = []
+            for arg in variables:
+                out.append(self.requirecall([arg]))
+            return diagmatrixlist(out)
+
+    def assertcall(self, variables):
+        """Checks For Errors By Asserting That Something Is True."""
+        if not variables:
+            raise ExecutionError("NoneError", "Assertion failed that none")
+        elif len(variables) == 1:
+            if isinstance(variables[0], codestr):
+                original = str(variables[0])
+                out = self.e.calc(original, " | assert")
+            else:
+                original = self.e.prepare(variables[0], True, True, True)
+                out = variables[0]
+        else:
+            for arg in variables:
+                self.assertcall([arg])
+            out = 1.0
+        test = bool(out)
+        if test:
+            return out
+        else:
+            raise ExecutionError("AssertionError", "Assertion failed that "+original, {"Result":out})

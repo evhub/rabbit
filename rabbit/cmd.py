@@ -120,9 +120,6 @@ class mathbase(safebase):
             self.e.fresh()
         self.e.makevars({
             "debug":funcfloat(self.debugcall, self.e, "debug"),
-            "run":funcfloat(self.runcall, self.e, "run", reqargs=1),
-            "require":funcfloat(self.requirecall, self.e, "require", reqargs=1),
-            "assert":funcfloat(self.assertcall, self.e, "assert", reqargs=1),
             "make":funcfloat(self.e.funcs.docalc, self.e, "make", reqargs=1),
             "cmd":funcfloat(self.e.funcs.docalc, self.e, "cmd", reqargs=1),
             "save":funcfloat(self.savecall, self.e, "save", reqargs=1),
@@ -233,65 +230,6 @@ class mathbase(safebase):
             raise ExecutionError("ArgumentError", "Too many arguments to debug")
         self.setdebug(out)
         return float(out)
-
-    def runcall(self, variables):
-        """Performs run."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to run")
-        elif len(variables) == 1:
-            self.e.setreturned()
-            original = os.path.normcase(self.e.prepare(variables[0], False, False))
-            while not os.path.isfile(original):
-                if "." not in original:
-                    original += ".rab"
-                else:
-                    raise ExecutionError("IOError", "Could not find file "+str(original))
-            if not self.evalfile(original):
-                raise ExecutionError("IOError", "Failed to execute file "+str(original))
-            else:
-                self.dumpdebug(True)
-        else:
-            for arg in variables:
-                self.runcall([arg])
-        return matrix(0)
-
-    def requirecall(self, variables):
-        """Performs require."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to require")
-        elif len(variables) == 1:
-            self.e.setreturned()
-            out = classcalc(self.e)
-            params = out.begin()
-            self.runcall(variables)
-            out.end(params)
-            return out
-        else:
-            out = []
-            for arg in variables:
-                out.append(self.requirecall([arg]))
-            return diagmatrixlist(out)
-
-    def assertcall(self, variables):
-        """Checks For Errors By Asserting That Something Is True."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Assertion failed that nothing")
-        elif len(variables) == 1:
-            if isinstance(variables[0], codestr):
-                original = str(variables[0])
-                out = self.e.calc(original, " | assert")
-            else:
-                original = self.e.prepare(variables[0], True, True, True)
-                out = variables[0]
-        else:
-            for arg in variables:
-                self.assertcall([arg])
-            out = 1.0
-        test = bool(out)
-        if test:
-            return out
-        else:
-            raise ExecutionError("AssertionError", "Assertion failed that "+original, {"Result":out})
 
     def printcall(self, variables, func=None):
         """Performs print."""
