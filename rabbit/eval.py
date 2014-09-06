@@ -3854,7 +3854,7 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to run")
         elif len(variables) == 1:
-            self.esetreturned()
+            self.e.setreturned()
             original = os.path.normcase(self.e.prepare(variables[0], False, False))
             while not os.path.isfile(original):
                 if "." not in original:
