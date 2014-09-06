@@ -525,6 +525,7 @@ passert:: class<<x=1;;y=2>> ?= (
  )
 passert:: [1,2,3] union [1,2,4] ?= [1,2,3,4]
 passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
+passert:: a.x ?= 1 $ (def:: a.x = 1) $ a = class<< b = class<<>> >>
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")
