@@ -239,18 +239,18 @@ Strings in rabbit are also not complicated, and are really very similar to strin
 
 Classes in Rabbit are essentially namespace objects. What that means is that classes are just groups of commands that are fed to them, and then any new definitions put into their own namespace. The basic syntax for classes is:
 ```
-{ x = 1 }			# Will create a class whose only variable, x, is set to 1
-{ x = 1 ;; y = 2 }	# Because the interior of a class is just treated as a command, command separators can be used to define multiple items inside of a class
-{ f(x) = x }		# That also means that functions can be defined within classes just the same as if they were being defined at the top level
+class<< x = 1 >>		# Will create a class whose only variable, x, is set to 1
+class<< x = 1 ;; y = 2 >>	# Because the interior of a class is just treated as a command, command separators can be used to define multiple items inside of a class
+class<< f(x) = x >>		# That also means that functions can be defined within classes just the same as if they were being defined at the top level
 ```
 
 Once a class has been created, a variety of different things can be done with it. The different sytnax for calling classes, and a further explanation of methods, is below:
 ```
-a := { x = 1 ;; x := x+1 }	# Remember, any valid top-level command is valid inside of a class
+a := class<< x = 1 ;; x := x+1 >>	# Remember, any valid top-level command is valid inside of a class
 a.x + 1						# This will retrieve x from the class and add 1 to it (result = 3)
 a:"x+1"						# Same as above--this will evaluate "x+1" in the namespace of the class (result = 3)
 a.z = 5						# Sets z to 5 inside the class
-a + { z = 5 }				# Same as above--class addition like this is the best method for inheritance (result = { x = 2 ;; z = 5 })
+a + class<< z = 5 <<				# Same as above--class addition like this is the best method for inheritance (result = class<< x = 2 ;; z = 5 >>)
 ```
 
 Since class definitions can often get very long, it is recommended that line continuations be used. Since we haven't introduced those yet, we'll do so here. Line continuations follow a very simple rule: any line that starts with whitespace will be added onto the previous line. It should be noted that this only works when running code from a file, not from the command line. Some common uses of this syntax are:
@@ -261,10 +261,10 @@ f(x) =
  -1/x
 
 # Defining a class:
-a = {
+a = class<<
  f(x) = x		# No need to use command seperators if you put the class on multiple lines: each line indented to the same degree as the first is a new command
  x = 1
- }
+ >>
 ```
 
 Since a very common use of classes is to define a temporary variable that is going to be used in multiple places but only in the same expression, with/where clauses were added to facilitate that. The syntax for these statements is:
@@ -272,27 +272,26 @@ Since a very common use of classes is to define a temporary variable that is goi
 # In with clause syntax:
 f(x) = gx*floor(gx) $ gx = g(x)			# Calls what comes before the dollar sign in the namespace of what comes after (right to left, highest precedence, right above at)
 # The same thing in class syntax:
-f(x) = { gx = g(x) } : "gx*floor(gx)"
+f(x) = class<< gx = g(x) >> : "gx*floor(gx)"
 
 # In with clause syntax:
 g(x) = m(z) $ z = x^2 $ m(z) = z%10		# Multiple dollar signs are used instead of double semicolons to separate multiple commands
 # The same thing in class syntax:
-g(x) = { m(z) = z%10 ;; z = x^2 } : "m(z)"
+g(x) = class<< m(z) = z%10 ;; z = x^2 >> : "m(z)"
 ```
 
 #### Rabbits Take Instances
 
 On their own, classes are very useful container objects. When instantiated, however, they become even more useful tools, capable of acting like any object they want. To instantiate a class, do:
 ```
-{} ()		# If called with parentheses, the class will get instantiated
+class<<>> ()		# If called with parentheses, the class will get instantiated
 ```
 
 Methods of instantiated classes will always take the instance as the first argument, and are urged to return it as the first argument as well. In addition, instances support a variety of special methods to define their behavior:
 ```
-nothing := {
+nothing := class<<
  __type__(self) = "nil"
  __init__(self) = self
- __get__(self, key) = key
  __call__(self, args) = args
  __cont__(self) = []
  __add__(self, other) = other
@@ -319,7 +318,7 @@ nothing := {
  __bool__(self) = 0
  __rep__(self, other) = [self]**other
  __rrep__(self, other) = ()
- }
+ >>
 nil := nothing()
 ```
 
@@ -423,13 +422,13 @@ The third stage is top-level operator evaluation. This stage, and all following 
 
 All different types of parentheses as well as conditionals are evaluated at this stage. In order, the different operators evaluated are:
 ```
-"hello, world"  # Strings
-(x+2)*2         # Parentheses
-{ x = 1 }       # Classes
-[1, 2, 3]       # Matrix rows (after this step whitespace is eliminated)
+"hello, world"   # Strings
+(x+2)*2          # Parentheses
+class<< x = 1 >> # Classes
+[1, 2, 3]        # Matrix rows (after this step whitespace is eliminated)
 x $ x = 1		# With clauses (result = 1)
-f(x); g(x)      # Conditionals
-f(x) @ x>=0     # Conditions
+f(x); g(x)       # Conditionals
+f(x) @ x>=0      # Conditions
 ```
 
 ##### Debug Output
