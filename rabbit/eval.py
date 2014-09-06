@@ -880,7 +880,7 @@ Global Operator Precedence List:
         out, self.calculated = self.calculated, calculated
         return out
 
-    def process(self, inputstring, info="", command=None, top=None, variables=None):
+    def process(self, inputstring, info="", command=None, top=None):
         """Performs Top-Level Evaluation."""
         inputstring = str(inputstring)
         if top is None:
@@ -892,54 +892,26 @@ Global Operator Precedence List:
         else:
             info = str(info)
         if top:
-            while True:
-                self.printdebug(">>> "+inputstring+info)
-                self.recursion += 1
-                cleaned = self.clean_begin(True, True)
-                tailing, self.tailing = self.tailing, True
-                spawned = self.spawned
-                self.setspawned(False)
-                if variables is not None:
-                    oldvars = self.setvars(variables)
-                else:
-                    oldvars = None
-                try:
-                    self.proc_calc(inputstring, top, command)
-                except TailRecursion as params:
-                    if (variables or {}) == params.variables and inputstring == params.funcstr:
-                        raise ExecutionError("RuntimeError", "Illegal infinite recursive loop")
-                    else:
-                        inputstring = params.funcstr
-                        variables = params.variables
-                        command = None
-                        top = False
-                        info = " <:"
-                else:
-                    break
-                finally:
-                    if oldvars is not None:
-                        self.setvars(oldvars)
-                    if not self.spawned:
-                        self.processor.addcommand(inputstring)
-                    self.setspawned(self.spawned or spawned)
-                    self.tailing = tailing
-                    self.clean_end(cleaned)
-                    self.recursion -= 1
+            self.printdebug(">>> "+inputstring+info)
+            self.recursion += 1
+            spawned = self.spawned
+            self.setspawned(False)
+            tailing, self.tailing = self.tailing, False
+            cleaned = self.clean_begin(True, True)
         else:
             self.printdebug(":>> "+inputstring+info)
             self.recursion += 1
             cleaned = self.clean_begin(None, None)
-            if variables is not None:
-                oldvars = self.setvars(variables)
-            else:
-                oldvars = None
-            try:
-                self.proc_calc(inputstring, top, command)
-            finally:
-                if oldvars is not None:
-                    self.setvars(oldvars)
-                self.clean_end(cleaned)
-                self.recursion -= 1
+        try:
+            self.proc_calc(inputstring, top, command)
+        finally:
+            if top:
+                if not self.spawned:
+                    self.processor.addcommand(inputstring)
+                self.setspawned(self.spawned or spawned)
+                self.tailing = tailing
+            self.clean_end(cleaned)
+            self.recursion -= 1
 
     def do_pre(self, item, top):
         """Does The Pre-Processing."""
