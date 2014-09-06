@@ -1302,7 +1302,7 @@ Global Operator Precedence List:
                         useclass = useclass.retrieve(classlist[x])
                         if not isinstance(useclass, classcalc):
                             if istext(useclass) and len(classlist) == x+1:
-                                sides[1] = "( "+useclass+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
+                                sides[1] = "( "+useclass+" )"+" + class\xab "+sides[0]+" "+":"*docalc+"= "+sides[1]+" \xbb"
                                 sides[0] = classlist[x]
                                 useclass = last
                                 classlist = classlist[:x]
@@ -1311,7 +1311,7 @@ Global Operator Precedence List:
                             else:
                                 raise ExecutionError("ClassError", "Could not set "+classlist[x]+" in "+self.prepare(last, False, True, True))
                 elif classlist[0] in self.variables and istext(self.variables[classlist[0]]) and len(classlist) == 1:
-                    sides[1] = "( "+self.variables[classlist[0]]+" )"+" + { "+sides[0]+" :"*docalc+" "*(not docalc)+"= "+sides[1]+" }"
+                    sides[1] = "( "+self.variables[classlist[0]]+" ) + class\xab "+sides[0]+" "+":"*docalc+"= "+sides[1]+" \xbb"
                     sides[0] = classlist[0]
                     useclass = None
                     classlist = []
