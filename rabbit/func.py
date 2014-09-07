@@ -1328,8 +1328,8 @@ class classcalc(cotobject):
 
     def init(self, params):
         """Initializes The Instance."""
-        if "__init__" in self.variables:
-            item = self.calc("__init__")
+        if "__new__" in self.variables:
+            item = self.calc("__new__")
             if isfunc(item):
                 value = self.domethod(item, params)
             else:
@@ -1674,7 +1674,18 @@ class instancecalc(numobject, classcalc):
                     self += self
             except ExecutionError:
                 pass
+            else:
+                return self
         raise ExecutionError("TypeError", "Insufficient methods defined for division")
+
+    def __ifloordiv__(self, other):
+        """Performs Floor Division."""
+        check_fdiv = self.tryget("__fdiv__")
+        if check_fdiv:
+            return self.domethod(check_fdiv, other)
+        else:
+            self /= other
+            return int(self)
 
     def __imod__(self, other):
         """Performs Moduluo."""
@@ -1703,6 +1714,8 @@ class instancecalc(numobject, classcalc):
                     self *= self
             except ExecutionError:
                 pass
+            else:
+                return self
         raise ExecutionError("TypeError", "Insufficient methods defined for exponentiation")
 
     def __rdiv__(self, other):
@@ -1711,6 +1724,14 @@ class instancecalc(numobject, classcalc):
         if check_rdiv:
             return self.domethod(check_rdiv, other)
         raise ExecutionError("TypeError", "Insufficient methods defined for division")
+
+    def __rfloordiv__(self, other):
+        """Performs Reverse Floor Division."""
+        check_rfdiv = self.tryget("__rfdiv__")
+        if check_rfdiv:
+            return self.domethod(check_rfdiv, other)
+        else:
+            return int(other / self)
 
     def __rmod__(self, other):
         """Performs Reverse Modulo."""
@@ -2380,3 +2401,99 @@ class brace(bracket):
     def getstate(self):
         """Returns A Pickleable Reference Object."""
         return ("brace", self.items)
+
+class evalwrap(evalobject):
+    """A Wrapper For Converting An Arbitrary Python Object Into A Rabbit Object."""
+    def __init__(self, inputobj):
+        """Constructs The Wrapper."""
+        self.obj = inputobj
+
+# Need to be directly implemented:
+##    getstate
+##    copy
+##    check
+##    getcall
+##    call
+##    isfunc
+##    ismatrix
+##    tomatrix
+##    notmatrix
+##    isprop
+##    getrepr
+##    op_repeat
+##    rop_repeat
+##    itemcall
+##    getmethod
+##    evaltype
+##    __hash__
+##    __lt__
+##    __gt__
+##    __le__
+##    __ge__
+##    __eq__
+##    __ne__
+##    __cmp__
+##    __nonzero__
+##    __len__
+##    __add__
+##    __iadd__
+##    __radd__
+##    __sub__
+##    __isub__
+##    __rsub__
+##    __mul__
+##    __imul__
+##    __rmul__
+##    __floordiv__
+##    __ifloordiv__
+##    __rfloordiv__
+##    __mod__
+##    __imod__
+##    __rmod__
+##    __pow__
+##    __ipow__
+##    __rpow__
+##    __lshift__
+##    __ilshift__
+##    __rlshift__
+##    __rshift__
+##    __irshift__
+##    __rrshift__
+##    __and__
+##    __iand__
+##    __rand__
+##    __or__
+##    __ior__
+##    __ror__
+##    __xor__
+##    __ixor__
+##    __rxor__
+##    __neg__
+##    __pos__
+##    __abs__
+##    __invert__
+##    __complex__
+##    __int__
+##    __long__
+##    __float__
+##    __oct__
+##    __hex__
+##    __index__
+
+# Need to be indirectly implemented:
+##    __getitem__
+##    __setitem__
+##    __delitem__
+##    __getattr__
+##    __setattr__
+##    __delattr__
+##    __get__
+##    __set__
+##    __delete__
+##    __metaclass__
+##    __instancecheck__
+##    __subclasscheck__
+##    __iter__
+##    __contains__
+##    __enter__
+##    __exit__

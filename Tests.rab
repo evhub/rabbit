@@ -92,7 +92,7 @@ passert:: class << x = 1 >> + class << z = 5 >> ?= class << x = 1 ;; z = 5 >>
 # Instance Tests:
 nothing := class <<
  __type__(self) = "nil"
- __init__(self) = self
+ __new__(self) = self
  __call__(self, args) = args
  __cont__(self) = []
  __add__(self, other) = other

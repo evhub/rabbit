@@ -291,7 +291,7 @@ Methods of instantiated classes will always take the instance as the first argum
 ```
 nothing := class<<
  __type__(self) = "nil"
- __init__(self) = self
+ __new__(self) = self
  __call__(self, args) = args
  __cont__(self) = []
  __add__(self, other) = other

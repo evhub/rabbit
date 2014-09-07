@@ -26,8 +26,11 @@ from .base import *
 
 def getcheck(inputobject):
     """Returns The Evaluator Check Number For The Object Where (-2=unknown; -1=string; 0=number; 1=number-equivalent; 2=matrix-equivalent)."""
-    if isinstance(inputobject, evalobject):
-        return int(inputobject.check)
+    if isinstance(inputobject, evalobject) and hasattr(inputobject, "check"):
+        if isinstance(inputobject.check, int):
+            return inputobject.check
+        else:
+            return inputobject.check()
     elif isnum(inputobject):
         return 0
     elif istext(inputobject):

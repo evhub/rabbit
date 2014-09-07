@@ -171,7 +171,6 @@ Global Operator Precedence List:
     messagevar = "message"
     autoarg = "____"
     recursion = 0
-    laxnull = True
     redef = False
     useclass = None
     returned = True
@@ -618,10 +617,7 @@ Global Operator Precedence List:
                 out = self.prepare(getmatrix(item), top, bottom, indebug, maxrecursion)
         elif isinstance(item, matrix):
             if item.y == 0:
-                if self.laxnull:
-                    out = "()"
-                else:
-                    out = "none"
+                out = "()"
             elif item.onlydiag():
                 out = "("
                 for x in item.getdiag():
@@ -2447,7 +2443,7 @@ Global Operator Precedence List:
                     key = itemlist[x]
                     if hasattr(out, "getmethod"):
                         new = out.getmethod(key)
-                    elif self.laxnull and isnull(out):
+                    elif isnull(out):
                         raise ExecutionError("NoneError", "Nothing does not have methods")
                     else:
                         if hasattr(out, key):

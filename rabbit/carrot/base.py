@@ -90,10 +90,32 @@ class evalobject(object):
         """Raises An Error."""
         raise ExecutionError("OperatorError", "Division not defined for object")
 
-    def __pow__(self, other):
+    def __truediv__(self, other):
+        """Wraps __div__."""
+        return self.__div__(other)
+    def __itruediv__(self, other):
+        """Wraps __idiv__."""
+        return self.__idiv__(other)
+    def __rtruediv__(self, other):
+        """Wraps __rdiv__."""
+        return self.__rdiv__(other)
+
+    def __floordiv__(self, other):
+        """Performs Floor Division."""
+        out = self.copy()
+        out //= other
+        return out
+    def __ifloordiv__(self, other):
+        """Performs //."""
+        self /= other
+        return int(self)
+
+    def __pow__(self, other, mod=None):
         """Performs Exponentiation."""
         out = self.copy()
         out **= other
+        if mod is not None:
+            out %= mod
         return out
     def __ipow__(self, other):
         """Performs **."""
@@ -183,6 +205,10 @@ class evalobject(object):
         """Wraps int."""
         return int(self)
 
+    def __unicode__(self):
+        """Converts To A String."""
+        return str(self)
+
 class numobject(evalobject):
     """A Base Class For Objects."""
 
@@ -222,30 +248,6 @@ class numobject(evalobject):
     def __int__(self):
         """Retrieves An Integer."""
         return int(self.calc())
-
-    def __floordiv__(self, other):
-        """Implements Floor Division."""
-        return self.__div__(int(other))
-
-    def __truediv__(self, other):
-        """Implements Float Division."""
-        return self.__div__(float(other))
-
-    def __itruediv__(self, other):
-        """Implements Float Division In-Place."""
-        return self.__idiv__(float(other))
-
-    def __ifloordiv__(self, other):
-        """Implements Floor Divison In-Place."""
-        return self.__idiv__(int(other))
-
-    def __rfloordiv__(self, other):
-        """Implements Reverse Floor Division."""
-        return self.__rdiv__(int(other))
-
-    def __rtruediv__(self, other):
-        """Implements Reverse Float Division."""
-        return self.__rdiv__(float(other))
 
     def __neg__(self):
         """Implements Unary -."""
