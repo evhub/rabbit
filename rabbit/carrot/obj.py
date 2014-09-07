@@ -156,7 +156,7 @@ def hasreal(value):
 
 def isnum(inputobject):
     """Determines If An Object Is A Number."""
-    return isinstance(inputobject, (old_float, old_int, long, complex))
+    return isinstance(inputobject, (old_float, old_int, long, complex, bool))
 
 def ismethod(inputobject):
     """Determines Whether An Object Is A Method."""

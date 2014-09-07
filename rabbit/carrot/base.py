@@ -207,7 +207,10 @@ class evalobject(object):
 
     def __unicode__(self):
         """Converts To A String."""
-        return str(self)
+        if hasattr(self, "__str__"):
+            return self.__str__()
+        else:
+            return repr(self)
 
 class numobject(evalobject):
     """A Base Class For Objects."""
