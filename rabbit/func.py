@@ -1153,7 +1153,7 @@ class classcalc(cotobject):
     doset = False
     selfvar = "__self__"
 
-    def __init__(self, e, variables=None):
+    def __init__(self, e, variables=None, name=None):
         """Initializes The Class."""
         self.e = e
         self.restricted = [
@@ -1163,7 +1163,7 @@ class classcalc(cotobject):
             self.selfvar : self
             }
         if variables is not None:
-            self.add(variables)
+            self.add(variables, name=name)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -1250,16 +1250,17 @@ class classcalc(cotobject):
         out += " \xbb"
         return out
 
-    def store(self, key, value, bypass=False):
+    def store(self, key, value, bypass=False, name=None):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
+        value = getcopy(value)
         if test in self.restricted:
             raise ExecutionError("RedefinitionError", "The "+test+" variable cannot be redefined")
-        elif bypass:
-            self.variables[test] = value
-        elif self.e.isreserved(test):
+        elif not bypass and self.e.isreserved(test):
             raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
         else:
+            if name is not None and isinstance(value, funcfloat) and not isinstance(value, strfunc):
+                value.funcstr = str(name)+"."+value.funcstr
             self.variables[test] = value
             if self.doset:
                 self.doset[test] = haskey(self.e.variables, test)
@@ -1364,10 +1365,10 @@ class classcalc(cotobject):
         else:
             raise ExecutionError("ClassError", "Could not extend class with "+repr(other))
 
-    def add(self, other, bypass=True):
+    def add(self, other, bypass=True, name=None):
         """Adds Variables."""
         for k,v in other.items():
-            self.store(k, v, bypass)
+            self.store(k, v, bypass, name)
 
     def getvars(self):
         """Gets Original Variables."""
@@ -1572,13 +1573,10 @@ class instancecalc(numobject, classcalc):
     def store(self, key, value, bypass=False):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        if test == self.selfvar:
-            raise ExecutionError("RedefinitionError", "The "+self.selfvar+" variable cannot be redefined.")
-        elif bypass:
-            if isinstance(value, strfunc):
-                value.curryself(self)
-            self.variables[test] = value
-        elif self.e.isreserved(test):
+        value = getcopy(value)
+        if test in self.restricted:
+            raise ExecutionError("RedefinitionError", "The "+test+" variable cannot be redefined.")
+        elif not bypass and self.e.isreserved(test):
             raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
         else:
             if isinstance(value, strfunc):

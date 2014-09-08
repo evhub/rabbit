@@ -5,7 +5,7 @@ assert:: (passert::"abc")
 assert:: iserr((try::(passert::0)):1)
 
 # Includes:
-passert:: include(Math, Stats)
+passert:: include(Meta, Math, Stats, Unicode)
 
 # Boolean Operator Tests:
 passert:: 1 ?= 1
