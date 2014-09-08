@@ -278,24 +278,26 @@ class mathbase(safebase):
                 return strfloat(out, self.e)
 
     def installcall(self, variables):
-        """Performs x = import."""
+        """Performs install."""
         if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
         elif len(variables) == 1:
             self.e.setreturned()
-            inputstring = self.e.prepare(variables[0], False, False)
-            name = delspace(delspace(inputstring), self.e.reserved)
+            name = self.e.prepare(variables[0], False, False)
             try:
                 impclass = dirimport(inputstring).interface
             except IOError:
-                raise ExecutionError("IOError", "Could not find for install file "+inputstring)
+                raise ExecutionError("IOError", "Could not find for install file "+name)
             else:
+                funcname = "install:`"+name+"`"
                 if impclass is None:
                     return matrix(0)
                 elif iseval(impclass):
                     return impclass(self)
+                elif "`" in name:
+                    raise ValueError("Cannot install files with a backtick in them")
                 elif hascall(impclass):
-                    return funcfloat(impclass(self).call, self.e, name)
+                    return funcfloat(getcall(impclass(self)), self.e, funcname)
                 else:
                     try:
                         impclass.precall
@@ -305,9 +307,9 @@ class mathbase(safebase):
                         except AttributeError:
                             return impclass(self)
                         else:
-                            return unifunc(impclass(self).unicall, self.e, name)
+                            return unifunc(impclass(self).unicall, self.e, funcname)
                     else:
-                        return usefunc(impclass(self).precall, self.e, name)
+                        return usefunc(impclass(self).precall, self.e, funcname)
         else:
             out = []
             for x in variables:
