@@ -123,7 +123,6 @@ class mathbase(safebase):
             "make":funcfloat(self.e.funcs.docalc, self.e, "make", reqargs=1),
             "cmd":funcfloat(self.e.funcs.docalc, self.e, "cmd", reqargs=1),
             "save":funcfloat(self.savecall, self.e, "save", reqargs=1),
-            "install":funcfloat(self.installcall, self.e, "install", reqargs=1),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
@@ -276,45 +275,6 @@ class mathbase(safebase):
                 return rawstrcalc(out, self.e)
             else:
                 return strfloat(out, self.e)
-
-    def installcall(self, variables):
-        """Performs install."""
-        if not variables:
-            raise ExecutionError("NoneError", "Nothing is not a file name")
-        elif len(variables) == 1:
-            self.e.setreturned()
-            name = self.e.prepare(variables[0], False, False)
-            try:
-                impclass = dirimport(inputstring).interface
-            except IOError:
-                raise ExecutionError("IOError", "Could not find for install file "+name)
-            else:
-                funcname = "install:`"+name+"`"
-                if impclass is None:
-                    return matrix(0)
-                elif iseval(impclass):
-                    return impclass(self)
-                elif "`" in name:
-                    raise ValueError("Cannot install files with a backtick in them")
-                elif hascall(impclass):
-                    return funcfloat(getcall(impclass(self)), self.e, funcname)
-                else:
-                    try:
-                        impclass.precall
-                    except AttributeError:
-                        try:
-                            impclass.unicall
-                        except AttributeError:
-                            return impclass(self)
-                        else:
-                            return unifunc(impclass(self).unicall, self.e, funcname)
-                    else:
-                        return usefunc(impclass(self).precall, self.e, funcname)
-        else:
-            out = []
-            for x in variables:
-                out.append(self.installcall([x]))
-            return diagmatrixlist(out)
 
     def savecall(self, variables):
         """Performs save."""

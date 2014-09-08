@@ -164,7 +164,6 @@ class compiler(commandline):
         self.e.makevars({
             "make":funcfloat(self.makecall, self.e, "make", reqargs=1),
             "cmd":funcfloat(self.cmdcall, self.e, "cmd", reqargs=1),
-            "install":funcfloat(self.installcall, self.e, "install", reqargs=1),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show")
             })

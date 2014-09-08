@@ -309,7 +309,6 @@ class grapher(mathbase):
             "make":funcfloat(self.e.funcs.docalc, self.e, "make", reqargs=1),
             "cmd":funcfloat(self.e.funcs.docalc, self.e, "cmd", reqargs=1),
             "save":funcfloat(self.savecall, self.e, "save", reqargs=1),
-            "install":funcfloat(self.installcall, self.e, "install", reqargs=1),
             "cum":funcfloat(self.cumcall, self.e, "cum"),
             "inv":funcfloat(self.invcall, self.e, "inv"),
             "invcum":funcfloat(self.invcumcall, self.e, "invcum"),

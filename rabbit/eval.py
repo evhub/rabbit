@@ -366,6 +366,7 @@ Global Operator Precedence List:
             "run":funcfloat(self.funcs.runcall, self, "run", reqargs=1),
             "require":funcfloat(self.funcs.requirecall, self, "require", reqargs=1),
             "assert":funcfloat(self.funcs.assertcall, self, "assert"),
+            "install":funcfloat(self.funcs.installcall, self, "install", reqargs=1),
             "bitnot":funcfloat(self.funcs.bitnotcall, self, "bitnot", reqargs=1),
             "bitor":funcfloat(self.funcs.bitorcall, self, "bitor", reqargs=2),
             "bitand":funcfloat(self.funcs.bitandcall, self, "bitand", reqargs=2),
@@ -3903,3 +3904,42 @@ class evalfuncs(object):
             return out
         else:
             raise ExecutionError("AssertionError", "Assertion failed that "+original, {"Result":out})
+
+    def installcall(self, variables):
+        """Performs install."""
+        if not variables:
+            raise ExecutionError("NoneError", "Nothing is not a file name")
+        elif len(variables) == 1:
+            self.setreturned()
+            name = self.prepare(variables[0], False, False)
+            try:
+                impclass = dirimport(inputstring).__rabbit__
+            except IOError:
+                raise ExecutionError("IOError", "Could not find for install file "+name)
+            else:
+                funcname = "install:`"+name+"`"
+                if impclass is None:
+                    return matrix(0)
+                elif iseval(impclass):
+                    return impclass(self)
+                elif "`" in name:
+                    raise ValueError("Cannot install files with a backtick in them")
+                elif hascall(impclass):
+                    return funcfloat(getcall(impclass(self)), self, funcname)
+                else:
+                    try:
+                        impclass.precall
+                    except AttributeError:
+                        try:
+                            impclass.unicall
+                        except AttributeError:
+                            return impclass(self)
+                        else:
+                            return unifunc(impclass(self).unicall, self, funcname)
+                    else:
+                        return usefunc(impclass(self).precall, self, funcname)
+        else:
+            out = []
+            for x in variables:
+                out.append(self.installcall([x]))
+            return diagmatrixlist(out)

@@ -61,7 +61,6 @@ class commandline(mathbase):
             "make":funcfloat(self.e.funcs.docalc, self.e, "make", reqargs=1),
             "cmd":funcfloat(self.e.funcs.docalc, self.e, "cmd", reqargs=1),
             "save":funcfloat(self.savecall, self.e, "save", reqargs=1),
-            "install":funcfloat(self.installcall, self.e, "install", reqargs=1),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
