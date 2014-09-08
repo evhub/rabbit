@@ -875,6 +875,7 @@ Global Operator Precedence List:
 
     def calc(self, inputstring, info=""):
         """Performs Top-Level Calculation."""
+        inputstring = str(inputstring)
         calculated, self.calculated = self.calculated, matrix(0)
         self.process(inputstring, info, self.setcalculated, False)
         out, self.calculated = self.calculated, calculated
@@ -2684,11 +2685,7 @@ Global Operator Precedence List:
             if name in self.constructors:
                 value = self.constructors[name](self, args)
             elif name == "find":
-                tofind = str(args[0])
-                if tofind in self.variables:
-                    value = self.variables[tofind]
-                else:
-                    raise ExecutionError("UnpicklingError", "Rabbit could not find "+tofind)
+                value = self.calc(args[0])
             else:
                 raise ExecutionError("UnpicklingError", "Rabbit could not unpickle "+name)
         else:
@@ -3913,31 +3910,35 @@ class evalfuncs(object):
             self.setreturned()
             name = self.prepare(variables[0], False, False)
             try:
-                impclass = dirimport(inputstring).__rabbit__
+                impbaseclass = dirimport(inputstring)
             except IOError:
                 raise ExecutionError("IOError", "Could not find for install file "+name)
             else:
-                funcname = "install:`"+name+"`"
-                if impclass is None:
-                    return matrix(0)
-                elif iseval(impclass):
-                    return impclass(self)
-                elif "`" in name:
-                    raise ValueError("Cannot install files with a backtick in them")
-                elif hascall(impclass):
-                    return funcfloat(getcall(impclass(self)), self, funcname)
-                else:
-                    try:
-                        impclass.precall
-                    except AttributeError:
-                        try:
-                            impclass.unicall
-                        except AttributeError:
-                            return impclass(self)
-                        else:
-                            return unifunc(impclass(self).unicall, self, funcname)
+                if hasattr(impbaseclass, "__rabbit__"):
+                    impclass = impbaseclass.__rabbit__
+                    funcname = "install`"+name+"`"
+                    if impclass is None:
+                        return matrix(0)
+                    elif iseval(impclass):
+                        return impclass(self)
+                    elif "`" in name:
+                        raise ValueError("Cannot install files with a backtick in them")
+                    elif hascall(impclass):
+                        return funcfloat(getcall(impclass(self)), self, funcname)
                     else:
-                        return usefunc(impclass(self).precall, self, funcname)
+                        try:
+                            impclass.precall
+                        except AttributeError:
+                            try:
+                                impclass.unicall
+                            except AttributeError:
+                                return impclass(self)
+                            else:
+                                return unifunc(impclass(self).unicall, self, funcname)
+                        else:
+                            return usefunc(impclass(self).precall, self, funcname)
+                else:
+                    raise ExecutionError("ImportError", "Found no __rabbit__ variable in file "+name)
         else:
             out = []
             for x in variables:
