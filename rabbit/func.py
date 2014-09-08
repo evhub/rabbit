@@ -1490,7 +1490,7 @@ class instancecalc(numobject, classcalc):
     evaltype = "instance"
     parentvar = "__parent__"
 
-    def __init__(self, e, variables, parent=None):
+    def __init__(self, e, variables, parent=None, name=None):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
         if parent is None:
@@ -1507,7 +1507,7 @@ class instancecalc(numobject, classcalc):
             self.parentvar : parent
             }
         if variables is not None:
-            self.add(variables)
+            self.add(variables, name=name)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -1570,7 +1570,7 @@ class instancecalc(numobject, classcalc):
         else:
             raise ExecutionError("ClassError", "Invalid class key of "+test)
 
-    def store(self, key, value, bypass=False):
+    def store(self, key, value, bypass=False, name=None):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
         value = getcopy(value)
@@ -1581,6 +1581,8 @@ class instancecalc(numobject, classcalc):
         else:
             if isinstance(value, strfunc):
                 value.curryself(self)
+            elif name is not None and isinstance(value, funcfloat):
+                value.funcstr = str(name)+"."+value.funcstr
             self.variables[test] = value
             if self.doset:
                 self.doset[test] = haskey(self.e.variables, test)
