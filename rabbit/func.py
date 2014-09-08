@@ -1253,7 +1253,6 @@ class classcalc(cotobject):
     def store(self, key, value, bypass=False, name=None):
         """Stores An Item."""
         test = delspace(self.e.prepare(key, False, False))
-        value = getcopy(value)
         if test in self.restricted:
             raise ExecutionError("RedefinitionError", "The "+test+" variable cannot be redefined")
         elif not bypass and self.e.isreserved(test):
