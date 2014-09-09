@@ -530,6 +530,11 @@ passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
 passert:: a.x ?= 1 $ (def:: a.x = 1) $ a = class<< b = class<<>> >>
 passert:: [][] ?= []
 passert:: inst ?= class<<__parent__=class<<meta=1>>;;x=1>> $ (def:: inst.x = 1) $ inst = class<<meta=1>>
+property(func) = class<<__value__(self)=func()>>()
+vv = prop(val"v")
+vv' = property(val"v")
+passert:: vv ?= 1 ?= vv' $ v = 1
+passert:: vv ?= 2 ?= vv' $ v = 2
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")
@@ -538,7 +543,7 @@ contents = read("Tests.save")
 passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents)
 passert:: ! using()
 use(calc) ;; use(using())
-passert:: calc ?= using() ?= used             $ used = property(using) $ property(func) = class<<__value__(self)=func()>>()
+passert:: calc ?= using() ?= used ?= used'    $ used' = property(using) $ used = prop(using)
 passert:: class <<
            run :: Tests.save
            >>

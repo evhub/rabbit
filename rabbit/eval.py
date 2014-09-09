@@ -411,7 +411,7 @@ Global Operator Precedence List:
             funcfloat.allargs : matrix(0)
             }
         self.variables.update({
-            "property":strfunc("class\xab__value__(self,getter:getter)=getter()\xbb()", self, ["getter"], name="property"),
+            "prop":strfunc("class\xab__value__(self,getter:getter)=getter()\xbb()", self, ["getter"], name="prop"),
             "inside":strfunc("\\__,begin:begin,end:end\\(out$end()$out=calc(__)$begin())", self, ["begin", "end"], name="inside"),
             "Unicode":classcalc(self, {
                 "__include__" : strfunc("""self.includes$self.aliases~~Meta.alias""", self, ["self"], name="__include__"),
