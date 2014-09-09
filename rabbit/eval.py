@@ -2081,12 +2081,12 @@ Global Operator Precedence List:
                     value = value * item
             return value
 
-    def eval_call(self, inputstring):
+    def eval_call(self, inputstring, top=True):
         """Evaluates A Variable."""
         self.printdebug("=> "+inputstring)
         self.recursion += 1
         for func in self.calls:
-            out = func(inputstring)
+            out = func(inputstring, top)
             if out is not None:
                 break
         self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring)
@@ -2124,7 +2124,7 @@ Global Operator Precedence List:
         """Determines If An Item Can Be Converted By eval_check."""
         return hasnum(item) or islist(item) or isinstance(item, bool) or item is None
 
-    def call_var(self, inputstring):
+    def call_var(self, inputstring, top=None):
         """Checks If Variable."""
         if inputstring in self.variables:
             self.unclean()
@@ -2142,7 +2142,7 @@ Global Operator Precedence List:
                 self.variables[key] = value
             return value
 
-    def call_parenvar(self, inputstring):
+    def call_parenvar(self, inputstring, top=None):
         """Checks If Parentheses."""
         if inputstring.startswith(self.parenchar) and inputstring.endswith(self.parenchar):
             item = self.namefind(inputstring, True)
@@ -2165,12 +2165,12 @@ Global Operator Precedence List:
             value = self.getcall(value)(None)
         return value
 
-    def call_lambda(self, inputstring):
+    def call_lambda(self, inputstring, top=None):
         """Wraps Lambda Evaluation."""
         if inputstring.startswith(self.lambdamarker):
             return self.eval_lambda([inputstring])
 
-    def call_neg(self, inputstring):
+    def call_neg(self, inputstring, top=None):
         """Evaluates Unary -."""
         if inputstring.startswith("-"):
             self.unclean()
@@ -2180,7 +2180,7 @@ Global Operator Precedence List:
             else:
                 return negative(item)
 
-    def call_reciproc(self, inputstring):
+    def call_reciproc(self, inputstring, top=None):
         """Evaluates /."""
         if inputstring.startswith("/"):
             self.unclean()
@@ -2190,7 +2190,7 @@ Global Operator Precedence List:
             else:
                 return reciprocal(item)
 
-    def call_exp(self, inputstring):
+    def call_exp(self, inputstring, top=None):
         """Evaluates The Exponential Part Of An Expression."""
         if "^" in inputstring:
             self.unclean()
@@ -2209,7 +2209,7 @@ Global Operator Precedence List:
                         level += 1
             return value
 
-    def call_colon(self, inputstring):
+    def call_colon(self, inputstring, top=None):
         """Evaluates Colons."""
         if ":" in inputstring:
             cleaned = self.clean_begin()
@@ -2316,73 +2316,74 @@ Global Operator Precedence List:
             out = "_"+out
         return out
 
-    def call_paren(self, inputstring):
+    def call_paren(self, inputstring, top=True):
         """Evaluates Parentheses."""
-        inputstring = (self.parenchar*2).join(switchsplit(inputstring, string.digits, notstring=self.reserved))
-        if self.parenchar in inputstring:
-            self.unclean()
-            self.printdebug("(|) "+inputstring) 
-            templist = inputstring.split(self.parenchar)
-            checkops = delspace(self.callops, self.subparenops)
-            inputlist = [[]]
-            feed = inputlist[0]
-            last = False
-            for x in xrange(0, len(templist)):
-                if x%2 == 1:
-                    if templist[x]:
-                        last = True
-                        if feed and feed[-1] and feed[-1][-1] in checkops:
-                            feed[-1] += self.parenchar+templist[x]+self.parenchar
+        if top:
+            inputstring = (self.parenchar*2).join(switchsplit(inputstring, string.digits, notstring=self.reserved))
+            if self.parenchar in inputstring:
+                self.unclean()
+                self.printdebug("(|) "+inputstring) 
+                templist = inputstring.split(self.parenchar)
+                checkops = delspace(self.callops, self.subparenops)
+                inputlist = [[]]
+                feed = inputlist[0]
+                last = False
+                for x in xrange(0, len(templist)):
+                    if x%2 == 1:
+                        if templist[x]:
+                            last = True
+                            if feed and feed[-1] and feed[-1][-1] in checkops:
+                                feed[-1] += self.parenchar+templist[x]+self.parenchar
+                            else:
+                                feed.append(self.parenchar+templist[x]+self.parenchar)
+                            last = True
                         else:
-                            feed.append(self.parenchar+templist[x]+self.parenchar)
-                        last = True
+                            last = False
+                    elif templist[x]:
+                        if feed and ((templist[x] and templist[x][0] in checkops) or (feed[-1] and feed[-1][-1] in checkops)):
+                            feed[-1] += templist[x]
+                        else:
+                            if last:
+                                inputlist.append([])
+                                feed = inputlist[-1]
+                            feed.append(templist[x])
+                temp = "("+strlist(inputlist, ") * (", lambda l: strlist(l, " : "))+")"
+                self.printdebug("(>) "+temp)
+                self.recursion += 1
+                values = []
+                for l in inputlist:
+                    x = 0
+                    while x < len(l):
+                        if endswithany(l[x], self.subparenops) and x+1 < len(l):
+                            l[x] += l.pop(x+1)
+                        if startswithany(l[x], self.subparenops) and x > 0:
+                            l[x-1] += l.pop(x)
+                            x -= 1
+                        x += 1
+                    if not l:
+                        item = matrix(0)
+                    elif len(values) > 0 and startswithany(l[0], self.subparenops):
+                        autoarg = self.unusedarg()
+                        item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
                     else:
-                        last = False
-                elif templist[x]:
-                    if feed and ((templist[x] and templist[x][0] in checkops) or (feed[-1] and feed[-1][-1] in checkops)):
-                        feed[-1] += templist[x]
+                        item = self.eval_call(l[0], False)
+                    args = []
+                    for x in xrange(1, len(l)):
+                        args.append(self.eval_call(l[x], False))
+                    item = self.call_paren_do(item, args)
+                    if values and isinstance(item, funcfloat) and item.infix:
+                        values.append(self.call_paren_do(item, [values.pop()]))
                     else:
-                        if last:
-                            inputlist.append([])
-                            feed = inputlist[-1]
-                        feed.append(templist[x])
-            temp = "("+strlist(inputlist, ") * (", lambda l: strlist(l, " : "))+")"
-            self.printdebug("(>) "+temp)
-            self.recursion += 1
-            values = []
-            for l in inputlist:
-                x = 0
-                while x < len(l):
-                    if endswithany(l[x], self.subparenops) and x+1 < len(l):
-                        l[x] += l.pop(x+1)
-                    if startswithany(l[x], self.subparenops) and x > 0:
-                        l[x-1] += l.pop(x)
-                        x -= 1
-                    x += 1
-                if not l:
-                    item = matrix(0)
-                elif len(values) > 0 and startswithany(l[0], self.subparenops):
-                    autoarg = self.unusedarg()
-                    item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
+                        values.append(item)
+                if len(values) == 0:
+                    value = matrix(0)
                 else:
-                    item = self.eval_call(l[0])
-                args = []
-                for x in xrange(1, len(l)):
-                    args.append(self.eval_call(l[x]))
-                item = self.call_paren_do(item, args)
-                if values and isinstance(item, funcfloat) and item.infix:
-                    values.append(self.call_paren_do(item, [values.pop()]))
-                else:
-                    values.append(item)
-            if len(values) == 0:
-                value = matrix(0)
-            else:
-                value = values[0]
-                for x in xrange(1, len(values)):
-                    value = value * values[x]
-            self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
-            self.recursion -= 1
-            return value
+                    value = values[0]
+                    for x in xrange(1, len(values)):
+                        value = value * values[x]
+                self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
+                self.recursion -= 1
+                return value
 
     def call_paren_do(self, item, arglist):
         """Does Parentheses Calling."""
@@ -2412,7 +2413,7 @@ Global Operator Precedence List:
             self._overflow = overflow
         return item
 
-    def call_comp(self, inputstring):
+    def call_comp(self, inputstring, top=None):
         """Performs Function Composition."""
         if ".." in inputstring:
             self.unclean()
@@ -2423,13 +2424,13 @@ Global Operator Precedence List:
                     funclist.append(self.wrap(func))
             return strfunc(strlist(funclist, "(")+"("*bool(funclist)+strfunc.allargs+")"*len(funclist), self, overflow=False)
 
-    def call_lambdacoeff(self, inputstring):
+    def call_lambdacoeff(self, inputstring, top=None):
         """Evaluates Lambda Coefficients."""
         parts = inputstring.split(self.lambdamarker, 1)
         if len(parts) > 1:
             return self.eval_call(parts[0]+self.wrap(self.eval_lambda([self.lambdamarker+parts[1]])))
 
-    def call_method(self, inputstring):
+    def call_method(self, inputstring, top=None):
         """Returns Method Instances."""
         if "." in inputstring:
             itemlist = inputstring.split(".")
@@ -2489,7 +2490,7 @@ Global Operator Precedence List:
                     out = new
                 return out
 
-    def call_normal(self, inputstring):
+    def call_normal(self, inputstring, top=None):
         """Returns Argument."""
         return self.eval_check(inputstring)
 
