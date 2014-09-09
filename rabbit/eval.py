@@ -1293,6 +1293,7 @@ Global Operator Precedence List:
             delfrom = None
             if self.useclass is False and classcalc.selfvar in self.variables and isinstance(self.variables[classcalc.selfvar], classcalc):
                 delfrom = self.variables[classcalc.selfvar].doset
+            redef = self.redef
             if "." in sides[0]:
                 classlist += sides[0].split(".")
                 for x in xrange(0, len(classlist)-1):
@@ -1327,6 +1328,7 @@ Global Operator Precedence List:
                     raise ExecutionError("VariableError", "Could not find class "+self.prepare(classlist[0], False, True, True))
             elif self.useclass:
                 useclass = self.funcfind(self.useclass)
+                redef = True
             sides[1] = basicformat(sides[1])
             for func in self.sets:
                 value = func(sides)
@@ -1337,7 +1339,7 @@ Global Operator Precedence List:
                         value = value[0], self.trycalc(value[1])
                     self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.prepare(value[1], False, True, True))
                     if useclass is None:
-                        if not self.redef and value[0] in self.variables:
+                        if not redef and value[0] in self.variables:
                             if self.variables[value[0]] is value[1]:
                                 raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
                         else:
@@ -1348,7 +1350,7 @@ Global Operator Precedence List:
                             out = strfloat(value[0], self, name=value[0])
                     else:
                         if value[0] not in useclass.variables or useclass.variables[value[0]] is not value[1]:
-                            if self.redef:
+                            if redef:
                                 useclass.store(value[0], value[1])
                             else:
                                 raise ExecutionError("RedefinitionError", "Cannot redefine attribute "+value[0])
