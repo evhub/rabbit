@@ -1152,13 +1152,11 @@ class classcalc(cotobject):
     notmatrix = True
     doset = False
     selfvar = "__self__"
+    restricted = [selfvar]
 
     def __init__(self, e, variables=None, name=None):
         """Initializes The Class."""
         self.e = e
-        self.restricted = [
-            self.selfvar
-            ]
         self.variables = {
             self.selfvar : self
             }
@@ -1213,7 +1211,6 @@ class classcalc(cotobject):
 
     def __len__(self):
         """Finds The Number Of Variables."""
-        self.e.setreturned()
         return len(self.variables)
 
     def items(self):
@@ -1267,14 +1264,14 @@ class classcalc(cotobject):
 
     def tryget(self, key):
         """Attempts To Get An Item."""
-        try:
-            out = self.retrieve(key)
-        except ExecutionError as detail:
-            if detail.name == "ClassError" and detail.message.startswith("Could not find "):
-                out = None
-            else:
-                raise
-        return out
+        if istext(key):
+            test = key
+        else:
+            test = delspace(self.e.prepare(key, False, False))
+        if not self.e.isreserved(test) and test in self.variables:
+            return self.getitem(test)
+        else:
+            return None
 
     def getitem(self, test):
         """Retrieves An Item At The Base Level."""
@@ -1287,24 +1284,17 @@ class classcalc(cotobject):
             out = self.variables[test]
         return self.e.deprop(out)
 
-    def getmethod(self, key):
-        """Retrieves A Method."""
-        test = delspace(self.e.prepare(key, False, False))
-        if not self.e.isreserved(test) and test in self.variables:
-            return self.getitem(test)
-        else:
-            return None
-
     def retrieve(self, key):
         """Retrieves An Item."""
-        test = delspace(self.e.prepare(key, False, False))
-        if not self.e.isreserved(test):
-            if test in self.variables:
-                return self.getitem(test)
-            else:
-                raise ExecutionError("ClassError", "Could not find "+test+" in "+self.e.prepare(self, False, True, True))
+        test = self.tryget(key)
+        if test is None:
+            raise ExecutionError("ClassError", "Could not find "+key+" in "+self.e.prepare(self, False, True, True))
         else:
-            raise ExecutionError("ClassError", "Invalid class key of "+test)
+            return test
+
+    def getmethod(self, key):
+        """Retrieves A Method."""
+        return self.retrieve(key)
 
     def call(self, variables):
         """Calculates An Item."""
@@ -1489,18 +1479,13 @@ class instancecalc(numobject, classcalc):
     evaltype = "instance"
     parentvar = "__parent__"
 
-    def __init__(self, e, variables, parent=None, name=None):
+    def __init__(self, e, variables=None, parent=None, name=None):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
         if parent is None:
             parent = classcalc(self.e)
             parent.variables = variables
-            variables = variables.copy()
-            del variables[self.selfvar]
-        self.restricted = [
-            self.selfvar,
-            self.parentvar
-            ]
+            variables = None
         self.variables = {
             self.selfvar : self,
             self.parentvar : parent
@@ -1532,6 +1517,19 @@ class instancecalc(numobject, classcalc):
         else:
             return False
 
+    def tryget(self, key):
+        """Attempts To Get An Item."""
+        if istext(key):
+            test = key
+        else:
+            test = delspace(self.e.prepare(key, False, False))
+        if not self.e.isreserved(test) and test in self.variables:
+            return self.getitem(test)
+        elif "__get__" in self.variables:
+            return self.domethod(self.getitem("__get__"), rawstrcalc(test, self.e))
+        else:
+            return self.getparent().tryget(test)
+
     def getitem(self, test):
         """Retrieves An Item At The Base Level."""
         if istext(self.variables[test]):
@@ -1544,30 +1542,6 @@ class instancecalc(numobject, classcalc):
                 self.variables[test].curryself(self)
             out = self.variables[test]
         return self.e.deprop(out)
-
-    def getmethod(self, key):
-        """Retrieves A Method."""
-        test = delspace(self.e.prepare(key, False, False))
-        if not self.e.isreserved(test) and test in self.variables:
-            return self.getitem(test)
-        elif "__get__" in self.variables:
-            return self.domethod(self.getitem("__get__"), rawstrcalc(test, self.e))
-        else:
-            return None
-
-    def retrieve(self, key):
-        """Retrieves An Item."""
-        test = delspace(self.e.prepare(key, False, False))
-        if not self.e.isreserved(test):
-            if test in self.variables:
-                out = self.getitem(test)
-            elif "__get__" in self.variables:
-                out = self.domethod(self.getitem("__get__"), rawstrcalc(test, self.e))
-            else:
-                raise ExecutionError("ClassError", "Could not find "+test+" in the class")
-            return out
-        else:
-            raise ExecutionError("ClassError", "Invalid class key of "+test)
 
     def store(self, key, value, bypass=False, name=None):
         """Stores An Item."""
@@ -1602,6 +1576,7 @@ class instancecalc(numobject, classcalc):
             if func is None:
                 return self
             else:
+                self.e.setreturned()
                 return self.domethod(func)
         else:
             func = self.tryget("__call__")
@@ -1666,6 +1641,11 @@ class instancecalc(numobject, classcalc):
         check_mul = self.tryget("__mul__")
         if check_mul:
             return self.domethod(check_mul, 1.0/other)
+        check_fdiv = self.tryget("__fdiv__")
+        if check_fdiv:
+            check_mod = self.tryget("__mod__")
+            if check_mod:
+                return self.domethod(check_fdiv, other)+self.domethod(check_mod, other)/other
         other = 1.0/other
         if other == int(other):
             try:
@@ -1677,14 +1657,29 @@ class instancecalc(numobject, classcalc):
                 return self
         raise ExecutionError("TypeError", "Insufficient methods defined for division")
 
+    def __rdiv__(self, other):
+        """Performs Reverse Division."""
+        check_rdiv = self.tryget("__rdiv__")
+        if check_rdiv:
+            return self.domethod(check_rdiv, other)
+        check_pow = self.tryget("__pow__")
+        if check_pow:
+            return other*self.domethod(check_pow, -1.0)
+        raise ExecutionError("TypeError", "Insufficient methods defined for division")
+
     def __ifloordiv__(self, other):
         """Performs Floor Division."""
         check_fdiv = self.tryget("__fdiv__")
         if check_fdiv:
             return self.domethod(check_fdiv, other)
         else:
-            self /= other
-            return int(self)
+            try:
+                self /= other
+                out = int(self)
+            except ExecutionError:
+                raise ExecutionError("TypeError", "Insufficient methods defined for floor division")
+            else:
+                return out
 
     def __imod__(self, other):
         """Performs Moduluo."""
@@ -1717,13 +1712,6 @@ class instancecalc(numobject, classcalc):
                 return self
         raise ExecutionError("TypeError", "Insufficient methods defined for exponentiation")
 
-    def __rdiv__(self, other):
-        """Performs Reverse Division."""
-        check_rdiv = self.tryget("__rdiv__")
-        if check_rdiv:
-            return self.domethod(check_rdiv, other)
-        raise ExecutionError("TypeError", "Insufficient methods defined for division")
-
     def __rfloordiv__(self, other):
         """Performs Reverse Floor Division."""
         check_rfdiv = self.tryget("__rfdiv__")
@@ -1745,6 +1733,30 @@ class instancecalc(numobject, classcalc):
         if check_rpow:
             return self.domethod(check_rpow, other)
         raise ExecutionError("TypeError", "Insufficient methods defined for reverse exponentiation")
+
+    def __rmul__(self, other):
+        """Performs Reverse Multiplication."""
+        check_rmul = self.tryget("__rmul__")
+        if check_rmul:
+            return self.domethod(check_rmul, other)
+        else:
+            return self*other
+
+    def __radd__(self, other):
+        """Performs Reverse Addition."""
+        check_radd = self.tryget("__radd__")
+        if check_radd:
+            return self.domethod(check_radd, other)
+        else:
+            return self+other
+
+    def __rsub__(self, other):
+        """Performs Reverse Subtraction."""
+        check_rsub = self.tryget("__rsub__")
+        if check_rsub:
+            return self.domethod(check_rsub, other)
+        else:
+            return other + -self
 
     def getfloat(self):
         """Retrieves A Float."""
@@ -1976,10 +1988,26 @@ class instancecalc(numobject, classcalc):
             return NotImplemented
 
     def rop_repeat(self, other):
-        """Performs **."""
+        """Performs Reverse **."""
         item = self.tryget("__rrep__")
         if item:
             return self.domethod(item, other)
+        else:
+            return NotImplemented
+
+    def op_join(self, params):
+        """Performs ++."""
+        item = self.tryget("__join__")
+        if item:
+            return self.domethod(item, params)
+        else:
+            return NotImplemented
+
+    def rop_join(self, params):
+        """Performs Reverse ++."""
+        item = self.tryget("__rjoin__")
+        if item:
+            return self.domethod(item, params)
         else:
             return NotImplemented
 
@@ -1995,6 +2023,14 @@ class instancecalc(numobject, classcalc):
                 return self.e.prepare(self.domethod(check_repr), top, False, indebug, maxrecursion)
             else:
                 return classcalc.getrepr(self, top, bottom, indebug, maxrecursion)+" ( )"
+
+    def include(self):
+        """Returns A Class For Inclusion."""
+        item = self.tryget("__include__")
+        if item:
+            return self.domethod(item)
+        else:
+            raise ExecutionError("TypeError", "Insufficient methods defined for include")
 
 class atom(evalobject):
     """Implements Atoms."""

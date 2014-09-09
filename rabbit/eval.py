@@ -121,25 +121,7 @@ Global Operator Precedence List:
     aliases = {
         "<<":"\xab",
         ">>":"\xbb",
-        "\t":"    ",
-        "\xac":"!",
-        "\xf7":"/",
-        "\xd7":"*",
-        "\u2219":"*",
-        "\u22c5":"*",
-        "\u2264":"<=",
-        "\u2265":">=",
-        "\u2227":"&",
-        "\u2228":"|",
-        "\u22c0":"&",
-        "\u22c1":"|",
-        "\u2212":"-",
-        "\u2215":"/",
-        "\u2044":"/",
-        "\u2237":"::",
-        "\u2192":"->",
-        "\u2254":":=",
-        "\u225f":"?="
+        "\t":"    "
         }
     rawstringchars = "`"
     lambdachars = "\\"
@@ -403,8 +385,7 @@ Global Operator Precedence List:
                 "E":usefunc(E10, self, "E", ["x"]),
                 "D":funcfloat(self.funcs.derivcall, self, "D", reqargs=1),
                 "S":funcfloat(self.funcs.integcall, self, "S", reqargs=1),
-                "i":complex(0.0, 1.0),
-                "d":"rand"
+                "i":complex(0.0, 1.0)
                 }, name="Math"),
             "Stats":classcalc(self, {
                 "gamma":usefunc(gamma, self, "gamma", ["x"]),
@@ -430,68 +411,93 @@ Global Operator Precedence List:
             funcfloat.allargs : matrix(0)
             }
         self.variables.update({
+            "property":strfunc("class\xab__value__(self,getter:getter)=getter()\xbb()", self, ["getter"], name="property"),
+            "inside":strfunc("\\__,begin:begin,end:end\\(out$end()$out=calc(__)$begin())", self, ["begin", "end"], name="inside"),
             "Unicode":classcalc(self, {
-                "\xf8" : "none",
-                "\u221e" : "inf",
-                "\u2211" : "sum",
-                "\u03c0" : "Math.pi",
-                "\u221a" : "Math.sqrt",
-                "\u222b" : "Math.S",
-                "\u0393" : "Stats.gamma",
-                "\u220f" : "prod",
-                "\u2208" : "in",
-                "\u230a" : "min",
-                "\u2308" : "max",
-                "\xb0" : "Math.rad",
-                "\u22d8" : "lshift",
-                "\u22d9" : "rshift",
-                "\u22c3" : "union",
-                "\u22c2" : "intersect",
-                "\xbd" : 0.5,
-                "\xbc" : 0.25,
-                "\xbe" : 0.75,
-                "\u2400" : rawstrcalc("\x00", self),
-                "\u2401" : rawstrcalc("\x01", self),
-                "\u2402" : rawstrcalc("\x02", self),
-                "\u2403" : rawstrcalc("\x03", self),
-                "\u2404" : rawstrcalc("\x04", self),
-                "\u2405" : rawstrcalc("\x05", self),
-                "\u2406" : rawstrcalc("\x06", self),
-                "\u2407" : rawstrcalc("\x07", self),
-                "\u2408" : rawstrcalc("\x08", self),
-                "\u2409" : rawstrcalc("\x09", self),
-                "\u240a" : rawstrcalc("\n", self),
-                "\u240b" : rawstrcalc("\x0b", self),
-                "\u240c" : rawstrcalc("\x0c", self),
-                "\u240d" : rawstrcalc("\r", self),
-                "\u240e" : rawstrcalc("\x0e", self),
-                "\u240f" : rawstrcalc("\x0f", self),
-                "\u2410" : rawstrcalc("\x10", self),
-                "\u2411" : rawstrcalc("\x11", self),
-                "\u2412" : rawstrcalc("\x12", self),
-                "\u2413" : rawstrcalc("\x13", self),
-                "\u2414" : rawstrcalc("\x14", self),
-                "\u2415" : rawstrcalc("\x15", self),
-                "\u2416" : rawstrcalc("\x16", self),
-                "\u2417" : rawstrcalc("\x17", self),
-                "\u2418" : rawstrcalc("\x18", self),
-                "\u2419" : rawstrcalc("\x19", self),
-                "\u241a" : rawstrcalc("\x1a", self),
-                "\u241b" : rawstrcalc("\x1b", self),
-                "\u241c" : rawstrcalc("\x1c", self),
-                "\u241d" : rawstrcalc("\x1d", self),
-                "\u241e" : rawstrcalc("\x1e", self),
-                "\u241f" : rawstrcalc("\x1f", self),
-                "\u2420" : rawstrcalc(" ", self),
-                "\u2421" : rawstrcalc("\x21", self),
-                "\u2209" : strfunc("!\u2208(__)", self, name="\u2209", overflow=False),
-                "\u220b" : strfunc("\u2208(rev(__))", self, name="\u220b", overflow=False),
-                "\u220c" : strfunc("!\u220b(__)", self, name="\u220c", overflow=False),
-                "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
-                "\u221c" : strfunc("Math.sqrt(Math.sqrt(x))", self, ["x"], name="\u221c"),
-                "\u222c" : strfunc("Math.S((Math.S((f,)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
-                "\u222d" : strfunc("Math.S((\u222c((f,)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222d")
-                }, name="Unicode")
+                "__include__" : strfunc("""self.includes$self.aliases~~Meta.alias""", self, ["self"], name="__include__"),
+                "aliases" : self.frompython({
+                    "\xac":"!",
+                    "\xf7":"/",
+                    "\xd7":"*",
+                    "\u2219":"*",
+                    "\u22c5":"*",
+                    "\u2264":"<=",
+                    "\u2265":">=",
+                    "\u2227":"&",
+                    "\u2228":"|",
+                    "\u22c0":"&",
+                    "\u22c1":"|",
+                    "\u2212":"-",
+                    "\u2215":"/",
+                    "\u2044":"/",
+                    "\u2237":"::",
+                    "\u2192":"->",
+                    "\u2254":":=",
+                    "\u225f":"?="
+                    }),
+                "includes" : classcalc(self, {
+                    "\xf8" : "none",
+                    "\u221e" : "inf",
+                    "\u2211" : "sum",
+                    "\u03c0" : "Math.pi",
+                    "\u221a" : "Math.sqrt",
+                    "\u222b" : "Math.S",
+                    "\u0393" : "Stats.gamma",
+                    "\u220f" : "prod",
+                    "\u2208" : "in",
+                    "\u230a" : "min",
+                    "\u2308" : "max",
+                    "\xb0" : "Math.rad",
+                    "\u22d8" : "lshift",
+                    "\u22d9" : "rshift",
+                    "\u22c3" : "union",
+                    "\u22c2" : "intersect",
+                    "\xbd" : 0.5,
+                    "\xbc" : 0.25,
+                    "\xbe" : 0.75,
+                    "\u2400" : rawstrcalc("\x00", self),
+                    "\u2401" : rawstrcalc("\x01", self),
+                    "\u2402" : rawstrcalc("\x02", self),
+                    "\u2403" : rawstrcalc("\x03", self),
+                    "\u2404" : rawstrcalc("\x04", self),
+                    "\u2405" : rawstrcalc("\x05", self),
+                    "\u2406" : rawstrcalc("\x06", self),
+                    "\u2407" : rawstrcalc("\x07", self),
+                    "\u2408" : rawstrcalc("\x08", self),
+                    "\u2409" : rawstrcalc("\x09", self),
+                    "\u240a" : rawstrcalc("\n", self),
+                    "\u240b" : rawstrcalc("\x0b", self),
+                    "\u240c" : rawstrcalc("\x0c", self),
+                    "\u240d" : rawstrcalc("\r", self),
+                    "\u240e" : rawstrcalc("\x0e", self),
+                    "\u240f" : rawstrcalc("\x0f", self),
+                    "\u2410" : rawstrcalc("\x10", self),
+                    "\u2411" : rawstrcalc("\x11", self),
+                    "\u2412" : rawstrcalc("\x12", self),
+                    "\u2413" : rawstrcalc("\x13", self),
+                    "\u2414" : rawstrcalc("\x14", self),
+                    "\u2415" : rawstrcalc("\x15", self),
+                    "\u2416" : rawstrcalc("\x16", self),
+                    "\u2417" : rawstrcalc("\x17", self),
+                    "\u2418" : rawstrcalc("\x18", self),
+                    "\u2419" : rawstrcalc("\x19", self),
+                    "\u241a" : rawstrcalc("\x1a", self),
+                    "\u241b" : rawstrcalc("\x1b", self),
+                    "\u241c" : rawstrcalc("\x1c", self),
+                    "\u241d" : rawstrcalc("\x1d", self),
+                    "\u241e" : rawstrcalc("\x1e", self),
+                    "\u241f" : rawstrcalc("\x1f", self),
+                    "\u2420" : rawstrcalc(" ", self),
+                    "\u2421" : rawstrcalc("\x21", self),
+                    "\u2209" : strfunc("!\u2208(__)", self, name="\u2209", overflow=False),
+                    "\u220b" : strfunc("\u2208(rev(__))", self, name="\u220b", overflow=False),
+                    "\u220c" : strfunc("!\u220b(__)", self, name="\u220c", overflow=False),
+                    "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
+                    "\u221c" : strfunc("Math.sqrt(Math.sqrt(x))", self, ["x"], name="\u221c"),
+                    "\u222c" : strfunc("Math.S((Math.S((f,)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
+                    "\u222d" : strfunc("Math.S((\u222c((f,)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222d")
+                    })
+                }, name="Unicode").call([])
             })
 
     def setreturned(self, value=True):
@@ -694,7 +700,7 @@ Global Operator Precedence List:
             else:
                 out += "("+b+")"
         elif bottom and isinstance(item, rollfunc):
-            out = "d:"+self.prepare(item.stop, False, bottom, indebug, maxrecursion)
+            out = "rand:"+self.prepare(item.stop, False, bottom, indebug, maxrecursion)
         elif bottom and isinstance(item, strfunc):
             out = ""
             if isinstance(item, integbase):
@@ -1332,7 +1338,7 @@ Global Operator Precedence List:
                     self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.prepare(value[1], False, True, True))
                     if useclass is None:
                         if not self.redef and value[0] in self.variables:
-                            if self.variables[value[0]] is not value[1]:
+                            if self.variables[value[0]] is value[1]:
                                 raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
                         else:
                             self.variables[value[0]] = value[1]
@@ -1341,11 +1347,11 @@ Global Operator Precedence List:
                         else:
                             out = strfloat(value[0], self, name=value[0])
                     else:
-                        if not self.redef and value[0] in useclass.variables:
-                            if useclass.variables[value[0]] is not value[1]:
-                                raise ExecutionError("RedefinitionError", "The attribute "+value[0]+" already exists")
-                        else:
-                            useclass.store(value[0], value[1])
+                        if value[0] not in useclass.variables or useclass.variables[value[0]] is not value[1]:
+                            if self.redef:
+                                useclass.store(value[0], value[1])
+                            else:
+                                raise ExecutionError("RedefinitionError", "Cannot redefine attribute "+value[0])
                         if docalc:
                             out = value[1]
                         else:
@@ -1653,11 +1659,7 @@ Global Operator Precedence List:
             elif value.onlydiag():
                 out = diagmatrixlist(new)
             else:
-                out = value.new()
-                i = 0
-                for y,x in out.coords():
-                    out.store(y,x, new[i])
-                    i += 1
+                out = rowmatrixlist(new)
             return out
         else:
             args.append(value)
@@ -1759,6 +1761,13 @@ Global Operator Precedence List:
             elif len(items) == 1:
                 return items[0]
             else:
+                if hasattr(items[0], "op_join"):
+                    try:
+                        test = out.op_join(items[1:])
+                    except NotImplementedError:
+                        test = NotImplemented
+                    if test is not NotImplemented:
+                        return test
                 dostr = 0
                 dolist = 0
                 dobrack = 0
@@ -1770,6 +1779,15 @@ Global Operator Precedence List:
                 rowlen = None
                 tot = len(items)
                 for x in items:
+                    if hasattr(x, "rop_join"):
+                        params = items[:]
+                        params.remove(x)
+                        try:
+                            test = out.rop_join(params)
+                        except NotImplementedError:
+                            test = NotImplemented
+                        if test is not NotImplemented:
+                            return test
                     if isinstance(x, strcalc):
                         dostr += 1
                     elif isinstance(x, matrix):
@@ -1853,7 +1871,7 @@ Global Operator Precedence List:
                             out += x.items()
                     return multidata(out)
                 else:
-                    raise ExecutionError("TypeError", "Could not concatenate items "+repr(items))
+                    raise ExecutionError("TypeError", "Could not concatenate items "+strlist(items, ", ", lambda x: self.prepare(x, False, True, True)))
 
     def eval_remove(self, inputlist, eval_funcs):
         """Performs Removal."""
@@ -2779,8 +2797,10 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to include")
         elif len(variables) == 1:
+            self.e.setreturned()
+            if isinstance(variables[0], instancecalc):
+                variables[0] = variables[0].include()
             if isinstance(variables[0], classcalc):
-                self.e.setreturned()
                 oldvars = self.e.setvars(variables[0].getvars())
                 return classcalc(self.e, oldvars)
             else:

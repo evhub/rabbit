@@ -148,7 +148,14 @@ class matrix(mctobject):
     def __mul__(self, other):
         """Performs Multiplication."""
         if isinstance(other, matrix):
-            if self.x == other.y:
+            if not len(self) and not len(other):
+                if self.onlydiag():
+                    return matrix(0)
+                else:
+                    return rowmatrixlist()
+            elif not len(self) or not len(other):
+                raise IndexError("Matrix multiplication invalid between empty matrix and non-empty matrix")
+            elif self.x == other.y:
                 out = self.new(self.y, other.x)
                 for y,x in out.coords():
                     v = 0
@@ -693,8 +700,10 @@ def nonull(inputlist):
     """Cleans The Input Of Empty Matrices."""
     return clean(inputlist, isnull, True)
 
-def diagmatrixlist(inputlist, converter=float, func=None, fake=True, clean=True):
+def diagmatrixlist(inputlist=None, converter=float, func=None, fake=True, clean=True):
     """Constructs A Diagonal Matrix From A List."""
+    if inputlist is None:
+        inputlist = []
     if func is None:
         func = diagmatrixlist
     outlist = []
@@ -708,8 +717,10 @@ def diagmatrixlist(inputlist, converter=float, func=None, fake=True, clean=True)
         out.store(x,x, outlist[x])
     return out
 
-def rowmatrixlist(inputlist, converter=float, func=None, fake=False, clean=False):
+def rowmatrixlist(inputlist=None, converter=float, func=None, fake=False, clean=False):
     """Constructs A Row Matrix From A List."""
+    if inputlist is None:
+        inputlist = []
     if func is None:
         func = rowmatrixlist
     out = matrix(1, len(inputlist), converter=converter, fake=fake)
