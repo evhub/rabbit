@@ -119,6 +119,7 @@ nothing := class <<
  __bool__(self) = 0
  __rep__(self, other) = [self]**other
  __rrep__(self, other) = ()
+ __rjoin__(self, __) = self
  >>
 nil := nothing()
 passert:: type(nil) ?= "nil"
@@ -150,6 +151,7 @@ passert:: 2**nil ?= ()
 passert:: class<<>> ++ class << x = 1 >> ?= class << x = 1 >>
 passert:: type(class<<>>() ++ class << x = 1 >>) ?= "instance"
 passert:: class << nothing := nothing ;; nil := nil >> ?= class << nil := nil ;; nothing := nothing >>
+passert:: nil ++ 1 ?= nil
 
 # Multi-Line Tests:
 passert:: # A mid-line comment
