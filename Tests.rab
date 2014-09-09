@@ -6,6 +6,7 @@ assert:: iserr((try::(passert::0)):1)
 
 # Includes:
 passert:: include(Meta, Math, Stats, Unicode)
+d = rand
 
 # Boolean Operator Tests:
 passert:: 1 ?= 1
@@ -381,7 +382,7 @@ passert:: except( (try::1/0), (try::(1/0)):1 ):1
 passert:: int(1.5) ?= 1
 passert:: class(class<<>>()) ?= class<<>>
 passert:: type(class(class<<>>())) ?= "class"
-passert:: succ1 ?= 2
+passert:: succ1 ?= 2 $ succ(x) = x+1
 passert:: is:"a":"a" & is(5,5,5)
 passert:: 0 ?= ¬1
 passert:: 0.5 ?= ½
