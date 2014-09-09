@@ -535,6 +535,8 @@ vv = prop(val"v")
 vv' = property(val"v")
 passert:: vv ?= 1 ?= vv' $ v = 1
 passert:: vv ?= 2 ?= vv' $ v = 2
+passert:: -(-1) ?= 1
+passert:: 2^-0.5 ?= 1/(2^(0.5))
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")

@@ -64,10 +64,15 @@ def float(x, *args, **kwargs):
     if isinstance(x, (old_int, long)):
         return int(x, *args, **kwargs)
     elif isinstance(x, old_float):
-        if int(x) == x:
-            return int(x, *args, **kwargs)
-        else:
+        try:
+            test_int = int(x, *args, **kwargs)
+        except:
             return old_float(x, *args, **kwargs)
+        else:
+            if test_int == x:
+                return test_int
+            else:
+                return old_float(x, *args, **kwargs)
     elif hasattr(x, "getfloat"):
         return x.getfloat(*args, **kwargs)
     else:

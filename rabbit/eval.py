@@ -252,6 +252,8 @@ Global Operator Precedence List:
             self.eval_call
             ]
         self.calls = [
+            self.call_parenvar,
+            self.call_var,
             self.call_lambda,
             self.call_neg,
             self.call_reciproc,
@@ -261,8 +263,6 @@ Global Operator Precedence List:
             self.call_comp,
             self.call_lambdacoeff,
             self.call_method,
-            self.call_parenvar,
-            self.call_var,
             self.call_normal
             ]
         self.funcs = evalfuncs(self)
@@ -2085,7 +2085,10 @@ Global Operator Precedence List:
         """Evaluates A Variable."""
         self.printdebug("=> "+inputstring)
         self.recursion += 1
-        out = self.calc_next(inputstring, self.calls[:], True)
+        for func in self.calls:
+            out = func(inputstring)
+            if out is not None:
+                break
         self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring)
         self.recursion -= 1
         return out
@@ -2121,12 +2124,11 @@ Global Operator Precedence List:
         """Determines If An Item Can Be Converted By eval_check."""
         return hasnum(item) or islist(item) or isinstance(item, bool) or item is None
 
-    def call_var(self, inputstring, call_funcs):
+    def call_var(self, inputstring):
         """Checks If Variable."""
         if inputstring in self.variables:
             self.unclean()
             item, key = self.getfind(inputstring, True)
-            store = not self.isreserved(key)
             if istext(item):
                 value = self.calc(str(item), " | var")
             elif self.convertable(item):
@@ -2136,16 +2138,13 @@ Global Operator Precedence List:
             if isprop(value):
                 value = self.deprop(value)
                 store = False
-            if store:
+            if not self.isreserved(key):
                 self.variables[key] = value
             return value
-        else:
-            return self.calc_next(inputstring, call_funcs)
 
-    def call_parenvar(self, inputstring, call_funcs):
+    def call_parenvar(self, inputstring):
         """Checks If Parentheses."""
         if inputstring.startswith(self.parenchar) and inputstring.endswith(self.parenchar):
-            self.unclean()
             item = self.namefind(inputstring, True)
             if item is not inputstring:
                 if istext(item):
@@ -2159,8 +2158,6 @@ Global Operator Precedence List:
                 else:
                     raise ValueError("Unconvertable variable value of "+repr(item))
                 return value
-        else:
-            return self.calc_next(inputstring, call_funcs)
 
     def deprop(self, value):
         """Evaluates Property Objects."""
@@ -2168,39 +2165,32 @@ Global Operator Precedence List:
             value = self.getcall(value)(None)
         return value
 
-    def call_lambda(self, inputstring, call_funcs):
+    def call_lambda(self, inputstring):
         """Wraps Lambda Evaluation."""
         if inputstring.startswith(self.lambdamarker):
-            self.unclean()
             return self.eval_lambda([inputstring])
-        else:
-            return self.calc_next(inputstring, call_funcs)
 
-    def call_neg(self, inputstring, call_funcs):
+    def call_neg(self, inputstring):
         """Evaluates Unary -."""
         if inputstring.startswith("-"):
             self.unclean()
-            item = self.calc_next(inputstring[1:], call_funcs)
+            item = self.eval_call(inputstring[1:])
             if isnull(item):
                 return -1.0
             else:
                 return negative(item)
-        else:
-            return self.calc_next(inputstring, call_funcs)
 
-    def call_reciproc(self, inputstring, call_funcs):
+    def call_reciproc(self, inputstring):
         """Evaluates /."""
         if inputstring.startswith("/"):
             self.unclean()
-            item = self.calc_next(inputstring[1:], call_funcs)
+            item = self.eval_call(inputstring[1:])
             if isnull(item):
                 return item
             else:
                 return reciprocal(item)
-        else:
-            return self.calc_next(inputstring, call_funcs)
 
-    def call_exp(self, inputstring, call_funcs):
+    def call_exp(self, inputstring):
         """Evaluates The Exponential Part Of An Expression."""
         if "^" in inputstring:
             self.unclean()
@@ -2210,7 +2200,7 @@ Global Operator Precedence List:
             for x in reversed(xrange(0, len(inputlist))):
                 item = inputlist[x]
                 if item:
-                    value = knuth(self.calc_next(item, call_funcs), value, level)
+                    value = knuth(self.eval_call(item), value, level)
                     level = 1
                 else:
                     if x == 0 or x == len(inputlist)-1:
@@ -2218,10 +2208,8 @@ Global Operator Precedence List:
                     else:
                         level += 1
             return value
-        else:
-            return self.calc_next(inputstring, call_funcs)
 
-    def call_colon(self, inputstring, call_funcs):
+    def call_colon(self, inputstring):
         """Evaluates Colons."""
         if ":" in inputstring:
             cleaned = self.clean_begin()
@@ -2233,8 +2221,6 @@ Global Operator Precedence List:
                     params.append(getcopy(self.eval_call(inputlist[x])))
             self.clean_end(cleaned)
             return self.call_colon_set(item, params)
-        else:
-            return self.calc_next(inputstring, call_funcs)
 
     def call_colon_set(self, item, params):
         """Performs Colon Function Calls."""
@@ -2330,7 +2316,7 @@ Global Operator Precedence List:
             out = "_"+out
         return out
 
-    def call_paren(self, inputstring, call_funcs):
+    def call_paren(self, inputstring):
         """Evaluates Parentheses."""
         inputstring = (self.parenchar*2).join(switchsplit(inputstring, string.digits, notstring=self.reserved))
         if self.parenchar in inputstring:
@@ -2379,10 +2365,10 @@ Global Operator Precedence List:
                     autoarg = self.unusedarg()
                     item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
                 else:
-                    item = self.calc_next(l[0], call_funcs)
+                    item = self.eval_call(l[0])
                 args = []
                 for x in xrange(1, len(l)):
-                    args.append(self.calc_next(l[x], call_funcs))
+                    args.append(self.eval_call(l[x]))
                 item = self.call_paren_do(item, args)
                 if values and isinstance(item, funcfloat) and item.infix:
                     values.append(self.call_paren_do(item, [values.pop()]))
@@ -2397,8 +2383,6 @@ Global Operator Precedence List:
             self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
             self.recursion -= 1
             return value
-        else:
-            return self.calc_next(inputstring, call_funcs)
 
     def call_paren_do(self, item, arglist):
         """Does Parentheses Calling."""
@@ -2428,29 +2412,24 @@ Global Operator Precedence List:
             self._overflow = overflow
         return item
 
-    def call_comp(self, inputstring, call_funcs):
+    def call_comp(self, inputstring):
         """Performs Function Composition."""
         if ".." in inputstring:
             self.unclean()
             funclist = []
             for item in inputstring.split(".."):
-                func = self.calc_next(item, call_funcs)
+                func = self.eval_call(item)
                 if not isnull(func):
                     funclist.append(self.wrap(func))
             return strfunc(strlist(funclist, "(")+"("*bool(funclist)+strfunc.allargs+")"*len(funclist), self, overflow=False)
-        else:
-            return self.calc_next(inputstring, call_funcs)
 
-    def call_lambdacoeff(self, inputstring, call_funcs):
+    def call_lambdacoeff(self, inputstring):
         """Evaluates Lambda Coefficients."""
         parts = inputstring.split(self.lambdamarker, 1)
-        if len(parts) == 1:
-            return self.calc_next(parts[0], call_funcs)
-        else:
-            self.unclean()
+        if len(parts) > 1:
             return self.eval_call(parts[0]+self.wrap(self.eval_lambda([self.lambdamarker+parts[1]])))
 
-    def call_method(self, inputstring, call_funcs):
+    def call_method(self, inputstring):
         """Returns Method Instances."""
         if "." in inputstring:
             itemlist = inputstring.split(".")
@@ -2509,7 +2488,6 @@ Global Operator Precedence List:
                             raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                     out = new
                 return out
-        return self.calc_next(inputstring, call_funcs)
 
     def call_normal(self, inputstring):
         """Returns Argument."""
