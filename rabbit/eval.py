@@ -1765,7 +1765,7 @@ Global Operator Precedence List:
             else:
                 if hasattr(items[0], "op_join"):
                     try:
-                        test = out.op_join(items[1:])
+                        test = items[0].op_join(items[1:])
                     except NotImplementedError:
                         test = NotImplemented
                     if test is not NotImplemented:
@@ -1785,7 +1785,7 @@ Global Operator Precedence List:
                         params = items[:]
                         params.remove(x)
                         try:
-                            test = out.rop_join(params)
+                            test = x.rop_join(params)
                         except NotImplementedError:
                             test = NotImplemented
                         if test is not NotImplemented:

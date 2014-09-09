@@ -335,7 +335,7 @@ passert:: merge:(1,(2,2)):(3,4) ?= (1,2,2,3,4)
 passert:: sort(1,0,9,5) ?= (0,1,5,9)
 passert:: rev(1,2,3) ?= (3,2,1)
 passert:: round(1.5) ?= 2
-passert:: eval"i" ?= j $ (def:: i = 1) $ j := i
+passert:: eval"Math.i" ?= j $ (def:: i = 1) $ j := i
 passert:: find:"a":(0,1,"a",3,4) ?= 2
 passert:: split:"abcde":"c" ?= ("ab","de")
 passert:: replace:"abc":"b":"" ?= "ac"
