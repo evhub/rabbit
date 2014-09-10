@@ -2781,10 +2781,15 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to include")
         elif len(variables) == 1:
             self.e.setreturned()
-            if isinstance(variables[0], instancecalc):
-                variables[0] = variables[0].include()
+            last = None
+            while isinstance(variables[0], instancecalc):
+                if last is None or not self.iseq(last, variables[0]):
+                    last = variables[0]
+                    variables[0] = variables[0].include()
+                else:
+                    raise ExecutionError("RuntimeError", "Illegal infinite recursive loop in __include__")
             if isinstance(variables[0], classcalc):
-                oldvars = self.e.setvars(variables[0].getvars())
+                oldvars = self.e.setvars(variables[0].getvars(True))
                 return classcalc(self.e, oldvars)
             else:
                 raise ValueError("Can only include a class")
@@ -2853,7 +2858,7 @@ class evalfuncs(object):
                     fatal = bool(fatal)
                 else:
                     fatal = False
-                extras = variables[0].getvars()
+                extras = variables[0].getvars(True)
                 del extras[self.e.errorvar]
                 if self.e.namevar in extras:
                     del extras[self.e.namevar]
@@ -2933,7 +2938,7 @@ class evalfuncs(object):
         elif isinstance(variables[0], namespace):
             return variables[0]
         elif isinstance(variables[0], classcalc):
-            return namespace(variables[0].e, variables[0].getvars())
+            return namespace(variables[0].e, variables[0].getvars(True))
         else:
             raise ExecutionError("ClassError", "Cannot convert "+self.e.prepare(variables[0], False, True, True)+" to namespace")
 

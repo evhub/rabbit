@@ -380,7 +380,7 @@ passert:: imag(i) ?= 1
 passert:: except( (try::1/0), "ZeroDivisionError" ):1
 passert:: except( (try::1/0), (try::(1/0)):1 ):1
 passert:: int(1.5) ?= 1
-passert:: class(class<<>>()) ?= class<<>>
+passert:: class(class<<>>()) ?= class<<__parent__=class()>>
 passert:: type(class(class<<>>())) ?= "class"
 passert:: succ1 ?= 2 $ succ(x) = x+1
 passert:: is:"a":"a" & is(5,5,5)
@@ -540,6 +540,7 @@ passert:: vv ?= 1 ?= vv' $ v = 1
 passert:: vv ?= 2 ?= vv' $ v = 2
 passert:: -(-1) ?= 1
 passert:: 2^-0.5 ?= 2^(-0.5)
+passert:: inst.__parent__.__parent__.meta ?= 1 $ inst = class<<__parent__ = class<<meta=1>> >>()
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")

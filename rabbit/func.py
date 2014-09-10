@@ -378,7 +378,7 @@ class strfunc(funcfloat):
                     out = self.e.calc(funcstr, " \\>")
                 except TailRecursion as params:
                     if not self.e.returned and funcstr == params.funcstr and variables == params.variables:
-                        raise ExecutionError("RuntimeError", "Illegal infinite recursive loop")
+                        raise ExecutionError("RuntimeError", "Illegal infinite recursive loop in "+funcstr)
                     else:
                         funcstr = params.funcstr
                         variables = params.variables
@@ -1349,7 +1349,7 @@ class classcalc(cotobject):
     def extend(self, other):
         """Extends The Class."""
         if isinstance(other, (dict, classcalc)):
-            self.add(other.getvars())
+            self.add(other.getvars(True))
             return self
         else:
             raise ExecutionError("ClassError", "Could not extend class with "+repr(other))
@@ -1359,7 +1359,7 @@ class classcalc(cotobject):
         for k,v in other.items():
             self.store(k, v, bypass, name)
 
-    def getvars(self):
+    def getvars(self, merge=None):
         """Gets Original Variables."""
         out = self.variables.copy()
         for var in self.restricted:
@@ -1511,7 +1511,7 @@ class instancecalc(numobject, classcalc):
 
     def toclass(self):
         """Converts To A Normal Class."""
-        out = classcalc(self.e, self.getvars())
+        out = classcalc(self.e, self.getvars(True))
         return out
 
     def isfrom(self, parent):
@@ -1572,6 +1572,17 @@ class instancecalc(numobject, classcalc):
     def isfunc(self):
         """Determines Whether The Class Is A Function."""
         return bool(self.tryget("__call__"))
+
+    def getvars(self, merge=False):
+        """Gets Original Variables."""
+        if merge:
+            out = self.getparent().getvars(True)
+            out.update(self.variables)
+        else:
+            out = self.variables.copy()
+        for var in self.restricted:
+            del out[var]
+        return out
 
     def call(self, variables):
         """Calls The Function."""
