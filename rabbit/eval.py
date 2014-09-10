@@ -102,7 +102,7 @@ Global Operator Precedence List:
         "derivfunc": lambda self, args: derivfunc(args[0], args[1], args[2], args[3], self, args[4], args[5], args[6], args[7], self.devariables(args[8])),
         "integfunc": lambda self, args: integfunc(args[0], args[1], self, args[2], args[3], args[4], self.devariables(args[5])),
         "usefunc": lambda self, args: usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], args[7], self.devariables(args[8])),
-        "classcalc": lambda self, args: classcalc(self, self.devariables(args[0])),
+        "classcalc": lambda self, args: classcalc(self, self.devariables(args[0]), selfvar=args[1]),
         "namespace": lambda self, args: namespace(self, self.devariables(args[0])),
         "instancecalc": lambda self, args: instancecalc(self, self.devariables(args[0]), top=False),
         "makefunc": lambda self, args: makefunc(args[0], self, args[1], args[2], self.devariables(args[3])),
@@ -143,6 +143,7 @@ Global Operator Precedence List:
     calcops = "$"
     multiargops = bools + callops + "+-@~|&;," + calcops + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
+    withvar = "__with__"
     errorvar = "__error__"
     fatalvar = "fatal"
     namevar = "name"
@@ -1221,7 +1222,7 @@ Global Operator Precedence List:
             cleaned = self.clean_begin()
             inputlist.reverse()
             item = inputlist.pop()
-            withclass = classcalc(self)
+            withclass = classcalc(self, selfvar=self.withvar)
             for x in inputlist:
                 withclass.process(x)
             self.clean_end(cleaned)

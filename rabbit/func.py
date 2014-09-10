@@ -1154,9 +1154,11 @@ class classcalc(cotobject):
     selfvar = "__self__"
     restricted = [selfvar]
 
-    def __init__(self, e, variables=None, name=None):
+    def __init__(self, e, variables=None, name=None, selfvar=None):
         """Initializes The Class."""
         self.e = e
+        if selfvar is not None:
+            self.selfvar = selfvar
         self.variables = {
             self.selfvar : self
             }
@@ -1165,11 +1167,11 @@ class classcalc(cotobject):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("classcalc", getstates(self.getvars()))
+        return ("classcalc", getstates(self.getvars()), self.selfvar)
 
     def copy(self):
         """Copies The Class."""
-        return classcalc(self.e, getcopy(self.getvars()))
+        return classcalc(self.e, getcopy(self.getvars()), selfvar=self.selfvar)
 
     def process(self, command, inglobal=False):
         """Processes A Command And Puts The Result In The Variables."""
