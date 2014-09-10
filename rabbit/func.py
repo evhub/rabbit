@@ -1218,7 +1218,7 @@ class classcalc(cotobject):
 
     def items(self):
         """Returns The Variables."""
-        return self.variables.items()
+        return list(self.variables.items())
 
     def getrepr(self, top=True, bottom=True, indebug=True, maxrecursion=5):
         """Finds A Representation."""
@@ -2328,7 +2328,7 @@ class dictionary(pair):
 
     def items(self):
         """Gets Items."""
-        return self.a.items()
+        return list(self.a.items())
 
     def call(self, variables):
         """Retrieves A Value."""
