@@ -2047,6 +2047,22 @@ class instancecalc(numobject, classcalc):
         else:
             raise ExecutionError("TypeError", "Insufficient methods defined for include")
 
+    def inside_enter(self, args):
+        """Enters The Inside."""
+        item = self.tryget("__enter__")
+        if item:
+            return self.domethod(item, args)
+        else:
+            raise ExecutionError("TypeError", "Insufficient methods defined for inside")
+
+    def inside_exit(self, args):
+        """Exits The Inside."""
+        item = self.tryget("__exit__")
+        if item:
+            return self.domethod(item, args)
+        else:
+            return matrix(0)
+
 class atom(evalobject):
     """Implements Atoms."""
     evaltype = "atom"

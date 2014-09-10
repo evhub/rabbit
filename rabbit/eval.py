@@ -350,6 +350,7 @@ Global Operator Precedence List:
             "union":funcfloat(self.funcs.unioncall, self, "union", reqargs=2),
             "intersect":funcfloat(self.funcs.intersectcall, self, "intersect", reqargs=2),
             "rand":funcfloat(self.funcs.randcall, self, "rand", reqargs=1),
+            "inside":funcfloat(self.funcs.insidecall, self, "inside", reqargs=1),
             "Meta":classcalc(self, {
                 "var":funcfloat(self.funcs.getvarcall, self, "var", reqargs=1),
                 "val":funcfloat(self.funcs.getvalcall, self, "val", reqargs=1),
@@ -419,7 +420,6 @@ Global Operator Precedence List:
             }
         self.variables.update({
             "prop":strfunc("class\xab__value__(self,getter:getter)=getter()\xbb()", self, ["getter"], name="prop"),
-            "inside":strfunc("\\__,begin:begin,end:end\\(out$end()$out=calc(__)$begin())", self, ["begin", "end"], name="inside"),
             "Unicode":classcalc(self, {
                 "__include__" : strfunc("""self.includes$self.aliases~~Meta.alias""", self, ["self"], name="__include__"),
                 "aliases" : self.frompython({
@@ -4001,3 +4001,31 @@ class evalfuncs(object):
             for x in variables:
                 out.append(self.installcall([x]))
             return diagmatrixlist(out)
+
+    def insidecall(self, variables):
+        """Performs inside."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to inside")
+        else:
+            inside = variables[0]
+            outside = None
+            args = []
+            if len(variables) > 1:
+                outside = getcall(variables[1])
+                args = variables[2:]
+            elif hasattr(inside, "inside_exit"):
+                outside = inside.inside_exit
+            if hasattr(inside, "inside_enter"):
+                inside = inside.inside_enter
+            else:
+                inside = getcall(inside)
+            def _outside(variables):
+                arg = inside(args)
+                out = self.docalc(variables)
+                if outside is not None:
+                    return outside([arg, out])
+                elif not isnull(arg):
+                    return getcall(arg)([out])
+                else:
+                    return out
+            return funcfloat(_outside, self.e, "calc", reqargs=1)
