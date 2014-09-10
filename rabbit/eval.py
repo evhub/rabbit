@@ -386,6 +386,7 @@ Global Operator Precedence List:
                 "comb":usefunc(comb, self, "comb", ["n", "k"]),
                 "real":funcfloat(self.funcs.realcall, self, "real"),
                 "imag":funcfloat(self.funcs.imagcall, self, "imag"),
+                "complex":usefunc(complex, self, "complex", ["re", "im"]),
                 "e":math.e,
                 "pi":math.pi,
                 "E":usefunc(E10, self, "E", ["x"]),
@@ -2624,7 +2625,7 @@ Global Operator Precedence List:
         elif isinstance(item, complex):
             return "complex"
         elif isnum(item):
-            return "number"
+            return "num"
         else:
             return namestr(item)
 
@@ -2717,14 +2718,6 @@ Global Operator Precedence List:
 class evalfuncs(object):
     """Implements Evaluator Functions."""
     typefuncs = {
-        "number": "num",
-        "list": "cont",
-        "row": "cont",
-        "matrix": "cont",
-        "multidata": "data",
-        "fraction": "frac",
-        "string": "str",
-        "dictionary": "dict"
         }
 
     def __init__(self, e):

@@ -673,7 +673,7 @@ class data(mctobject):
 
 class multidata(mctobject):
     """Implements A Multivariate Data Set."""
-    evaltype = "multidata"
+    evaltype = "data"
 
     def __init__(self, x=None, y=None):
         """Creates A Joint Data Set."""

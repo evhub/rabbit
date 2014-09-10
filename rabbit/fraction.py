@@ -52,7 +52,7 @@ class reciprocal(numobject):
 
 class fraction(numobject):
     """Implements A Fraction."""
-    evaltype = "fraction"
+    evaltype = "frac"
 
     def __init__(self, n=0, d=1):
         """Constructs The Fraction."""

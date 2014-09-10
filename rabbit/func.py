@@ -601,7 +601,7 @@ class strfloat(strfunc):
 
 class strcalc(numobject):
     """Allows Strings Inside Evaluation."""
-    evaltype = "string"
+    evaltype = "str"
     notmatrix = True
     check = 2
 
@@ -2285,7 +2285,7 @@ class pair(cotobject):
 
 class dictionary(pair):
     """A Key-Value Dictionary."""
-    evaltype = "dictionary"
+    evaltype = "dict"
 
     def __init__(self, e, items=None):
         """Creates The Dictionary."""
