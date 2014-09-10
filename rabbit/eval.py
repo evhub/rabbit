@@ -325,6 +325,7 @@ Global Operator Precedence List:
             "from":funcfloat(self.funcs.instanceofcall, self, "from", reqargs=2),
             "iserr":funcfloat(self.funcs.iserrcall, self, "iserr", reqargs=1),
             "class":funcfloat(self.funcs.classcall, self, "class"),
+            "instance":funcfloat(self.funcs.instancecall, self, "instance"),
             "namespace":funcfloat(self.funcs.namespacecall, self, "namespace"),
             "try":funcfloat(self.funcs.trycall, self, "try"),
             "raise":funcfloat(self.funcs.raisecall, self, "raise"),
@@ -2938,6 +2939,18 @@ class evalfuncs(object):
             return out
         else:
             raise ExecutionError("ClassError", "Cannot convert "+self.e.prepare(variables[0], False, True, True)+" to class")
+
+    def instancecall(self, variables):
+        """Converts To An Instance."""
+        self.e.overflow = variables[1:]
+        if not variables:
+            return classcalc(self.e).call([])
+        elif isinstance(variables[0], instancecalc):
+            return variables[0]
+        elif isinstance(variables[0], classcalc):
+            return variables[0].toinstance()
+        else:
+            raise ExecutionError("ClassError", "Cannot convert "+self.e.prepare(variables[0], False, True, True)+" to instance")
 
     def namespacecall(self, variables):
         """Converts To A Namespace."""

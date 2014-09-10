@@ -124,7 +124,7 @@ class negative(numobject):
 
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
-    evaltype = "function"
+    evaltype = "\\\\"
     overflow = False
     memoize = True
     allargs = "__"
@@ -2065,7 +2065,7 @@ class instancecalc(numobject, classcalc):
 
 class atom(evalobject):
     """Implements Atoms."""
-    evaltype = "atom"
+    evaltype = "_"
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
