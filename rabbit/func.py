@@ -2376,7 +2376,7 @@ class dictionary(pair):
 
     def tomatrix(self):
         """Converts To A Matrix."""
-        items = self.a.items()
+        items = list(self.a.items())
         out = matrix(len(items), 2)
         for x in xrange(0, len(items)):
             out.store(x, 0, items[x][0])

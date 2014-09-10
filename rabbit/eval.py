@@ -1307,8 +1307,9 @@ Global Operator Precedence List:
             delfrom = None
             if self.useclass is False and classcalc.selfvar in self.variables and isinstance(self.variables[classcalc.selfvar], classcalc):
                 delfrom = self.variables[classcalc.selfvar].doset
-            redef = self.redef
+            method = False
             if "." in sides[0]:
+                method = True
                 classlist += sides[0].split(".")
                 for x in xrange(0, len(classlist)-1):
                     if self.isreserved(classlist[x]):
@@ -1342,7 +1343,6 @@ Global Operator Precedence List:
                     raise ExecutionError("VariableError", "Could not find class "+self.prepare(classlist[0], False, True, True))
             elif self.useclass:
                 useclass = self.funcfind(self.useclass)
-                redef = True
             sides[1] = basicformat(sides[1])
             for func in self.sets:
                 value = func(sides)
@@ -1355,7 +1355,7 @@ Global Operator Precedence List:
                     if useclass is None:
                         if value[0] not in self.variables:
                             self.variables[value[0]] = value[1]
-                        elif redef:
+                        elif self.redef:
                             self.setreturned()
                             self.variables[value[0]] = value[1]
                         elif self.variables[value[0]] is not value[1]:
@@ -1365,8 +1365,16 @@ Global Operator Precedence List:
                         else:
                             out = strfloat(value[0], self, name=value[0])
                     else:
-                        if value[0] not in useclass.variables or useclass.variables[value[0]] is not value[1]:
-                            if redef:
+                        if value[0] not in useclass.variables:
+                            if not method:
+                                useclass.store(value[0], value[1])
+                            elif self.redef:
+                                self.setreturned()
+                                useclass.store(value[0], value[1])
+                            else:
+                                raise ExecutionError("RedefinitionError", "Cannot add attribute "+value[0])
+                        elif useclass.variables[value[0]] is not value[1]:
+                            if self.redef:
                                 self.setreturned()
                                 useclass.store(value[0], value[1])
                             else:
@@ -2154,10 +2162,11 @@ Global Operator Precedence List:
                 value = item
             else:
                 raise ValueError("Unconvertable variable value of "+repr(item))
+            store = not self.isreserved(key)
             if isprop(value):
                 value = self.deprop(value)
                 store = False
-            if not self.isreserved(key):
+            if store:
                 self.variables[key] = value
             return value
 
