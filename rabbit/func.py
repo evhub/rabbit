@@ -1479,11 +1479,11 @@ class instancecalc(numobject, classcalc):
     evaltype = "instance"
     parentvar = "__parent__"
 
-    def __init__(self, e, variables=None, parent=None, name=None):
+    def __init__(self, e, variables=None, parent=None, name=None, top=True):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
         if parent is None:
-            if self.parentvar in variables:
+            if not top and self.parentvar in variables:
                 parent = variables[self.parentvar]
                 del variables[self.parentvar]
             else:
@@ -1503,7 +1503,7 @@ class instancecalc(numobject, classcalc):
 
     def copy(self):
         """Copies The Instance."""
-        return instancecalc(self.e, getcopy(self.getvars()))
+        return instancecalc(self.e, getcopy(self.getvars()), top=False)
 
     def getparent(self):
         """Reconstructs The Parent Class."""

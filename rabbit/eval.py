@@ -104,7 +104,7 @@ Global Operator Precedence List:
         "usefunc": lambda self, args: usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], args[7], self.devariables(args[8])),
         "classcalc": lambda self, args: classcalc(self, self.devariables(args[0])),
         "namespace": lambda self, args: namespace(self, self.devariables(args[0])),
-        "instancecalc": lambda self, args: instancecalc(self, self.devariables(args[0])),
+        "instancecalc": lambda self, args: instancecalc(self, self.devariables(args[0]), top=False),
         "makefunc": lambda self, args: makefunc(args[0], self, args[1], args[2], self.devariables(args[3])),
         "brace": lambda self, args: brace(self, args[0]),
         "bracket": lambda self, args: bracket(self, args[0])
