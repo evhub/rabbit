@@ -413,8 +413,8 @@ Global Operator Precedence List:
                 "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], evalinclude="e")
                 }, name="Stats"),
             "none":matrix(0),
-            "true":1.0,
-            "false":0.0,
+            "true":True,
+            "false":False,
             "_":atom(),
             funcfloat.allargs : matrix(0)
             }
@@ -2121,7 +2121,9 @@ Global Operator Precedence List:
             if check > 0:
                 return value
             elif check == 0:
-                if isinstance(value, complex):
+                if isinstance(value, bool):
+                    return value
+                elif isinstance(value, complex):
                     if value.imag == 0.0:
                         return float(value.real)
                     else:
@@ -2629,6 +2631,8 @@ Global Operator Precedence List:
                 return item.evaltype()
         elif isinstance(item, complex):
             return "complex"
+        elif isinstance(item, bool):
+            return "bool"
         elif isnum(item):
             return "num"
         else:
