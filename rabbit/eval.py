@@ -1312,7 +1312,7 @@ Global Operator Precedence List:
                         useclass = useclass.retrieve(classlist[x])
                         if not isinstance(useclass, classcalc):
                             if istext(useclass) and len(classlist) == x+1:
-                                sides[1] = "( "+useclass+" )"+" + class\xab "+sides[0]+" "+":"*docalc+"= "+sides[1]+" \xbb"
+                                sides[1] = "( "+useclass+" )"+" ++ class\xab "+sides[0]+" "+":"*docalc+"= "+sides[1]+" \xbb"
                                 sides[0] = classlist[x]
                                 useclass = last
                                 classlist = classlist[:x]
@@ -1321,7 +1321,7 @@ Global Operator Precedence List:
                             else:
                                 raise ExecutionError("ClassError", "Could not set "+classlist[x]+" in "+self.prepare(last, False, True, True))
                 elif classlist[0] in self.variables and istext(self.variables[classlist[0]]) and len(classlist) == 1:
-                    sides[1] = "( "+self.variables[classlist[0]]+" ) + class\xab "+sides[0]+" "+":"*docalc+"= "+sides[1]+" \xbb"
+                    sides[1] = "( "+self.variables[classlist[0]]+" ) ++ class\xab "+sides[0]+" "+":"*docalc+"= "+sides[1]+" \xbb"
                     sides[0] = classlist[0]
                     useclass = None
                     classlist = []
@@ -1341,11 +1341,10 @@ Global Operator Precedence List:
                         value = value[0], self.trycalc(value[1])
                     self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.prepare(value[1], False, True, True))
                     if useclass is None:
-                        if not redef and value[0] in self.variables:
-                            if self.variables[value[0]] is value[1]:
-                                raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
-                        else:
+                        if redef or value[0] not in self.variables:
                             self.variables[value[0]] = value[1]
+                        elif self.variables[value[0]] is not value[1]:
+                            raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
                         if docalc:
                             out = value[1]
                         else:

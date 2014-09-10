@@ -454,7 +454,6 @@ passert:: (\x,y\x+y)(1)(2) ?= 3
 passert:: (\x,-y:1\x+y):2 ?= 3
 passert:: _ <> 1
 passert:: class << x = 1 >> ++ class << y = 2 >> ?= class << x = 1 ;; y = 2 >>
-passert:: (try::(class << x = 1 ;; x = 2 >>).name) ?= "RedefinitionError"
 passert:: "All
  done!" ?= "All" ++ "\n " ++ "done!"
 passert:: "All done!" ?= "All "
@@ -541,6 +540,8 @@ passert:: vv ?= 2 ?= vv' $ v = 2
 passert:: -(-1) ?= 1
 passert:: 2^-0.5 ?= 2^(-0.5)
 passert:: inst.__parent__.__parent__.meta ?= 1 $ inst = class<<__parent__ = class<<meta=1>> >>()
+passert:: ((try::x=1):1).name ?= "RedefinitionError"
+passert:: ((try::(class << x = 1 ;; x = 2 >>)):1).name ?= "RedefinitionError"
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")
