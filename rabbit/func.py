@@ -188,7 +188,10 @@ class funcfloat(numobject):
             self.e.setreturned(False)
             try:
                 out = self.base_func(*args, **kwargs)
-            except Exception:
+            except TailRecursion:
+                self.e.setreturned(returned or self.e.returned)
+                raise
+            except:
                 self.e.setreturned()
                 raise
             else:

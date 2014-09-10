@@ -531,7 +531,7 @@ passert:: [1,2,3] union [1,2,4] ?= [1,2,3,4]
 passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
 passert:: a.x ?= 1 $ (def:: a.x = 1) $ a = class<< b = class<<>> >>
 passert:: [][] ?= []
-passert:: inst ?= class<<__parent__=class<<meta=1>>;;x=1>> $ (def:: inst.x = 1) $ inst = class<<meta=1>>()
+passert:: inst ?= class<<__parent__=class<<meta=1>>;;meta=1;;x=1>> $ (def:: inst.x = 1) $ inst = class<<meta=1>>()
 property(func) = class<<__value__(self)=func()>>()
 vv = prop(\\val"v")
 vv' = property(\\val"v")

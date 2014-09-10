@@ -2985,7 +2985,7 @@ class evalfuncs(object):
             if original in self.e.variables:
                 return self.e.funcfind(original)
             else:
-                return matrix(0)
+                raise KeyError("Could not find "+original+" in variables")
 
     def getparenscall(self, variables):
         """Retreives The Number Of Parentheses."""
@@ -3018,7 +3018,7 @@ class evalfuncs(object):
             if original in self.e.variables:
                 return rawstrcalc(self.e.prepare(self.e.variables[original], True, True), self.e)
             else:
-                return matrix(0)
+                raise KeyError("Could not find "+original+" in variables")
 
     def copycall(self, variables):
         """Makes Copies Of Items."""
