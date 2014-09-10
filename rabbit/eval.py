@@ -326,8 +326,6 @@ Global Operator Precedence List:
             "iserr":funcfloat(self.funcs.iserrcall, self, "iserr", reqargs=1),
             "class":funcfloat(self.funcs.classcall, self, "class"),
             "namespace":funcfloat(self.funcs.namespacecall, self, "namespace"),
-            "var":funcfloat(self.funcs.getvarcall, self, "var", reqargs=1),
-            "val":funcfloat(self.funcs.getvalcall, self, "val", reqargs=1),
             "try":funcfloat(self.funcs.trycall, self, "try"),
             "raise":funcfloat(self.funcs.raisecall, self, "raise"),
             "except":funcfloat(self.funcs.exceptcall, self, "except"),
@@ -351,9 +349,10 @@ Global Operator Precedence List:
             "lshift":funcfloat(self.funcs.lshiftcall, self, "lshift", reqargs=2),
             "union":funcfloat(self.funcs.unioncall, self, "union", reqargs=2),
             "intersect":funcfloat(self.funcs.intersectcall, self, "intersect", reqargs=2),
-            "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
             "rand":funcfloat(self.funcs.randcall, self, "rand", reqargs=1),
             "Meta":classcalc(self, {
+                "var":funcfloat(self.funcs.getvarcall, self, "var", reqargs=1),
+                "val":funcfloat(self.funcs.getvalcall, self, "val", reqargs=1),
                 "use":funcfloat(self.funcs.usecall, self, "use"),
                 "using":funcfloat(self.funcs.usingcall, self, "using"),
                 "alias":funcfloat(self.funcs.aliascall, self, "alias", reqargs=1),
@@ -362,8 +361,9 @@ Global Operator Precedence List:
                 "parens":funcfloat(self.funcs.getparenscall, self, "parens")
                 }, name="Meta"),
             "Math":classcalc(self, {
+                "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
                 "data":funcfloat(self.funcs.datacall, self, "data"),
-                "frac":funcfloat(self.funcs.fractcall, self, "frac"),
+                "frac":funcfloat(self.funcs.fractioncall, self, "frac"),
                 "simp":funcfloat(self.funcs.simpcall, self, "simp"),
                 "det":funcfloat(self.funcs.detcall, self, "det", reqargs=1),
                 "floor":usefunc(math.floor, self, "floor", ["x"]),
@@ -377,8 +377,8 @@ Global Operator Precedence List:
                 "atan":usefunc(math.atan, self, "atan", ["x"]),
                 "asin":usefunc(math.asin, self, "asin", ["x"]),
                 "acos":usefunc(math.acos, self, "acos", ["x"]),
-                "deg":usefunc(math.degrees, self, "deg", ["x"]),
-                "rad":usefunc(math.radians, self, "rad", ["x"]),
+                "rad":usefunc(math.degrees, self, "rad", ["x"]),
+                "deg":usefunc(math.radians, self, "deg", ["x"]),
                 "fact":usefunc(factorial, self, "fact", ["x"]),
                 "gcd":usefunc(gcd, self, "gcd", ["x", "y"]),
                 "lcm":usefunc(lcm, self, "lcm", ["x", "y"]),
@@ -453,7 +453,7 @@ Global Operator Precedence List:
                     "\u2208" : "in",
                     "\u230a" : "min",
                     "\u2308" : "max",
-                    "\xb0" : "Math.rad",
+                    "\xb0" : "Math.deg",
                     "\u22d8" : "lshift",
                     "\u22d9" : "rshift",
                     "\u22c3" : "union",
@@ -3523,7 +3523,7 @@ class evalfuncs(object):
         else:
             return self.datacall([diagmatrixlist(variables)])
 
-    def fractcall(self, variables, dosimp=False):
+    def fractioncall(self, variables, dosimp=False):
         """Performs frac."""
         if not variables:
             return fraction()
@@ -3535,16 +3535,16 @@ class evalfuncs(object):
             else:
                 out = fraction(variables[0])
         else:
-            out = self.fractcall([variables[0]])
+            out = self.fractioncall([variables[0]])
             for x in xrange(1, len(variables)):
-                out /= self.fractcall([variables[x]])
+                out /= self.fractioncall([variables[x]])
         if dosimp or (isnum(out.n) and isnum(out.d)):
             out.simptens()
         return out
 
     def simpcall(self, variables):
         """Simplifies Fractions."""
-        out = self.fractcall(variables, True)
+        out = self.fractioncall(variables, True)
         out.simplify()
         return out
 

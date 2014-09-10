@@ -360,7 +360,7 @@ passert:: cos(0) ?= 1
 passert:: atan(0) ?= 0
 passert:: asin(0) ?= 0
 passert:: acos(1) ?= 0
-passert:: deg:(rad:180) ?= 180
+passert:: rad:(deg:180) ?= 180
 passert:: fact:3 ?= 6
 passert:: gcd:8:6 ?= 2
 passert:: lcm:4:6 ?= 12
@@ -546,6 +546,7 @@ passert:: ((try::(def::(pure::(x=1;;x=2)))):1).name ?= "PureError"
 passert:: bin 123 base 2 ?= 123
 passert:: oct 456 base 8 ?= 456
 passert:: hex 789 base 16 ?= 789
+passert:: simp(150deg/pi) ?= 5/6
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")

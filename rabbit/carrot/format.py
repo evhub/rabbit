@@ -208,10 +208,10 @@ def leading(inputstring, check=iswhite, func=True):
 def repeating(inputstring):
     """Generates A Repeating Representation Of A String."""
     opts = [(inputstring,"")]
-    for x in xrange(1, len(inputstring)/2+1):
+    for x in xrange(1, len(inputstring)//2+1):
         test = inputstring[-x:]
         left = inputstring[:-x]
-        for i in xrange(1, len(inputstring)/x):
+        for i in xrange(1, len(inputstring)//x):
             if left[-x:] == test:
                 left = left[:-x]
             else:
