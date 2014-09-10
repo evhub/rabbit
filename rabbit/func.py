@@ -1483,9 +1483,13 @@ class instancecalc(numobject, classcalc):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
         if parent is None:
-            parent = classcalc(self.e)
-            parent.variables = variables
-            variables = None
+            if self.parentvar in variables:
+                parent = variables[self.parentvar]
+                del variables[self.parentvar]
+            else:
+                parent = classcalc(self.e)
+                parent.variables = variables
+                variables = None
         self.variables = {
             self.selfvar : self,
             self.parentvar : parent
@@ -1495,11 +1499,11 @@ class instancecalc(numobject, classcalc):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("instancecalc", getstates(self.getvars()), getstates(self.getparent().getvars()))
+        return ("instancecalc", getstates(self.getvars()))
 
     def copy(self):
         """Copies The Instance."""
-        return instancecalc(self.e, getcopy(self.getvars()), self.getparent())
+        return instancecalc(self.e, getcopy(self.getvars()))
 
     def getparent(self):
         """Reconstructs The Parent Class."""
