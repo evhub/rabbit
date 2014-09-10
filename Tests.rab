@@ -543,6 +543,9 @@ passert:: inst.__parent__.__parent__.meta ?= 1 $ inst = class<<__parent__ = clas
 passert:: ((try::x=1):1).name ?= "RedefinitionError"
 passert:: ((try::(class << x = 1 ;; x = 2 >>)):1).name ?= "RedefinitionError"
 passert:: ((try::(def::(pure::(x=1;;x=2)))):1).name ?= "PureError"
+passert:: bin 123 base 2 ?= 123
+passert:: oct 456 base 8 ?= 456
+passert:: hex 789 base 16 ?= 789
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")

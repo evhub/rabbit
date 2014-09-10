@@ -307,6 +307,10 @@ Global Operator Precedence List:
             "round":funcfloat(self.funcs.roundcall, self, "round", reqargs=1),
             "num":funcfloat(self.funcs.numcall, self, "num"),
             "int":funcfloat(self.funcs.intcall, self, "int"),
+            "base":funcfloat(self.funcs.basecall, self, "base", reqargs=2),
+            "bin":funcfloat(self.funcs.bincall, self, "bin", reqargs=1),
+            "oct":funcfloat(self.funcs.octcall, self, "oct", reqargs=1),
+            "hex":funcfloat(self.funcs.hexcall, self, "hex", reqargs=1),
             "pair":funcfloat(self.funcs.paircall, self, "pair"),
             "dict":funcfloat(self.funcs.dictcall, self, "dict"),
             "eval":funcfloat(self.funcs.evalcall, self, "eval", reqargs=1),
@@ -3187,7 +3191,7 @@ class evalfuncs(object):
     def numcall(self, variables, new=True, func=makenum):
         """Performs float."""
         if not variables:
-            return 0.0
+            return func(0.0)
         elif len(variables) == 1:
             try:
                 variables[0].code
@@ -3206,6 +3210,38 @@ class evalfuncs(object):
     def intcall(self, variables):
         """Performs int."""
         return self.numcall(variables, func=lambda x: makeint(x))
+
+    def basecall(self, variables):
+        """Peforms base."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to base")
+        else:
+            self.e.overflow = variables[2:]
+            base = getnum(variables[0])
+            num = self.e.prepare(variables[1], False, False)
+            return int(num, base)
+
+    def reprstrip(self, inputrepr):
+        """Strips A Python Base Representation."""
+        while inputrepr and inputrepr[0] in "0box":
+            inputrepr = inputrepr[1:]
+        return inputrepr
+
+    def bincall(self, variables, func=bin):
+        """Performs bin."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to bin")
+        else:
+            self.e.overflow = variables[1:]
+            return rawstrcalc(self.reprstrip(func(getnum(variables[0]))), self.e)
+
+    def octcall(self, variables):
+        """Performs oct."""
+        return self.bincall(variables, oct)
+
+    def hexcall(self, variables):
+        """Performs hex."""
+        return self.bincall(variables, hex)
 
     def realcall(self, variables):
         """Performs Re."""
