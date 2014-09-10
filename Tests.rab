@@ -454,7 +454,7 @@ passert:: (\x,y\x+y)(1)(2) ?= 3
 passert:: (\x,-y:1\x+y):2 ?= 3
 passert:: _ <> 1
 passert:: class << x = 1 >> ++ class << y = 2 >> ?= class << x = 1 ;; y = 2 >>
-passert:: ((try::(class << x = 1 ;; x = 2 >>)):1).name ?= "RedefinitionError"
+passert:: (try::(class << x = 1 ;; x = 2 >>).name) ?= "RedefinitionError"
 passert:: "All
  done!" ?= "All" ++ "\n " ++ "done!"
 passert:: "All done!" ?= "All "
@@ -532,10 +532,10 @@ passert:: [1,2,3] union [1,2,4] ?= [1,2,3,4]
 passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
 passert:: a.x ?= 1 $ (def:: a.x = 1) $ a = class<< b = class<<>> >>
 passert:: [][] ?= []
-passert:: inst ?= class<<__parent__=class<<meta=1>>;;x=1>> $ (def:: inst.x = 1) $ inst = class<<meta=1>>
+passert:: inst ?= class<<__parent__=class<<meta=1>>;;x=1;;meta=1>> $ (def:: inst.x = 1) $ inst = class<<meta=1>>
 property(func) = class<<__value__(self)=func()>>()
-vv = prop(val"v")
-vv' = property(val"v")
+vv = prop(\\val"v")
+vv' = property(\\val"v")
 passert:: vv ?= 1 ?= vv' $ v = 1
 passert:: vv ?= 2 ?= vv' $ v = 2
 passert:: -(-1) ?= 1
