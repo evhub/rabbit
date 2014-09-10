@@ -297,6 +297,8 @@ Global Operator Precedence List:
             "cont":funcfloat(self.funcs.getmatrixcall, self, "cont", reqargs=1),
             "sum":funcfloat(self.funcs.sumcall, self, "sum", reqargs=1),
             "prod":funcfloat(self.funcs.prodcall, self, "prod", reqargs=1),
+            "min":funcfloat(self.funcs.mincall, self, "min", reqargs=1),
+            "max":funcfloat(self.funcs.maxcall, self, "max", reqargs=1),
             "join":funcfloat(self.funcs.joincall, self, "join", reqargs=2),
             "connect":funcfloat(self.funcs.connectcall, self, "connect", reqargs=1),
             "merge":funcfloat(self.funcs.mergecall, self, "merge", reqargs=1),
@@ -3064,6 +3066,24 @@ class evalfuncs(object):
             else:
                 value *= x
         return value
+
+    def maxcall(self, variables):
+        """Performs max."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to max")
+        elif len(variables) == 1:
+            return max(getmatrix(variables[0]).getitems())
+        else:
+            return max(variables)
+
+    def mincall(self, variables):
+        """Performs min."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to min")
+        elif len(variables) == 1:
+            return min(getmatrix(variables[0]).getitems())
+        else:
+            return min(variables)
 
     def connectcall(self, variables):
         """Connects Variables."""

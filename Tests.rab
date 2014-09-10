@@ -235,8 +235,8 @@ passert:: parts:(1,2,3,4) ?= 1,(2,3,4)
   a,as
   $ a,as = l
   )
-passert:: max(0,1,9,6,8,2) ?= 9
- $ max(l) = (
+passert:: max'(0,1,9,6,8,2) ?= 9
+ $ max'(l) = (
   (
    a @ a > maxtail;
    maxtail
@@ -400,6 +400,8 @@ passert:: 2 ?= (pure:: 1+1)
 passert:: aliases()
 passert:: pair() ?= (->)
 passert:: dict() ?= {}
+passert:: max(1,0,5,4) ?= 5
+passert:: min(1,0,5,4) ?= 0
 
 # New Feature Tests:
 passert:: f..g(1)g..f(2) ?= 20      $ f(x) = x^2 $ g(x) = x+1
@@ -537,7 +539,7 @@ vv' = property(val"v")
 passert:: vv ?= 1 ?= vv' $ v = 1
 passert:: vv ?= 2 ?= vv' $ v = 2
 passert:: -(-1) ?= 1
-passert:: 2^-0.5 ?= 1/(2^(0.5))
+passert:: 2^-0.5 ?= 2^(-0.5)
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")
