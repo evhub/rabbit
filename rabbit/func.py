@@ -1158,7 +1158,8 @@ class classcalc(cotobject):
         """Initializes The Class."""
         self.e = e
         if selfvar is not None:
-            self.selfvar = selfvar
+            self.selfvar = str(selfvar)
+            self.restricted = [self.selfvar]
         self.variables = {
             self.selfvar : self
             }
