@@ -1341,7 +1341,10 @@ Global Operator Precedence List:
                         value = value[0], self.trycalc(value[1])
                     self.printdebug(": "+strlist(classlist, ".")+"."*bool(classlist)+value[0]+" "+":"*docalc+"= "+self.prepare(value[1], False, True, True))
                     if useclass is None:
-                        if redef or value[0] not in self.variables:
+                        if value[0] not in self.variables:
+                            self.variables[value[0]] = value[1]
+                        elif redef:
+                            self.setreturned()
                             self.variables[value[0]] = value[1]
                         elif self.variables[value[0]] is not value[1]:
                             raise ExecutionError("RedefinitionError", "The variable "+value[0]+" already exists")
@@ -1352,6 +1355,7 @@ Global Operator Precedence List:
                     else:
                         if value[0] not in useclass.variables or useclass.variables[value[0]] is not value[1]:
                             if redef:
+                                self.setreturned()
                                 useclass.store(value[0], value[1])
                             else:
                                 raise ExecutionError("RedefinitionError", "Cannot redefine attribute "+value[0])
@@ -3686,7 +3690,6 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to def")
         else:
             self.e.overflow = variables[1:]
-            self.e.setreturned()
             original = self.e.prepare(variables[0], True, False)
             redef, self.e.redef = self.e.redef, True
             try:

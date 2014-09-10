@@ -542,6 +542,7 @@ passert:: 2^-0.5 ?= 2^(-0.5)
 passert:: inst.__parent__.__parent__.meta ?= 1 $ inst = class<<__parent__ = class<<meta=1>> >>()
 passert:: ((try::x=1):1).name ?= "RedefinitionError"
 passert:: ((try::(class << x = 1 ;; x = 2 >>)):1).name ?= "RedefinitionError"
+passert:: ((try::(def::(pure::(x=1;;x=2)))):1).name ?= "PureError"
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")
