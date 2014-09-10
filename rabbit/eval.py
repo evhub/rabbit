@@ -419,6 +419,11 @@ Global Operator Precedence List:
             funcfloat.allargs : matrix(0)
             }
         self.variables.update({
+            "and":strfunc("x&y", self, ["x", "y"], name="and"),
+            "or":strfunc("x|y", self, ["x", "y"], name="or"),
+            "xor":strfunc("(x|y)&!(x&y)", self, ["x", "y"], name="xor"),
+            "not":strfunc("!x", self, ["x"], name="not"),
+            "bool":strfunc("?x", self, ["x"], name="bool"),
             "prop":strfunc("class\xab__value__(self,getter:getter)=getter()\xbb()", self, ["getter"], name="prop"),
             "Unicode":classcalc(self, {
                 "__include__" : strfunc("""self.includes$self.aliases~~Meta.alias""", self, ["self"], name="__include__"),
