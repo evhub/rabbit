@@ -499,16 +499,16 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
             if x == hold:
                 hold = False
         elif found:
-            for k,(v,i,ex) in found.items():
+            for k,(v,i,xs,ex) in found.items():
                 if ex is None:
-                    found[k] = (v+x, i, None)
+                    found[k] = (v, i, xs+x, None)
                 elif x == k[v]:
                     if len(k) == v+1:
-                        found[k] = (ex+replaces[k], i+1, None)
+                        found[k] = (ex+replaces[k], i+1, xs, None)
                     else:
-                        found[k] = (v+1, i+1, ex)
+                        found[k] = (v+1, i+1, xs, ex)
                 else:
-                    found[k] = (ex+k[:v]+x, 0, None)
+                    found[k] = (ex+k[:v]+replaceall(xs+x, replaces, holdstrings, closers), 0, "", None)
             if istext(v):
                 last = v
             else:
@@ -516,12 +516,12 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
             for k in replaces:
                 if k not in found and k.startswith(x):
                     if len(k) == 1:
-                        found[k] = (last+replaces[k], 1, None)
+                        found[k] = (last+replaces[k], 1, "", None)
                     else:
-                        found[k] = (1, 0, last)
+                        found[k] = (1, 0, "", last)
             done = True
             new = ("", -1)
-            for v,i,ex in found.values():
+            for v,i,xs,ex in found.values():
                 if ex is None:
                     if i > new[1]:
                         new = v,i
@@ -535,9 +535,9 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
             for k in replaces:
                 if k.startswith(x):
                     if len(k) == 1:
-                        found[k] = (replaces[k], 1, None)
+                        found[k] = (replaces[k], 1, "", None)
                     else:
-                        found[k] = (1, 0, "")
+                        found[k] = (1, 0, "", "")
         if not found:
             out.append(new)
             if check_hold:
@@ -551,11 +551,14 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
                         hold = closers[c]
     if found:
         new = ("", -1)
-        for k,(v,i,ex) in found.items():
+        for k,(v,i,xs,ex) in found.items():
             if ex is not None and v == len(k):
-                v,i,ex = replaces[k], i+1, None
-            if ex is None and i > new[1]:
-                new = v,i
+                    v,i,ex = replaces[k], i+1, None
+            if ex is None:
+                if xs:
+                    v += replaceall(xs, replaces, holdstrings, closers)
+                if i > new[1]:
+                    new = v,i
         if new[0]:
             last = new[0]
         elif istext(v):
