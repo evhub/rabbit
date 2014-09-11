@@ -573,7 +573,7 @@ contents = read("Tests.save")
 passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents)
 passert:: ! using()
 use(calc) ;; use(using())
-passert:: calc ?= using() ?= used             $ used = prop(using)
+passert:: using() ?= calc ?= used             $ used = prop(using)
 passert:: class <<
            run :: Tests.save
            >>

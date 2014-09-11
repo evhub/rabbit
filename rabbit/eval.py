@@ -148,7 +148,6 @@ Global Operator Precedence List:
     fatalvar = "fatal"
     namevar = "name"
     messagevar = "message"
-    autoarg = "____"
     recursion = 0
     redef = False
     useclass = None
@@ -1586,8 +1585,8 @@ Global Operator Precedence List:
                     if inv:
                         out = not out
                     if not out:
-                        return 0.0
-            return 1.0
+                        return False
+            return True
 
     def calc_eval(self, expression):
         """Evaluates An Expression."""
@@ -2350,10 +2349,10 @@ Global Operator Precedence List:
 
     def unusedarg(self):
         """Returns An Unused Arg."""
-        out = self.autoarg
-        while out in self.variables:
-            out = "_"+out
-        return out
+        out = "'"
+        while "__"+out+"__" in self.variables:
+            out += "'"
+        return "__"+out+"__"
 
     def call_paren(self, inputstring, top=True):
         """Evaluates Parentheses."""
@@ -3452,7 +3451,7 @@ class evalfuncs(object):
                 out.append(self.e.typecalc(x))
             return diagmatrixlist(out)
 
-    def tocall(self, variables, varstrings="xyzwpqrabchjklmnABCFGHJKMNOQRTUVWXYZ"):
+    def tocall(self, variables, varstrings="xyzwpqrabchjklmABFGHJKMOTUVWXY"):
         """Returns A Converter Function."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to to")

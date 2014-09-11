@@ -234,7 +234,7 @@ class funcfloat(numobject):
 
     def __iadd__(self, other):
         """Performs Addition."""
-        if other == 0.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc("("+self.funcstr+"("+self.allargs+"))+"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
@@ -283,7 +283,7 @@ class funcfloat(numobject):
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
-        if other == 1.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc(self.e.wrap(other)+"*("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
@@ -425,7 +425,7 @@ class strfunc(funcfloat):
 
     def __idiv__(self, other):
         """Performs Division."""
-        if other == 1.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc("("+self.name+":"+strlist(self.variables,":")+")/"+self.e.wrap(other), self.e, self.variables, {self.name:self})
@@ -467,7 +467,7 @@ class strfunc(funcfloat):
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
-        if other == 1.0 or isnull(other):
+        if isnull(other):
             return self
         else:
             return strfunc(self.e.wrap(other)+"*("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
