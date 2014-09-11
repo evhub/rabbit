@@ -523,6 +523,8 @@ def replaceall(inputstring, replaces={}, holdstrings="", closers={}):
             new = ("", -1)
             for v,i,xs,ex in found.values():
                 if ex is None:
+                    if xs:
+                        v += replaceall(xs, replaces, holdstrings, closers)
                     if i > new[1]:
                         new = v,i
                 else:

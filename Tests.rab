@@ -561,7 +561,7 @@ passert:: !( 1 and 1 and 0)
 passert:: 0 or 0 or 1
 passert:: !(0 or 0 or 0)
 passert:: ((x?=5$x=y)$y=z)$z=5
-passert:: ! "∷" in ∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷
+passert:: ! "∷" in (∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷)
 passert:: len<<<<>>>> ?= 2
 
 # Final Testing:

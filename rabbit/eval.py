@@ -1550,9 +1550,15 @@ Global Operator Precedence List:
                         if c == "=":
                             haseq = True
                         elif c == ">":
-                            hasgt = True
+                            if hasgt:
+                                raise ExecutionError("SyntaxError", "Illegal double greater than")
+                            else:
+                                hasgt = True
                         elif c == "<":
-                            haslt = True
+                            if haslt:
+                                raise ExecutionError("SyntaxError", "Illegal double less than")
+                            else:
+                                haslt = True
                         elif c == "\u2260":
                             hasne = True
                         elif c == "!":
