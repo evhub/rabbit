@@ -179,7 +179,7 @@ Global Operator Precedence List:
             self.makevars(variables)
 
     def new(self):
-        """Makes A New Identically-Configured Evaluator."""
+        """Makes A New Essentially Identically-Configured Evaluator."""
         return evaluator(None, self.processor, self.color, self.speedy, self.maxrecursion)
 
     @property
@@ -421,12 +421,12 @@ Global Operator Precedence List:
             funcfloat.allargs : matrix(0)
             }
         self.variables.update({
-            "and":strfunc("x&y", self, ["x", "y"], name="and"),
-            "or":strfunc("x|y", self, ["x", "y"], name="or"),
-            "xor":strfunc("(x|y)&!(x&y)", self, ["x", "y"], name="xor"),
-            "not":strfunc("!x", self, ["x"], name="not"),
-            "bool":strfunc("?x", self, ["x"], name="bool"),
-            "prop":strfunc("class\xab__value__(self,getter:getter)=getter()\xbb()", self, ["getter"], name="prop"),
+            "and":strfunc("x&y", self, ["x", "y"], name="and", lexical=False),
+            "or":strfunc("x|y", self, ["x", "y"], name="or", lexical=False),
+            "xor":strfunc("(x|y)&!(x&y)", self, ["x", "y"], name="xor", lexical=False),
+            "not":strfunc("!x", self, ["x"], name="not", lexical=False),
+            "bool":strfunc("?x", self, ["x"], name="bool", lexical=False),
+            "prop":strfunc("class\xab__value__(^self,getter:getter)=getter()\xbb()", self, ["getter"], name="prop"),
             "Unicode":classcalc(self, {
                 "__include__" : strfunc("""self.includes$self.aliases~~Meta.alias""", self, ["self"], name="__include__"),
                 "aliases" : self.frompython({
@@ -506,7 +506,7 @@ Global Operator Precedence List:
                     "\u2209" : strfunc("!\u2208(__)", self, name="\u2209", overflow=False),
                     "\u220b" : strfunc("\u2208(rev(__))", self, name="\u220b", overflow=False),
                     "\u220c" : strfunc("!\u220b(__)", self, name="\u220c", overflow=False),
-                    "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
+                    "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b", lexical=False),
                     "\u221c" : strfunc("Math.sqrt(Math.sqrt(x))", self, ["x"], name="\u221c"),
                     "\u222c" : strfunc("Math.S((Math.S((f,)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
                     "\u222d" : strfunc("Math.S((Math.S((Math.S((f,)++args),)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222d")
@@ -1401,8 +1401,8 @@ Global Operator Precedence List:
         if self.parenchar in sides[0] and sides[0].endswith(self.parenchar):
             sides[0] = sides[0].split(self.parenchar, 1)
             sides[0][1] = self.namefind(self.parenchar+sides[0][1])
-            params, personals, allargs, reqargs = self.eval_set(self.outersplit(sides[0][1], ",", top=False))
-            return (sides[0][0], strfunc(sides[1], self, params, personals, allargs=allargs, reqargs=reqargs))
+            params, personals, allargs, reqargs, lexical = self.eval_set(self.outersplit(sides[0][1], ",", top=False))
+            return (sides[0][0], strfunc(sides[1], self, params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical))
 
     def set_normal(self, sides):
         """Performs =."""
@@ -1714,8 +1714,8 @@ Global Operator Precedence List:
             elif not out[0]:
                 return strfloat(out[1], self, check=False)
             else:
-                params, personals, allargs, reqargs = self.eval_set(self.outersplit(self.namefind(out[0]), ",", top=False))
-                return strfloat(out[1], self, params, personals, check=False, allargs=allargs, reqargs=reqargs)
+                params, personals, allargs, reqargs, lexical = self.eval_set(self.outersplit(self.namefind(out[0]), ",", top=False))
+                return strfloat(out[1], self, params, personals, check=False, allargs=allargs, reqargs=reqargs, lexical=lexical)
 
     def eval_set(self, temp):
         """Performs Setting."""
@@ -1724,6 +1724,11 @@ Global Operator Precedence List:
         allargs = None
         inopt = None
         reqargs = None
+        if temp[0].startswith("^"):
+            temp[0] = temp[0][1:]
+            lexical = False
+        else:
+            lexical = True
         for i in xrange(0, len(temp)):
             x = basicformat(temp[i])
             if x:
@@ -1770,7 +1775,7 @@ Global Operator Precedence List:
                     allargs = x
                 if doparam:
                     params.append(x)
-        return params, personals, allargs, reqargs
+        return params, personals, allargs, reqargs, lexical
 
     def eval_join(self, inputlist, eval_funcs):
         """Performs Concatenation."""

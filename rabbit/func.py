@@ -298,9 +298,8 @@ class funcfloat(numobject):
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
     method = None
-    lexical = True
 
-    def __init__(self, funcstr, e, variables=None, personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None, method=None):
+    def __init__(self, funcstr, e, variables=None, personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None, method=None, lexical=True):
         """Creates A Callable String Function."""
         self.e = e
         self.funcstr = self.e.namefind(str(funcstr))
@@ -335,7 +334,7 @@ class strfunc(funcfloat):
             self.reqargs = len(self.variables)
         else:
             self.reqargs = reqargs
-        if self.lexical:
+        if lexical:
             self.snapshot = self.e.variables.copy()
         else:
             self.snapshot = {}
@@ -530,7 +529,7 @@ class strfunc(funcfloat):
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
-    def __init__(self, funcstr, e, variables=None, personals=None, check=True, name=None, overflow=None, allargs=None, reqargs=None):
+    def __init__(self, funcstr, e, variables=None, personals=None, check=True, name=None, overflow=None, allargs=None, reqargs=None, lexical=True):
         """Initializes The String Float."""
         self.e = e
         if name:
@@ -584,7 +583,7 @@ class strfloat(strfunc):
             self.memoize = test.memoize
             self.memo = test.memo
             self.snapshot = test.snapshot
-            if self.lexical:
+            if lexical:
                 self.snapshot.update(self.e.variables)
             self.method = test.method
         else:
@@ -595,7 +594,7 @@ class strfloat(strfunc):
             self.variables = variables
             self.personals = personals
             self.memo = {}
-            if self.lexical:
+            if lexical:
                 self.snapshot = self.e.variables.copy()
             else:
                 self.snapshot = {}

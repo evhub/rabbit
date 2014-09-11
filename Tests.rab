@@ -534,7 +534,7 @@ passert:: [][] ?= []
 passert:: inst ?= class<<__parent__=class<<meta=1>>;;meta=1;;x=1>> $ (def:: inst.x = 1) $ inst = class<<meta=1>>()
 property(func) = class<<__value__(self)=func()>>()
 vv = prop(\\val"v")
-val'(__) = val(__)
+val'(^__) = val(__)
 vv' = property(\\val'"v")
 passert:: val'"v" ?= 1   $ v = 1
 passert:: val'"v" ?= 2   $ v = 2
