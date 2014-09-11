@@ -535,7 +535,7 @@ passert:: inst ?= class<<__parent__=class<<meta=1>>;;meta=1;;x=1>> $ (def:: inst
 val'(^__) = val(__)
 passert:: val'"v" ?= 1   $ v = 1
 passert:: val'"v" ?= 2   $ v = 2
-vv = prop(\\val"v")
+vv = prop(\^\val"v")
 passert:: vv ?= 1        $ v = 1
 passert:: vv ?= 2        $ v = 2
 passert:: -(-1) ?= 1
