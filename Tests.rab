@@ -532,16 +532,12 @@ passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
 passert:: a.x ?= 1 $ (def:: a.x = 1) $ a = class<< b = class<<>> >>
 passert:: [][] ?= []
 passert:: inst ?= class<<__parent__=class<<meta=1>>;;meta=1;;x=1>> $ (def:: inst.x = 1) $ inst = class<<meta=1>>()
-property(func) = class<<__value__(self)=func()>>()
-vv = prop(\\val"v")
 val'(^__) = val(__)
-vv' = property(\\val'"v")
 passert:: val'"v" ?= 1   $ v = 1
 passert:: val'"v" ?= 2   $ v = 2
+vv = prop(\\val"v")
 passert:: vv ?= 1        $ v = 1
 passert:: vv ?= 2        $ v = 2
-passert:: vv' ?= 1       $ v = 1
-passert:: vv' ?= 2       $ v = 2
 passert:: -(-1) ?= 1
 passert:: 2^-0.5 ?= 2^(-0.5)
 passert:: inst.__parent__.__parent__.meta ?= 1 $ inst = class<<__parent__ = class<<meta=1>> >>()
@@ -563,6 +559,12 @@ passert:: !(0 or 0 or 0)
 passert:: ((x?=5$x=y)$y=z)$z=5
 passert:: ! "∷" in (∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷∷)
 passert:: len<<<<>>>> ?= 2
+passert:: class<<x=1;;f(x)=x;;y=2>> ?= (__where__
+ $ x = 1
+ $ f(x) =
+    x
+ $ y = 2
+ )
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")
@@ -571,7 +573,7 @@ contents = read("Tests.save")
 passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents)
 passert:: ! using()
 use(calc) ;; use(using())
-passert:: calc ?= using() ?= used ?= used'    $ used' = property(using) $ used = prop(using)
+passert:: calc ?= using() ?= used             $ used = prop(using)
 passert:: class <<
            run :: Tests.save
            >>

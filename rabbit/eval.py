@@ -143,7 +143,7 @@ Global Operator Precedence List:
     calcops = "$"
     multiargops = bools + callops + "+-@~|&;," + calcops + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = string.digits + multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
-    withvar = "__with__"
+    withvar = "__where__"
     errorvar = "__error__"
     fatalvar = "fatal"
     namevar = "name"
