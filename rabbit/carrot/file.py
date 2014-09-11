@@ -63,8 +63,10 @@ def getfile(filename, opentype="r+b"):
         out = createfile(filename, opentype)
     return out
 
-def runfile(filename, currentos=None):
+def runfile(filename, currentos=None, wdir=None):
     """Opens A File With Its Default Program."""
+    if wdir is not None:
+        os.chdir(os.path.normcase(str(wdir)))
     if currentos is None:
         currentos = getos()
     else:
@@ -75,7 +77,7 @@ def runfile(filename, currentos=None):
         newfilename = ""
         for x in filename:
             if x == " ":
-                newfilename += "\ "
+                newfilename += "\\ "
             else:
                 newfilename += x
         runcmd("open " + newfilename)

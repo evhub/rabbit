@@ -2616,7 +2616,7 @@ Global Operator Precedence List:
         else:
             reserved = self.reserved+extra
             for x in expression:
-                if x in self.reserved and not x in allowed:
+                if x in reserved and x not in allowed:
                     return True
             return False
 
