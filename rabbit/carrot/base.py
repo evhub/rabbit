@@ -179,27 +179,27 @@ class evalobject(object):
 
     def __gt__(self, other):
         """Wraps cmp."""
-        return cmp(self, other) > 0
+        return self.__cmp__(other) > 0
 
     def __lt__(self, other):
         """Wraps cmp."""
-        return cmp(self, other) < 0
+        return self.__cmp__(other) < 0
 
     def __ge__(self, other):
         """Wraps cmp."""
-        return cmp(self, other) >= 0
+        return self.__cmp__(other) >= 0
 
     def __le__(self, other):
         """Wraps cmp."""
-        return cmp(self, other) <= 0
+        return self.__cmp__(other) <= 0
 
     def __eq__(self, other):
         """Wraps cmp."""
-        return cmp(self, other) == 0
+        return self.__cmp__(other) == 0
 
     def __cmp__(self, other):
         """Raises An Error."""
-        return NotImplemented
+        raise ExecutionError("OperatorError", "Comparison not defined for object")
 
     def __index__(self):
         """Wraps int."""
