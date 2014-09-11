@@ -509,7 +509,7 @@ Global Operator Precedence List:
                     "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b"),
                     "\u221c" : strfunc("Math.sqrt(Math.sqrt(x))", self, ["x"], name="\u221c"),
                     "\u222c" : strfunc("Math.S((Math.S((f,)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
-                    "\u222d" : strfunc("Math.S((\u222c((f,)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222d")
+                    "\u222d" : strfunc("Math.S((Math.S((Math.S((f,)++args),)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222d")
                     })
                 }, name="Unicode").call([])
             })
@@ -2746,22 +2746,21 @@ class evalfuncs(object):
 
     def usecall(self, variables):
         """Uses A Default Statement."""
+        self.e.setreturned()
         if not variables:
-            self.e.setreturned()
             self.e.using = None
         else:
             self.e.overflow = variables[1:]
-            self.e.setreturned()
             self.e.using = variables[0]
         return matrix(0)
 
     def delcall(self, variables):
         """Deletes A Variable."""
+        self.e.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to del")
         else:
             self.e.overflow = variables[1:]
-            self.e.setreturned()
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
                 out = self.e.variables[original]
@@ -2797,10 +2796,10 @@ class evalfuncs(object):
 
     def includecall(self, variables):
         """Includes A Class In The Global Namespace."""
+        self.e.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to include")
         elif len(variables) == 1:
-            self.e.setreturned()
             last = None
             while isinstance(variables[0], instancecalc):
                 if last is None or not self.iseq(last, variables[0]):
@@ -2979,8 +2978,8 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to val")
         else:
-            self.e.overflow = variables[1:]
             self.e.setreturned()
+            self.e.overflow = variables[1:]
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
                 return self.e.funcfind(original)
@@ -2995,25 +2994,25 @@ class evalfuncs(object):
 
     def getparenvarcall(self, variables):
         """Gets The Value Of A Paren."""
+        self.e.setreturned()
         if not variables:
             variables = [-1]
         self.e.overflow = variables[1:]
-        self.e.setreturned()
         original = getint(variables[0])
         if original < 0:
             original += len(self.e.parens)
         if 0 < original and original < len(self.e.parens):
             return rawstrcalc(self.e.prepare(self.e.getparen(original), True, True), self.e)
         else:
-            return matrix(0)
+            raise KeyError("Could not find "+self.parenchar+str(original)+self.parenchar+" in parens")
 
     def getvarcall(self, variables):
         """Gets The Value Of A Variable."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to var")
         else:
-            self.e.overflow = variables[1:]
             self.e.setreturned()
+            self.e.overflow = variables[1:]
             original = self.e.prepare(variables[0], False, False)
             if original in self.e.variables:
                 return rawstrcalc(self.e.prepare(self.e.variables[original], True, True), self.e)
@@ -3709,8 +3708,8 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to write")
         else:
-            self.e.overflow = variables[2:]
             self.e.setreturned()
+            self.e.overflow = variables[2:]
             name = self.e.prepare(variables[0], False, False)
             if len(variables) == 1:
                 writer = ""
@@ -3725,8 +3724,8 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to read")
         else:
-            self.e.overflow = variables[1:]
             self.e.setreturned()
+            self.e.overflow = variables[1:]
             name = self.e.prepare(variables[0], False, False)
             with openfile(name) as f:
                 return rawstrcalc(readfile(f), self.e)
@@ -3775,11 +3774,11 @@ class evalfuncs(object):
 
     def aliascall(self, variables):
         """Makes Aliases."""
+        self.e.setreturned()
         self.e.overflow = variables[2:]
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to alias")
         elif len(variables) == 1:
-            self.e.setreturned()
             key = self.e.prepare(variables[0], True, False)
             if key in self.e.aliases:
                 out = rawstrcalc(self.e.aliases[key], self.e)
@@ -3788,7 +3787,6 @@ class evalfuncs(object):
                 out = matrix(0)
             return out
         else:
-            self.e.setreturned()
             key = self.e.prepare(variables[0], True, False)
             value = self.e.prepare(variables[1], True, False)
             self.e.aliases[key] = value
@@ -3934,10 +3932,10 @@ class evalfuncs(object):
 
     def runcall(self, variables):
         """Performs run."""
+        self.e.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to run")
         elif len(variables) == 1:
-            self.e.setreturned()
             original = os.path.normcase(self.e.prepare(variables[0], False, False))
             while not os.path.isfile(original):
                 if "." not in original:
@@ -3993,10 +3991,10 @@ class evalfuncs(object):
 
     def installcall(self, variables):
         """Performs install."""
+        self.setreturned()
         if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
         elif len(variables) == 1:
-            self.setreturned()
             name = self.prepare(variables[0], False, False)
             try:
                 impbaseclass = dirimport(inputstring)
