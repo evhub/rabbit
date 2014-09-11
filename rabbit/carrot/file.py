@@ -63,10 +63,10 @@ def getfile(filename, opentype="r+b"):
         out = createfile(filename, opentype)
     return out
 
-def runfile(filename, currentos=None, wdir=None):
+def startfile(filename, currentos=None, dirname=None):
     """Opens A File With Its Default Program."""
-    if wdir is not None:
-        os.chdir(os.path.normcase(str(wdir)))
+    if dirname is not None:
+        os.chdir(os.path.normcase(str(dirname)))
     if currentos is None:
         currentos = getos()
     else:
