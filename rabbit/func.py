@@ -1377,7 +1377,7 @@ class classcalc(cotobject):
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, classcalc):
-            if self.variables[self.selfvar] is other.variables[self.selfvar]:
+            if self.variables[self.selfvar] is other.variables[other.selfvar]:
                 return True
             else:
                 self.calcall()
