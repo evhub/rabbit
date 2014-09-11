@@ -360,7 +360,8 @@ Global Operator Precedence List:
                 "alias":funcfloat(self.funcs.aliascall, self, "alias", reqargs=1),
                 "aliases":funcfloat(self.funcs.aliasescall, self, "aliases"),
                 "paren":funcfloat(self.funcs.getparenvarcall, self, "paren"),
-                "parens":funcfloat(self.funcs.getparenscall, self, "parens")
+                "parens":funcfloat(self.funcs.getparenscall, self, "parens"),
+                "unused":funcfloat(self.funcs.unusedcall, self, "unused")
                 }, name="Meta"),
             "Math":classcalc(self, {
                 "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
@@ -4069,3 +4070,19 @@ class evalfuncs(object):
                 else:
                     return out
             return funcfloat(_outside, self.e, "calc", reqargs=1)
+
+    def unusedcall(self, variables):
+        """Gets Unused Variables."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to unused")
+        else:
+            self.e.setreturned()
+            self.e.overflow = variables[1:]
+            if isinstance(variables[0], classcalc):
+                out = {}
+                for k,v in variables[0].getvars(True).items():
+                    if istext(v):
+                        out[k] = v
+                return classcalc(self.e, out)
+            else:
+                raise TypeError("Only classes can have their variables analyzed")

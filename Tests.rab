@@ -567,6 +567,7 @@ passert:: class<<x=1;;f(x)=x;;y=2>> ?= (__where__
  )
 
 # Final Testing:
+passert:: unused(env()) ?= class<<x=1>> $ x = 1
 passert:: print("<#> Make sure you see this message three times")
 passert:: save("Tests.save");true
 contents = read("Tests.save")
