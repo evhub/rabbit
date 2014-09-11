@@ -188,19 +188,17 @@ class funcfloat(numobject):
             self.e.setreturned(False)
             try:
                 out = self.base_func(*args, **kwargs)
-            except TailRecursion:
-                self.e.setreturned(returned or self.e.returned)
-                raise
-            except:
+            except Exception:
                 self.e.setreturned()
                 raise
             else:
-                self.e.setreturned(returned or self.e.returned)
-                if not self.e.returned:
+                if not returned and not self.e.returned:
                     if arghash is None:
                         arghash = (self.keyhash(args), self.keyhash(kwargs))
                     self.memo[arghash] = out
                 return out
+            finally:
+                self.e.setreturned(returned or self.e.returned)
         else:
             return self.base_func(*args, **kwargs)
 
