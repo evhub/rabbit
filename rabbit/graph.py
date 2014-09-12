@@ -64,13 +64,13 @@ class grapher(mathbase):
                 else:
                     raise IOError("Unable to find Pixel.gif.")
         try:
-            self.graph = openphoto(directory+"Graph.gif")
+            self.graph = openphoto(os.path.join(directory, "Graph.gif"))
         except:
             self.graph = None
         else:
             self.app.new(self.graph)
         try:
-            self.gridline = openphoto(directory+"Grid.gif")
+            self.gridline = openphoto(os.path.join(directory, "Grid.gif"))
         except:
             self.sepgrid = False
         else:
@@ -327,8 +327,8 @@ class grapher(mathbase):
             "ticks":usefunc(self.tickrender, self.e, "ticks"),
             "axis":usefunc(self.axisrender, self.e, "axis"),
             "origin":usefunc(self.origin, self.e, "origin"),
-            "render":strfunc("cleargrid()axis()ticks()", self.e, name="render"),
-            "display":strfunc("center()render()", self.e, name="display"),
+            "render":strfunc("cleargrid(),axis(),ticks()", self.e, name="render"),
+            "display":strfunc("center(),render()", self.e, name="display"),
             "stretch":1.0,
             "xstretch":"stretch",
             "ystretch":"stretch",
