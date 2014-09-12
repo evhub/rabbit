@@ -289,6 +289,7 @@ Global Operator Precedence List:
             "repr":funcfloat(self.funcs.reprcall, self, "repr"),
             "code":funcfloat(self.funcs.codecall, self, "code"),
             "calc":funcfloat(self.funcs.docalc, self, "calc", reqargs=1),
+            "do":funcfloat(self.funcs.nonecalc, self, "do", reqargs=1),
             "exec":funcfloat(self.funcs.cmdcall, self, "exec", reqargs=1),
             "fold":funcfloat(self.funcs.foldcall, self, "fold", reqargs=1),
             "row":funcfloat(rowmatrixlist, self, "row"),
@@ -3593,6 +3594,11 @@ class evalfuncs(object):
             return out[0]
         else:
             return diagmatrixlist(out)
+
+    def nonecalc(self, variables):
+        """Performs calc And Returns null."""
+        self.docalc(variables)
+        return matrix(0)
 
     def evalcall(self, variables):
         """Performs eval."""

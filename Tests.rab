@@ -402,6 +402,7 @@ passert:: pair() ?= (->)
 passert:: dict() ?= {}
 passert:: max(1,0,5,4) ?= 5
 passert:: min(1,0,5,4) ?= 0
+passert:: 5x^2 ?= 20                $ (do:: x = 2)
 
 # New Feature Tests:
 passert:: f..g(1)g..f(2) ?= 20      $ f(x) = x^2 $ g(x) = x+1
