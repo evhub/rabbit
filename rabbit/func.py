@@ -1005,13 +1005,34 @@ class derivfunc(derivbase, strfunc):
                 kwargs["variables"] = [varname]
         strfunc.__init__(self, *args, **kwargs)
 
-    def getstate(self):
-        """Returns A Pickleable Reference Object."""
-        return ("derivfunc", ) #TODO
-
     def copy(self):
         """Returns A Copy Of The Derivative Function."""
-        return derivfunc() #TODO
+        return derivfunc(self.funcstr,
+                         self.e,
+                         self.variables,
+                         self.personals,
+                         self.name,
+                         self.overflow,
+                         self.allargs,
+                         self.reqargs,
+                         self.memoize,
+                         self.memo,
+                         self.method,
+                         n=self.n,
+                         accuracy=self.accuracy,
+                         scaledown=self.scaledown
+                         )
+
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        state = list(strfunc.getstate(self))
+        state[0] = "derivfunc"
+        state.extend([
+            self.n,
+            self.accuracy,
+            self.scaledown
+            ])
+        return tuple(state)
 
 class integfunc(integbase, strfunc):
     """Implements An Integral Function."""
@@ -1031,11 +1052,26 @@ class integfunc(integbase, strfunc):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("integfunc", ) #TODO
+        state = list(strfunc.getstate(self))
+        state[0] = "integfunc"
+        state.append(self.accuracy)
+        return tuple(state)
 
     def copy(self):
         """Returns A Copy Of The Integral Function."""
-        return integfunc() #TODO
+        return integfunc(self.funcstr,
+                         self.e,
+                         self.variables,
+                         self.personals,
+                         self.name,
+                         self.overflow,
+                         self.allargs,
+                         self.reqargs,
+                         self.memoize,
+                         self.memo,
+                         self.method,
+                         accuracy=self.accuracy
+                         )
 
 class derivfuncfloat(derivbase, funcfloat):
     """Implements A Derivative Function Of A Fake Function."""

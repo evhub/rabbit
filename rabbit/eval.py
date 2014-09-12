@@ -86,28 +86,138 @@ Global Operator Precedence List:
     .       Denotes methods and functions of functions.
     normal  Evaluates numbers."""
     constructors = {
-        "atom": lambda self, args: atom(),
-        "reciprocal": lambda self, args: reciprocal(self.deitem(args[0])),
-        "negative": lambda self, args: negative(self.deitem(args[0])),
-        "fraction": lambda self, args: fraction(self.deitem(args[0]), self.deitem(args[1])),
-        "pair": lambda self, args: pair(self, self.deitem(args[0]), self.deitem(args[1])),
-        "dictionary": lambda self, args: dictionary(self, self.devariables(args[0])),
-        "data": lambda self, args: data(args[0], args[1]),
-        "multidata": lambda self, args: multidata(args[0], args[1]),
-        "rollfunc": lambda self, args: rollfunc(args[0], self, args[1], args[2], args[3]),
+        "atom": lambda self, args: atom(
+            ),
+        "reciprocal": lambda self, args: reciprocal(
+            self.deitem(args[0])
+            ),
+        "negative": lambda self, args: negative(
+            self.deitem(args[0])
+            ),
+        "fraction": lambda self, args: fraction(
+            self.deitem(args[0]),
+            self.deitem(args[1])
+            ),
+        "pair": lambda self, args: pair(
+            self,
+            self.deitem(args[0]),
+            self.deitem(args[1])
+            ),
+        "dictionary": lambda self, args: dictionary(
+            self,
+            self.devariables(args[0])
+            ),
+        "data": lambda self, args: data(
+            args[0],
+            args[1]
+            ),
+        "multidata": lambda self, args: multidata(
+            args[0],
+            args[1]
+            ),
+        "rollfunc": lambda self, args: rollfunc(
+            args[0],
+            self,
+            args[1],
+            args[2],
+            args[3]
+            ),
         "matrix": matrixconstructor,
-        "strfunc": lambda self, args: strfunc(args[0], self, args[1], self.deitem(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]), args[9]),
-        "codestr": lambda self, args: codestr(args[0], self),
-        "strcalc": lambda self, args: rawstrcalc(args[0], self),
-        "derivfunc": lambda self, args: derivfunc(args[0], args[1], args[2], args[3], self, args[4], args[5], args[6], args[7], self.devariables(args[8])),
-        "integfunc": lambda self, args: integfunc(args[0], args[1], self, args[2], args[3], args[4], self.devariables(args[5])),
-        "usefunc": lambda self, args: usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], args[7], self.devariables(args[8])),
-        "classcalc": lambda self, args: classcalc(self, self.devariables(args[0]), selfvar=args[1]),
-        "namespace": lambda self, args: namespace(self, self.devariables(args[0]), selfvar=args[1]),
-        "instancecalc": lambda self, args: instancecalc(self, self.devariables(args[0]), top=False, selfvar=args[1], parentvar=args[2]),
-        "makefunc": lambda self, args: makefunc(args[0], self, args[1], args[2], self.devariables(args[3])),
-        "brace": lambda self, args: brace(self, args[0]),
-        "bracket": lambda self, args: bracket(self, args[0])
+        "strfunc": lambda self, args: strfunc(
+            args[0],
+            self,
+            args[1],
+            self.deitem(args[2]),
+            args[3],
+            args[4],
+            args[5],
+            args[6],
+            args[7],
+            self.devariables(args[8]),
+            args[9]
+            ),
+        "codestr": lambda self, args: codestr(
+            args[0],
+            self
+            ),
+        "strcalc": lambda self, args: rawstrcalc(
+            args[0],
+            self
+            ),
+        "derivfunc": lambda self, args: derivfunc(
+            args[0],
+            self,
+            args[1],
+            self.deitem(args[2]),
+            args[3],
+            args[4],
+            args[5],
+            args[6],
+            args[7],
+            self.devariables(args[8]),
+            args[9],
+            n=args[10],
+            accuracy=args[11],
+            scaledown=args[12]
+            ),
+        "integfunc": lambda self, args: integfunc(
+            args[0],
+            self,
+            args[1],
+            self.deitem(args[2]),
+            args[3],
+            args[4],
+            args[5],
+            args[6],
+            args[7],
+            self.devariables(args[8]),
+            args[9],
+            accuracy=args[11]
+            ),
+        "usefunc": lambda self, args: usefunc(
+            args[0],
+            self,
+            args[1],
+            args[2],
+            args[3],
+            args[4],
+            args[5],
+            args[6],
+            args[7],
+            self.devariables(args[8])
+            ),
+        "classcalc": lambda self, args: classcalc(
+            self,
+            self.devariables(args[0]),
+            selfvar=args[1]
+            ),
+        "namespace": lambda self, args: namespace(
+            self,
+            self.devariables(args[0]),
+            selfvar=args[1]
+            ),
+        "instancecalc": lambda self, args: instancecalc(
+            self,
+            self.devariables(args[0]),
+            top=False,
+            selfvar=args[1],
+            parentvar=args[2]
+            ),
+        "makefunc": lambda self, args: makefunc(
+            args[0],
+            self,
+            args[1],
+            args[2],
+            self.devariables(args[3])
+            ),
+        "brace": lambda self, args: brace(
+            self,
+            args[0]
+            ),
+        "bracket": lambda self, args: bracket(
+            self,
+            args[0]
+            )
         }
     testers = {
         }
@@ -3675,14 +3785,27 @@ class evalfuncs(object):
                 scaledown = float(variables[4])
                 self.e.overflow = variables[5:]
             if isinstance(func, strfunc):
-                if len(func.variables) == 0:
-                    return derivfunc() #TODO
-                else:
-                    return derivfunc() #TODO
+                if len(func.variables):
+                    varname = func.variables.pop(0)
+                return derivfunc(func.funcstr,
+                                 self.e,
+                                 func.variables,
+                                 func.personals,
+                                 func.name,
+                                 func.overflow,
+                                 func.allargs,
+                                 func.reqargs,
+                                 func.memoize,
+                                 func.memo,
+                                 func.method,
+                                 n=n,
+                                 accuracy=accuracy,
+                                 scaledown=scaledown,
+                                 varname=varname)
             elif isinstance(func, funcfloat):
                 return derivfuncfloat(func, n, accuracy, scaledown, self.e)
             else:
-                return derivfunc(str(func), self.e, n=n, accuracy=accuracy, scaledown=scaledown, varname=varname)
+                return derivfunc(self.e.prepare(func, False, True), self.e, n=n, accuracy=accuracy, scaledown=scaledown, varname=varname)
 
     def integcall(self, variables):
         """Returns The Integral Of A Function."""
@@ -3698,14 +3821,25 @@ class evalfuncs(object):
                 accuracy = float(variables[2])
                 self.e.overflow = variables[3:]
             if isinstance(func, strfunc):
-                if len(func.variables) == 0:
-                    return integfunc() #TODO
-                else:
-                    return integfunc() #TODO
+                if len(func.variables):
+                    varname = func.variables.pop(0)
+                return integfunc(func.funcstr,
+                                 self.e,
+                                 func.variables,
+                                 func.personals,
+                                 func.name,
+                                 func.overflow,
+                                 func.allargs,
+                                 func.reqargs,
+                                 func.memoize,
+                                 func.memo,
+                                 func.method,
+                                 accuracy=accuracy,
+                                 varname=varname)
             elif isinstance(func, funcfloat):
                 return integfuncfloat(func, accuracy, self.e)
             else:
-                return integfunc(str(func), self.e, accracy=accuracy, varname=varname)
+                return integfunc(self.e.prepare(func, False, True), self.e, accuracy=accuracy, varname=varname)
 
     def randcall(self, variables):
         """Returns A Random Number Generator Object."""
