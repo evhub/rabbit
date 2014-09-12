@@ -298,6 +298,7 @@ class funcfloat(numobject):
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
     snapshotvar = "__closure__"
+    personalsvar = "__class__"
     method = None
 
     def __init__(self, funcstr, e, variables=None, personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None, method=None, lexical=True):
@@ -321,28 +322,30 @@ class strfunc(funcfloat):
         if self.overflow and self.allargs in self.variables:
             self.variables.remove(self.allargs)
             self.overflow = False
-        if personals is None:
-            self.personals = {}
+        if reqargs is None:
+            self.reqargs = len(self.variables)
         else:
-            self.personals = dict(personals)
+            self.reqargs = reqargs
+        if method is not None:
+            self.method = method
         if memoize is not None:
             self.memoize = memoize
         if memo is None:
             self.memo = {}
         else:
             self.memo = memo
-        if reqargs is None:
-            self.reqargs = len(self.variables)
+        if isinstance(personals, classcalc):
+            self.personals = personals
         else:
-            self.reqargs = reqargs
-        if isinstance(lexical, dict):
-            self.snapshot = lexical.copy()
-        elif lexical:
-            self.snapshot = self.e.variables.copy()
-        else:
-            self.snapshot = {}
-        if method is not None:
-            self.method = method
+            if lexical:
+                snapshot = self.e.variables.copy()
+            else:
+                snapshot = {}
+            if personals is not None:
+                personals = personals.copy()
+            else:
+                personals = {}
+            self.personals = instancecalc(self.e, personals, classcalc(self.e, snapshot, selfvar=self.personalsvar), top=False, selfvar=self.personalsvar, parentvar=self.snapshotvar)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -350,23 +353,21 @@ class strfunc(funcfloat):
             memo = None
         else:
             memo = getstates(self.memo)
-        return ("strfunc", self.funcstr, self.variables, getstates(self.getpers()), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method, self.snapshot)
+        return ("strfunc", self.funcstr, self.variables, itemstate(self.personals), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method)
 
     def copy(self):
         """Copies The String Function."""
-        return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, self.snapshot)
+        return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method)
 
     def calc(self, personals=None):
         """Calculates The String."""
         if personals is None:
-            personals = self.personals
+            personals = self.personals.getvars(True)
         return self.func(personals)
 
-    def base_func(self, personals):
+    def base_func(self, variables):
         """Allows For Tail Recursion."""
         funcstr = self.funcstr
-        variables = self.snapshot.copy()
-        variables.update(personals)
         out = None
         while out is None:
             if self.e.tailing and self.e.all_clean:
@@ -408,15 +409,16 @@ class strfunc(funcfloat):
             else:
                 items, _ = useparams(variables, self.variables, matrix(0))
             items[self.allargs] = allvars
-            for k in self.personals:
+            personals = self.personals.getvars(True)
+            for k in personals:
                 if (not k in items) or isnull(items[k]):
-                    items[k] = self.personals[k]
+                    items[k] = personals[k]
             out = self.calc(items)
             return out
 
     def curry(self, arg):
         """Curries An Argument."""
-        self.personals[self.variables.pop(0)] = arg
+        self.personals.store(self.variables.pop(0), arg)
         self.reqargs -= 1
 
     def __iadd__(self, other):
@@ -491,125 +493,63 @@ class strfunc(funcfloat):
                 out.append("*"+self.allargs)
         return out
 
+    def didsnapshot(self):
+        """Determines Whether A Snapshot Was Taken."""
+        return bool(len(self.personals.getparent()))
+
     def getpers(self):
         """Returns The Modified Personals List."""
-        out = self.personals.copy()
+        out = self.personals.getvars()
+        del out[self.snapshotvar]
         if self.method and self.method in out:
             del out[self.method]
         return out
 
-    def getitem(self, test):
-        """Retrieves A Personal At The Base Level."""
-        if istext(self.personals[test]):
-            self.personals[test] = self.e.calc(self.personals[test])
-        return self.personals[test]
-
-    def getsnapshot(self):
-        """Retrieves The Snapshot."""
-        out = self.snapshot.copy()
-        if classcalc.selfvar in out:
-            del out[classcalc.selfvar]
-        return classcalc(self.e, out)
-
     def getmethod(self, key):
         """Retrieves A Personal."""
-        test = delspace(self.e.prepare(key, False, False))
-        if not self.e.isreserved(test) and test in self.personals:
-            return self.getitem(test)
-        elif test == self.snapshotvar:
-            return self.getsnapshot()
-        else:
-            return None
+        return self.personals.getmethod(key)
 
     def curryself(self, other):
         """Curries Self Into The Function."""
-        self.method = self.method or other.selfvar
-        if self.method in self.personals:
-            self.personals[self.method] = other
-        elif len(self.variables) > 0:
-            self.personals[self.method] = other
-            self.curry(self.method)
-        else:
-            raise ExecutionError("ClassError", "Methods must have self as their first argument")
+        if self.personalsvar != other.selfvar:
+            self.method = self.method or other.selfvar
+            if self.method in self.personals.variables:
+                self.personals.store(self.method, other)
+            elif len(self.variables) > 0:
+                self.personals.store(self.method, other)
+                self.curry(self.method)
+            else:
+                raise ExecutionError("ClassError", "Methods must have self as their first argument")
 
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, strfunc):
-            return self.funcstr == other.funcstr and self.variables == other.variables and self.personals == other.personals and self.overflow == other.overflow and self.reqargs == other.reqargs and self.allargs == other.allargs and self.method == other.method
+            return self.funcstr == other.funcstr and self.overflow == other.overflow and self.reqargs == other.reqargs and self.allargs == other.allargs and self.method == other.method and self.variables == other.variables and self.personals == other.personals
         else:
             return False
 
 class strfloat(strfunc):
     """Allows A String To Be Treated Like A Float."""
-    def __init__(self, funcstr, e, variables=None, personals=None, check=True, name=None, overflow=None, allargs=None, reqargs=None, lexical=True):
+    def __init__(self, *args, **kwargs):
         """Initializes The String Float."""
-        self.e = e
-        if name:
-            self.name = str(name)
-        else:
-            self.name = None
-        if allargs is not None:
-            self.allargs = str(allargs)
-        if variables is None:
-            variables = []
-        else:
-            variables = variables[:]
-        if overflow is None:
-            overflow = True
-        else:
-            overflow = bool(overflow)
-        if overflow and self.allargs in variables:
-            variables.remove(self.allargs)
-            overflow = False
-        if personals is None:
-            personals = {}
-        else:
-            personals = dict(personals)
-        if reqargs is None:
-            self.reqargs = len(variables)
-        else:
-            self.reqargs = reqargs
-        funcstr = self.e.namefind(str(funcstr))
-        if check:
-            test = self.e.find(funcstr, True)
-        if check and isinstance(test, strfunc):
+        strfunc.__init__(self, *args, **kwargs)
+        test = self.e.find(self.funcstr, True)
+        if isinstance(test, strfunc):
             self.name = self.name or test.name
             self.funcstr = test.funcstr
-            self.overflow = overflow and test.overflow
-            self.variables = variables
+            self.overflow = self.overflow and test.overflow
             self.reqargs += test.reqargs
             for x in test.variables:
                 if not x in self.variables:
                     self.variables.append(x)
                 else:
                     self.reqargs -= 1
-            self.personals = test.personals
-            for x,y in personals:
-                if y != test:
-                    self.personals[x] = y
-            if allargs is None:
+            self.personals.merge(test.personals)
+            if strfunc.allargs == self.allargs:
                 self.allargs = test.allargs
-            if self.overflow and self.allargs in self.variables:
-                self.variables.remove(self.allargs)
-                self.overflow = False
-            self.memoize = test.memoize
-            self.memo = test.memo
-            self.snapshot = test.snapshot
-            if lexical:
-                self.snapshot.update(self.e.variables)
-            self.method = test.method
-        else:
-            if self.name is None:
-                self.name = self.e.unusedarg()
-            self.funcstr = funcstr
-            self.overflow = overflow
-            self.variables = variables
-            self.personals = personals
-            self.memo = {}
-            if lexical:
-                self.snapshot = self.e.variables.copy()
-            else:
-                self.snapshot = {}
+            self.memoize = self.memoize and test.memoize
+            self.memo.update(test.memo)
+            self.method = self.method or test.method
 
 class strcalc(numobject):
     """Allows Strings Inside Evaluation."""
@@ -1043,67 +983,59 @@ class integbase(derivbase):
 
 class derivfunc(derivbase, strfunc):
     """Implements A Derivative Function."""
-    def __init__(self, funcstr, n, accuracy, scaledown, e, varname="x", personals=None, name=None, memoize=None, memo=None):
+    def __init__(self, *args, **kwargs):
         """Creates The Derivative Function."""
-        self.e = e
-        if name:
-            self.name = str(name)
+        if "n" in kwargs:
+            self.n = int(n)
         else:
-            self.name = self.e.unusedarg()
-        self.funcstr = str(funcstr)
-        self.n = int(n)
-        self.accuracy = float(accuracy)
-        self.scaledown = float(scaledown)
-        self.variables = [str(varname)]
-        if memoize is not None:
-            self.memoize = memoize
-        if memo is None:
-            self.memo = {}
+            raise SyntaxError("Expected keyword argument n to derivfunc")
+        if "accuracy" in kwargs:
+            self.accuracy = float(accuracy)
         else:
-            self.memo = memo
-        if personals is None:
-            self.personals = {}
+            raise SyntaxError("Expected keyword argument accuracy to derivfunc")
+        if "scaledown" in kwargs:
+            self.scaledown = float(scaledown)
         else:
-            self.personals = dict(personals)
+            raise SyntaxError("Expected keyword argument scaledown to derivfunc")
+        if "varname" in kwargs:
+            varname = str(kwargs["varname"])
+            if "variables" in kwargs:
+                kwargs["variables"].append(varname)
+            else:
+                kwargs["variables"] = [varname]
+        strfunc.__init__(self, *args, **kwargs)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("derivfunc", self.funcstr, self.n, self.accuracy, self.scaledown, self.varname, self.personals, self.name, self.memoize, getstates(self.memo))
+        return ("derivfunc", ) #TODO
 
     def copy(self):
         """Returns A Copy Of The Derivative Function."""
-        return derivfunc(self.funcstr, self.n, self.accuracy, self.scaledown, self.e, self.variables[0], self.personals, self.name, self.memoize, self.memo)
+        return derivfunc() #TODO
 
 class integfunc(integbase, strfunc):
     """Implements An Integral Function."""
     def __init__(self, funcstr, accuracy, e, varname="x", personals=None, name=None, memoize=None, memo=None):
         """Creates The Integral Function."""
-        self.e = e
-        if name:
-            self.name = str(name)
+        if "accuracy" in kwargs:
+            self.accuracy = float(accuracy)
         else:
-            self.name = self.e.unusedarg()
-        self.funcstr = str(funcstr)
-        self.accuracy = float(accuracy)
-        self.variables = [str(varname)]
-        if memoize is not None:
-            self.memoize = memoize
-        if memo is None:
-            self.memo = {}
-        else:
-            self.memo = memo
-        if personals is None:
-            self.personals = {}
-        else:
-            self.personals = dict(personals)
+            raise SyntaxError("Expected keyword argument accuracy to derivfunc")
+        if "varname" in kwargs:
+            varname = str(kwargs["varname"])
+            if "variables" in kwargs:
+                kwargs["variables"].append(varname)
+            else:
+                kwargs["variables"] = [varname]
+        strfunc.__init__(self, *args, **kwargs)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("integfunc", self.funcstr, self.accuracy, self.varname, self.personals, self.name, self.memoize, getstates(self.memo))
+        return ("integfunc", ) #TODO
 
     def copy(self):
         """Returns A Copy Of The Integral Function."""
-        return integfunc(self.funcstr, self.accuracy, self.e, self.variables[0], self.personals, self.name, self.memoize, self.memo)
+        return integfunc() #TODO
 
 class derivfuncfloat(derivbase, funcfloat):
     """Implements A Derivative Function Of A Fake Function."""
@@ -1226,11 +1158,16 @@ class classcalc(cotobject):
 
     def __len__(self):
         """Finds The Number Of Variables."""
-        return len(self.variables)
+        return len(self.variables)-1
 
     def items(self):
         """Returns The Variables."""
         return list(self.variables.items())
+
+
+    def __repr__(self):
+        """Gets A Representation."""
+        return repr(self.getvars())
 
     def getrepr(self, top=True, bottom=True, indebug=True, maxrecursion=5):
         """Finds A Representation."""
@@ -1363,7 +1300,7 @@ class classcalc(cotobject):
 
     def extend(self, other):
         """Extends The Class."""
-        if isinstance(other, (dict, classcalc)):
+        if isinstance(other, classcalc):
             self.add(other.getvars(True))
             return self
         else:
@@ -1471,11 +1408,11 @@ class namespace(classcalc):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("namespace", getstates(self.getvars()))
+        return ("namespace", getstates(self.getvars()), self.selfvar)
 
     def copy(self):
         """Copies The Class."""
-        return namespace(self.e, getcopy(self.getvars()))
+        return namespace(self.e, getcopy(self.getvars()), selfvar=self.selfvar)
 
     def getrepr(self, *args, **kwargs):
         """Wraps classcalc.getrepr."""
@@ -1494,9 +1431,14 @@ class instancecalc(numobject, classcalc):
     evaltype = "instance"
     parentvar = "__parent__"
 
-    def __init__(self, e, variables=None, parent=None, name=None, top=True):
+    def __init__(self, e, variables=None, parent=None, name=None, top=True, selfvar=None, parentvar=None):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
+        if selfvar is not None:
+            self.selfvar = str(selfvar)
+            self.restricted = [self.selfvar]
+        if parentvar is not None:
+            self.parentvar = str(parentvar)
         if parent is None:
             if not top and self.parentvar in variables:
                 parent = variables[self.parentvar]
@@ -1514,11 +1456,11 @@ class instancecalc(numobject, classcalc):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("instancecalc", getstates(self.getvars()))
+        return ("instancecalc", getstates(self.getvars()), self.selfvar, self.parentvar)
 
     def copy(self):
         """Copies The Instance."""
-        return instancecalc(self.e, getcopy(self.getvars()), top=False)
+        return instancecalc(self.e, getcopy(self.getvars()), top=False, selfvar=self.selfvar, parentvar=self.parentvar)
 
     def getparent(self):
         """Reconstructs The Parent Class."""
@@ -1849,7 +1791,7 @@ class instancecalc(numobject, classcalc):
                 check_le = self.tryget("__le__")
                 if check_le:
                     return self.domethod(check_ge, other) and self.domethod(check_le, other)
-            return self.toclass() == other
+            return classcalc.__eq__(self, other)
 
     def __ne__(self, other):
         """Performs Not Equal."""
@@ -1875,7 +1817,7 @@ class instancecalc(numobject, classcalc):
                 check_le = self.tryget("__le__")
                 if check_le:
                     return not (self.domethod(check_ge, other) and self.domethod(check_le, other))
-            return self.toclass() != other
+            return not classcalc.__eq__(self, other)
 
     def __gt__(self, other):
         """Performs Greater Than."""
@@ -2077,6 +2019,12 @@ class instancecalc(numobject, classcalc):
             return self.domethod(item, args)
         else:
             return matrix(0)
+
+    def merge(self, other):
+        """Merges Two Classes."""
+        self.add(other.getvars())
+        if isinstance(other, instancecalc):
+            self.variables[self.parentvar].extend(other.getparent())
 
 class atom(evalobject):
     """Implements Atoms."""

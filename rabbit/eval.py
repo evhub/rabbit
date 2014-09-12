@@ -96,15 +96,15 @@ Global Operator Precedence List:
         "multidata": lambda self, args: multidata(args[0], args[1]),
         "rollfunc": lambda self, args: rollfunc(args[0], self, args[1], args[2], args[3]),
         "matrix": matrixconstructor,
-        "strfunc": lambda self, args: strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]), args[9], args[10]),
+        "strfunc": lambda self, args: strfunc(args[0], self, args[1], self.deitem(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]), args[9]),
         "codestr": lambda self, args: codestr(args[0], self),
         "strcalc": lambda self, args: rawstrcalc(args[0], self),
         "derivfunc": lambda self, args: derivfunc(args[0], args[1], args[2], args[3], self, args[4], args[5], args[6], args[7], self.devariables(args[8])),
         "integfunc": lambda self, args: integfunc(args[0], args[1], self, args[2], args[3], args[4], self.devariables(args[5])),
         "usefunc": lambda self, args: usefunc(args[0], self, args[1], args[2], args[3], args[4], args[5], args[6], args[7], self.devariables(args[8])),
         "classcalc": lambda self, args: classcalc(self, self.devariables(args[0]), selfvar=args[1]),
-        "namespace": lambda self, args: namespace(self, self.devariables(args[0])),
-        "instancecalc": lambda self, args: instancecalc(self, self.devariables(args[0]), top=False),
+        "namespace": lambda self, args: namespace(self, self.devariables(args[0]), selfvar=args[1]),
+        "instancecalc": lambda self, args: instancecalc(self, self.devariables(args[0]), top=False, selfvar=args[1], parentvar=args[2]),
         "makefunc": lambda self, args: makefunc(args[0], self, args[1], args[2], self.devariables(args[3])),
         "brace": lambda self, args: brace(self, args[0]),
         "bracket": lambda self, args: bracket(self, args[0])
@@ -726,7 +726,7 @@ Global Operator Precedence List:
             personals = item.getpers()
             if item.method:
                 personals[item.method] = item.method
-            out += "\\"+"^"*(not len(item.snapshot))+strlist(variables,",")
+            out += "\\"+"^"*(not item.didsnapshot())+strlist(variables,",")
             if len(variables) > 0:
                 out += ","
             for x,y in personals.items():
@@ -1717,12 +1717,12 @@ Global Operator Precedence List:
             out = inputstring[1:].split(self.lambdamarker, 1)
             out[0] = self.namefind(out[0])
             if len(out) == 1:
-                return strfloat(out[0], self, check=False)
+                return strfloat(out[0], self)
             elif not out[0]:
-                return strfloat(out[1], self, check=False)
+                return strfunc(out[1], self)
             else:
                 params, personals, allargs, reqargs, lexical = self.eval_set(self.outersplit(self.namefind(out[0]), ",", top=False))
-                return strfloat(out[1], self, params, personals, check=False, allargs=allargs, reqargs=reqargs, lexical=lexical)
+                return strfunc(out[1], self, params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical)
 
     def eval_set(self, temp):
         """Performs Setting."""
@@ -3483,7 +3483,7 @@ class evalfuncs(object):
                     out += funcs[x]+":"+args[x]+","
                 if len(out) > 0:
                     out = out[:-1]
-                return strfloat(out, self.e, args)
+                return strfunc(out, self.e, args)
             else:
                 raise ExecutionError("TypeError", "Unable to create a converter for "+repr(variables[0]))
         else:
@@ -3676,13 +3676,13 @@ class evalfuncs(object):
                 self.e.overflow = variables[5:]
             if isinstance(func, strfunc):
                 if len(func.variables) == 0:
-                    return derivfunc(func.funcstr, n, accuracy, scaledown, self.e, varname, func.personals)
+                    return derivfunc() #TODO
                 else:
-                    return derivfunc(func.funcstr, n, accuracy, scaledown, self.e, func.variables[0], func.personals)
+                    return derivfunc() #TODO
             elif isinstance(func, funcfloat):
                 return derivfuncfloat(func, n, accuracy, scaledown, self.e)
             else:
-                return derivfunc(str(func), n, accuracy, scaledown, self.e, varname)
+                return derivfunc(str(func), self.e, n=n, accuracy=accuracy, scaledown=scaledown, varname=varname)
 
     def integcall(self, variables):
         """Returns The Integral Of A Function."""
@@ -3699,13 +3699,13 @@ class evalfuncs(object):
                 self.e.overflow = variables[3:]
             if isinstance(func, strfunc):
                 if len(func.variables) == 0:
-                    return integfunc(func.funcstr, accuracy, self.e, varname, func.personals)
+                    return integfunc() #TODO
                 else:
-                    return integfunc(func.funcstr, accuracy, self.e, func.variables[0], func.personals)
+                    return integfunc() #TODO
             elif isinstance(func, funcfloat):
                 return integfuncfloat(func, accuracy, self.e)
             else:
-                return integfunc(str(func), accuracy, self.e, varname)
+                return integfunc(str(func), self.e, accracy=accuracy, varname=varname)
 
     def randcall(self, variables):
         """Returns A Random Number Generator Object."""

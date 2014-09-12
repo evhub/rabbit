@@ -230,3 +230,16 @@ def knuth(a, b, n):
 def E10(x):
     """Implements 1e(x)."""
     return 10.0**x
+
+def collatz(n, out=None):
+    """Performs The Collatz Function."""
+    if out is None:
+        out = []
+    if n in out:
+        return out+[n]
+    else:
+        out.append(n)
+        if n%2 == 0:
+            return collatz(n//2, out)
+        else:
+            return collatz(n*3+1, out)
