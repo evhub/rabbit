@@ -297,6 +297,7 @@ class funcfloat(numobject):
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
+    snapshotvar = "__closure__"
     method = None
 
     def __init__(self, funcstr, e, variables=None, personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None, method=None, lexical=True):
@@ -334,7 +335,9 @@ class strfunc(funcfloat):
             self.reqargs = len(self.variables)
         else:
             self.reqargs = reqargs
-        if lexical:
+        if isinstance(lexical, dict):
+            self.snapshot = lexical.copy()
+        elif lexical:
             self.snapshot = self.e.variables.copy()
         else:
             self.snapshot = {}
@@ -347,11 +350,11 @@ class strfunc(funcfloat):
             memo = None
         else:
             memo = getstates(self.memo)
-        return ("strfunc", self.funcstr, self.variables, getstates(self.getpers()), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method)
+        return ("strfunc", self.funcstr, self.variables, getstates(self.getpers()), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method, self.snapshot)
 
     def copy(self):
         """Copies The String Function."""
-        return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method)
+        return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, self.snapshot)
 
     def calc(self, personals=None):
         """Calculates The String."""
@@ -501,11 +504,20 @@ class strfunc(funcfloat):
             self.personals[test] = self.e.calc(self.personals[test])
         return self.personals[test]
 
+    def getsnapshot(self):
+        """Retrieves The Snapshot."""
+        out = self.snapshot.copy()
+        if classcalc.selfvar in out:
+            del out[classcalc.selfvar]
+        return classcalc(self.e, out)
+
     def getmethod(self, key):
         """Retrieves A Personal."""
         test = delspace(self.e.prepare(key, False, False))
         if not self.e.isreserved(test) and test in self.personals:
             return self.getitem(test)
+        elif test == self.snapshotvar:
+            return self.getsnapshot()
         else:
             return None
 
@@ -1287,17 +1299,17 @@ class classcalc(cotobject):
             out = self.variables[test]
         return self.e.deprop(out)
 
+    def getmethod(self, key):
+        """Retrieves A Method."""
+        return self.tryget(key)
+
     def retrieve(self, key):
         """Retrieves An Item."""
-        test = self.tryget(key)
+        test = self.getmethod(key)
         if test is None:
             raise ExecutionError("ClassError", "Could not find "+key+" in "+self.e.prepare(self, False, True, True))
         else:
             return test
-
-    def getmethod(self, key):
-        """Retrieves A Method."""
-        return self.retrieve(key)
 
     def call(self, variables):
         """Calculates An Item."""

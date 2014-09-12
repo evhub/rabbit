@@ -96,7 +96,7 @@ Global Operator Precedence List:
         "multidata": lambda self, args: multidata(args[0], args[1]),
         "rollfunc": lambda self, args: rollfunc(args[0], self, args[1], args[2], args[3]),
         "matrix": matrixconstructor,
-        "strfunc": lambda self, args: strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]), args[9]),
+        "strfunc": lambda self, args: strfunc(args[0], self, args[1], self.devariables(args[2]), args[3], args[4], args[5], args[6], args[7], self.devariables(args[8]), args[9], args[10]),
         "codestr": lambda self, args: codestr(args[0], self),
         "strcalc": lambda self, args: rawstrcalc(args[0], self),
         "derivfunc": lambda self, args: derivfunc(args[0], args[1], args[2], args[3], self, args[4], args[5], args[6], args[7], self.devariables(args[8])),
@@ -726,7 +726,7 @@ Global Operator Precedence List:
             personals = item.getpers()
             if item.method:
                 personals[item.method] = item.method
-            out += "\\"+strlist(variables,",")
+            out += "\\"+"^"*(not len(item.snapshot))+strlist(variables,",")
             if len(variables) > 0:
                 out += ","
             for x,y in personals.items():
