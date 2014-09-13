@@ -2976,15 +2976,15 @@ class evalfuncs(object):
             result, err = catch(self.e.calc, original)
             if not err:
                 return rowmatrixlist([result, matrix(0)])
-            elif len(err) == 4 and err[3] is not None:
-                out = err[3]
-            elif len(err) == 3:
+            elif len(err) == 3 or (len(err) == 4 and err[3] is None):
                 out = instancecalc(self.e, {
                     self.e.errorvar : True,
                     self.e.fatalvar : err[2]
                     })
                 out.store(self.e.namevar, strcalc(err[0], self.e))
                 out.store(self.e.messagevar, strcalc(err[1], self.e))
+            elif len(err) == 4:
+                out = err[3]
             else:
                 raise SyntaxError("Invalid error signature of "+repr(err))
             return rowmatrixlist([matrix(0), out])
