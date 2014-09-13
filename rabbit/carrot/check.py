@@ -169,7 +169,7 @@ def catch(function, *args, **kwargs):
     except KeyboardInterrupt as detail:
         err = ("KeyboardInterrupt", detail or "Action has been terminated", False)
     except ExecutionError as detail:
-        err = (detail.name, detail.message, detail.fatal, detail.variables)
+        err = (detail.name, detail.message, detail.fatal, detail.instance)
     except Exception as detail:
         err = ("Error", detail or "An error occured", True)
     else:

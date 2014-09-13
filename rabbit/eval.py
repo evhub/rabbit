@@ -388,12 +388,12 @@ Global Operator Precedence List:
         self.parens = []
         self.variables = {
             "Warning":classcalc(self, {
-                self.errorvar: 1.0,
-                self.fatalvar: 0.0
+                self.errorvar: True,
+                self.fatalvar: False
                 }),
             "Error":classcalc(self, {
-                self.errorvar: 1.0,
-                self.fatalvar: 1.0
+                self.errorvar: True,
+                self.fatalvar: False
                 }),
             "pure":funcfloat(self.funcs.purecall, self, "pure", reqargs=1),
             "env":funcfloat(self.funcs.envcall, self, "env"),
@@ -2974,20 +2974,20 @@ class evalfuncs(object):
             self.e.overflow = variables[1:]
             original = self.e.prepare(variables[0], True, False)
             result, err = catch(self.e.calc, original)
-            if err:
+            if not err:
+                return rowmatrixlist([result, matrix(0)])
+            elif len(err) == 4:
+                out = err[3]
+            elif len(err) == 3:
                 out = instancecalc(self.e, {
-                    classcalc.selfvar : None,
                     self.e.errorvar : 1.0,
-                    self.e.fatalvar : float(err[2])
+                    self.e.fatalvar : err[2]
                     })
                 out.store(self.e.namevar, strcalc(err[0], self.e))
                 out.store(self.e.messagevar, strcalc(err[1], self.e))
-                if len(err) > 3:
-                    for k,v in err[3].items():
-                        out.variables[k] = v
-                return rowmatrixlist([matrix(0), out])
             else:
-                return rowmatrixlist([result, matrix(0)])
+                raise SyntaxError("Invalid error signature of "+repr(err))
+            return rowmatrixlist([matrix(0), out])
 
     def raisecall(self, variables):
         """Raises An Error."""
@@ -3010,16 +3010,7 @@ class evalfuncs(object):
                     fatal = bool(fatal)
                 else:
                     fatal = False
-                extras = variables[0].getvars(True)
-                del extras[self.e.errorvar]
-                if self.e.namevar in extras:
-                    del extras[self.e.namevar]
-                if self.e.messagevar in extras:
-                    del extras[self.e.messagevar]
-                if self.e.fatalvar in extras:
-                    del extras[self.e.fatalvar]
-                extras[variables[0].parentvar] = variables[0].getparent()
-                raise ExecutionError(name, message, fatal, extras)
+                raise ExecutionError(name, message, fatal, variables[0])
             else:
                 raise ExecutionError("Error", self.e.prepare(variables[0], False, False))
         else:

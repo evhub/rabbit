@@ -1500,12 +1500,14 @@ class instancecalc(numobject, classcalc):
         if parentvar is not None:
             self.parentvar = str(parentvar)
         if parent is None:
+            variables = variables.copy()
             if not top and self.parentvar in variables:
                 parent = variables[self.parentvar]
                 del variables[self.parentvar]
             else:
-                parent = classcalc(self.e)
-                parent.variables = variables
+                if classcalc.selfvar in variables:
+                    del variables[classcalc.selfvar]
+                parent = classcalc(self.e, variables)
                 variables = None
         self.variables = {
             self.selfvar : self,
