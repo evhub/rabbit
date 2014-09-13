@@ -2976,11 +2976,11 @@ class evalfuncs(object):
             result, err = catch(self.e.calc, original)
             if not err:
                 return rowmatrixlist([result, matrix(0)])
-            elif len(err) == 4:
+            elif len(err) == 4 and err[3] is not None:
                 out = err[3]
             elif len(err) == 3:
                 out = instancecalc(self.e, {
-                    self.e.errorvar : 1.0,
+                    self.e.errorvar : True,
                     self.e.fatalvar : err[2]
                     })
                 out.store(self.e.namevar, strcalc(err[0], self.e))
@@ -3019,16 +3019,16 @@ class evalfuncs(object):
     def exceptcall(self, variables):
         """Excepts Errors."""
         if not variables:
-            return rowmatrixlist([matrix(0), 0.0])
+            return rowmatrixlist([matrix(0), False])
         elif isinstance(variables[0], matrix) and variables[0].y == 1 and variables[0].x == 2:
             items = variables[0].items()
             if self.iserrcall([items[1]]):
                 for check in variables[1:]:
                     if items[1] == check or items[1].getmethod(self.e.namevar) == check:
-                        return rowmatrixlist([items[0], 1.0])
+                        return rowmatrixlist([items[0], True])
                 return self.raisecall([items[1]])
             else:
-                return rowmatrixlist([items[0], 0.0])
+                return rowmatrixlist([items[0], False])
         else:
             raise ExecutionError("ValueError", "Can only except the result of a try")
 
@@ -3040,20 +3040,20 @@ class evalfuncs(object):
             if isinstance(variables[0], classcalc):
                 for x in xrange(1, len(variables)):
                     if not (isinstance(variables[x], instancecalc) and variables[x].isfrom(variables[0])):
-                        return 0.0
+                        return False
             else:
                 check = self.e.typecalc(variables[0])
                 for x in xrange(1, len(variables)):
                     if check != self.e.typecalc(variables[x]):
-                        return 0.0
-            return 1.0
+                        return False
+            return True
 
     def iserrcall(self, variables):
         """Determines Whether Something Is An Error."""
         for item in variables:
             if not (isinstance(item, instancecalc) and item.getmethod(self.e.errorvar)):
-                return 0.0
-        return 1.0
+                return False
+        return True
 
     def classcall(self, variables):
         """Converts To A Class."""
@@ -3546,12 +3546,12 @@ class evalfuncs(object):
             if hasmatrix(variables[0]):
                 for x in xrange(1, len(variables)):
                     if variables[x] in variables[0]:
-                        return 1.0
+                        return True
             else:
                 for x in xrange(1, len(variables)):
                     if variables[x] == variables[0]:
-                        return 1.0
-        return 0.0
+                        return True
+        return False
 
     def typecall(self, variables):
         """Finds Types."""
@@ -4135,9 +4135,8 @@ class evalfuncs(object):
         else:
             for arg in variables:
                 self.assertcall([arg])
-            out = 1.0
-        test = bool(out)
-        if test:
+            out = True
+        if out:
             return out
         else:
             raise ExecutionError("AssertionError", "Assertion failed that "+original, {"Result":out})
