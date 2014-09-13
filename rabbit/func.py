@@ -370,7 +370,7 @@ class strfunc(funcfloat):
         """Allows For Tail Recursion."""
         variables = self.personals.getparent().getvars()
         if self.method:
-            variables[self.method] = self.personals.variables(self.method)
+            variables[self.method] = self.personals.variables[self.method]
         variables.update(personals)
         funcstr = self.funcstr
         out = None
