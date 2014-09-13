@@ -1845,7 +1845,7 @@ Global Operator Precedence List:
         params = []
         personals = {}
         allargs = None
-        inopt = None
+        inopt = 0
         reqargs = None
         if temp[0].startswith("^"):
             temp[0] = temp[0][1:]
@@ -1866,7 +1866,7 @@ Global Operator Precedence List:
                         raise ExecutionError("ArgumentError", "Catch-all argument must come last")
                 elif x.startswith("-"):
                     x = x[1:]
-                    inopt = True
+                    inopt = 2
                     if reqargs is None:
                         reqargs = len(params)
                 elif x.startswith("+"):
@@ -1879,7 +1879,7 @@ Global Operator Precedence List:
                 equal_test = x.split("=", 1)
                 colon_test = x.split(":", 1)
                 if len(equal_test) > 1 and equal_test[0] and not self.isreserved(equal_test[0]):
-                    inopt = True
+                    inopt = 3
                     if reqargs is None:
                         reqargs = len(params)
                     equal_test[0] = delspace(equal_test[0])
@@ -1891,7 +1891,7 @@ Global Operator Precedence List:
                     colon_test[0] = delspace(colon_test[0])
                     personals[colon_test[0]] = self.calc(colon_test[1], " <\\:")
                     x = colon_test[0]
-                elif inopt:
+                elif inopt == 1:
                     raise ExecutionError("ArgumentError", "Cannot have normal args after optional args")
                 elif not x or self.isreserved(x):
                     raise ExecutionError("VariableError", "Could not set to invalid variable "+x)
@@ -1901,6 +1901,8 @@ Global Operator Precedence List:
                     allargs = x
                 if doparam:
                     params.append(x)
+                if inopt > 1:
+                    inopt = 1
         return params, personals, allargs, reqargs, lexical
 
     def eval_join(self, inputlist, eval_funcs):
@@ -2292,7 +2294,7 @@ Global Operator Precedence List:
             elif self.convertable(item):
                 value = item
             else:
-                raise ValueError("Unconvertable variable value of "+repr(item))
+                raise ExecutionError("ValueError", "Unconvertable variable value of "+repr(item))
             store = not self.isreserved(key)
             if isprop(value):
                 value = self.deprop(value)
@@ -2315,7 +2317,7 @@ Global Operator Precedence List:
                 elif self.convertable(item):
                     value = item
                 else:
-                    raise ValueError("Unconvertable variable value of "+repr(item))
+                    raise ExecutionError("ValueError", "Unconvertable variable value of "+repr(item))
                 return value
 
     def deprop(self, value):
@@ -2640,7 +2642,7 @@ Global Operator Precedence List:
                                                     args, kwargs = rabargs
                                                     new = makefunc(test, self, *args, **kwargs)
                                                 else:
-                                                    raise ValueError("Invalid Rabbit wrapper of "+name)
+                                                    raise ExecutionError("ValueError", "Invalid Rabbit wrapper of "+name)
                             if new is None:
                                 raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                                 #TODO: This is where whatever test is should be wrapped regardless in a special full-conversion wrapper
@@ -2942,7 +2944,7 @@ class evalfuncs(object):
                 oldvars = self.e.setvars(variables[0].getvars(True))
                 return classcalc(self.e, oldvars)
             else:
-                raise ValueError("Can only include a class")
+                raise ExecutionError("ValueError", "Can only include a class")
         else:
             out = []
             for arg in variables:
@@ -3037,7 +3039,7 @@ class evalfuncs(object):
             else:
                 return rowmatrixlist([items[0], 0.0])
         else:
-            raise ValueError("Can only except the result of a try")
+            raise ExecutionError("ValueError", "Can only except the result of a try")
 
     def instanceofcall(self, variables):
         """Determines Whether Something Is An Instance Of Something Else."""
@@ -3115,7 +3117,7 @@ class evalfuncs(object):
             if original in self.e.variables:
                 return self.e.funcfind(original)
             else:
-                raise KeyError("Could not find "+original+" in variables")
+                raise ExecutionError("KeyError", "Could not find "+original+" in variables")
 
     def getparenscall(self, variables):
         """Retreives The Number Of Parentheses."""
@@ -3135,7 +3137,7 @@ class evalfuncs(object):
         if 0 < original and original < len(self.e.parens):
             return rawstrcalc(self.e.prepare(self.e.getparen(original), True, True), self.e)
         else:
-            raise KeyError("Could not find "+self.parenchar+str(original)+self.parenchar+" in parens")
+            raise ExecutionError("KeyError", "Could not find "+self.parenchar+str(original)+self.parenchar+" in parens")
 
     def getvarcall(self, variables):
         """Gets The Value Of A Variable."""
@@ -3148,7 +3150,7 @@ class evalfuncs(object):
             if original in self.e.variables:
                 return rawstrcalc(self.e.prepare(self.e.variables[original], True, True), self.e)
             else:
-                raise KeyError("Could not find "+original+" in variables")
+                raise ExecutionError("KeyError", "Could not find "+original+" in variables")
 
     def copycall(self, variables):
         """Makes Copies Of Items."""
@@ -4169,7 +4171,7 @@ class evalfuncs(object):
                     elif iseval(impclass):
                         return impclass(self)
                     elif "`" in name:
-                        raise ValueError("Cannot install files with a backtick in them")
+                        raise ExecutionError("ValueError", "Cannot install files with a backtick in them")
                     elif hascall(impclass):
                         return funcfloat(getcall(impclass(self)), self, funcname)
                     else:

@@ -541,15 +541,6 @@ class strfunc(funcfloat):
         else:
             return False
 
-class strfloat(strfunc):
-    """Allows A String To Be Treated Like A Float."""
-    def __init__(self, *args, **kwargs):
-        """Initializes The String Float."""
-        strfunc.__init__(self, *args, **kwargs)
-        test = self.e.find(self.funcstr, True)
-        if isinstance(test, strfunc):
-            self.merge(test)
-
     def merge(self, test):
         """Merges With test."""
         self.name = self.name or test.name
@@ -567,6 +558,15 @@ class strfloat(strfunc):
         self.memoize = self.memoize and test.memoize
         self.memo.update(test.memo)
         self.method = self.method or test.method
+
+class strfloat(strfunc):
+    """Allows A String To Be Treated Like A Float."""
+    def __init__(self, *args, **kwargs):
+        """Initializes The String Float."""
+        strfunc.__init__(self, *args, **kwargs)
+        test = self.e.find(self.funcstr, True)
+        if isinstance(test, strfunc):
+            self.merge(test)
 
 class strcalc(numobject):
     """Allows Strings Inside Evaluation."""
@@ -2484,7 +2484,7 @@ class brace(bracket):
                 elif isinstance(value, pair):
                     out[value.k] = value.v
                 else:
-                    raise ValueError("Dictionary got non-pair item "+self.e.prepare(value, False, True, True))
+                    raise ExecutionError("ValueError", "Dictionary got non-pair item "+self.e.prepare(value, False, True, True))
         return dictionary(self.e, out)
 
     def getstate(self):
