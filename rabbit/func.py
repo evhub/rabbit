@@ -354,11 +354,11 @@ class strfunc(funcfloat):
             memo = None
         else:
             memo = getstates(self.memo)
-        return ("strfunc", self.funcstr, self.variables, self.getpers(), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method, self.didsnapshot())
+        return ("strfunc", self.funcstr, self.variables, self.getpers(), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method)
 
     def copy(self):
         """Copies The String Function."""
-        return strfunc(self.funcstr, self.e, self.variables, self.getpers(), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, self.didsnapshot())
+        return strfunc(self.funcstr, self.e, self.variables, self.getpers(), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, False)
 
     def calc(self, personals=None):
         """Calculates The String."""
@@ -1004,14 +1004,17 @@ class derivfunc(derivbase, strfunc):
         """Creates The Derivative Function."""
         if "n" in kwargs:
             self.n = int(kwargs["n"])
+            del kwargs["n"]
         else:
             raise SyntaxError("Expected keyword argument n to derivfunc")
         if "accuracy" in kwargs:
             self.accuracy = float(kwargs["accuracy"])
+            del kwargs["accuracy"]
         else:
             raise SyntaxError("Expected keyword argument accuracy to derivfunc")
         if "scaledown" in kwargs:
             self.scaledown = float(kwargs["scaledown"])
+            del kwargs["scaledown"]
         else:
             raise SyntaxError("Expected keyword argument scaledown to derivfunc")
         if "varname" in kwargs:
@@ -1020,6 +1023,7 @@ class derivfunc(derivbase, strfunc):
                 kwargs["variables"].append(varname)
             else:
                 kwargs["variables"] = [varname]
+            del kwargs["varname"]
         strfunc.__init__(self, *args, **kwargs)
 
     def copy(self):
@@ -1057,6 +1061,7 @@ class integfunc(integbase, strfunc):
         """Creates The Integral Function."""
         if "accuracy" in kwargs:
             self.accuracy = float(kwargs["accuracy"])
+            del kwargs["accuracy"]
         else:
             raise SyntaxError("Expected keyword argument accuracy to derivfunc")
         if "varname" in kwargs:
@@ -1065,6 +1070,7 @@ class integfunc(integbase, strfunc):
                 kwargs["variables"].append(varname)
             else:
                 kwargs["variables"] = [varname]
+            del kwargs["varname"]
         strfunc.__init__(self, *args, **kwargs)
 
     def getstate(self):

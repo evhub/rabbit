@@ -135,7 +135,7 @@ Global Operator Precedence List:
             args[7],
             self.devariables(args[8]),
             args[9],
-            args[10]
+            False
             ),
         "codestr": lambda self, args: codestr(
             args[0],
@@ -157,10 +157,10 @@ Global Operator Precedence List:
             args[7],
             self.devariables(args[8]),
             args[9],
-            args[10],
-            n=args[11],
-            accuracy=args[12],
-            scaledown=args[13]
+            False,
+            n=args[10],
+            accuracy=args[11],
+            scaledown=args[12]
             ),
         "integfunc": lambda self, args: integfunc(
             args[0],
@@ -174,8 +174,8 @@ Global Operator Precedence List:
             args[7],
             self.devariables(args[8]),
             args[9],
-            args[10],
-            accuracy=args[12]
+            False,
+            accuracy=args[10]
             ),
         "usefunc": lambda self, args: usefunc(
             args[0],
