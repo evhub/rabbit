@@ -338,18 +338,14 @@ class strfunc(funcfloat):
         if isinstance(personals, classcalc):
             self.personals = personals
         else:
-            parentvars = {}
+            if personals is None:
+                childvars = {}
+            else:
+                childvars = personals.copy()
             if lexical:
-                for k,v in self.e.variables.items():
-                    if self is v:
-                        v = self.funcvar
-                    parentvars[k] = v
-            childvars = {}
-            if personals is not None:
-                for k,v in personals.items():
-                    if self is v:
-                        v = self.funcvar
-                    childvars[k] = v
+                parentvars = self.e.variables.copy()
+            else:
+                parentvars = {}
             restricted = [self.personalsvar, self.funcvar]
             self.personals = instancecalc(self.e, childvars, classcalc(self.e, parentvars, selfvar=self.personalsvar, restricted=restricted), top=False, selfvar=self.personalsvar, parentvar=self.snapshotvar)
             self.personals.variables[self.snapshotvar].variables[self.funcvar] = self
@@ -369,11 +365,13 @@ class strfunc(funcfloat):
     def calc(self, personals=None):
         """Calculates The String."""
         if personals is None:
-            personals = self.personals.getvars(True)
+            personals = self.personals.getvars()
         return self.func(personals)
 
-    def base_func(self, variables):
+    def base_func(self, personals):
         """Allows For Tail Recursion."""
+        variables = self.personals.getparent().getvars()
+        variables.update(personals)
         funcstr = self.funcstr
         out = None
         while out is None:
@@ -416,7 +414,7 @@ class strfunc(funcfloat):
             else:
                 items, _ = useparams(variables, self.variables, matrix(0))
             items[self.allargs] = allvars
-            personals = self.personals.getvars(True)
+            personals = self.personals.getvars()
             for k in personals:
                 if (not k in items) or isnull(items[k]):
                     items[k] = personals[k]
@@ -528,10 +526,18 @@ class strfunc(funcfloat):
             else:
                 raise ExecutionError("ClassError", "Methods must have self as their first argument")
 
-    def __eq__(self, other):
+    def __eq__(self, other, personals=None):
         """Performs ==."""
         if isinstance(other, strfunc):
-            return self.funcstr == other.funcstr and self.overflow == other.overflow and self.reqargs == other.reqargs and self.allargs == other.allargs and self.method == other.method and self.variables == other.variables and self.personals == other.personals
+            if personals is None:
+                personals = self.getpers()
+            return (self.funcstr == other.funcstr and
+                    self.overflow == other.overflow and
+                    self.reqargs == other.reqargs and
+                    self.allargs == other.allargs and
+                    self.method == other.method and
+                    self.variables == other.variables and
+                    personals == other.getpers())
         else:
             return False
 
