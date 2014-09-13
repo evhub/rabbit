@@ -189,19 +189,22 @@ Global Operator Precedence List:
         "classcalc": lambda self, args: classcalc(
             self,
             self.devariables(args[0]),
-            selfvar=args[1]
+            selfvar=args[1],
+            restricted=args[2]
             ),
         "namespace": lambda self, args: namespace(
             self,
             self.devariables(args[0]),
-            selfvar=args[1]
+            selfvar=args[1],
+            restricted=args[2]
             ),
         "instancecalc": lambda self, args: instancecalc(
             self,
             self.devariables(args[0]),
             top=False,
             selfvar=args[1],
-            parentvar=args[2]
+            parentvar=args[2],
+            restricted=args[3]
             ),
         "makefunc": lambda self, args: makefunc(
             args[0],

@@ -297,6 +297,7 @@ class funcfloat(numobject):
 
 class strfunc(funcfloat):
     """Allows A String Function To Be Callable."""
+    funcvar = "__func__"
     snapshotvar = "__closure__"
     personalsvar = "__class__"
     method = None
@@ -337,15 +338,21 @@ class strfunc(funcfloat):
         if isinstance(personals, classcalc):
             self.personals = personals
         else:
+            parentvars = {}
             if lexical:
-                snapshot = self.e.variables.copy()
-            else:
-                snapshot = {}
+                for k,v in self.e.variables.items():
+                    if self is v:
+                        v = self.funcvar
+                    parentvars[k] = v
+            childvars = {}
             if personals is not None:
-                personals = personals.copy()
-            else:
-                personals = {}
-            self.personals = instancecalc(self.e, personals, classcalc(self.e, snapshot, selfvar=self.personalsvar), top=False, selfvar=self.personalsvar, parentvar=self.snapshotvar)
+                for k,v in personals.items():
+                    if self is v:
+                        v = self.funcvar
+                    childvars[k] = v
+            restricted = [self.personalsvar, self.funcvar]
+            self.personals = instancecalc(self.e, childvars, classcalc(self.e, parentvars, selfvar=self.personalsvar, restricted=restricted), top=False, selfvar=self.personalsvar, parentvar=self.snapshotvar)
+            self.personals.variables[self.snapshotvar].variables[self.funcvar] = self
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -1132,14 +1139,16 @@ class classcalc(cotobject):
     notmatrix = True
     doset = False
     selfvar = "__self__"
-    restricted = [selfvar]
 
-    def __init__(self, e, variables=None, name=None, selfvar=None):
+    def __init__(self, e, variables=None, name=None, selfvar=None, restricted=None):
         """Initializes The Class."""
         self.e = e
         if selfvar is not None:
             self.selfvar = str(selfvar)
+        if restricted is None:
             self.restricted = [self.selfvar]
+        else:
+            self.restricted = restricted
         self.variables = {
             self.selfvar : self
             }
@@ -1148,11 +1157,11 @@ class classcalc(cotobject):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("classcalc", getstates(self.getvars()), self.selfvar)
+        return ("classcalc", getstates(self.getvars()), self.selfvar, self.restricted)
 
     def copy(self):
         """Copies The Class."""
-        return classcalc(self.e, getcopy(self.getvars()), selfvar=self.selfvar)
+        return classcalc(self.e, getcopy(self.getvars()), selfvar=self.selfvar, restricted=self.restricted)
 
     def process(self, command, inglobal=False):
         """Processes A Command And Puts The Result In The Variables."""
@@ -1444,11 +1453,11 @@ class namespace(classcalc):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("namespace", getstates(self.getvars()), self.selfvar)
+        return ("namespace", getstates(self.getvars()), self.selfvar, self.restricted)
 
     def copy(self):
         """Copies The Class."""
-        return namespace(self.e, getcopy(self.getvars()), selfvar=self.selfvar)
+        return namespace(self.e, getcopy(self.getvars()), selfvar=self.selfvar, restricted=self.restricted)
 
     def getrepr(self, *args, **kwargs):
         """Wraps classcalc.getrepr."""
@@ -1467,12 +1476,15 @@ class instancecalc(numobject, classcalc):
     evaltype = "instance"
     parentvar = "__parent__"
 
-    def __init__(self, e, variables=None, parent=None, name=None, top=True, selfvar=None, parentvar=None):
+    def __init__(self, e, variables=None, parent=None, name=None, top=True, selfvar=None, parentvar=None, restricted=None):
         """Creates An Instance Of An Evaluator Class."""
         self.e = e
         if selfvar is not None:
             self.selfvar = str(selfvar)
+        if restricted is None:
             self.restricted = [self.selfvar]
+        else:
+            self.restricted = restricted
         if parentvar is not None:
             self.parentvar = str(parentvar)
         if parent is None:
@@ -1492,11 +1504,11 @@ class instancecalc(numobject, classcalc):
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
-        return ("instancecalc", getstates(self.getvars()), self.selfvar, self.parentvar)
+        return ("instancecalc", getstates(self.getvars()), self.selfvar, self.parentvar, self.restricted)
 
     def copy(self):
         """Copies The Instance."""
-        return instancecalc(self.e, getcopy(self.getvars()), top=False, selfvar=self.selfvar, parentvar=self.parentvar)
+        return instancecalc(self.e, getcopy(self.getvars()), top=False, selfvar=self.selfvar, parentvar=self.parentvar, restricted=self.restricted)
 
     def getparent(self):
         """Reconstructs The Parent Class."""
