@@ -342,13 +342,11 @@ class strfunc(funcfloat):
                 childvars = {}
             else:
                 childvars = personals.copy()
-            if lexical:
-                parentvars = self.e.variables.copy()
-            else:
+            if not lexical:
                 parentvars = {}
-            restricted = [self.personalsvar, self.funcvar]
-            self.personals = instancecalc(self.e, childvars, classcalc(self.e, parentvars, selfvar=self.personalsvar, restricted=restricted), top=False, selfvar=self.personalsvar, parentvar=self.snapshotvar)
-            self.personals.variables[self.snapshotvar].variables[self.funcvar] = self
+            else:
+                parentvars = self.e.variables.copy()
+            self.personals = instancecalc(self.e, childvars, classcalc(self.e, parentvars, selfvar=self.personalsvar), top=False, selfvar=self.personalsvar, parentvar=self.snapshotvar)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -356,21 +354,23 @@ class strfunc(funcfloat):
             memo = None
         else:
             memo = getstates(self.memo)
-        return ("strfunc", self.funcstr, self.variables, itemstate(self.personals), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method)
+        return ("strfunc", self.funcstr, self.variables, self.getpers(), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method, self.didsnapshot())
 
     def copy(self):
         """Copies The String Function."""
-        return strfunc(self.funcstr, self.e, self.variables, self.personals, self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method)
+        return strfunc(self.funcstr, self.e, self.variables, self.getpers(), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, self.didsnapshot())
 
     def calc(self, personals=None):
         """Calculates The String."""
         if personals is None:
-            personals = self.personals.getvars()
+            personals = self.getpers()
         return self.func(personals)
 
     def base_func(self, personals):
         """Allows For Tail Recursion."""
         variables = self.personals.getparent().getvars()
+        if self.method:
+            variables[self.method] = self.personals.retrieve(self.method)
         variables.update(personals)
         funcstr = self.funcstr
         out = None
@@ -387,7 +387,7 @@ class strfunc(funcfloat):
                     out = self.e.calc(funcstr, " \\>")
                 except TailRecursion as params:
                     if not self.e.returned and funcstr == params.funcstr and variables == params.variables:
-                        raise ExecutionError("RuntimeError", "Illegal infinite recursive loop in "+funcstr)
+                        raise ExecutionError("LoopError", "Illegal infinite recursive loop in "+funcstr)
                     else:
                         funcstr = params.funcstr
                         variables = params.variables
@@ -414,7 +414,7 @@ class strfunc(funcfloat):
             else:
                 items, _ = useparams(variables, self.variables, matrix(0))
             items[self.allargs] = allvars
-            personals = self.personals.getvars()
+            personals = self.getpers()
             for k in personals:
                 if (not k in items) or isnull(items[k]):
                     items[k] = personals[k]
@@ -548,21 +548,25 @@ class strfloat(strfunc):
         strfunc.__init__(self, *args, **kwargs)
         test = self.e.find(self.funcstr, True)
         if isinstance(test, strfunc):
-            self.name = self.name or test.name
-            self.funcstr = test.funcstr
-            self.overflow = self.overflow and test.overflow
-            self.reqargs += test.reqargs
-            for x in test.variables:
-                if not x in self.variables:
-                    self.variables.append(x)
-                else:
-                    self.reqargs -= 1
-            self.personals.merge(test.personals)
-            if strfunc.allargs == self.allargs:
-                self.allargs = test.allargs
-            self.memoize = self.memoize and test.memoize
-            self.memo.update(test.memo)
-            self.method = self.method or test.method
+            self.merge(test)
+
+    def merge(self, test):
+        """Merges With test."""
+        self.name = self.name or test.name
+        self.funcstr = test.funcstr
+        self.overflow = self.overflow and test.overflow
+        self.reqargs += test.reqargs
+        for x in test.variables:
+            if not x in self.variables:
+                self.variables.append(x)
+            else:
+                self.reqargs -= 1
+        self.personals.merge(test.personals)
+        if strfunc.allargs == self.allargs:
+            self.allargs = test.allargs
+        self.memoize = self.memoize and test.memoize
+        self.memo.update(test.memo)
+        self.method = self.method or test.method
 
 class strcalc(numobject):
     """Allows Strings Inside Evaluation."""
@@ -999,15 +1003,15 @@ class derivfunc(derivbase, strfunc):
     def __init__(self, *args, **kwargs):
         """Creates The Derivative Function."""
         if "n" in kwargs:
-            self.n = int(n)
+            self.n = int(kwargs["n"])
         else:
             raise SyntaxError("Expected keyword argument n to derivfunc")
         if "accuracy" in kwargs:
-            self.accuracy = float(accuracy)
+            self.accuracy = float(kwargs["accuracy"])
         else:
             raise SyntaxError("Expected keyword argument accuracy to derivfunc")
         if "scaledown" in kwargs:
-            self.scaledown = float(scaledown)
+            self.scaledown = float(kwargs["scaledown"])
         else:
             raise SyntaxError("Expected keyword argument scaledown to derivfunc")
         if "varname" in kwargs:
@@ -1052,7 +1056,7 @@ class integfunc(integbase, strfunc):
     def __init__(self, funcstr, accuracy, e, varname="x", personals=None, name=None, memoize=None, memo=None):
         """Creates The Integral Function."""
         if "accuracy" in kwargs:
-            self.accuracy = float(accuracy)
+            self.accuracy = float(kwargs["accuracy"])
         else:
             raise SyntaxError("Expected keyword argument accuracy to derivfunc")
         if "varname" in kwargs:
@@ -1265,7 +1269,7 @@ class classcalc(cotobject):
                 self.doset[test] = haskey(self.e.variables, test)
                 self.e.variables[test] = self.variables[test]
 
-    def tryget(self, key):
+    def getmethod(self, key):
         """Attempts To Get An Item."""
         if istext(key):
             test = key
@@ -1286,10 +1290,6 @@ class classcalc(cotobject):
         else:
             out = self.variables[test]
         return self.e.deprop(out)
-
-    def getmethod(self, key):
-        """Retrieves A Method."""
-        return self.tryget(key)
 
     def retrieve(self, key):
         """Retrieves An Item."""
@@ -1532,7 +1532,7 @@ class instancecalc(numobject, classcalc):
         else:
             return False
 
-    def tryget(self, key):
+    def getmethod(self, key):
         """Attempts To Get An Item."""
         if istext(key):
             test = key
@@ -1543,7 +1543,7 @@ class instancecalc(numobject, classcalc):
         elif "__get__" in self.variables:
             return self.domethod(self.getitem("__get__"), rawstrcalc(test, self.e))
         else:
-            return self.getparent().tryget(test)
+            return self.getparent().getmethod(test)
 
     def getitem(self, test):
         """Retrieves An Item At The Base Level."""
@@ -1578,11 +1578,11 @@ class instancecalc(numobject, classcalc):
 
     def isprop(self):
         """Determines Whether The Class Is A Property."""
-        return bool(self.tryget("__value__"))
+        return bool(self.getmethod("__value__"))
 
     def isfunc(self):
         """Determines Whether The Class Is A Function."""
-        return bool(self.tryget("__call__"))
+        return bool(self.getmethod("__call__"))
 
     def getvars(self, merge=False):
         """Gets Original Variables."""
@@ -1598,14 +1598,14 @@ class instancecalc(numobject, classcalc):
     def call(self, variables):
         """Calls The Function."""
         if variables is None:
-            func = self.tryget("__value__")
+            func = self.getmethod("__value__")
             if func is None:
                 return self
             else:
                 self.e.setreturned()
                 return self.domethod(func)
         else:
-            func = self.tryget("__call__")
+            func = self.getmethod("__call__")
             if func is None:
                 raise ExecutionError("ClassError", "The class being called has no __call__ method")
             else:
@@ -1613,11 +1613,11 @@ class instancecalc(numobject, classcalc):
 
     def ismatrix(self):
         """Determines Whether The Class Can Be A Matrix."""
-        return bool(self.tryget("__cont__"))
+        return bool(self.getmethod("__cont__"))
 
     def tomatrix(self):
         """Converts To Matrix."""
-        func = self.tryget("__cont__")
+        func = self.getmethod("__cont__")
         if func is None:
             raise ExecutionError("ClassError", "The class being converted to a container has no __cont__ method")
         else:
@@ -1625,30 +1625,30 @@ class instancecalc(numobject, classcalc):
 
     def __iadd__(self, other):
         """Performs Addition."""
-        check_add = self.tryget("__add__")
+        check_add = self.getmethod("__add__")
         if check_add:
             return self.domethod(check_add, other)
-        check_sub = self.tryget("__sub__")
+        check_sub = self.getmethod("__sub__")
         if check_sub:
             return self.domethod(check_sub, -other)
         raise ExecutionError("TypeError", "Insufficient methods defined for addition")
 
     def __isub__(self, other):
         """Performs Subtraction."""
-        check_sub = self.tryget("__sub__")
+        check_sub = self.getmethod("__sub__")
         if check_sub:
             return self.domethod(check_sub, other)
-        check_add = self.tryget("__add__")
+        check_add = self.getmethod("__add__")
         if check_add:
             return self.domethod(check_add, -other)
         raise ExecutionError("TypeError", "Insufficient methods defined for subtraction")
 
     def __imul__(self, other):
         """Performs Multiplication."""
-        check_mul = self.tryget("__mul__")
+        check_mul = self.getmethod("__mul__")
         if check_mul:
             return self.domethod(check_mul, other)
-        check_div = self.tryget("__div__")
+        check_div = self.getmethod("__div__")
         if check_div:
             return self.domethod(check_div, 1.0/other)
         if other == int(other):
@@ -1661,15 +1661,15 @@ class instancecalc(numobject, classcalc):
 
     def __idiv__(self, other):
         """Performs Division."""
-        check_div = self.tryget("__div__")
+        check_div = self.getmethod("__div__")
         if check_div:
             return self.domethod(check_div, other)
-        check_mul = self.tryget("__mul__")
+        check_mul = self.getmethod("__mul__")
         if check_mul:
             return self.domethod(check_mul, 1.0/other)
-        check_fdiv = self.tryget("__fdiv__")
+        check_fdiv = self.getmethod("__fdiv__")
         if check_fdiv:
-            check_mod = self.tryget("__mod__")
+            check_mod = self.getmethod("__mod__")
             if check_mod:
                 return self.domethod(check_fdiv, other)+self.domethod(check_mod, other)/other
         other = 1.0/other
@@ -1685,17 +1685,17 @@ class instancecalc(numobject, classcalc):
 
     def __rdiv__(self, other):
         """Performs Reverse Division."""
-        check_rdiv = self.tryget("__rdiv__")
+        check_rdiv = self.getmethod("__rdiv__")
         if check_rdiv:
             return self.domethod(check_rdiv, other)
-        check_pow = self.tryget("__pow__")
+        check_pow = self.getmethod("__pow__")
         if check_pow:
             return other*self.domethod(check_pow, -1.0)
         raise ExecutionError("TypeError", "Insufficient methods defined for division")
 
     def __ifloordiv__(self, other):
         """Performs Floor Division."""
-        check_fdiv = self.tryget("__fdiv__")
+        check_fdiv = self.getmethod("__fdiv__")
         if check_fdiv:
             return self.domethod(check_fdiv, other)
         else:
@@ -1709,7 +1709,7 @@ class instancecalc(numobject, classcalc):
 
     def __imod__(self, other):
         """Performs Moduluo."""
-        check_mod = self.tryget("__mod__")
+        check_mod = self.getmethod("__mod__")
         if check_mod:
             self = self.domethod(check_mod, other)
         try:
@@ -1725,7 +1725,7 @@ class instancecalc(numobject, classcalc):
 
     def __ipow__(self, other):
         """Performs Exponentiation."""
-        check_pow = self.tryget("__pow__")
+        check_pow = self.getmethod("__pow__")
         if check_pow:
             return self.domethod(check_pow, other)
         if other == int(other):
@@ -1740,7 +1740,7 @@ class instancecalc(numobject, classcalc):
 
     def __rfloordiv__(self, other):
         """Performs Reverse Floor Division."""
-        check_rfdiv = self.tryget("__rfdiv__")
+        check_rfdiv = self.getmethod("__rfdiv__")
         if check_rfdiv:
             return self.domethod(check_rfdiv, other)
         else:
@@ -1748,21 +1748,21 @@ class instancecalc(numobject, classcalc):
 
     def __rmod__(self, other):
         """Performs Reverse Modulo."""
-        check_rmod = self.tryget("__rmod__")
+        check_rmod = self.getmethod("__rmod__")
         if check_rmod:
             return self.domethod(check_rmod, other)
         raise ExecutionError("TypeError", "Insufficient methods defined for reverse modulus")
 
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
-        check_rpow = self.tryget("__rpow__")
+        check_rpow = self.getmethod("__rpow__")
         if check_rpow:
             return self.domethod(check_rpow, other)
         raise ExecutionError("TypeError", "Insufficient methods defined for reverse exponentiation")
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
-        check_rmul = self.tryget("__rmul__")
+        check_rmul = self.getmethod("__rmul__")
         if check_rmul:
             return self.domethod(check_rmul, other)
         else:
@@ -1770,7 +1770,7 @@ class instancecalc(numobject, classcalc):
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
-        check_radd = self.tryget("__radd__")
+        check_radd = self.getmethod("__radd__")
         if check_radd:
             return self.domethod(check_radd, other)
         else:
@@ -1778,7 +1778,7 @@ class instancecalc(numobject, classcalc):
 
     def __rsub__(self, other):
         """Performs Reverse Subtraction."""
-        check_rsub = self.tryget("__rsub__")
+        check_rsub = self.getmethod("__rsub__")
         if check_rsub:
             return self.domethod(check_rsub, other)
         else:
@@ -1794,14 +1794,14 @@ class instancecalc(numobject, classcalc):
 
     def tonum(self):
         """Converts To Float."""
-        check_num = self.tryget("__num__")
+        check_num = self.getmethod("__num__")
         if check_num:
             return self.domethod(check_num)
         raise ExecutionError("TypeError", "Insufficient methods defined for conversion to number")
 
     def __abs__(self):
         """Performs Absolute Value."""
-        check_abs = self.tryget("__abs__")
+        check_abs = self.getmethod("__abs__")
         if check_abs:
             return self.domethod(check_abs)
         if self < 0:
@@ -1811,7 +1811,7 @@ class instancecalc(numobject, classcalc):
 
     def __cmp__(self, other):
         """Performs Comparison."""
-        check_cmp = self.tryget("__cmp__")
+        check_cmp = self.getmethod("__cmp__")
         if check_cmp:
             return self.domethod(check_cmp, other)
         if self == other:
@@ -1826,23 +1826,23 @@ class instancecalc(numobject, classcalc):
         if not hasnum(other):
             return False
         else:
-            check_eq = self.tryget("__eq__")
+            check_eq = self.getmethod("__eq__")
             if check_eq:
                 return self.domethod(check_eq, other)
-            check_ne = self.tryget("__ne__")
+            check_ne = self.getmethod("__ne__")
             if check_ne:
                 return not self.domethod(check_ne, other)
-            check_cmp = self.tryget("__cmp__")
+            check_cmp = self.getmethod("__cmp__")
             if check_cmp:
                 return self.domethod(check_cmp, other) == 0.0
-            check_gt = self.tryget("__gt__")
+            check_gt = self.getmethod("__gt__")
             if check_gt:
-                check_lt = self.tryget("__lt__")
+                check_lt = self.getmethod("__lt__")
                 if check_lt:
                     return not self.domethod(check_gt, other) and not self.domethod(check_lt, other)
-            check_ge = self.tryget("__ge__")
+            check_ge = self.getmethod("__ge__")
             if check_ge:
-                check_le = self.tryget("__le__")
+                check_le = self.getmethod("__le__")
                 if check_le:
                     return self.domethod(check_ge, other) and self.domethod(check_le, other)
             return classcalc.__eq__(self, other)
@@ -1852,23 +1852,23 @@ class instancecalc(numobject, classcalc):
         if not hasnum(other):
             return True
         else:
-            check_ne = self.tryget("__ne__")
+            check_ne = self.getmethod("__ne__")
             if check_ne:
                 return self.domethod(check_ne, other)
-            check_eq = self.tryget("__eq__")
+            check_eq = self.getmethod("__eq__")
             if check_eq:
                 return not self.domethod(check_eq, other)
-            check_cmp = self.tryget("__cmp__")
+            check_cmp = self.getmethod("__cmp__")
             if check_cmp:
                 return self.domethod(check_cmp, other) == 0.0
-            check_gt = self.tryget("__gt__")
+            check_gt = self.getmethod("__gt__")
             if check_gt:
-                check_lt = self.tryget("__lt__")
+                check_lt = self.getmethod("__lt__")
                 if check_lt:
                     return not self.domethod(check_gt, other) and not self.domethod(check_lt, other)
-            check_ge = self.tryget("__ge__")
+            check_ge = self.getmethod("__ge__")
             if check_ge:
-                check_le = self.tryget("__le__")
+                check_le = self.getmethod("__le__")
                 if check_le:
                     return not (self.domethod(check_ge, other) and self.domethod(check_le, other))
             return not classcalc.__eq__(self, other)
@@ -1878,18 +1878,18 @@ class instancecalc(numobject, classcalc):
         if not hasnum(other):
             return False
         else:
-            check_gt = self.tryget("__gt__")
+            check_gt = self.getmethod("__gt__")
             if check_gt:
                 return self.domethod(check_gt, other)
-            check_cmp = self.tryget("__cmp__")
+            check_cmp = self.getmethod("__cmp__")
             if check_cmp:
                 return self.domethod(check_cmp, other) > 0.0
-            check_le = self.tryget("__le__")
+            check_le = self.getmethod("__le__")
             if check_le:
                 return not self.domethod(check_le, other)
-            check_ge = self.tryget("__ge__")
+            check_ge = self.getmethod("__ge__")
             if check_ge:
-                check_eq = self.tryget("__eq__")
+                check_eq = self.getmethod("__eq__")
                 if check_eq:
                     return self.domethod(check_ge, other) and not self.domethod(check_eq, other)
             raise ExecutionError("TypeError", "Insufficient methods defined for greater than")
@@ -1899,18 +1899,18 @@ class instancecalc(numobject, classcalc):
         if not hasnum(other):
             return False
         else:
-            check_lt = self.tryget("__lt__")
+            check_lt = self.getmethod("__lt__")
             if check_lt:
                 return self.domethod(check_lt, other)
-            check_cmp = self.tryget("__cmp__")
+            check_cmp = self.getmethod("__cmp__")
             if check_cmp:
                 return self.domethod(check_cmp, other) < 0.0
-            check_ge = self.tryget("__ge__")
+            check_ge = self.getmethod("__ge__")
             if check_ge:
                 return not self.domethod(check_ge, other)
-            check_le = self.tryget("__le__")
+            check_le = self.getmethod("__le__")
             if check_le:
-                check_eq = self.tryget("__eq__")
+                check_eq = self.getmethod("__eq__")
                 if check_eq:
                     return self.domethod(check_le, other) and not self.domethod(check_eq, other)
             raise ExecutionError("TypeError", "Insufficient methods defined for less than")
@@ -1920,18 +1920,18 @@ class instancecalc(numobject, classcalc):
         if not hasnum(other):
             return False
         else:
-            check_ge = self.tryget("__ge__")
+            check_ge = self.getmethod("__ge__")
             if check_ge:
                 return self.domethod(check_ge, other)
-            check_cmp = self.tryget("__cmp__")
+            check_cmp = self.getmethod("__cmp__")
             if check_cmp:
                 return self.domethod(check_cmp, other) >= 0.0
-            check_lt = self.tryget("__lt__")
+            check_lt = self.getmethod("__lt__")
             if check_lt:
                 return not self.domethod(check_lt, other)
-            check_gt = self.tryget("__gt__")
+            check_gt = self.getmethod("__gt__")
             if check_gt:
-                check_eq = self.tryget("__eq__")
+                check_eq = self.getmethod("__eq__")
                 if check_eq:
                     return self.domethod(check_gt, other) or self.domethod(check_eq, other)
             raise ExecutionError("TypeError", "Insufficient methods defined for greater than or equal")
@@ -1941,25 +1941,25 @@ class instancecalc(numobject, classcalc):
         if not hasnum(other):
             return False
         else:
-            check_le = self.tryget("__le__")
+            check_le = self.getmethod("__le__")
             if check_le:
                 return self.domethod(check_le, other)
-            check_cmp = self.tryget("__cmp__")
+            check_cmp = self.getmethod("__cmp__")
             if check_cmp:
                 return self.domethod(check_cmp, other) <= 0.0
-            check_gt = self.tryget("__gt__")
+            check_gt = self.getmethod("__gt__")
             if check_gt:
                 return not self.domethod(check_gt, other)
-            check_lt = self.tryget("__lt__")
+            check_lt = self.getmethod("__lt__")
             if check_lt:
-                check_eq = self.tryget("__eq__")
+                check_eq = self.getmethod("__eq__")
                 if check_eq:
                     return self.domethod(check_lt, other) or self.domethod(check_eq, other)
             raise ExecutionError("TypeError", "Insufficient methods defined for less than or equal")
 
     def __str__(self):
         """Retrieves A String."""
-        check_str = self.tryget("__str__")
+        check_str = self.getmethod("__str__")
         if check_str:
             return self.e.prepare(self.domethod(check_str), True, False)
         else:
@@ -1968,11 +1968,11 @@ class instancecalc(numobject, classcalc):
     def __len__(self):
         """Retrieves The Length."""
         out = None
-        check_len = self.tryget("__len__")
+        check_len = self.getmethod("__len__")
         if check_len:
             out = self.domethod(check_len)
         else:
-            check_cont = self.tryget("__cont__")
+            check_cont = self.getmethod("__cont__")
             if check_cont:
                 out = len(self.domethod(check_cont))
         if out is None:
@@ -1983,11 +1983,11 @@ class instancecalc(numobject, classcalc):
     def __bool__(self):
         """Converts To A Boolean."""
         out = None
-        check_bool = self.tryget("__bool__")
+        check_bool = self.getmethod("__bool__")
         if check_bool:
             out = self.domethod(check_bool)
         else:
-            check_num = self.tryget("__num__")
+            check_num = self.getmethod("__num__")
             if check_num:
                 out = self.domethod(check_num)
         if out is None:
@@ -1999,7 +1999,7 @@ class instancecalc(numobject, classcalc):
 
     def typecalc(self):
         """Finds The Type Of The Instance."""
-        item = self.tryget("__type__")
+        item = self.getmethod("__type__")
         if item:
             return self.domethod(item)
         else:
@@ -2007,7 +2007,7 @@ class instancecalc(numobject, classcalc):
 
     def op_repeat(self, other):
         """Performs **."""
-        item = self.tryget("__rep__")
+        item = self.getmethod("__rep__")
         if item:
             return self.domethod(item, other)
         else:
@@ -2015,7 +2015,7 @@ class instancecalc(numobject, classcalc):
 
     def rop_repeat(self, other):
         """Performs Reverse **."""
-        item = self.tryget("__rrep__")
+        item = self.getmethod("__rrep__")
         if item:
             return self.domethod(item, other)
         else:
@@ -2023,7 +2023,7 @@ class instancecalc(numobject, classcalc):
 
     def op_join(self, params):
         """Performs ++."""
-        item = self.tryget("__join__")
+        item = self.getmethod("__join__")
         if item:
             return self.domethod(item, params)
         else:
@@ -2031,7 +2031,7 @@ class instancecalc(numobject, classcalc):
 
     def rop_join(self, params):
         """Performs Reverse ++."""
-        item = self.tryget("__rjoin__")
+        item = self.getmethod("__rjoin__")
         if item:
             return self.domethod(item, params)
         else:
@@ -2044,7 +2044,7 @@ class instancecalc(numobject, classcalc):
         elif not indebug and not bottom:
             return str(self)
         else:
-            check_repr = self.tryget("__repr__")
+            check_repr = self.getmethod("__repr__")
             if check_repr:
                 return self.e.prepare(self.domethod(check_repr), top, False, indebug, maxrecursion)
             else:
@@ -2052,7 +2052,7 @@ class instancecalc(numobject, classcalc):
 
     def include(self):
         """Returns A Class For Inclusion."""
-        item = self.tryget("__include__")
+        item = self.getmethod("__include__")
         if item:
             return self.domethod(item)
         else:
@@ -2060,7 +2060,7 @@ class instancecalc(numobject, classcalc):
 
     def inside_enter(self, args):
         """Enters The Inside."""
-        item = self.tryget("__enter__")
+        item = self.getmethod("__enter__")
         if item:
             return self.domethod(item, args)
         else:
@@ -2068,7 +2068,7 @@ class instancecalc(numobject, classcalc):
 
     def inside_exit(self, args):
         """Exits The Inside."""
-        item = self.tryget("__exit__")
+        item = self.getmethod("__exit__")
         if item:
             return self.domethod(item, args)
         else:

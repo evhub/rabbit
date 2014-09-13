@@ -127,14 +127,15 @@ Global Operator Precedence List:
             args[0],
             self,
             args[1],
-            self.deitem(args[2]),
+            self.devariables(args[2]),
             args[3],
             args[4],
             args[5],
             args[6],
             args[7],
             self.devariables(args[8]),
-            args[9]
+            args[9],
+            args[10]
             ),
         "codestr": lambda self, args: codestr(
             args[0],
@@ -148,7 +149,7 @@ Global Operator Precedence List:
             args[0],
             self,
             args[1],
-            self.deitem(args[2]),
+            self.devariables(args[2]),
             args[3],
             args[4],
             args[5],
@@ -156,15 +157,16 @@ Global Operator Precedence List:
             args[7],
             self.devariables(args[8]),
             args[9],
-            n=args[10],
-            accuracy=args[11],
-            scaledown=args[12]
+            args[10],
+            n=args[11],
+            accuracy=args[12],
+            scaledown=args[13]
             ),
         "integfunc": lambda self, args: integfunc(
             args[0],
             self,
             args[1],
-            self.deitem(args[2]),
+            self.devariables(args[2]),
             args[3],
             args[4],
             args[5],
@@ -172,7 +174,8 @@ Global Operator Precedence List:
             args[7],
             self.devariables(args[8]),
             args[9],
-            accuracy=args[11]
+            args[10],
+            accuracy=args[12]
             ),
         "usefunc": lambda self, args: usefunc(
             args[0],
@@ -702,7 +705,7 @@ Global Operator Precedence List:
         """Speedily Prepares The Output Of An Evaluation."""
         out = "class \xab"+"\n"*top
         if not indebug and bottom and not top:
-            out += 'raise("RuntimeError", "Maximum recursion depth exceeded in object preparation")'
+            out += 'raise("LoopError", "Maximum recursion depth exceeded in object preparation")'
         else:
             out += " __type__ "
             if istext(item):
@@ -1860,16 +1863,17 @@ Global Operator Precedence List:
                         x = x[1:]
                         doallargs = True
                     else:
-                        raise ExecutionError("ArgumentError", "Catch all argument must come last")
+                        raise ExecutionError("ArgumentError", "Catch-all argument must come last")
                 elif x.startswith("-"):
                     x = x[1:]
                     inopt = True
                     if reqargs is None:
                         reqargs = len(params)
-                elif inopt:
-                    raise ExecutionError("ArgumentError", "Cannot have required args after optional args")
                 elif x.startswith("+"):
-                    x = x[1:]
+                    if inopt:
+                        raise ExecutionError("ArgumentError", "Cannot have required args after optional args")
+                    else:
+                        x = x[1:]
                 else:
                     special = False
                 equal_test = x.split("=", 1)
@@ -1887,6 +1891,8 @@ Global Operator Precedence List:
                     colon_test[0] = delspace(colon_test[0])
                     personals[colon_test[0]] = self.calc(colon_test[1], " <\\:")
                     x = colon_test[0]
+                elif inopt:
+                    raise ExecutionError("ArgumentError", "Cannot have normal args after optional args")
                 elif not x or self.isreserved(x):
                     raise ExecutionError("VariableError", "Could not set to invalid variable "+x)
                 else:
@@ -2931,7 +2937,7 @@ class evalfuncs(object):
                     last = variables[0]
                     variables[0] = variables[0].include()
                 else:
-                    raise ExecutionError("RuntimeError", "Illegal infinite recursive loop in __include__")
+                    raise ExecutionError("LoopError", "Illegal infinite recursive loop in __include__")
             if isinstance(variables[0], classcalc):
                 oldvars = self.e.setvars(variables[0].getvars(True))
                 return classcalc(self.e, oldvars)
@@ -2987,17 +2993,17 @@ class evalfuncs(object):
             raise ExecutionError("Error", "An error occured")
         elif len(variables) == 1:
             if isinstance(variables[0], instancecalc) and self.iserrcall(variables):
-                name = variables[0].tryget(self.e.namevar)
+                name = variables[0].getmethod(self.e.namevar)
                 if name:
                     name = self.e.prepare(name, False, False)
                 else:
                     name = "Error"
-                message = variables[0].tryget(self.e.messagevar)
+                message = variables[0].getmethod(self.e.messagevar)
                 if message:
                     message = self.e.prepare(message, False, False)
                 else:
                     message = "An error occured"
-                fatal = variables[0].tryget(self.e.fatalvar)
+                fatal = variables[0].getmethod(self.e.fatalvar)
                 if fatal:
                     fatal = bool(fatal)
                 else:
@@ -3025,7 +3031,7 @@ class evalfuncs(object):
             items = variables[0].items()
             if self.iserrcall([items[1]]):
                 for check in variables[1:]:
-                    if items[1] == check or items[1].tryget(self.e.namevar) == check:
+                    if items[1] == check or items[1].getmethod(self.e.namevar) == check:
                         return rowmatrixlist([items[0], 1.0])
                 return self.raisecall([items[1]])
             else:
@@ -3052,7 +3058,7 @@ class evalfuncs(object):
     def iserrcall(self, variables):
         """Determines Whether Something Is An Error."""
         for item in variables:
-            if not (isinstance(item, instancecalc) and item.tryget(self.e.errorvar)):
+            if not (isinstance(item, instancecalc) and item.getmethod(self.e.errorvar)):
                 return 0.0
         return 1.0
 

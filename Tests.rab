@@ -566,6 +566,8 @@ passert:: class<<x=1;;f(x)=x;;y=2>> ?= (__where__
     x
  $ y = 2
  )
+passert:: ((try::f(0)):1).name ?= "LoopError" $ f(x) = x@x;f:x@!x
+passert:: f() ?= 1                            $ f(-x,x:1) = x
 
 # Final Testing:
 passert:: unused(env()) ?= class<<x=1>> $ x = 1
