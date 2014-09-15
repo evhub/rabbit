@@ -439,7 +439,7 @@ Global Operator Precedence List:
             "len":funcfloat(self.funcs.lencall, self, "len", reqargs=1),
             "size":funcfloat(self.funcs.sizecall, self, "size", reqargs=1),
             "abs":funcfloat(self.funcs.abscall, self, "abs", reqargs=1),
-            "from":funcfloat(self.funcs.instanceofcall, self, "from", reqargs=2),
+            "inherits":funcfloat(self.funcs.instanceofcall, self, "inherits", reqargs=2),
             "iserr":funcfloat(self.funcs.iserrcall, self, "iserr", reqargs=1),
             "class":funcfloat(self.funcs.classcall, self, "class"),
             "instance":funcfloat(self.funcs.instancecall, self, "instance"),

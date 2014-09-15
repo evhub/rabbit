@@ -370,8 +370,8 @@ passert:: env().a ?= a ?= 2         $ a = 2
 passert:: iserr(Error())
 passert:: iserr((try::raise()):1)
 passert:: iserr(Warning())
-passert:: from(Error, Error())
-passert:: from(Error, (try::raise()):1)
+passert:: inherits(Error, Error())
+passert:: inherits(Error, (try::raise()):1)
 passert:: var:"a" ?= "b"            $ a = b
 passert:: a ?= 5                    $ exec("a = 5")
 passert:: num(i) ?= i
@@ -492,7 +492,7 @@ passert:: 10 != 1
 passert:: type(class<<>>) ?= "class"
 passert:: 270394572394085723904572394857203495793457 ?= 270394572394085723904572394857203495793457.0
 passert:: 5 in [1,5,2]
-passert:: (class<<x=1>>()) from (class<<x=1>>)
+passert:: (class<<x=1>>()) inherits (class<<x=1>>)
 passert:: 5 // 2 ?= 2
 passert:: ! (1,2,3,4) ~ \x\($)
 passert:: len( [1,2,3,4] ~ \x\($) ) ?= 4
