@@ -145,9 +145,9 @@ class editor(mathbase):
             self.box.placetag("comment", point+"-1c", point)
         elif test in ['"', "`", "\u201c", "\u201d"]:
             self.box.placetag("string", point+"-1c", point)
-        elif test in string.digits:
+        elif test in self.e.digits:
             self.box.placetag("digit", point+"-1c", point)
-        elif self.e.isreserved(test):
+        elif not self.e.validvar(test):
             self.box.placetag("reserved", point+"-1c", point)
         return test
 
@@ -231,14 +231,14 @@ class editor(mathbase):
                     if decimal:
                         decimal = point
                 elif decimal:
-                    if test in string.digits:
+                    if test in self.e.digits:
                         self.box.remtag("reserved", decimal+"-1c", point+"-1c")
                         self.box.placetag("digit", decimal+"-1c", point+"-1c")
-                    elif not self.e.isreserved(test):
+                    elif self.e.validvar(test):
                         normal = True
                     if not iswhite(test):
                         decimal = False
-                elif not self.e.isreserved(test):
+                elif self.e.validvar(test):
                     normal = True
                 if normal:
                     if last[0] == "":

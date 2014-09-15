@@ -258,12 +258,14 @@ Global Operator Precedence List:
     callops = subparenops + lambdamarker + "%/*:"
     calcops = "$"
     multiargops = bools + callops + "+-@~|&;," + calcops + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
-    reserved = string.digits + multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
+    reserved = multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
+    digits = string.digits
     withvar = "__where__"
     errorvar = "__error__"
     fatalvar = "fatal"
     namevar = "name"
     messagevar = "message"
+    replacer = re.compile("\s+")
     recursion = 0
     redef = False
     useclass = None
@@ -368,18 +370,19 @@ Global Operator Precedence List:
             self.eval_call
             ]
         self.calls = [
-            self.call_parenvar,
-            self.call_var,
-            self.call_lambda,
-            self.call_neg,
-            self.call_reciproc,
-            self.call_colon,
-            self.call_paren,
-            self.call_exp,
-            self.call_comp,
-            self.call_lambdacoeff,
-            self.call_method,
-            self.call_normal
+            (self.call_parenvar, True),
+            (self.call_var, True),
+            (self.call_lambda, True),
+            (self.call_neg, True),
+            (self.call_reciproc, True),
+            (self.call_colon, True),
+            (self.call_paren_format, False),
+            (self.call_paren, True),
+            (self.call_exp, True),
+            (self.call_comp, True),
+            (self.call_lambdacoeff, True),
+            (self.call_method, True),
+            (self.call_normal, True)
             ]
         self.funcs = evalfuncs(self)
 
@@ -680,7 +683,7 @@ Global Operator Precedence List:
 
     def store(self, name, value):
         """Stores A Variable."""
-        if not self.isreserved(name):
+        if self.validvar(name):
             self.variables[basicformat(name)] = value
             return True
         else:
@@ -817,7 +820,7 @@ Global Operator Precedence List:
                 part_b = item.d
             out = ""
             a = self.prepare(part_a, False, bottom, indebug, maxrecursion)
-            if not bottom or madeof(a, string.digits) or not self.isreserved(a):
+            if not bottom or self.validvar(a):
                 out += a
             else:
                 out += "("+a+")"
@@ -826,7 +829,7 @@ Global Operator Precedence List:
             else:
                 out += "/"
             b = self.prepare(part_b, False, bottom, indebug, maxrecursion)
-            if not bottom or madeof(b, string.digits) or not self.isreserved(b):
+            if not bottom or self.validvar(b):
                 out += b
             else:
                 out += "("+b+")"
@@ -856,10 +859,10 @@ Global Operator Precedence List:
                 out = out[:-1]
             out += "\\"
             test = self.prepare(item.funcstr, False, True, indebug, maxrecursion)
-            if self.isreserved(test, allowed=string.digits):
-                out += "("+test+")"
-            else:
+            if self.validvar(test):
                 out += test
+            else:
+                out += "("+test+")"
             try:
                 item.n
             except AttributeError:
@@ -1247,6 +1250,10 @@ Global Operator Precedence List:
     def calc_next(self, arg, funcs, top=False):
         """Calls The Next Function."""
         while True:
+            if istext(arg):
+                arg = basicformat(arg)
+            if not arg:
+                raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
             funcs = funcs[:]
             if top:
                 func = funcs.pop(0)
@@ -1330,7 +1337,7 @@ Global Operator Precedence List:
 
     def calc_format(self, expression, calc_funcs):
         """Removes Unwanted Characters."""
-        return self.calc_next(delspace(self.remformat(expression)), calc_funcs)
+        return self.calc_next(self.remformat(expression), calc_funcs)
 
     def calc_with(self, expression, calc_funcs):
         """Evaluates With Clauses."""
@@ -1408,11 +1415,6 @@ Global Operator Precedence List:
                 
     def calc_set_do(self, sides, docalc):
         """Performs The Definition Command."""
-        sides[0] = sides[0].split("(", 1)
-        if len(sides[0]) > 1:
-            sides[0] = delspace(sides[0][0])+"("+sides[0][1]
-        else:
-            sides[0] = delspace(sides[0][0])
         if not self.readytofunc(sides[0], allowed="."):
             raise ExecutionError("SyntaxError", "Could not set to invalid variable name "+sides[0])
         else:
@@ -1423,13 +1425,13 @@ Global Operator Precedence List:
                 classlist = []
             delfrom = None
             if self.useclass is False and classcalc.selfvar in self.variables and isinstance(self.variables[classcalc.selfvar], classcalc):
-                delfrom = self.variables[classcalc.selfvar].doset
+                delfrom = self.variables[classcalc.selfvar].doset #TODO: This won't work if selfvar has been rebound
             method = False
             if "." in sides[0]:
                 method = True
                 classlist += sides[0].split(".")
                 for x in xrange(0, len(classlist)-1):
-                    if self.isreserved(classlist[x]):
+                    if not self.validvar(classlist[x]):
                         raise ExecutionError("SyntaxError", "Could not set to invalid class name "+classlist[x])
                 sides[0] = classlist.pop()
                 if delfrom is not None and classlist[0] in delfrom:
@@ -1507,7 +1509,7 @@ Global Operator Precedence List:
     def readytofunc(self, expression, extra="", allowed=""):
         """Determines If An Expression Could Be Turned Into A Function."""
         funcparts = expression.split(self.parenchar, 1)
-        out = funcparts[0] != "" and (not self.isreserved(funcparts[0], extra, allowed)) and (len(funcparts) == 1 or funcparts[1].endswith(self.parenchar))
+        out = funcparts[0] != "" and (self.validvar(funcparts[0], extra, allowed)) and (len(funcparts) == 1 or funcparts[1].endswith(self.parenchar))
         if out and len(funcparts) != 1:
             return not self.insideouter(funcparts[1][:-1])
         else:
@@ -1523,7 +1525,7 @@ Global Operator Precedence List:
 
     def set_normal(self, sides):
         """Performs =."""
-        if not self.isreserved(sides[0]):
+        if self.validvar(sides[0]):
             return sides[1]
 
     def calc_list(self, inputstring, calc_funcs):
@@ -1535,9 +1537,10 @@ Global Operator Precedence List:
             self.unclean()
             out = []
             for x in xrange(0, len(inputlist)):
-                item = self.calc_next(inputlist[x], calc_funcs)
-                if not isnull(item):
-                    out.append(item)
+                if inputlist[x]:
+                    item = self.calc_next(inputlist[x], calc_funcs)
+                    if not isnull(item):
+                        out.append(item)
             if len(out) == 0:
                 return matrix(0)
             elif len(out) == 1:
@@ -1878,25 +1881,25 @@ Global Operator Precedence List:
                     special = False
                 equal_test = x.split("=", 1)
                 colon_test = x.split(":", 1)
-                if len(equal_test) > 1 and equal_test[0] and not self.isreserved(equal_test[0]):
+                if len(equal_test) > 1 and equal_test[0] and self.validvar(equal_test[0]):
                     inopt = 3
                     if reqargs is None:
                         reqargs = len(params)
-                    equal_test[0] = delspace(equal_test[0])
+                    equal_test[0] = basicformat(equal_test[0])
                     personals[equal_test[0]] = self.calc(equal_test[1], " <\\=")
                     x = equal_test[0]
-                elif len(colon_test) > 1 and colon_test[0] and not self.isreserved(colon_test[0]):
+                elif len(colon_test) > 1 and colon_test[0] and self.validvar(colon_test[0]):
                     if not special:
                         doparam = False
-                    colon_test[0] = delspace(colon_test[0])
+                    colon_test[0] = basicformat(colon_test[0])
                     personals[colon_test[0]] = self.calc(colon_test[1], " <\\:")
                     x = colon_test[0]
                 elif inopt == 1:
                     raise ExecutionError("ArgumentError", "Cannot have normal args after optional args")
-                elif not x or self.isreserved(x):
+                elif not x or not self.validvar(x):
                     raise ExecutionError("VariableError", "Could not set to invalid variable "+x)
                 else:
-                    x = delspace(x)
+                    x = basicformat(x)
                 if doallargs:
                     allargs = x
                 if doparam:
@@ -2239,17 +2242,24 @@ Global Operator Precedence List:
                     value = value * item
             return value
 
-    def eval_call(self, inputstring, top=True):
+    def eval_call(self, original, top=True):
         """Evaluates A Variable."""
-        self.printdebug("=> "+inputstring)
-        self.recursion += 1
-        for func in self.calls:
-            out = func(inputstring, top)
-            if out is not None:
-                break
-        self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring)
-        self.recursion -= 1
-        return out
+        inputstring = basicformat(original)
+        if inputstring:
+            self.printdebug("=> "+inputstring)
+            self.recursion += 1
+            for func, test in self.calls:
+                if test:
+                    out = func(inputstring)
+                    if out is not None:
+                        break
+                elif top:
+                    inputstring = func(inputstring)
+            self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring)
+            self.recursion -= 1
+            return out
+        else:
+            raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
 
     def eval_check(self, value, top=False):
         """Checks A Value."""
@@ -2284,7 +2294,7 @@ Global Operator Precedence List:
         """Determines If An Item Can Be Converted By eval_check."""
         return hasnum(item) or islist(item) or isinstance(item, bool) or item is None
 
-    def call_var(self, inputstring, top=None):
+    def call_var(self, inputstring):
         """Checks If Variable."""
         if inputstring in self.variables:
             self.unclean()
@@ -2295,7 +2305,7 @@ Global Operator Precedence List:
                 value = item
             else:
                 raise ExecutionError("ValueError", "Unconvertable variable value of "+repr(item))
-            store = not self.isreserved(key)
+            store = self.validvar(key)
             if isprop(value):
                 value = self.deprop(value)
                 store = False
@@ -2303,7 +2313,7 @@ Global Operator Precedence List:
                 self.variables[key] = value
             return value
 
-    def call_parenvar(self, inputstring, top=None):
+    def call_parenvar(self, inputstring):
         """Checks If Parentheses."""
         if inputstring.startswith(self.parenchar) and inputstring.endswith(self.parenchar):
             item = self.namefind(inputstring, True)
@@ -2326,12 +2336,12 @@ Global Operator Precedence List:
             value = self.getcall(value)(None)
         return value
 
-    def call_lambda(self, inputstring, top=None):
+    def call_lambda(self, inputstring):
         """Wraps Lambda Evaluation."""
         if inputstring.startswith(self.lambdamarker):
             return self.eval_lambda([inputstring])
 
-    def call_neg(self, inputstring, top=None):
+    def call_neg(self, inputstring):
         """Evaluates Unary -."""
         if inputstring.startswith("-"):
             self.unclean()
@@ -2341,7 +2351,7 @@ Global Operator Precedence List:
             else:
                 return negative(item)
 
-    def call_reciproc(self, inputstring, top=None):
+    def call_reciproc(self, inputstring):
         """Evaluates /."""
         if inputstring.startswith("/"):
             self.unclean()
@@ -2351,7 +2361,7 @@ Global Operator Precedence List:
             else:
                 return reciprocal(item)
 
-    def call_exp(self, inputstring, top=None):
+    def call_exp(self, inputstring):
         """Evaluates The Exponential Part Of An Expression."""
         if "^" in inputstring:
             self.unclean()
@@ -2363,14 +2373,13 @@ Global Operator Precedence List:
                 if item:
                     value = knuth(self.eval_call(item), value, level)
                     level = 1
+                elif x == 0 or x == len(inputlist)-1:
+                    raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
                 else:
-                    if x == 0 or x == len(inputlist)-1:
-                        raise ExecutionError("NoneError", "Cannot exponentiate nothing")
-                    else:
-                        level += 1
+                    level += 1
             return value
 
-    def call_colon(self, inputstring, top=None):
+    def call_colon(self, inputstring):
         """Evaluates Colons."""
         if ":" in inputstring:
             cleaned = self.clean_begin()
@@ -2477,74 +2486,77 @@ Global Operator Precedence List:
             out += "'"
         return "__"+out+"__"
 
-    def call_paren(self, inputstring, top=True):
+    def call_paren_format(self, inputstring):
+        """Performs Parenthesis Splitting."""
+        out = (self.parenchar*2).join(switchsplit(inputstring, self.digits, notstring=self.reserved))
+        return self.replacer.sub(self.parenchar*2, out)
+
+    def call_paren(self, inputstring):
         """Evaluates Parentheses."""
-        if top:
-            inputstring = (self.parenchar*2).join(switchsplit(inputstring, string.digits, notstring=self.reserved))
-            if self.parenchar in inputstring:
-                self.unclean()
-                self.printdebug("(|) "+inputstring) 
-                templist = inputstring.split(self.parenchar)
-                checkops = delspace(self.callops, self.subparenops)
-                inputlist = [[]]
-                feed = inputlist[0]
-                last = False
-                for x in xrange(0, len(templist)):
-                    if x%2 == 1:
-                        if templist[x]:
-                            last = True
-                            if feed and feed[-1] and feed[-1][-1] in checkops:
-                                feed[-1] += self.parenchar+templist[x]+self.parenchar
-                            else:
-                                feed.append(self.parenchar+templist[x]+self.parenchar)
-                            last = True
+        if self.parenchar in inputstring:
+            self.unclean()
+            self.printdebug("(|) "+inputstring) 
+            templist = inputstring.split(self.parenchar)
+            checkops = delspace(self.callops, self.subparenops)
+            inputlist = [[]]
+            feed = inputlist[0]
+            last = False
+            for x in xrange(0, len(templist)):
+                if x%2 == 1:
+                    if templist[x]:
+                        last = True
+                        if feed and feed[-1] and feed[-1][-1] in checkops:
+                            feed[-1] += self.parenchar+templist[x]+self.parenchar
                         else:
-                            last = False
-                    elif templist[x]:
-                        if feed and ((templist[x] and templist[x][0] in checkops) or (feed[-1] and feed[-1][-1] in checkops)):
-                            feed[-1] += templist[x]
-                        else:
-                            if last:
-                                inputlist.append([])
-                                feed = inputlist[-1]
-                            feed.append(templist[x])
-                temp = "("+strlist(inputlist, ") * (", lambda l: strlist(l, " : "))+")"
-                self.printdebug("(>) "+temp)
-                self.recursion += 1
-                values = []
-                for l in inputlist:
-                    x = 0
-                    while x < len(l):
-                        if endswithany(l[x], self.subparenops) and x+1 < len(l):
-                            l[x] += l.pop(x+1)
-                        if startswithany(l[x], self.subparenops) and x > 0:
-                            l[x-1] += l.pop(x)
-                            x -= 1
-                        x += 1
-                    if not l:
-                        item = matrix(0)
-                    elif len(values) > 0 and startswithany(l[0], self.subparenops):
-                        autoarg = self.unusedarg()
-                        item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
+                            feed.append(self.parenchar+templist[x]+self.parenchar)
+                        last = True
                     else:
-                        item = self.eval_call(l[0], False)
-                    args = []
-                    for x in xrange(1, len(l)):
-                        args.append(self.eval_call(l[x], False))
-                    item = self.call_paren_do(item, args)
-                    if values and isinstance(item, funcfloat) and item.infix:
-                        values.append(self.call_paren_do(item, [values.pop()]))
+                        last = False
+                elif templist[x]:
+                    if feed and ((templist[x] and templist[x][0] in checkops) or (feed[-1] and feed[-1][-1] in checkops)):
+                        feed[-1] += templist[x]
                     else:
-                        values.append(item)
-                if len(values) == 0:
-                    value = matrix(0)
+                        if last:
+                            inputlist.append([])
+                            feed = inputlist[-1]
+                        feed.append(templist[x])
+            temp = "("+strlist(inputlist, ") * (", lambda l: strlist(l, " : "))+")"
+            self.printdebug("(>) "+temp)
+            self.recursion += 1
+            values = []
+            for l in inputlist:
+                x = 0
+                while x < len(l):
+                    if endswithany(l[x], self.subparenops) and x+1 < len(l):
+                        l[x] += l.pop(x+1)
+                    if startswithany(l[x], self.subparenops) and x > 0:
+                        l[x-1] += l.pop(x)
+                        x -= 1
+                    x += 1
+                if not l:
+                    item = matrix(0)
+                elif len(values) > 0 and startswithany(l[0], self.subparenops):
+                    autoarg = self.unusedarg()
+                    item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
                 else:
-                    value = values[0]
-                    for x in xrange(1, len(values)):
-                        value = value * values[x]
-                self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
-                self.recursion -= 1
-                return value
+                    item = self.eval_call(l[0], False)
+                args = []
+                for x in xrange(1, len(l)):
+                    args.append(self.eval_call(l[x], False))
+                item = self.call_paren_do(item, args)
+                if values and isinstance(item, funcfloat) and item.infix:
+                    values.append(self.call_paren_do(item, [values.pop()]))
+                else:
+                    values.append(item)
+            if len(values) == 0:
+                value = matrix(0)
+            else:
+                value = values[0]
+                for x in xrange(1, len(values)):
+                    value = value * values[x]
+            self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
+            self.recursion -= 1
+            return value
 
     def call_paren_do(self, item, arglist):
         """Does Parentheses Calling."""
@@ -2574,7 +2586,7 @@ Global Operator Precedence List:
             self._overflow = overflow
         return item
 
-    def call_comp(self, inputstring, top=None):
+    def call_comp(self, inputstring):
         """Performs Function Composition."""
         if ".." in inputstring:
             self.unclean()
@@ -2585,19 +2597,19 @@ Global Operator Precedence List:
                     funclist.append(self.wrap(func))
             return strfunc(strlist(funclist, "(")+"("*bool(funclist)+strfunc.allargs+")"*len(funclist), self, overflow=False)
 
-    def call_lambdacoeff(self, inputstring, top=None):
+    def call_lambdacoeff(self, inputstring):
         """Evaluates Lambda Coefficients."""
         parts = inputstring.split(self.lambdamarker, 1)
         if len(parts) > 1:
             return self.eval_call(parts[0]+self.wrap(self.eval_lambda([self.lambdamarker+parts[1]])))
 
-    def call_method(self, inputstring, top=None):
+    def call_method(self, inputstring):
         """Returns Method Instances."""
         if "." in inputstring:
             itemlist = inputstring.split(".")
             isfloat = len(itemlist) < 3
             for item in itemlist:
-                isfloat = isfloat and (not item or madeof(item, string.digits))
+                isfloat = isfloat and (not item or madeof(item, self.digits))
             if not isfloat:
                 self.unclean()
                 itemlist[0] = self.funcfind(itemlist[0])
@@ -2622,7 +2634,7 @@ Global Operator Precedence List:
                                         rabcheck, rabstring = rabstring.split(":", 1)
                                         if basicformat(rabcheck) == "rabbit":
                                             name, rabargs = basicformat(rabstring).split(":", 1)
-                                            name = delspace(name)
+                                            name = basicformat(name)
                                             if not name:
                                                 new = eval(rabargs)
                                             else:
@@ -2644,14 +2656,14 @@ Global Operator Precedence List:
                                                 else:
                                                     raise ExecutionError("ValueError", "Invalid Rabbit wrapper of "+name)
                             if new is None:
-                                raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                                 #TODO: This is where whatever test is should be wrapped regardless in a special full-conversion wrapper
+                                raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                         else:
                             raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                     out = new
                 return out
 
-    def call_normal(self, inputstring, top=None):
+    def call_normal(self, inputstring):
         """Returns Argument."""
         return self.eval_check(inputstring)
 
@@ -2732,16 +2744,16 @@ Global Operator Precedence List:
         for x in self.variables:
             self.variables[x] = self.find(x, True)
 
-    def isreserved(self, expression, extra="", allowed=""):
-        """Determines If An Expression Contains Reserved Characters."""
-        if not expression:
-            return True
+    def validvar(self, varname, extra="", allowed=""):
+        """Determines If A Variable Name Is Valid."""
+        if not varname:
+            return False
         else:
             reserved = self.reserved+extra
-            for x in expression:
+            for x in varname:
                 if x in reserved and x not in allowed:
-                    return True
-            return False
+                    return False
+            return True
 
     def call(self, item, value, varname=None):
         """Evaluates An Item With A Value."""

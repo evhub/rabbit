@@ -228,7 +228,7 @@ class mathbase(safebase):
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to debug")
         self.setdebug(out)
-        return float(out)
+        return out
 
     def printcall(self, variables, func=None):
         """Performs print."""

@@ -1265,7 +1265,7 @@ class classcalc(cotobject):
         test = delspace(self.e.prepare(key, False, False))
         if test in self.restricted:
             raise ExecutionError("RedefinitionError", "The "+test+" variable cannot be redefined")
-        elif not bypass and self.e.isreserved(test):
+        elif not bypass and not self.e.validvar(test):
             raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
         else:
             if name is not None and isinstance(value, funcfloat) and not isinstance(value, strfunc):
@@ -1281,7 +1281,7 @@ class classcalc(cotobject):
             test = key
         else:
             test = delspace(self.e.prepare(key, False, False))
-        if not self.e.isreserved(test) and test in self.variables:
+        if self.e.validvar(test) and test in self.variables:
             return self.getitem(test)
         else:
             return None
@@ -1350,7 +1350,7 @@ class classcalc(cotobject):
     def remove(self, key):
         """Removes An Item."""
         test = self.e.prepare(key, False, False)
-        if not self.e.isreserved(test) and test in self.variables:
+        if self.e.validvar(test) and test in self.variables:
             del self.variables[test]
         else:
             raise ExecutionError("ClassError", "Could not remove "+test+" from "+self.e.prepare(self, False, True, True))
@@ -1546,7 +1546,7 @@ class instancecalc(numobject, classcalc):
             test = key
         else:
             test = delspace(self.e.prepare(key, False, False))
-        if not self.e.isreserved(test) and test in self.variables:
+        if self.e.validvar(test) and test in self.variables:
             return self.getitem(test)
         elif "__get__" in self.variables:
             return self.domethod(self.getitem("__get__"), rawstrcalc(test, self.e))
@@ -1572,7 +1572,7 @@ class instancecalc(numobject, classcalc):
         value = getcopy(value)
         if test in self.restricted:
             raise ExecutionError("RedefinitionError", "The "+test+" variable cannot be redefined.")
-        elif not bypass and self.e.isreserved(test):
+        elif not bypass and not self.e.validvar(test):
             raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
         else:
             if isinstance(value, strfunc):
