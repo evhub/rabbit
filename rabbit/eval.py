@@ -1648,13 +1648,13 @@ Global Operator Precedence List:
                 if istext(inputlist[x]) and madeof(inputlist[x], self.bools):
                     args = []
                     if x == 0:
-                        args.append(matrix(0))
+                        raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
                     else:
                         if istext(inputlist[x-1]):
                             inputlist[x-1] = self.calc_next(inputlist[x-1], calc_funcs)
                         args.append(inputlist[x-1])
                     if x == len(inputlist)-1:
-                        args.append(matrix(0))
+                        raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
                     else:
                         if istext(inputlist[x+1]):
                             inputlist[x+1] = self.calc_next(inputlist[x+1], calc_funcs)
@@ -2384,13 +2384,16 @@ Global Operator Precedence List:
         if ":" in inputstring:
             cleaned = self.clean_begin()
             inputlist = inputstring.split(":")
-            item = self.funcfind(inputlist[0])
-            params = []
-            for x in xrange(1, len(inputlist)):
-                if inputlist[x]:
-                    params.append(getcopy(self.eval_call(inputlist[x])))
-            self.clean_end(cleaned)
-            return self.call_colon_set(item, params)
+            if inputlist[0]:
+                item = self.funcfind(inputlist[0])
+                params = []
+                for x in xrange(1, len(inputlist)):
+                    if inputlist[x]:
+                        params.append(getcopy(self.eval_call(inputlist[x])))
+                self.clean_end(cleaned)
+                return self.call_colon_set(item, params)
+            else:
+                raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
 
     def call_colon_set(self, item, params):
         """Performs Colon Function Calls."""

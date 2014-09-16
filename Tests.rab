@@ -568,6 +568,11 @@ passert:: class<<x=1;;f(x)=x;;y=2>> ?= (__where__
  )
 passert:: ((try::f(0)):1).name ?= "LoopError" $ f(x) = x@x;f:x@!x
 passert:: f() ?= 1                            $ f(-x,x:1) = x
+passert:: type(1==1) ?= "bool"
+passert:: md5 ?= "hash"                       $ md5 = "hash"
+passert:: md5 ?= 10                           $ md = 2
+passert:: hello world ?= "hello world"        $ hello world = "hello world"
+passert:: hello world ?= "hellohello"         $ hello = "hello" $ world = 2
 
 # Final Testing:
 passert:: unused(env()) ?= class<<x=1>> $ x = 1
