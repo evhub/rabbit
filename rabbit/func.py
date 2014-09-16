@@ -1262,7 +1262,7 @@ class classcalc(cotobject):
 
     def store(self, key, value, bypass=False, name=None):
         """Stores An Item."""
-        test = delspace(self.e.prepare(key, False, False))
+        test = basicformat(self.e.prepare(key, False, False))
         if test in self.restricted:
             raise ExecutionError("RedefinitionError", "The "+test+" variable cannot be redefined")
         elif not bypass and not self.e.validvar(test):
@@ -1280,7 +1280,7 @@ class classcalc(cotobject):
         if istext(key):
             test = key
         else:
-            test = delspace(self.e.prepare(key, False, False))
+            test = basicformat(self.e.prepare(key, False, False))
         if self.e.validvar(test) and test in self.variables:
             return self.getitem(test)
         else:
@@ -1545,7 +1545,7 @@ class instancecalc(numobject, classcalc):
         if istext(key):
             test = key
         else:
-            test = delspace(self.e.prepare(key, False, False))
+            test = basicformat(self.e.prepare(key, False, False))
         if self.e.validvar(test) and test in self.variables:
             return self.getitem(test)
         elif "__get__" in self.variables:
@@ -1568,7 +1568,7 @@ class instancecalc(numobject, classcalc):
 
     def store(self, key, value, bypass=False, name=None):
         """Stores An Item."""
-        test = delspace(self.e.prepare(key, False, False))
+        test = basicformat(self.e.prepare(key, False, False))
         value = getcopy(value)
         if test in self.restricted:
             raise ExecutionError("RedefinitionError", "The "+test+" variable cannot be redefined.")
