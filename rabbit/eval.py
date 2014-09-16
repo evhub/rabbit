@@ -861,7 +861,7 @@ Global Operator Precedence List:
                 out = out[:-1]
             out += "\\"
             test = self.prepare(item.funcstr, False, True, indebug, maxrecursion)
-            if not bottom or self.validvar(test) or a == "()":
+            if not bottom or self.validvar(test) or test == "()":
                 out += test
             else:
                 out += "("+test+")"
