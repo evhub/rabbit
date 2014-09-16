@@ -259,6 +259,7 @@ Global Operator Precedence List:
     calcops = "$"
     multiargops = bools + callops + "+-@~|&;," + calcops + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
+    purechar = "-"
     digits = string.digits
     withvar = "__where__"
     errorvar = "__error__"
@@ -269,8 +270,8 @@ Global Operator Precedence List:
     recursion = 0
     redef = False
     useclass = None
-    returned = True
-    spawned = True
+    returned = False
+    spawned = False
     calculated = None
     using = None
     pure = False
@@ -330,6 +331,7 @@ Global Operator Precedence List:
         self.calc_funcs = [
             self.calc_cmd,
             self.calc_format,
+            self.calc_pure,
             self.calc_set,
             self.calc_with,
             self.calc_list,
@@ -820,7 +822,7 @@ Global Operator Precedence List:
                 part_b = item.d
             out = ""
             a = self.prepare(part_a, False, bottom, indebug, maxrecursion)
-            if not bottom or self.validvar(a):
+            if not bottom or self.validvar(a) or a == "()":
                 out += a
             else:
                 out += "("+a+")"
@@ -859,7 +861,7 @@ Global Operator Precedence List:
                 out = out[:-1]
             out += "\\"
             test = self.prepare(item.funcstr, False, True, indebug, maxrecursion)
-            if self.validvar(test):
+            if not bottom or self.validvar(test) or a == "()":
                 out += test
             else:
                 out += "("+test+")"
@@ -1013,21 +1015,25 @@ Global Operator Precedence List:
         """Ensures That A Variable Exists."""
         self.variables[variable] = self.getitem(variable)
 
-    def calc(self, inputstring, info=""):
+    def calc(self, inputstring, info="", top=False):
         """Performs Top-Level Calculation."""
         inputstring = str(inputstring)
         calculated, self.calculated = self.calculated, matrix(0)
-        self.process(inputstring, info, self.setcalculated, False)
+        self.process(inputstring, info, self.setcalculated, top)
         out, self.calculated = self.calculated, calculated
         return out
 
     def process(self, inputstring, info="", command=None, top=None):
         """Performs Top-Level Evaluation."""
         inputstring = str(inputstring)
+        calc_top = None
         if top is None:
             top = command is not None
-        else:
-            top = top
+        elif top < 0:
+            calc_top = top
+            top = False
+        if calc_top is None:
+            calc_top = top
         if info is None:
             info = " <<"+"-"*(70-len(inputstring)-2*self.recursion)
         else:
@@ -1044,7 +1050,7 @@ Global Operator Precedence List:
             self.recursion += 1
             cleaned = self.clean_begin(None, None)
         try:
-            self.proc_calc(inputstring, top, command)
+            self.proc_calc(inputstring, calc_top, command)
         finally:
             if top:
                 if not self.spawned:
@@ -1054,7 +1060,7 @@ Global Operator Precedence List:
             self.clean_end(cleaned)
             self.recursion -= 1
 
-    def do_pre(self, item, top):
+    def do_pre(self, item, top=-1):
         """Does The Pre-Processing."""
         for func in self.preprocs:
             item = func(item, top)
@@ -1117,7 +1123,7 @@ Global Operator Precedence List:
             if istext(item):
                 command += item
             elif item[0] in self.lambdachars:
-                value = self.do_pre(item[1], True)
+                value = self.do_pre(item[1])
                 if value:
                     command += self.lambdamarker+self.wrap(value)+self.lambdamarker
                 else:
@@ -1338,6 +1344,17 @@ Global Operator Precedence List:
     def calc_format(self, expression, calc_funcs):
         """Removes Unwanted Characters."""
         return self.calc_next(self.remformat(expression), calc_funcs)
+
+    def calc_pure(self, expression, calc_funcs):
+        """Toggles Pure On And Off."""
+        if madeof(expression, self.purechar):
+            if len(expression) >= 3:
+                self.pure = not self.pure
+                return self.pure
+            else:
+                raise ExecutionError("SyntaxError", "Pure toggles must be at least three characters")
+        else:
+            return self.calc_next(expression, calc_funcs)
 
     def calc_with(self, expression, calc_funcs):
         """Evaluates With Clauses."""
@@ -1560,7 +1577,10 @@ Global Operator Precedence List:
             self.unclean()
             itemlist = []
             for item in inputlist:
-                itemlist.append(self.calc_next(item, calc_funcs))
+                if item:
+                    itemlist.append(self.calc_next(item, calc_funcs))
+                else:
+                    itemlist.append(matrix(0))
             out = itemlist[-1]
             for x in reversed(xrange(0, len(itemlist)-1)):
                 out = pair(self, itemlist[x], out)
@@ -3710,7 +3730,7 @@ class evalfuncs(object):
         out = []
         for x in variables:
             inputstring = self.e.prepare(x, False, False)
-            out.append(self.e.calc(self.e.do_pre(inputstring, True), " | calc"))
+            out.append(self.e.calc(inputstring, " | calc", -1))
         if len(out) == 1:
             return out[0]
         else:
@@ -3727,7 +3747,7 @@ class evalfuncs(object):
         e = self.e.new()
         for x in variables:
             inputstring = e.prepare(x, False, False)
-            out.append(e.calc(e.do_pre(inputstring, True), " | eval"))
+            out.append(e.calc(inputstring, " | eval", -1))
         if len(out) == 1:
             return out[0]
         else:

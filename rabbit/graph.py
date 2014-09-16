@@ -476,7 +476,6 @@ class grapher(mathbase):
     def normcommand(self, item):
         """Graphs Normal Entries."""
         if not isnull(item) and self.doshow:
-            self.e.setreturned()
             if isinstance(item, strcalc):
                 self.show(self.e.prepare(item, True, True))
             elif isinstance(item, data):

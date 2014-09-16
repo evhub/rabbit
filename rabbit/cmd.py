@@ -205,7 +205,6 @@ class mathbase(safebase):
         if not isnull(test):
             self.ans.append(test)
             if self.doshow:
-                self.e.setreturned()
                 self.show(self.e.prepare(self.ans[-1], True, True))
 
     def debugcall(self, variables):

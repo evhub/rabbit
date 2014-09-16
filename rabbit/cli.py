@@ -31,7 +31,6 @@ class commandline(mathbase):
     
     def __init__(self, message=None, prompt=addcolor(">>>", "pink")+" ", moreprompt=addcolor("...", "pink")+" ", outcolor="cyan", debugcolor="lightred", debug=False, *initializers):
         """Initializes The Command Line Interface."""
-        self.fatalerror = self.doexit
         self.startup(debug)
         if message:
             message = str(message)
@@ -71,6 +70,10 @@ class commandline(mathbase):
     def doexit(self):
         """Exits The Command Line Interface."""
         self.e.setreturned()
+        self.on = False
+
+    def fatalerror(self):
+        """Exits Upon Fatal Error."""
         self.on = False
 
     def start(self):
