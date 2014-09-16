@@ -376,8 +376,7 @@ Global Operator Precedence List:
             (self.call_neg, True),
             (self.call_reciproc, True),
             (self.call_colon, True),
-            (self.call_paren_format, False),
-            (self.call_paren, True),
+            (self.call_paren, False),
             (self.call_exp, True),
             (self.call_comp, True),
             (self.call_lambdacoeff, True),
@@ -2249,13 +2248,11 @@ Global Operator Precedence List:
         self.printdebug("=> "+inputstring)
         if inputstring:
             self.recursion += 1
-            for func, test in self.calls:
-                if test:
+            for func, ifbottom in self.calls:
+                if ifbottom or top:
                     out = func(inputstring)
                     if out is not None:
                         break
-                elif top:
-                    inputstring = func(inputstring)
             self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring)
             self.recursion -= 1
             return out
@@ -2490,12 +2487,9 @@ Global Operator Precedence List:
             out += "'"
         return "__"+out+"__"
 
-    def call_paren_format(self, inputstring):
-        """Performs Parenthesis Splitting."""
-        return (self.parenchar*2).join(switchsplit(self.replacer.sub(self.parenchar*2, inputstring), self.digits, notstring=self.reserved))
-
-    def call_paren(self, inputstring):
+    def call_paren(self, original):
         """Evaluates Parentheses."""
+        inputstring = (self.parenchar*2).join(switchsplit(self.replacer.sub(self.parenchar*2, original), self.digits, notstring=self.reserved))
         if self.parenchar in inputstring:
             self.unclean()
             self.printdebug("(|) "+inputstring) 
