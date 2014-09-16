@@ -1365,7 +1365,7 @@ Global Operator Precedence List:
                 self.unclean()
                 docalc = False
                 if sides[0].endswith(":"):
-                    sides[0] = sides[0][:-1]
+                    sides[0] = basicformat(sides[0][:-1])
                     docalc = True
                 sides[0] = sides[0].split(",")
                 if len(sides[0]) > 1:
