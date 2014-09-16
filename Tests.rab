@@ -594,6 +594,7 @@ passert:: (try<< ? >>:1).name ?= "SyntaxError"
 passert:: (try<< ?= >>:1).name ?= "SyntaxError"
 passert:: (try<< >= >>:1).name ?= "SyntaxError"
 passert:: (try<< <= >>:1).name ?= "SyntaxError"
+passert:: pure<<sin(pi/4)>>
 
 # Final Testing:
 passert:: unused(env()) ?= class<<x=1>> $ x = 1

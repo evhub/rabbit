@@ -1055,7 +1055,7 @@ Global Operator Precedence List:
             if top:
                 if not self.spawned:
                     self.processor.addcommand(inputstring)
-                self.setspawned(self.spawned or spawned)
+                self.spawned = self.spawned or spawned
                 self.tailing = tailing
             self.clean_end(cleaned)
             self.recursion -= 1

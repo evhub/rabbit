@@ -198,7 +198,7 @@ class funcfloat(numobject):
                     self.memo[arghash] = out
                 return out
             finally:
-                self.e.setreturned(returned or self.e.returned)
+                self.e.returned = self.e.returned or returned
         else:
             return self.base_func(*args, **kwargs)
 
