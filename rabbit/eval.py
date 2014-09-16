@@ -2246,8 +2246,8 @@ Global Operator Precedence List:
     def eval_call(self, original, top=True):
         """Evaluates A Variable."""
         inputstring = basicformat(original)
+        self.printdebug("=> "+inputstring)
         if inputstring:
-            self.printdebug("=> "+inputstring)
             self.recursion += 1
             for func, test in self.calls:
                 if test:
