@@ -1537,7 +1537,7 @@ Global Operator Precedence List:
         if self.parenchar in sides[0] and sides[0].endswith(self.parenchar):
             sides[0] = sides[0].split(self.parenchar, 1)
             sides[0][1] = self.namefind(self.parenchar+sides[0][1])
-            params, personals, allargs, reqargs, lexical = self.eval_set(self.outersplit(sides[0][1], ",", top=False))
+            params, personals, allargs, reqargs, lexical = self.eval_set(sides[0][1])
             return (sides[0][0], strfunc(sides[1], self, params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical))
 
     def set_normal(self, sides):
@@ -1860,11 +1860,12 @@ Global Operator Precedence List:
             elif not out[0]:
                 return strfunc(out[1], self)
             else:
-                params, personals, allargs, reqargs, lexical = self.eval_set(self.outersplit(self.namefind(out[0]), ",", top=False))
+                params, personals, allargs, reqargs, lexical = self.eval_set(out[0])
                 return strfunc(out[1], self, params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical)
 
-    def eval_set(self, temp):
+    def eval_set(self, original):
         """Performs Setting."""
+        temp = self.outersplit(self.namefind(original), ",", top=False)
         params = []
         personals = {}
         allargs = None

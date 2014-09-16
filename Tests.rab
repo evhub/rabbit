@@ -573,6 +573,27 @@ passert:: md5 ?= "hash"                       $ md5 = "hash"
 passert:: md5 ?= 10                           $ md = 2
 passert:: hello world ?= "hello world"        $ hello world = "hello world"
 passert:: hello world ?= "hellohello"         $ hello = "hello" $ world = 2
+passert:: (try<< ~ >>:1).name ?= "SyntaxError"
+passert:: (try<< ! >>:1).name ?= "SyntaxError"
+passert:: (try<< @ >>:1).name ?= "SyntaxError"
+passert:: (try<< % >>:1).name ?= "SyntaxError"
+passert:: (try<< ^ >>:1).name ?= "SyntaxError"
+passert:: (try<< & >>:1).name ?= "SyntaxError"
+passert:: (try<< * >>:1).name ?= "SyntaxError"
+passert:: (try<< - >>:1).name ?= "SyntaxError"
+passert:: (try<< -- >>:1).name ?= "SyntaxError"
+passert:: (try<< + >>:1).name ?= "SyntaxError"
+passert:: (try<< ++ >>:1).name ?= "SyntaxError"
+passert:: (try<< == >>:1).name ?= "SyntaxError"
+passert:: (try<< | >>:1).name ?= "SyntaxError"
+passert:: (try<< : >>:1).name ?= "SyntaxError"
+passert:: (try<< ; >>:1).name ?= "SyntaxError"
+passert:: (try<< . >>:1).name ?= "SyntaxError"
+passert:: (try<< .. >>:1).name ?= "SyntaxError"
+passert:: (try<< ? >>:1).name ?= "SyntaxError"
+passert:: (try<< ?= >>:1).name ?= "SyntaxError"
+passert:: (try<< >= >>:1).name ?= "SyntaxError"
+passert:: (try<< <= >>:1).name ?= "SyntaxError"
 
 # Final Testing:
 passert:: unused(env()) ?= class<<x=1>> $ x = 1
