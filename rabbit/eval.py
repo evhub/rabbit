@@ -589,6 +589,7 @@ Global Operator Precedence List:
                     "\xbd" : 0.5,
                     "\xbc" : 0.25,
                     "\xbe" : 0.75,
+                    "\u23E8" : "Math.E",
                     "\u2400" : rawstrcalc("\x00", self),
                     "\u2401" : rawstrcalc("\x01", self),
                     "\u2402" : rawstrcalc("\x02", self),
@@ -2749,7 +2750,7 @@ Global Operator Precedence List:
 
     def validvar(self, varname, extra="", allowed=""):
         """Determines If A Variable Name Is Valid."""
-        if not varname:
+        if not varname or madeof(varname, self.digits):
             return False
         else:
             reserved = self.reserved+extra
