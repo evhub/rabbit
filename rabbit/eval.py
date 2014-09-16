@@ -2492,8 +2492,7 @@ Global Operator Precedence List:
 
     def call_paren_format(self, inputstring):
         """Performs Parenthesis Splitting."""
-        out = (self.parenchar*2).join(switchsplit(inputstring, self.digits, notstring=self.reserved))
-        return self.replacer.sub(self.parenchar*2, out)
+        return (self.parenchar*2).join(switchsplit(self.replacer.sub(self.parenchar*2, inputstring), self.digits, notstring=self.reserved))
 
     def call_paren(self, inputstring):
         """Evaluates Parentheses."""
