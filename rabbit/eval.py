@@ -706,6 +706,21 @@ Global Operator Precedence List:
         else:
             return str(arg)
 
+    def converterr(self, err):
+        """Converts A Caught Error Into An Error Instance."""
+        if len(err) == 3 or (len(err) == 4 and err[3] is None):
+            out = instancecalc(self.e, {
+                self.e.errorvar : True,
+                self.e.fatalvar : err[2]
+                })
+            out.store(self.e.namevar, strcalc(err[0], self.e))
+            out.store(self.e.messagevar, strcalc(err[1], self.e))
+            return out
+        elif len(err) == 4:
+            return err[3]
+        else:
+            raise SyntaxError("Invalid error signature of "+repr(err))
+
     def speedyprep(self, item, top=False, bottom=False, indebug=False, maxrecursion=0):
         """Speedily Prepares The Output Of An Evaluation."""
         out = "class \xab"+"\n"*top
@@ -889,7 +904,12 @@ Global Operator Precedence List:
             else:
                 out = "\\\\"+str(item)
         elif hasattr(item, "getrepr"):
-            out = item.getrepr(top, bottom, indebug, maxrecursion-1)
+            if indebug:
+                out, err = catch(item.getrepr, top, bottom, indebug, maxrecursion-1)
+                if err:
+                    out = self.prepare(self.converterr(err), top, bottom, indebug, maxrecursion-1)
+            else:
+                out = item.getrepr(top, bottom, indebug, maxrecursion-1)
         elif getcheck(item) >= 1:
             out = str(item)
         elif indebug:
@@ -3004,20 +3024,10 @@ class evalfuncs(object):
             self.e.overflow = variables[1:]
             original = self.e.prepare(variables[0], True, False)
             result, err = catch(self.e.calc, original)
-            if not err:
-                return rowmatrixlist([result, matrix(0)])
-            elif len(err) == 3 or (len(err) == 4 and err[3] is None):
-                out = instancecalc(self.e, {
-                    self.e.errorvar : True,
-                    self.e.fatalvar : err[2]
-                    })
-                out.store(self.e.namevar, strcalc(err[0], self.e))
-                out.store(self.e.messagevar, strcalc(err[1], self.e))
-            elif len(err) == 4:
-                out = err[3]
+            if err:
+                return rowmatrixlist([matrix(0), self.e.converterr(err)])
             else:
-                raise SyntaxError("Invalid error signature of "+repr(err))
-            return rowmatrixlist([matrix(0), out])
+                return rowmatrixlist([result, matrix(0)])
 
     def raisecall(self, variables):
         """Raises An Error."""
