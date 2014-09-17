@@ -1,5 +1,8 @@
 # Assertion Tests:
 x = "don't touch me"
+assert:: 1
+assert:: ?1
+assert:: !0
 passert(statement) = ( assert:code(statement) ;; statement )
 assert:: (passert::"abc")
 assert:: iserr((try::(passert::0)):1)
@@ -595,6 +598,7 @@ passert:: (try<< ?= >>:1).name ?= "SyntaxError"
 passert:: (try<< >= >>:1).name ?= "SyntaxError"
 passert:: (try<< <= >>:1).name ?= "SyntaxError"
 passert:: pure<<sin(pi/4)>>
+passert:: noshow $ noshow = class<<__repr__=raise("Unrepresentable")>>()
 
 # Final Testing:
 passert:: unused(env()) ?= class<<x=1>> $ x = 1

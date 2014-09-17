@@ -709,12 +709,12 @@ Global Operator Precedence List:
     def converterr(self, err):
         """Converts A Caught Error Into An Error Instance."""
         if len(err) == 3 or (len(err) == 4 and err[3] is None):
-            out = instancecalc(self.e, {
-                self.e.errorvar : True,
-                self.e.fatalvar : err[2]
+            out = instancecalc(self, {
+                self.errorvar : True,
+                self.fatalvar : err[2]
                 })
-            out.store(self.e.namevar, strcalc(err[0], self.e))
-            out.store(self.e.messagevar, strcalc(err[1], self.e))
+            out.store(self.namevar, strcalc(err[0], self))
+            out.store(self.messagevar, strcalc(err[1], self))
             return out
         elif len(err) == 4:
             return err[3]
@@ -1107,9 +1107,11 @@ Global Operator Precedence List:
                 self.clean_end(cleaned)
             self.printdebug("=>> "+inputlist[x])
             self.recursion += 1
-            out = self.calc_proc(inputlist[x], top)
-            self.printdebug(self.prepare(out, False, True, True)+" <<= "+inputlist[x])
-            self.recursion -= 1
+            try:
+                out = self.calc_proc(inputlist[x], top)
+                self.printdebug(self.prepare(out, False, True, True)+" <<= "+inputlist[x])
+            finally:
+                self.recursion -= 1
             if command is not None:
                 command(out)
 
@@ -1120,9 +1122,11 @@ Global Operator Precedence List:
             original = func+" :: "+inputstring
             self.printdebug("::> "+original)
             self.recursion += 1
-            out = self.getcall(self.using)([codestr(inputstring, self)])
-            self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
-            self.recursion -= 1
+            try:
+                out = self.getcall(self.using)([codestr(inputstring, self)])
+                self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
+            finally:
+                self.recursion -= 1
             return out
         else:
             return self.calc_next(inputstring, self.calc_funcs, True)
@@ -1343,20 +1347,22 @@ Global Operator Precedence List:
             original = func+" :: "+strlist(args, " :: ")
             self.printdebug("::> "+original)
             self.recursion += 1
-            if func:
-                cleaned = self.clean_begin()
-                item = self.funcfind(func)
-                params = []
-                for x in xrange(0, len(args)):
-                    arg = basicformat(args[x])
-                    if x != len(args)-1 or arg:
-                        params.append(codestr(arg, self))
-                self.clean_end(cleaned)
-                out = self.call_colon_set(item, params)
-            else:
-                out = codestr(strlist(args, "::"), self)
-            self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
-            self.recursion -= 1
+            try:
+                if func:
+                    cleaned = self.clean_begin()
+                    item = self.funcfind(func)
+                    params = []
+                    for x in xrange(0, len(args)):
+                        arg = basicformat(args[x])
+                        if x != len(args)-1 or arg:
+                            params.append(codestr(arg, self))
+                    self.clean_end(cleaned)
+                    out = self.call_colon_set(item, params)
+                else:
+                    out = codestr(strlist(args, "::"), self)
+                self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
+            finally:
+                self.recursion -= 1
             return out
         else:
             return self.calc_next(inputstring, calc_funcs)
@@ -1755,9 +1761,11 @@ Global Operator Precedence List:
         value = reassemble(top, ops)
         self.printdebug("==> "+value)
         self.recursion += 1
-        out = self.eval_check(self.calc_next(top, self.eval_funcs, True), True)
-        self.printdebug(self.prepare(out, False, True, True)+" <== "+value)
-        self.recursion -= 1
+        try:
+            out = self.eval_check(self.calc_next(top, self.eval_funcs, True), True)
+            self.printdebug(self.prepare(out, False, True, True)+" <== "+value)
+        finally:
+            self.recursion -= 1
         return out
 
     def eval_split(self, expression):
@@ -2289,13 +2297,15 @@ Global Operator Precedence List:
         self.printdebug("=> "+inputstring)
         if inputstring:
             self.recursion += 1
-            for func, ifbottom in self.calls:
-                if ifbottom or top:
-                    out = func(inputstring)
-                    if out is not None:
-                        break
-            self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring)
-            self.recursion -= 1
+            try:
+                for func, ifbottom in self.calls:
+                    if ifbottom or top:
+                        out = func(inputstring)
+                        if out is not None:
+                            break
+                self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring)
+            finally:
+                self.recursion -= 1
             return out
         else:
             raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
@@ -2561,39 +2571,41 @@ Global Operator Precedence List:
             temp = "("+strlist(inputlist, ") * (", lambda l: strlist(l, " : "))+")"
             self.printdebug("(>) "+temp)
             self.recursion += 1
-            values = []
-            for l in inputlist:
-                x = 0
-                while x < len(l):
-                    if endswithany(l[x], self.subparenops) and x+1 < len(l):
-                        l[x] += l.pop(x+1)
-                    if startswithany(l[x], self.subparenops) and x > 0:
-                        l[x-1] += l.pop(x)
-                        x -= 1
-                    x += 1
-                if not l:
-                    item = matrix(0)
-                elif len(values) > 0 and startswithany(l[0], self.subparenops):
-                    autoarg = self.unusedarg()
-                    item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
+            try:
+                values = []
+                for l in inputlist:
+                    x = 0
+                    while x < len(l):
+                        if endswithany(l[x], self.subparenops) and x+1 < len(l):
+                            l[x] += l.pop(x+1)
+                        if startswithany(l[x], self.subparenops) and x > 0:
+                            l[x-1] += l.pop(x)
+                            x -= 1
+                        x += 1
+                    if not l:
+                        item = matrix(0)
+                    elif len(values) > 0 and startswithany(l[0], self.subparenops):
+                        autoarg = self.unusedarg()
+                        item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
+                    else:
+                        item = self.eval_call(l[0], False)
+                    args = []
+                    for x in xrange(1, len(l)):
+                        args.append(self.eval_call(l[x], False))
+                    item = self.call_paren_do(item, args)
+                    if values and isinstance(item, funcfloat) and item.infix:
+                        values.append(self.call_paren_do(item, [values.pop()]))
+                    else:
+                        values.append(item)
+                if len(values) == 0:
+                    value = matrix(0)
                 else:
-                    item = self.eval_call(l[0], False)
-                args = []
-                for x in xrange(1, len(l)):
-                    args.append(self.eval_call(l[x], False))
-                item = self.call_paren_do(item, args)
-                if values and isinstance(item, funcfloat) and item.infix:
-                    values.append(self.call_paren_do(item, [values.pop()]))
-                else:
-                    values.append(item)
-            if len(values) == 0:
-                value = matrix(0)
-            else:
-                value = values[0]
-                for x in xrange(1, len(values)):
-                    value = value * values[x]
-            self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
-            self.recursion -= 1
+                    value = values[0]
+                    for x in xrange(1, len(values)):
+                        value = value * values[x]
+                self.printdebug(self.prepare(value, False, True, True)+" (<) "+temp)
+            finally:
+                self.recursion -= 1
             return value
 
     def call_paren_do(self, item, arglist):
@@ -2741,12 +2753,14 @@ Global Operator Precedence List:
             original = item
             self.printdebug("> "+self.prepare(original, False, True, True))
             self.recursion += 1
-            if item in self.variables:
-                item = self.variables[item]
-            else:
-                item = self.calc(item, " >")
-            self.printdebug(self.prepare(item, False, True, True)+" < "+self.prepare(original, False, True, True))
-            self.recursion -= 1
+            try:
+                if item in self.variables:
+                    item = self.variables[item]
+                else:
+                    item = self.calc(item, " >")
+                self.printdebug(self.prepare(item, False, True, True)+" < "+self.prepare(original, False, True, True))
+            finally:
+                self.recursion -= 1
         return item
 
     def find(self, *args, **kwargs):
