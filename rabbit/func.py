@@ -346,7 +346,7 @@ class strfunc(funcfloat):
                 parentvars = {}
             else:
                 parentvars = self.e.variables.copy()
-            self.personals = instancecalc(self.e, childvars, classcalc(self.e, parentvars, selfvar=self.personalsvar), top=False, selfvar=self.personalsvar, parentvar=self.snapshotvar)
+            self.personals = instancecalc(self.e, childvars, namespace(self.e, parentvars, selfvar=self.personalsvar), top=False, selfvar=self.personalsvar, parentvar=self.snapshotvar)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -354,11 +354,11 @@ class strfunc(funcfloat):
             memo = None
         else:
             memo = getstates(self.memo)
-        return ("strfunc", self.funcstr, self.variables, self.getpers(), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method)
+        return ("strfunc", self.funcstr, self.variables, getstates(self.getpers()), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, memo, self.method)
 
     def copy(self):
         """Copies The String Function."""
-        return strfunc(self.funcstr, self.e, self.variables, self.getpers(), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, False)
+        return strfunc(self.funcstr, self.e, self.variables, getcopy(self.personals), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, False)
 
     def calc(self, personals=None):
         """Calculates The String."""
@@ -503,7 +503,7 @@ class strfunc(funcfloat):
         return bool(len(self.personals.getparent()))
 
     def getpers(self):
-        """Returns The Modified Personals List."""
+        """Returns The Modified Personals Dictionary."""
         out = self.personals.getvars()
         del out[self.snapshotvar]
         if self.method and self.method in out:

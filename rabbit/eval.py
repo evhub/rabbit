@@ -461,7 +461,7 @@ Global Operator Precedence List:
             "effect":usefunc(self.setreturned, self, "effect"),
             "run":funcfloat(self.funcs.runcall, self, "run", reqargs=1),
             "require":funcfloat(self.funcs.requirecall, self, "require", reqargs=1),
-            "assert":funcfloat(self.funcs.assertcall, self, "assert"),
+            "assert":funcfloat(self.funcs.assertcall, self, "assert", reqargs=1),
             "install":funcfloat(self.funcs.installcall, self, "install", reqargs=1),
             "bitnot":funcfloat(self.funcs.bitnotcall, self, "bitnot", reqargs=1),
             "bitor":funcfloat(self.funcs.bitorcall, self, "bitor", reqargs=2),
@@ -1391,7 +1391,11 @@ Global Operator Precedence List:
             item = inputlist.pop()
             withclass = classcalc(self, selfvar=self.withvar)
             for x in inputlist:
-                withclass.process(x)
+                inputstring = basicformat(x)
+                if x:
+                    withclass.process(x)
+                else:
+                    raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
             self.clean_end(cleaned)
             return withclass.calc(item)
         else:
@@ -2884,7 +2888,7 @@ Global Operator Precedence List:
         elif isfunc(item):
             out = item
         else:
-            raise TypeError("Cannot convert non-evaluatour result type "+typestr(item))
+            raise TypeError("Cannot convert non-evaluator result type "+typestr(item))
         return out
 
     def topython(self, item):
@@ -2962,7 +2966,10 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to del")
         else:
             self.e.overflow = variables[1:]
-            original = self.e.prepare(variables[0], False, False)
+            if isinstance(variables[0], strcalc):
+                original = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "Variable names must be strings")
             if original in self.e.variables:
                 out = self.e.variables[original]
                 del self.e.variables[original]
@@ -3036,16 +3043,11 @@ class evalfuncs(object):
 
     def trycall(self, variables):
         """Catches Errors."""
-        if not variables:
-            return matrix(0)
+        result, err = catch(self.docalc, variables, " | try")
+        if err:
+            return rowmatrixlist([matrix(0), self.e.converterr(err)])
         else:
-            self.e.overflow = variables[1:]
-            original = self.e.prepare(variables[0], True, False)
-            result, err = catch(self.e.calc, original)
-            if err:
-                return rowmatrixlist([matrix(0), self.e.converterr(err)])
-            else:
-                return rowmatrixlist([result, matrix(0)])
+            return rowmatrixlist([result, matrix(0)])
 
     def raisecall(self, variables):
         """Raises An Error."""
@@ -3123,7 +3125,7 @@ class evalfuncs(object):
         elif isinstance(variables[0], classcalc):
             return variables[0]
         elif isinstance(variables[0], strcalc):
-            original = self.e.prepare(variables[0], True, False)
+            original = str(variables[0])
             out = classcalc(self.e)
             for cmd in self.e.splitdedent(original, lambda x: x.splitlines()):
                 out.process(cmd)
@@ -3162,7 +3164,10 @@ class evalfuncs(object):
         else:
             self.e.setreturned()
             self.e.overflow = variables[1:]
-            original = self.e.prepare(variables[0], False, False)
+            if isinstance(variables[0], strcalc):
+                original = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "Variable names must be strings")
             if original in self.e.variables:
                 return self.e.funcfind(original)
             else:
@@ -3184,7 +3189,7 @@ class evalfuncs(object):
         if original < 0:
             original += len(self.e.parens)
         if 0 < original and original < len(self.e.parens):
-            return rawstrcalc(self.e.prepare(self.e.getparen(original), True, True), self.e)
+            return codestr(self.e.prepare(self.e.getparen(original), True, True), self.e)
         else:
             raise ExecutionError("KeyError", "Could not find "+self.parenchar+str(original)+self.parenchar+" in parens")
 
@@ -3195,7 +3200,10 @@ class evalfuncs(object):
         else:
             self.e.setreturned()
             self.e.overflow = variables[1:]
-            original = self.e.prepare(variables[0], False, False)
+            if isinstance(variables[0], strcalc):
+                original = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "Variable names must be strings")
             if original in self.e.variables:
                 return rawstrcalc(self.e.prepare(self.e.variables[original], True, True), self.e)
             else:
@@ -3665,7 +3673,7 @@ class evalfuncs(object):
         if item in self.typefuncs:
             return self.typefuncs[item]
         else:
-            return item
+            return "("+item+")"
 
     def codecall(self, variables):
         """Converts To Code."""
@@ -3693,16 +3701,25 @@ class evalfuncs(object):
         if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to join")
         else:
-            delim = self.e.prepare(variables[0], True, False)
-            out = ""
+            if isinstance(variables[0], strcalc):
+                delim = str(variables[0])
+                tostring = True
+            else:
+                delim = variables[0]
+                tostring = False
+            out = []
             for x in xrange(1, len(variables)):
                 item = variables[x]
                 if ismatrix(item):
-                    out += self.joincall([delim]+getmatrix(item).getitems()).calcstr
-                else:
-                    out += self.e.prepare(item, True, False)
-                out += delim
-            return rawstrcalc(out[:-len(delim)], self.e)
+                    item = self.joincall([delim]+getmatrix(item).getitems())
+                elif not isinstance(item, strcalc):
+                    tostring = False
+                out += [item, delim]
+            out.pop()
+            if tostring:
+                return rawstrcalc("".join(map(str, out)), self.e)
+            else:
+                return diagmatrixlist(out)
 
     def abscall(self, variables):
         """Performs abs."""
@@ -3753,12 +3770,16 @@ class evalfuncs(object):
         out.simplify()
         return out
 
-    def docalc(self, variables):
+    def docalc(self, variables, info=" | calc"):
         """Performs calc."""
         out = []
         for x in variables:
-            inputstring = self.e.prepare(x, False, False)
-            out.append(self.e.calc(inputstring, " | calc", -1))
+            if isinstance(x, codestr):
+                out.append(self.e.calc(str(x), info))
+            elif isinstance(x, strcalc):
+                out.append(self.e.calc(str(x), info, -1))
+            else:
+                raise ExecutionError("ValueError", "Can't calc non-string values")
         if len(out) == 1:
             return out[0]
         else:
@@ -3774,8 +3795,13 @@ class evalfuncs(object):
         out = []
         e = self.e.new()
         for x in variables:
-            inputstring = e.prepare(x, False, False)
-            out.append(e.calc(inputstring, " | eval", -1))
+            if isinstance(x, codestr):
+                item = e.calc(str(x), " | eval")
+            elif isinstance(x, strcalc):
+                item = e.calc(str(x), " | eval", -1)
+            else:
+                raise ExecutionError("ValueError", "Can't eval non-string values")
+            out.append(self.e.deitem(getstate(item)))
         if len(out) == 1:
             return out[0]
         else:
@@ -3784,8 +3810,10 @@ class evalfuncs(object):
     def cmdcall(self, variables):
         """Performs exec."""
         for item in variables:
-            inputstring = self.e.prepare(item, False, False)
-            self.e.processor.evaltext(inputstring)
+            if isinstance(item, strcalc):
+                self.e.processor.evaltext(str(item))
+            else:
+                raise ExecutionError("ValueError", "Can't exec non-string values")
         return matrix(0)
 
     def foldcall(self, variables, func=None, overflow=True):
@@ -3837,7 +3865,10 @@ class evalfuncs(object):
             if len(variables) > 1:
                 n = int(variables[1])
             if len(variables) > 2:
-                varname = self.e.prepare(variables[2], False, False)
+                if isinstance(variables[2], strcalc):
+                    varname = str(variables[2])
+                else:
+                    raise ExecutionError("ValueError", "Variable names must be strings")
             if len(variables) > 3:
                 accuracy = float(variables[3])
             if len(variables) > 4:
@@ -3875,7 +3906,10 @@ class evalfuncs(object):
             accuracy = 0.0001
             func = variables[0]
             if len(variables) > 1:
-                varname = self.e.prepare(variables[1], False, False)
+                if isinstance(variables[1], strcalc):
+                    varname = str(variables[1])
+                else:
+                    raise ExecutionError("ValueError", "Variable names must be strings")
             if len(variables) > 2:
                 accuracy = float(variables[2])
                 self.e.overflow = variables[3:]
@@ -3920,7 +3954,10 @@ class evalfuncs(object):
         else:
             self.e.setreturned()
             self.e.overflow = variables[2:]
-            name = self.e.prepare(variables[0], False, False)
+            if isinstance(variables[0], strcalc):
+                name = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "File names must be strings")
             if len(variables) == 1:
                 writer = ""
             else:
@@ -3936,51 +3973,39 @@ class evalfuncs(object):
         else:
             self.e.setreturned()
             self.e.overflow = variables[1:]
-            name = self.e.prepare(variables[0], False, False)
+            if isinstance(variables[0], strcalc):
+                name = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "File names must be strings")
             with openfile(name) as f:
                 return rawstrcalc(readfile(f), self.e)
 
     def purecall(self, variables):
         """Ensures Purity."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to pure")
-        else:
-            self.e.overflow = variables[1:]
-            original = self.e.prepare(variables[0], True, False)
-            pure, self.e.pure = self.e.pure, True
-            try:
-                out = self.e.calc(original, " | pure")
-            finally:
-                self.e.pure = pure
-            return out
+        pure, self.e.pure = self.e.pure, True
+        try:
+            out = self.docalc(variables)
+        finally:
+            self.e.pure = pure
+        return out
 
     def defcall(self, variables):
         """Defines A Variable."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to def")
-        else:
-            self.e.overflow = variables[1:]
-            original = self.e.prepare(variables[0], True, False)
-            redef, self.e.redef = self.e.redef, True
-            try:
-                out = self.e.calc(original, " | def")
-            finally:
-                self.e.redef = redef
-            return out
+        redef, self.e.redef = self.e.redef, True
+        try:
+            out = self.docalc(variables)
+        finally:
+            self.e.redef = redef
+        return out
 
     def globalcall(self, variables):
         """Defines A Global Variable."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to global")
-        else:
-            self.e.overflow = variables[1:]
-            original = self.e.prepare(variables[0], True, False)
-            useclass, self.e.useclass = self.e.useclass, (useclass,)
-            try:
-                out = self.e.calc(original, " | global")
-            finally:
-                self.e.useclass = useclass
-            return out
+        useclass, self.e.useclass = self.e.useclass, (useclass,)
+        try:
+            out = self.docalc(variables)
+        finally:
+            self.e.useclass = useclass
+        return out
 
     def aliascall(self, variables):
         """Makes Aliases."""
@@ -3989,7 +4014,10 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to alias")
         elif len(variables) == 1:
-            key = self.e.prepare(variables[0], True, False)
+            if isinstance(variables[0], strcalc):
+                key = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "Aliases must be strings")
             if key in self.e.aliases:
                 out = rawstrcalc(self.e.aliases[key], self.e)
                 del self.e.aliases[key]
@@ -3997,8 +4025,14 @@ class evalfuncs(object):
                 out = matrix(0)
             return out
         else:
-            key = self.e.prepare(variables[0], True, False)
-            value = self.e.prepare(variables[1], True, False)
+            if isinstance(variables[0], strcalc):
+                key = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "Aliases must be strings")
+            if isinstance(variables[1], strcalc):
+                value = str(variables[1])
+            else:
+                raise ExecutionError("ValueError", "Aliases must be strings")
             self.e.aliases[key] = value
             return diagmatrixlist([rawstrcalc(key, self.e), rawstrcalc(value, self.e)])
 
@@ -4146,7 +4180,10 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to run")
         elif len(variables) == 1:
-            original = os.path.normcase(self.e.prepare(variables[0], False, False))
+            if isinstance(variables[0], strcalc):
+                original = os.path.normcase(str(variables[0]))
+            else:
+                raise ExecutionError("ValueError", "Can't run non-string valueS")
             while not os.path.isfile(original):
                 if "." not in original:
                     original += ".rab"
@@ -4172,8 +4209,7 @@ class evalfuncs(object):
             params = out.begin()
             e.funcs.runcall(variables)
             out.end(params)
-            out.e = self.e
-            return out
+            return self.e.deitem(getstate(out))
         else:
             out = []
             for arg in variables:
@@ -4182,23 +4218,18 @@ class evalfuncs(object):
 
     def assertcall(self, variables):
         """Checks For Errors By Asserting That Something Is True."""
-        if not variables:
-            raise ExecutionError("NoneError", "Assertion failed that none")
-        elif len(variables) == 1:
-            if isinstance(variables[0], codestr):
-                original = str(variables[0])
-                out = self.e.calc(original, " | assert")
+        out = []
+        for x in variables:
+            if isinstance(x, codestr):
+                test = self.e.calc(str(x), info)
+            elif isinstance(x, strcalc):
+                test = self.e.calc(str(x), info, -1)
             else:
-                original = self.e.prepare(variables[0], True, True, True)
-                out = variables[0]
-        else:
-            for arg in variables:
-                self.assertcall([arg])
-            out = True
-        if out:
-            return out
-        else:
-            raise ExecutionError("AssertionError", "Assertion failed that "+original, {"Result":out})
+                raise ExecutionError("ValueError", "Can't calc non-string values")
+            if test:
+                out.append(test)
+            else:
+                raise ExecutionError("AssertionError", "Assertion failed that "+str(x)+" (Result = "+self.e.prepare(test, False, True, True)+")")
 
     def installcall(self, variables):
         """Performs install."""
@@ -4206,6 +4237,10 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
         elif len(variables) == 1:
+            if isinstance(variables[0], strcalc):
+                name = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "File names must be strings")
             name = self.prepare(variables[0], False, False)
             try:
                 impbaseclass = dirimport(inputstring)
