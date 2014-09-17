@@ -4164,10 +4164,12 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to require")
         elif len(variables) == 1:
             self.e.setreturned()
-            out = classcalc(self.e)
+            e = self.e.new()
+            out = classcalc(e)
             params = out.begin()
-            self.runcall(variables)
+            e.runcall(variables)
             out.end(params)
+            out.e = self.e
             return out
         else:
             out = []
