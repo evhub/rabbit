@@ -4170,7 +4170,7 @@ class evalfuncs(object):
             e = self.e.new()
             out = classcalc(e)
             params = out.begin()
-            e.runcall(variables)
+            e.funcs.runcall(variables)
             out.end(params)
             out.e = self.e
             return out
