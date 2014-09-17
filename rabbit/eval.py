@@ -1468,7 +1468,7 @@ Global Operator Precedence List:
                 classlist = [self.useclass[0]]
                 delfrom = self.variables[self.useclass[0]].doset
             else:
-                classlist = [self.useclass[0]]
+                classlist = [self.useclass]
             method = False
             if "." in sides[0]:
                 method = True
