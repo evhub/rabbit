@@ -160,12 +160,12 @@ passert:: nil ++ 1 ?= nil
 # Multi-Line Tests:
 passert:: # A mid-line comment
  1 ?= 1
-passert:: f(-2) ?= 1/2
- $ f(x) =
+passert:: f(-2) ?= 1/2 $
+ f(x) =
   x+1 @ x>0;
   -1/x
-passert:: a.f(1) ?= 1
- $ a = class <<
+passert:: a.f(1) ?= 1 $
+ a = class <<
   f(x) = x
   x = 1
   >>
@@ -186,17 +186,12 @@ passert:: (a,b) ?= (1,2)                  $ a,b = (1,2)
 passert:: a ?= 1 & b ?= 2                 $ a,b = (1,2)
 passert:: a ?= 1 & b ?= (2,3)             $ a,b = (1,2,3)
 passert:: a ?= 1 & ! b                    $ a,b = 1
-passert:: smoosh((1,2),(3,4)) ?= (1,2,3,4)
- $ smoosh(a) = (
+passert:: smoosh((1,2),(3,4)) ?= (1,2,3,4) $
+ smoosh(a) = (
   x ++ smoosh(xs) @ xs;
   x
   $ x,xs = a
   )
-
-# Miscellaneous Tests:
-passert:: f..g(2) ?= 9                       $ f(x) = x^2 $ g(x) = x+1
-passert:: applyplus(0,-2) ?= (1,-1)          $ applyplus(__) = __~\x\(x+1)
-passert:: (x $ x = 1) ?= 1
 
 # Expression Tests:
 passert:: (1,2,3) ?= (1,2,3)~ \x\x
@@ -229,17 +224,17 @@ passert:: {1->2} + {3->4} ?= {1->2, 3->4}
 passert:: {"a" -> "b", "c" -> "d"} : "c" ?= "d"
 
 # Complex Tests:
-passert:: mod:3:2 ?= 1
- $ mod(x,y) = (xy+-1*floor:(xy))*y $ xy = x/y
-passert:: slope:(\x\x):1:2 ?= 1
- $ slope(f, a,b) = (f:b+-f:a)/(b+-a)
-passert:: parts:(1,2,3,4) ?= 1,(2,3,4)
- $ parts(l) = (
+passert:: mod:3:2 ?= 1 $
+ mod(x,y) = (xy+-1*floor:(xy))*y $ xy = x/y
+passert:: slope:(\x\x):1:2 ?= 1 $
+ slope(f, a,b) = (f:b+-f:a)/(b+-a)
+passert:: parts:(1,2,3,4) ?= 1,(2,3,4) $
+ parts(l) = (
   a,as
   $ a,as = l
   )
-passert:: max'(0,1,9,6,8,2) ?= 9
- $ max'(l) = (
+passert:: max'(0,1,9,6,8,2) ?= 9 $
+ max'(l) = (
   (
    a @ a > maxtail;
    maxtail
@@ -248,26 +243,26 @@ passert:: max'(0,1,9,6,8,2) ?= 9
   a
   $ a,as = l
   )
-passert:: zip:(1,2):(10,20) ?= (1,10),(2,20)
- $ zip(la, lb) =
+passert:: zip:(1,2):(10,20) ?= (1,10),(2,20) $
+ zip(la, lb) =
   (
    sg(a,b) ++ zip:as:bs
    $ a,as = la
    $ b,bs = lb
    )
   @ len:la & len:lb
-passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9)
- $ qsort(l) = (
+passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9) $
+ qsort(l) = (
    qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
    $ a,as = l
    ) @ len:l
-passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9)
- $ qsort(l) = (
+passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9) $
+ qsort(l) = (
    qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
    $ a,as = l
    ) @ (l,)
-passert:: range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop")
- $ crackle pop (x) = (
+passert:: range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop") $
+ crackle pop (x) = (
     "CracklePop"
         @ div by three & div by five;
     "Crackle"
@@ -278,8 +273,8 @@ passert:: range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Cra
     $ div by three = x%3 ?= 0
     $ div by five = x%5 ?= 0
     )
-passert:: crackle pop (10) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop")
- $ crackle pop (end, -x:1, -mod three:1, -mod five:1) =
+passert:: (crackle pop) (10) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop") $
+ crackle pop (end, -x:1, -mod three:1, -mod five:1) =
   sg(
    "CracklePop"
      @ mod three ?= 0 & mod five ?= 0;
@@ -290,26 +285,31 @@ passert:: crackle pop (10) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Po
    x
    )
   ++
-  ( crackle pop (end, x+1, (mod three+1) % 3, (mod five+1) % 5)
+  ( (crackle pop) (end, x+1, (mod three+1) % 3, (mod five+1) % 5)
     @ x < end
     )
 passert:: sum( 2**20~~ \(x,y)\(x!=y) ) ?= 0
-passert:: z ?= 3
- $ (
+passert:: z ?= 3 $
+ (
   if (x < 1) ::
    z = 3
   )
- $ x = 0
- $ if (cond) = calc @ cond
-passert:: abs'(2) ?= 2 & abs'(0) ?= 0 & abs'(-2) ?= 2
- $ abs'(x) = if (x<0) (\\ -x) elif (x?0) (\\ 0) else (x)
- $ if(cond, expr) =
+ $
+ x = 0
+ $
+ if (cond) = calc @ cond
+passert:: abs'(2) ?= 2 & abs'(0) ?= 0 & abs'(-2) ?= 2 $
+ abs'(x) = if (x<0) (\\ -x) elif (x?0) (\\ 0) else (x)
+ $
+ if(cond, expr) =
     [1, expr()]@cond; [0]
- $ elif(cond, expr, parts) = (
+ $
+ elif(cond, expr, parts) = (
     [1, out]@done; [1, expr()]@cond; [0]
     $ done, out = list:parts
     )
- $ else(expr, parts) = (
+ $
+ else(expr, parts) = (
     out@done;expr()
     $ done, out = list:parts
     )
@@ -408,6 +408,9 @@ passert:: min(1,0,5,4) ?= 0
 passert:: 5x^2 ?= 20                $ (do:: x = 2)
 
 # New Feature Tests:
+passert:: f..g(2) ?= 9                       $ f(x) = x^2 $ g(x) = x+1
+passert:: applyplus(0,-2) ?= (1,-1)          $ applyplus(__) = __~\x\(x+1)
+passert:: (x $ x = 1) ?= 1
 passert:: f..g(1)g..f(2) ?= 20      $ f(x) = x^2 $ g(x) = x+1
 passert:: f() ?= 5, & f(1) ?= 1,    $ f(*l:(5,)) = l
 passert:: a ?= 1 & b ?= [2,3]       $ a,b = [1,2,3]
@@ -429,8 +432,8 @@ passert:: class<<x=1>> >= class<<x=1>>
 passert:: class<<x=1>> <= class<<x=1>>
 passert:: iserr((try::raise()):1)
 passert:: (try::except( (try::1/0) )) ?= (try::(1/0))
-passert:: (try::raise( ComplicatedError() )):1 ?= ComplicatedError()
-    $ ComplicatedError := Error + class <<
+passert:: (try::raise( ComplicatedError() )):1 ?= ComplicatedError() $
+          ComplicatedError := Error + class <<
                                    name := "ComplicatedError"
                                    message := "A complicated error occurred"
                                    metadata := class <<
@@ -460,7 +463,8 @@ passert:: _ <> 1
 passert:: class << x = 1 >> ++ class << y = 2 >> ?= class << x = 1 ;; y = 2 >>
 passert:: "All
  done!" ?= "All" ++ "\n " ++ "done!"
-passert:: "All done!" ?= "All "
+passert:: "All done!" ?=
+        "All "
         "done!"
 passert:: "\\n1" ?= "\\n"+1
 passert:: class<<>> ?= class<< class<< x := 42 ;; y := "42" >> >>
@@ -517,8 +521,8 @@ passert:: 5 ?= a.f(a.y) $ a = class <<
   )
  y = 2
  >>
-passert:: f() ?= 5 & f(3) ?= 3
- $ f(x=5) =
+passert:: f() ?= 5 & f(3) ?= 3 $
+ f(x=5) =
   x
 passert:: 1,2++3,4 ?= 1,(2,3),4
 passert:: len:[] ?= 0
@@ -598,7 +602,8 @@ passert:: (try<< ?= >>:1).name ?= "SyntaxError"
 passert:: (try<< >= >>:1).name ?= "SyntaxError"
 passert:: (try<< <= >>:1).name ?= "SyntaxError"
 passert:: pure<<sin(pi/4)>>
-passert:: noshow $ noshow = class<<__repr__=raise("Unrepresentable")>>()
+passert:: noshow                              $ noshow = class<<__repr__=raise("Unrepresentable")>>()
+passert:: f(1) ?= 1                           $ f ( x ) = x 
 
 # Final Testing:
 passert:: unused(env()) ?= class<<x=1>> $ x = 1

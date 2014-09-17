@@ -266,7 +266,7 @@ Global Operator Precedence List:
     fatalvar = "fatal"
     namevar = "name"
     messagevar = "message"
-    replacer = re.compile("\s+")
+    replacer = re.compile("\s+(?![\s"+parenchar+"])")
     recursion = 0
     redef = False
     useclass = None
@@ -1562,6 +1562,7 @@ Global Operator Precedence List:
         """Creates Functions."""
         if self.parenchar in sides[0] and sides[0].endswith(self.parenchar):
             sides[0] = sides[0].split(self.parenchar, 1)
+            sides[0][0] = basicformat(sides[0][0])
             sides[0][1] = self.namefind(self.parenchar+sides[0][1])
             params, personals, allargs, reqargs, lexical = self.eval_set(sides[0][1])
             return (sides[0][0], strfunc(sides[1], self, params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical))
@@ -2354,11 +2355,9 @@ Global Operator Precedence List:
                 value = item
             else:
                 raise ExecutionError("ValueError", "Unconvertable variable value of "+repr(item))
-            store = self.validvar(key)
             if isprop(value):
                 value = self.deprop(value)
-                store = False
-            if store:
+            else:
                 self.variables[key] = value
             return value
 
@@ -3680,10 +3679,9 @@ class evalfuncs(object):
 
     def reprcall(self, variables):
         """Finds A Representation."""
-        out = []
-        for x in variables:
-            out.append(self.e.prepare(x, False, True))
-        return rawstrcalc(strlist(out, ""), self.e)
+        if len(variables) != 1:
+            variables = diagmatrixlist(variables)
+        return rawstrcalc(self.e.prepare(variables[0], False, True), self.e)
 
     def joincall(self, variables):
         """Joins Variables By A Delimiter."""
