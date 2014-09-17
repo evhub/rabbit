@@ -1461,14 +1461,14 @@ Global Operator Precedence List:
         if not self.readytofunc(sides[0], allowed="."):
             raise ExecutionError("SyntaxError", "Could not set to invalid variable name "+sides[0])
         else:
-            useclass = None
-            if self.useclass:
-                classlist = [self.useclass]
-            else:
-                classlist = []
             delfrom = None
-            if self.useclass is False and classcalc.selfvar in self.variables and isinstance(self.variables[classcalc.selfvar], classcalc):
-                delfrom = self.variables[classcalc.selfvar].doset #TODO: This won't work if selfvar has been rebound
+            if not self.useclass:
+                classlist = []
+            elif isinstance(self.useclass, tuple):
+                classlist = [self.useclass[0]]
+                delfrom = self.variables[self.useclass[0]].doset
+            else:
+                classlist = [self.useclass[0]]
             method = False
             if "." in sides[0]:
                 method = True
@@ -1505,6 +1505,8 @@ Global Operator Precedence List:
                     raise ExecutionError("VariableError", "Could not find class "+self.prepare(classlist[0], False, True, True))
             elif self.useclass:
                 useclass = self.funcfind(self.useclass)
+            else:
+                useclass = None
             sides[1] = basicformat(sides[1])
             for func in self.sets:
                 value = func(sides)
@@ -3971,7 +3973,7 @@ class evalfuncs(object):
         else:
             self.e.overflow = variables[1:]
             original = self.e.prepare(variables[0], True, False)
-            useclass, self.e.useclass = self.e.useclass, False
+            useclass, self.e.useclass = self.e.useclass, (useclass,)
             try:
                 out = self.e.calc(original, " | global")
             finally:

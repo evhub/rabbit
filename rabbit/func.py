@@ -1596,7 +1596,7 @@ class instancecalc(numobject, classcalc):
         """Gets Original Variables."""
         if merge:
             out = self.getparent().getvars(True)
-            out.update(self.getvars())
+            out.update(self.variables)
         else:
             out = self.variables.copy()
         for var in self.restricted:
