@@ -266,7 +266,7 @@ Global Operator Precedence List:
     fatalvar = "fatal"
     namevar = "name"
     messagevar = "message"
-    replacer = re.compile("\s+(?![\s"+parenchar+"])")
+    replacer = re.compile("(?<![\s"+parenchar+"])\s+(?![\s"+parenchar+"])")
     recursion = 0
     redef = False
     useclass = None
@@ -2549,6 +2549,7 @@ Global Operator Precedence List:
             feed = inputlist[0]
             last = False
             for x in xrange(0, len(templist)):
+                templist[x] = basicformat(templist[x])
                 if x%2 == 1:
                     if templist[x]:
                         last = True
