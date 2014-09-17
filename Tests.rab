@@ -603,7 +603,8 @@ passert:: (try<< >= >>:1).name ?= "SyntaxError"
 passert:: (try<< <= >>:1).name ?= "SyntaxError"
 passert:: pure<<sin(pi/4)>>
 passert:: noshow                              $ noshow = class<<__repr__=raise("Unrepresentable")>>()
-passert:: f(1) ?= 1                           $ f ( x ) = x 
+passert:: f(1) ?= 1                           $ f ( x ) = x
+passert:: f . ( __closure__ )                 $ f(x) = x
 
 # Final Testing:
 passert:: unused(env()) ?= class<<x=1>> $ x = 1

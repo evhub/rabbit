@@ -2667,7 +2667,7 @@ Global Operator Precedence List:
                 itemlist[0] = self.funcfind(itemlist[0])
                 out = itemlist[0]
                 for x in xrange(1, len(itemlist)):
-                    key = itemlist[x]
+                    key = self.namefind(itemlist[x])
                     if hasattr(out, "getmethod"):
                         new = out.getmethod(key)
                     elif isnull(out):
@@ -2722,13 +2722,14 @@ Global Operator Precedence List:
     def getparen(self, num):
         """Gets A Parenthesis."""
         test = self.parens[num]
-        if isinstance(test, bracket):
-            return test.calc()
+        if istext(test):
+            return basicformat(test)
         else:
-            return test
+            return test.calc()
 
     def namefind(self, varname, follow=False):
         """Finds A Name."""
+        varname = basicformat(varname)
         while varname.startswith(self.parenchar) and varname.endswith(self.parenchar):
             checknum = varname[1:-1]
             if checknum in self.variables:
@@ -2752,6 +2753,7 @@ Global Operator Precedence List:
     def funcfind(self, item):
         """Finds A Value."""
         while istext(item):
+            item = basicformat(item)
             original = item
             self.printdebug("> "+self.prepare(original, False, True, True))
             self.recursion += 1
