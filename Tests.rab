@@ -387,7 +387,7 @@ passert:: class(class<<>>()) ?= class<<__parent__=class()>>
 passert:: type(class(class<<>>())) ?= "class"
 passert:: succ1 ?= 2 $ succ(x) = x+1
 passert:: is:"a":"a" & is(5,5,5)
-passert:: 0 ?= ¬1
+passert:: 0 ?= (¬1)
 passert:: 0.5 ?= ½
 passert:: " " ?= ␠
 passert:: 5E6 ?= 5000000
@@ -411,18 +411,18 @@ passert:: 5x^2 ?= 20                $ (do:: x = 2)
 passert:: f..g(2) ?= 9                       $ f(x) = x^2 $ g(x) = x+1
 passert:: applyplus(0,-2) ?= (1,-1)          $ applyplus(__) = __~\x\(x+1)
 passert:: (x $ x = 1) ?= 1
-passert:: f..g(1)g..f(2) ?= 20      $ f(x) = x^2 $ g(x) = x+1
-passert:: f() ?= 5, & f(1) ?= 1,    $ f(*l:(5,)) = l
-passert:: a ?= 1 & b ?= [2,3]       $ a,b = [1,2,3]
-passert:: a ?= "a" & b ?= "bc"      $ a,b = "abc"
+passert:: f..g(1)g..f(2) ?= 20               $ f(x) = x^2 $ g(x) = x+1
+passert:: f() ?= (5,) & f(1) ?= (1,)         $ f(*l:(5,)) = l
+passert:: a ?= 1 & b ?= [2,3]                $ a,b = [1,2,3]
+passert:: a ?= "a" & b ?= "bc"               $ a,b = "abc"
 passert:: "∑" ?= "\u2211"
 passert:: π ?= pi
 passert:: "\'\\'\\n#" ?= `"\'\n#`
 passert:: (try::1):0 ?= 1
-passert:: class<<x=1>>~\x\x ?= "x",
+passert:: class<<x=1>>~\x\x ?= ("x",)
 passert:: class<<x=1 ;; y=2>> ?= class <<
    x = 1
-  
+   5
    y =
     2
    >>
@@ -511,8 +511,7 @@ passert:: len("\\\\") ?= 2
 passert:: x ?= 1 $ (x = x $ x=1)
 passert:: (pure::(calc::1))
 passert:: [12] ?= [
-                   1
-                   2
+                   12
                    ]
 passert:: 5 ?= a.f(a.y) $ a = class <<
  f(x) = (
@@ -539,7 +538,8 @@ passert:: [1,2,3] union [1,2,4] ?= [1,2,3,4]
 passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
 passert:: a.x ?= 1 $ (def:: a.x = 1) $ a = class<< b = class<<>> >>
 passert:: [][] ?= []
-passert:: inst ?= class<<__parent__=class<<meta=1>>;;meta=1;;x=1>> $ (def:: inst.x = 1) $ inst = class<<meta=1>>()
+passert:: class(inst) ?= class<<__parent__=class<<meta=1>>;;meta=1;;x=1>> $ (def:: inst.x = 1) $ inst = class<<meta=1>>()
+passert:: (try<<inst>>:1).name ?= "VariableError"
 val'(^__) = val(__)
 passert:: val'"v" ?= 1   $ v = 1
 passert:: val'"v" ?= 2   $ v = 2

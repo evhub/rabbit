@@ -397,7 +397,7 @@ Global Operator Precedence List:
                 }),
             "Error":classcalc(self, {
                 self.errorvar: True,
-                self.fatalvar: False
+                self.fatalvar: True
                 }),
             "pure":funcfloat(self.funcs.purecall, self, "pure", reqargs=1),
             "env":funcfloat(self.funcs.envcall, self, "env"),

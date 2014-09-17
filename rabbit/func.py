@@ -1057,7 +1057,7 @@ class derivfunc(derivbase, strfunc):
 
 class integfunc(integbase, strfunc):
     """Implements An Integral Function."""
-    def __init__(self, funcstr, accuracy, e, varname="x", personals=None, name=None, memoize=None, memo=None):
+    def __init__(self, *args, **kwargs):
         """Creates The Integral Function."""
         if "accuracy" in kwargs:
             self.accuracy = float(kwargs["accuracy"])
@@ -1596,7 +1596,7 @@ class instancecalc(numobject, classcalc):
         """Gets Original Variables."""
         if merge:
             out = self.getparent().getvars(True)
-            out.update(self.variables)
+            out.update(self.getvars())
         else:
             out = self.variables.copy()
         for var in self.restricted:
@@ -1853,7 +1853,10 @@ class instancecalc(numobject, classcalc):
                 check_le = self.getmethod("__le__")
                 if check_le:
                     return self.domethod(check_ge, other) and self.domethod(check_le, other)
-            return classcalc.__eq__(self, other)
+            if isinstance(other, instancecalc):
+                return classcalc.__eq__(self, other)
+            else:
+                return False
 
     def __ne__(self, other):
         """Performs Not Equal."""
@@ -1879,7 +1882,10 @@ class instancecalc(numobject, classcalc):
                 check_le = self.getmethod("__le__")
                 if check_le:
                     return not (self.domethod(check_ge, other) and self.domethod(check_le, other))
-            return not classcalc.__eq__(self, other)
+            if isinstance(other, instancecalc):
+                return not classcalc.__eq__(self, other)
+            else:
+                return True
 
     def __gt__(self, other):
         """Performs Greater Than."""
