@@ -220,7 +220,7 @@ class funcfloat(numobject):
         if variables is None:
             return self
         elif len(variables) < self.reqargs:
-            out = self.copy()
+            out = getcopy(self)
             for arg in variables:
                 out.curry(arg)
             return out
@@ -409,7 +409,7 @@ class strfunc(funcfloat):
         if variables is None:
             return self
         elif len(variables) < self.reqargs:
-            out = self.copy()
+            out = getcopy(self)
             for arg in variables:
                 out.curry(arg)
             return out
@@ -867,7 +867,7 @@ class usefunc(funcfloat):
         if params is None:
             return strfunc(self.funcstr+":"+strlist(self.variables,":"), self.e, self.variables)
         elif len(params) < self.reqargs:
-            out = self.copy()
+            out = getcopy(self)
             for arg in params:
                 out.curry(arg)
             return out
@@ -1989,35 +1989,29 @@ class instancecalc(numobject, classcalc):
 
     def __len__(self):
         """Retrieves The Length."""
-        out = None
         check_len = self.getmethod("__len__")
         if check_len:
-            out = self.domethod(check_len)
-        else:
-            check_cont = self.getmethod("__cont__")
-            if check_cont:
-                out = len(self.domethod(check_cont))
-        if out is None:
-            raise ExecutionError("ClassError", "Insufficient methods defined for len")
-        else:
-            return getint(out)
+            return self.domethod(check_len)
+        check_cont = self.getmethod("__cont__")
+        if check_cont:
+            return len(self.domethod(check_cont))
+        raise ExecutionError("ClassError", "Insufficient methods defined for len")
 
     def __bool__(self):
         """Converts To A Boolean."""
-        out = None
         check_bool = self.getmethod("__bool__")
         if check_bool:
-            out = self.domethod(check_bool)
-        else:
-            check_num = self.getmethod("__num__")
-            if check_num:
-                out = self.domethod(check_num)
-        if out is None:
-            try:
-                out = len(self) > 0
-            except ExecutionError:
-                raise ExecutionError("ClassError", "Insufficient methods defined for bool")
-        return bool(out)
+            return self.domethod(check_bool)
+        check_num = self.getmethod("__num__")
+        if check_num:
+            return bool(self.domethod(check_num))
+        check_len = self.getmethod("__len__")
+        if check_len:
+            return self.domethod(check_len)
+        check_cont = self.getmethod("__cont__")
+        if check_cont:
+            return bool(self.domethod(check_cont))
+        return True
 
     def typecalc(self):
         """Finds The Type Of The Instance."""
@@ -2061,9 +2055,9 @@ class instancecalc(numobject, classcalc):
 
     def getrepr(self, top, bottom, indebug, maxrecursion):
         """Gets A Representation."""
-        if maxrecursion <= 0:
-            return self.speedyprep(self, False, bottom, indebug, maxrecursion)
-        elif not indebug and not bottom:
+        if indebug or maxrecursion <= 0:
+            return self.e.speedyprep(self, False, bottom, indebug, maxrecursion)
+        elif not bottom:
             return str(self)
         else:
             check_repr = self.getmethod("__repr__")
@@ -2314,7 +2308,7 @@ class pair(cotobject):
     def __iadd__(self, item):
         """Extends With An Item."""
         if isinstance(item, dictionary):
-            out = item.copy()
+            out = getcopy(item)
             out.store(self.k, self.v)
             return out
         elif isinstance(item, pair):

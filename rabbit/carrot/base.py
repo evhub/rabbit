@@ -212,6 +212,15 @@ class evalobject(object):
         else:
             return repr(self)
 
+    def __nonzero__(self):
+        """Uses __bool__ If It Exists."""
+        if hasattr(self, "__bool__"):
+            return self.__bool__()
+        elif hasattr(self, "__len__"):
+            return self.__len__()
+        else:
+            return True
+
 class numobject(evalobject):
     """A Base Class For Objects."""
 

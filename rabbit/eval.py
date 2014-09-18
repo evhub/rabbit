@@ -904,12 +904,7 @@ Global Operator Precedence List:
             else:
                 out = "\\\\"+str(item)
         elif hasattr(item, "getrepr"):
-            if indebug:
-                out, err = catch(item.getrepr, top, bottom, indebug, maxrecursion-1)
-                if err:
-                    out = self.prepare(self.converterr(err), top, bottom, indebug, maxrecursion-1)
-            else:
-                out = item.getrepr(top, bottom, indebug, maxrecursion-1)
+            out = item.getrepr(top, bottom, indebug, maxrecursion-1)
         elif getcheck(item) >= 1:
             out = str(item)
         elif indebug:
@@ -1465,14 +1460,13 @@ Global Operator Precedence List:
         if not self.readytofunc(sides[0], allowed="."):
             raise ExecutionError("SyntaxError", "Could not set to invalid variable name "+sides[0])
         else:
+            classlist = []
             delfrom = None
-            if not self.useclass:
-                classlist = []
-            elif isinstance(self.useclass, tuple):
-                classlist = [self.useclass[0]]
-                delfrom = self.variables[self.useclass[0]].doset
-            else:
-                classlist = [self.useclass]
+            if self.useclass:
+                if isinstance(self.useclass, tuple):
+                    delfrom = self.variables[self.useclass[0]].doset
+                else:
+                    classlist = [self.useclass]
             method = False
             if "." in sides[0]:
                 method = True
@@ -1484,31 +1478,18 @@ Global Operator Precedence List:
                 if delfrom is not None and classlist[0] in delfrom:
                     del delfrom[classlist[0]]
                     delfrom = None
-                useclass = self.find(classlist[0], True)
+                useclass = self.funcfind(classlist[0])
+                doset = [useclass, classlist[1]]
                 if isinstance(useclass, classcalc):
                     for x in xrange(1, len(classlist)):
                         last = useclass
                         useclass = useclass.retrieve(classlist[x])
                         if not isinstance(useclass, classcalc):
-                            if istext(useclass) and len(classlist) == x+1:
-                                sides[1] = "( "+useclass+" )"+" ++ class\xab "+sides[0]+" "+":"*docalc+"= "+sides[1]+" \xbb"
-                                sides[0] = classlist[x]
-                                useclass = last
-                                classlist = classlist[:x]
-                                docalc = False
-                                break
-                            else:
-                                raise ExecutionError("ClassError", "Could not set "+classlist[x]+" in "+self.prepare(last, False, True, True))
-                elif classlist[0] in self.variables and istext(self.variables[classlist[0]]) and len(classlist) == 1:
-                    sides[1] = "( "+self.variables[classlist[0]]+" ) ++ class\xab "+sides[0]+" "+":"*docalc+"= "+sides[1]+" \xbb"
-                    sides[0] = classlist[0]
-                    useclass = None
-                    classlist = []
-                    docalc = False
+                            raise ExecutionError("ClassError", "Could not set "+classlist[x]+" in "+self.prepare(last, False, True, True))
                 else:
                     raise ExecutionError("VariableError", "Could not find class "+self.prepare(classlist[0], False, True, True))
-            elif self.useclass:
-                useclass = self.funcfind(self.useclass)
+            elif classlist:
+                useclass = self.funcfind(classlist[0])
             else:
                 useclass = None
             sides[1] = basicformat(sides[1])
@@ -1533,6 +1514,8 @@ Global Operator Precedence List:
                         else:
                             out = strfloat(value[0], self, name=value[0])
                     else:
+                        if method:
+                            doset[0].doset[doset[1]] = None
                         if value[0] not in useclass.variables:
                             if not method:
                                 useclass.store(value[0], value[1])
@@ -2866,6 +2849,8 @@ Global Operator Precedence List:
     def getvars(self):
         """Gets Variables Absent selfvar."""
         out = self.variables.copy()
+        if self.useclass:
+            del out[self.useclass]
         if classcalc.selfvar in out:
             del out[classcalc.selfvar]
         return out
@@ -3217,10 +3202,7 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to copy")
         else:
             self.e.overflow = variables[1:]
-            if iseval(variables[0]):
-                return variables[0].copy()
-            else:
-                return variables[0]
+            return getcopy(variables[0])
 
     def getmatrixcall(self, variables):
         """Converts To Matrices."""
@@ -3703,23 +3685,24 @@ class evalfuncs(object):
         if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to join")
         else:
-            if isinstance(variables[0], strcalc):
-                delim = str(variables[0])
+            delim = variables[0]
+            if isinstance(delim, strcalc):
                 tostring = True
             else:
-                delim = variables[0]
                 tostring = False
             out = []
             for x in xrange(1, len(variables)):
                 item = variables[x]
                 if ismatrix(item):
                     item = self.joincall([delim]+getmatrix(item).getitems())
-                elif not isinstance(item, strcalc):
+                if not isinstance(item, strcalc):
                     tostring = False
                 out += [item, delim]
             out.pop()
             if tostring:
                 return rawstrcalc("".join(map(str, out)), self.e)
+            elif len(out) == 1:
+                return out[0]
             else:
                 return diagmatrixlist(out)
 
@@ -3789,21 +3772,32 @@ class evalfuncs(object):
 
     def nonecalc(self, variables):
         """Performs calc And Returns null."""
-        self.docalc(variables)
+        for x in variables:
+            if isinstance(x, codestr):
+                self.e.process(str(x), " | do", top=False)
+            elif isinstance(x, strcalc):
+                self.e.process(str(x), " | do", top=-1)
+            else:
+                raise ExecutionError("ValueError", "Can't calc non-string values")
         return matrix(0)
 
     def evalcall(self, variables):
         """Performs eval."""
         out = []
-        e = self.e.new()
-        for x in variables:
-            if isinstance(x, codestr):
-                item = e.calc(str(x), " | eval")
-            elif isinstance(x, strcalc):
-                item = e.calc(str(x), " | eval", -1)
-            else:
-                raise ExecutionError("ValueError", "Can't eval non-string values")
-            out.append(self.e.deitem(getstate(item)))
+        try:
+            e = self.e.new()
+            for x in variables:
+                if isinstance(x, codestr):
+                    item = e.calc(str(x), " | eval")
+                elif isinstance(x, strcalc):
+                    item = e.calc(str(x), " | eval", -1)
+                else:
+                    raise ExecutionError("ValueError", "Can't eval non-string values")
+                out.append(self.e.deitem(itemstate(item)))
+        except ExecutionError as err:
+            if err.instance is not None:
+                err.instance = self.e.deitem(itemstate(err.instance))
+            raise
         if len(out) == 1:
             return out[0]
         else:
@@ -4002,11 +3996,11 @@ class evalfuncs(object):
 
     def globalcall(self, variables):
         """Defines A Global Variable."""
-        useclass, self.e.useclass = self.e.useclass, (useclass,)
+        self.e.useclass = (self.e.useclass,)
         try:
             out = self.docalc(variables)
         finally:
-            self.e.useclass = useclass
+            self.e.useclass = self.e.useclass[0]
         return out
 
     def aliascall(self, variables):
@@ -4206,12 +4200,17 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to require")
         elif len(variables) == 1:
             self.e.setreturned()
-            e = self.e.new()
-            out = classcalc(e)
-            params = out.begin()
-            e.funcs.runcall(variables)
-            out.end(params)
-            return self.e.deitem(getstate(out))
+            try:
+                e = self.e.new()
+                out = classcalc(e)
+                params = out.begin()
+                e.funcs.runcall(variables)
+                out.end(params)
+            except ExecutionError as err:
+                if err.instance is not None:
+                    err.instance = self.e.deitem(itemstate(err.instance))
+                raise
+            return self.e.deitem(itemstate(out))
         else:
             out = []
             for arg in variables:

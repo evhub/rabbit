@@ -19,6 +19,7 @@
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
 from .base import *
+import copy
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
@@ -121,15 +122,10 @@ def makeint(inputobject):
 
 def getcopy(inputobject):
     """Copies The Object If It Has A copy Method."""
-    if hasattr(inputobject, "copy"):
-        return inputobject.copy()
-    elif isinstance(inputobject, list):
+    if isinstance(inputobject, list):
         return map(getcopy, inputobject[:])
-    elif isinstance(inputobject, dict):
-        out = {}
-        for k,v in inputobject.items():
-            out[getcopy(k)] = getcopy(v)
-        return out
+    elif hasattr(inputobject, "copy"):
+        return inputobject.copy()
     else:
         return inputobject
 

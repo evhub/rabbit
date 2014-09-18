@@ -333,7 +333,7 @@ passert:: cont:"abc" ?= "a","b","c"
 passert:: det:(matrix:[1,2]:[3,4]) ?= -2
 passert:: sum(2,2,3) ?= 7
 passert:: prod(2,2,3) ?= 12
-passert:: join:",":[1,2] ?= "1,2"
+passert:: join:",":([1,2]~str) ?= "1,2"
 passert:: connect:[1,2]:[3,4] ?= matrix:[1,2]:[3,4]
 passert:: merge:(1,(2,2)):(3,4) ?= (1,2,2,3,4)
 passert:: sort(1,0,9,5) ?= (0,1,5,9)
@@ -501,8 +501,8 @@ passert:: 270394572394085723904572394857203495793457 ?= 270394572394085723904572
 passert:: 5 in [1,5,2]
 passert:: (class<<x=1>>()) inherits (class<<x=1>>)
 passert:: 5 // 2 ?= 2
-passert:: ! (1,2,3,4) ~ \x\($)
-passert:: len( [1,2,3,4] ~ \x\($) ) ?= 4
+passert:: ! (1,2,3,4) ~ \x\($())
+passert:: len( [1,2,3,4] ~ \x\($()) ) ?= 4
 passert:: 1 ?= call:\\1
 passert:: 1,2++3,4 ?= (1,2,3,4)
 passert:: 2x^2 ?= 50    $ x = 5
@@ -595,7 +595,8 @@ passert:: (try<< == >>:1).name ?= "SyntaxError"
 passert:: (try<< | >>:1).name ?= "SyntaxError"
 passert:: (try<< : >>:1).name ?= "SyntaxError"
 passert:: (try<< ; >>:1).name ?= "SyntaxError"
-passert:: (try<< . >>:1).name ?= "SyntaxError"
+passert:: (try<< . >>:1).name ?= "VariableError"
+passert:: (try<< $ >>:1).name ?= "SyntaxError"
 passert:: (try<< .. >>:1).name ?= "SyntaxError"
 passert:: (try<< ? >>:1).name ?= "SyntaxError"
 passert:: (try<< ?= >>:1).name ?= "SyntaxError"
