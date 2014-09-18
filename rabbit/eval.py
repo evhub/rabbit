@@ -3781,28 +3781,6 @@ class evalfuncs(object):
                 raise ExecutionError("ValueError", "Can't calc non-string values")
         return matrix(0)
 
-    def evalcall(self, variables):
-        """Performs eval."""
-        out = []
-        try:
-            e = self.e.new()
-            for x in variables:
-                if isinstance(x, codestr):
-                    item = e.calc(str(x), " | eval")
-                elif isinstance(x, strcalc):
-                    item = e.calc(str(x), " | eval", -1)
-                else:
-                    raise ExecutionError("ValueError", "Can't eval non-string values")
-                out.append(self.e.deitem(itemstate(item)))
-        except ExecutionError as err:
-            if err.instance is not None:
-                err.instance = self.e.deitem(itemstate(err.instance))
-            raise
-        if len(out) == 1:
-            return out[0]
-        else:
-            return diagmatrixlist(out)
-
     def cmdcall(self, variables):
         """Performs exec."""
         for item in variables:
@@ -4202,6 +4180,8 @@ class evalfuncs(object):
             self.e.setreturned()
             try:
                 e = self.e.new()
+                self.e.processor.e = e
+                self.e.processor.fresh(None)
                 out = classcalc(e)
                 params = out.begin()
                 e.funcs.runcall(variables)
@@ -4210,11 +4190,39 @@ class evalfuncs(object):
                 if err.instance is not None:
                     err.instance = self.e.deitem(itemstate(err.instance))
                 raise
+            finally:
+                self.e.processor.e = self.e
             return self.e.deitem(itemstate(out))
         else:
             out = []
             for arg in variables:
                 out.append(self.requirecall([arg]))
+            return diagmatrixlist(out)
+
+    def evalcall(self, variables):
+        """Performs eval."""
+        out = []
+        try:
+            e = self.e.new()
+            self.e.processor.e = e
+            self.e.processor.fresh(None)
+            for x in variables:
+                if isinstance(x, codestr):
+                    item = e.calc(str(x), " | eval")
+                elif isinstance(x, strcalc):
+                    item = e.calc(str(x), " | eval", -1)
+                else:
+                    raise ExecutionError("ValueError", "Can't eval non-string values")
+                out.append(self.e.deitem(itemstate(item)))
+        except ExecutionError as err:
+            if err.instance is not None:
+                err.instance = self.e.deitem(itemstate(err.instance))
+            raise
+        finally:
+            self.e.processor.e = self.e
+        if len(out) == 1:
+            return out[0]
+        else:
             return diagmatrixlist(out)
 
     def assertcall(self, variables):

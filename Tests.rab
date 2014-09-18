@@ -6,6 +6,7 @@ assert:: !0
 passert(statement) = ( assert:code(statement) ;; statement )
 assert:: (passert::"abc")
 assert:: iserr((try::(passert::0)):1)
+passert:: unused(env()) ?= class<<x="don't touch me">>
 
 # Includes:
 passert:: include(Meta, Math, Stats, Unicode)
@@ -608,7 +609,6 @@ passert:: f(1) ?= 1                           $ f ( x ) = x
 passert:: f . ( __closure__ )                 $ f(x) = x
 
 # Final Testing:
-passert:: unused(env()) ?= class<<x=1>> $ x = 1
 passert:: print("<#> Make sure you see this message three times")
 passert:: save("Tests.save");true
 contents = read("Tests.save")
