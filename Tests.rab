@@ -12,6 +12,9 @@ passert:: unused(env()) ?= class<<x="don't touch me">>
 passert:: include(Meta, Math, Stats, Unicode)
 d = rand
 
+# Begin Pure Section:
+---------------------
+
 # Boolean Operator Tests:
 passert:: 1 ?= 1
 passert:: ? 1 ?= 1
@@ -315,6 +318,9 @@ passert:: abs'(2) ?= 2 & abs'(0) ?= 0 & abs'(-2) ?= 2 $
     $ done, out = list:parts
     )
 
+# End Pure Section:
+---------------------
+
 # Built-Ins Tests:
 passert:: (( try:: 1/0 ):1).name ?= "ZeroDivisionError"
 passert:: a != b                    $ (def :: b.x = 2) $ b := copy(a) $ a := class << x = 1 >>
@@ -607,6 +613,7 @@ passert:: pure<<sin(pi/4)>>
 passert:: noshow                              $ noshow = class<<__repr__=raise("Unrepresentable")>>()
 passert:: f(1) ?= 1                           $ f ( x ) = x
 passert:: f . ( __closure__ )                 $ f(x) = x
+tag = "tag"
 
 # Final Testing:
 passert:: print("<#> Make sure you see this message three times")
@@ -616,11 +623,11 @@ passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents)
 passert:: ! using()
 use(calc) ;; use(using())
 passert:: using() ?= calc ?= used             $ used = prop(using)
-passert:: require("Tests.save")
+passert:: require("Tests.save").tag ?= "tag"
 use() ;; use(using())
 passert:: class <<
            exec: contents
-           >>
+           >> . tag ?= "tag"
 passert:: ! using()
 passert:: paren(parens()-1) ?= "123"          $ (123)
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
