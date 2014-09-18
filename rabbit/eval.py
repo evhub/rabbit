@@ -2728,8 +2728,10 @@ Global Operator Precedence List:
         test = self.parens[num]
         if istext(test):
             return basicformat(test)
-        else:
+        elif isinstance(test, bracket):
             return test.calc()
+        else:
+            return test
 
     def namefind(self, varname, follow=False):
         """Finds A Name."""
@@ -4221,15 +4223,19 @@ class evalfuncs(object):
         out = []
         for x in variables:
             if isinstance(x, codestr):
-                test = self.e.calc(str(x), info)
+                test = self.e.calc(str(x), " | assertion")
             elif isinstance(x, strcalc):
-                test = self.e.calc(str(x), info, -1)
+                test = self.e.calc(str(x), " | assertion", -1)
             else:
                 raise ExecutionError("ValueError", "Can't calc non-string values")
             if test:
                 out.append(test)
             else:
                 raise ExecutionError("AssertionError", "Assertion failed that "+str(x)+" (Result = "+self.e.prepare(test, False, True, True)+")")
+        if len(out) == 1:
+            return out[0]
+        else:
+            return diagmatrixlist(out)
 
     def installcall(self, variables):
         """Performs install."""

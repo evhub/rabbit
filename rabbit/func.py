@@ -124,6 +124,7 @@ class negative(numobject):
 
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
+    allownone = False
     evaltype = "\\\\"
     overflow = False
     memoize = True
@@ -196,11 +197,16 @@ class funcfloat(numobject):
                     if arghash is None:
                         arghash = (self.keyhash(args), self.keyhash(kwargs))
                     self.memo[arghash] = out
-                return out
             finally:
                 self.e.returned = self.e.returned or returned
         else:
-            return self.base_func(*args, **kwargs)
+            out = self.base_func(*args, **kwargs)
+        if out is not None:
+            return out
+        elif self.allownone:
+            return matrix(0)
+        else:
+            raise ExecutionError("PythonError", "Functions should never return Python None")
 
     def calc(self, variables=None):
         """Calculates The Float Function."""
@@ -801,6 +807,8 @@ class codestr(rawstrcalc):
 
 class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
+    allownone = True
+
     def __init__(self, func, e, funcstr=None, variables=None, extras=None, overflow=True, reqargs=None, evalinclude=False, memoize=None, memo=None):
         """Creates A Callable Function."""
         self.e = e
