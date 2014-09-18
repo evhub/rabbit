@@ -4289,13 +4289,14 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to inside")
         else:
             inside = variables[0]
-            outside = None
             args = []
             if len(variables) > 1:
                 outside = getcall(variables[1])
                 args = variables[2:]
             elif hasattr(inside, "inside_exit"):
                 outside = inside.inside_exit
+            else:
+                outside = None
             if hasattr(inside, "inside_enter"):
                 inside = inside.inside_enter
             else:
@@ -4309,7 +4310,7 @@ class evalfuncs(object):
                     return getcall(arg)([out])
                 else:
                     return out
-            return funcfloat(_outside, self.e, "calc", reqargs=1)
+            return funcfloat(_outside, self.e, "inside:("+strlist(variables, "):(", lambda x: self.e.prepare(x, False, True))+")", reqargs=1)
 
     def unusedcall(self, variables):
         """Gets Unused Variables."""
