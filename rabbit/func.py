@@ -189,9 +189,6 @@ class funcfloat(numobject):
             self.e.setreturned(False)
             try:
                 out = self.base_func(*args, **kwargs)
-            except Exception:
-                self.e.setreturned()
-                raise
             else:
                 if not returned and not self.e.returned:
                     if arghash is None:

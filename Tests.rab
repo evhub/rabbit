@@ -6,10 +6,11 @@ assert:: !0
 passert(statement) = ( assert:code(statement) ;; statement )
 assert:: (passert::"abc")
 assert:: iserr((try::(passert::0)):1)
-passert:: unused(env()) ?= class<<x="don't touch me">>
 
 # Includes:
-passert:: include(Meta, Math, Stats, Unicode)
+passert:: include Meta
+passert:: unused(env()) ?= class<<x="don't touch me">>
+passert:: include(Math, Stats, Unicode)
 d = rand
 
 # Begin Pure Section:
