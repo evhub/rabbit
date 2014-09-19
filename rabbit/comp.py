@@ -76,19 +76,22 @@ class compiler(commandline):
             elif cmd in ["d", "decompile"]:
                 self.run()
             elif cmd in ["n", "interactive"]:
-                fatalerror, self.fatalerror = self.fatalerror, self.doexit
                 on, self.on = self.on, True
                 oldvars = self.e.setvars({
-                    "exit":usefunc(self.doexit, self.e, "exit", [])
+                    "exit":usefunc(self.doexit, "exit", [])
                     })
                 self.cli_start()
                 self.e.setvars(oldvars)
                 self.on = on
-                self.fatalerror = fatalerror
             elif cmd in ["x", "exit"]:
                 self.on = False
             else:
                 self.app.display(addcolor("That isn't a valid command. Try 'help' for a list of valid commands.", self.color))
+
+    def fatalerror(self):
+        """Handles A Fatal Error."""
+        self.on = False
+        raise ExecutionError("RabbitError", "A fatal error occured")
 
     def interp(self):
         """Runs The Interpreter On A Source File."""
@@ -162,10 +165,10 @@ class compiler(commandline):
         if not top:
             self.e.fresh()
         self.e.makevars({
-            "make":funcfloat(self.makecall, self.e, "make", reqargs=1),
-            "cmd":funcfloat(self.cmdcall, self.e, "cmd", reqargs=1),
-            "print":funcfloat(self.printcall, self.e, "print"),
-            "show":funcfloat(self.showcall, self.e, "show")
+            "make":funcfloat(self.makecall, "make", reqargs=1),
+            "cmd":funcfloat(self.cmdcall, "cmd", reqargs=1),
+            "print":funcfloat(self.printcall, "print"),
+            "show":funcfloat(self.showcall, "show")
             })
         self.commands = []
         self.makes = []

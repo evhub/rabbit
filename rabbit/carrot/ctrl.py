@@ -44,7 +44,10 @@ def compute(inputstring, extras=None, builtins=None):
     inputstring = str(inputstring)
     if extras is None:
         extras = {}
-    extras["__builtins__"] = builtins
+    if builtins is True:
+        extras["__builtins__"] = globals()["__builtins__"]
+    elif builtins is not False:
+        extras["__builtins__"] = builtins
     return eval(inputstring, extras)
 
 def runcode(code):

@@ -76,13 +76,13 @@ class editor(mathbase):
         if not top:
             self.e.fresh()
         self.e.makevars({
-            "debug":funcfloat(self.debugcall, self.e, "debug"),
-            "make":funcfloat(self.e.funcs.docalc, self.e, "make", reqargs=1),
-            "cmd":funcfloat(self.e.funcs.docalc, self.e, "cmd", reqargs=1),
-            "save":funcfloat(self.savecall, self.e, "save", reqargs=1),
-            "print":funcfloat(self.printcall, self.e, "print"),
-            "show":funcfloat(self.showcall, self.e, "show"),
-            "ans":funcfloat(self.anscall, self.e, "ans")
+            "debug":funcfloat(self.debugcall, "debug"),
+            "make":funcfloat(self.e.funcs.docalc, "make", reqargs=1),
+            "cmd":funcfloat(self.e.funcs.docalc, "cmd", reqargs=1),
+            "save":funcfloat(self.savecall, "save", reqargs=1),
+            "print":funcfloat(self.printcall, "print"),
+            "show":funcfloat(self.showcall, "show"),
+            "ans":funcfloat(self.anscall, "ans")
             })
 
     def handle(self, func):

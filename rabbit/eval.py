@@ -22,6 +22,20 @@ from .data import *
 from .fraction import *
 from .carrot.file import *
 
+global e
+try:
+    set_e
+except:
+    old_set_e = None
+else:
+    old_set_e = set_e
+def set_e(new_e):
+    """Sets The Evaluator Global."""
+    global e
+    if old_set_e is not None:
+        old_set_e(new_e)
+    e = new_e
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -99,12 +113,10 @@ Global Operator Precedence List:
             self.deitem(args[1])
             ),
         "pair": lambda self, args: pair(
-            self,
             self.deitem(args[0]),
             self.deitem(args[1])
             ),
         "dictionary": lambda self, args: dictionary(
-            self,
             self.devariables(args[0])
             ),
         "data": lambda self, args: data(
@@ -117,7 +129,6 @@ Global Operator Precedence List:
             ),
         "rollfunc": lambda self, args: rollfunc(
             args[0],
-            self,
             args[1],
             args[2],
             args[3]
@@ -125,7 +136,6 @@ Global Operator Precedence List:
         "matrix": matrixconstructor,
         "strfunc": lambda self, args: strfunc(
             args[0],
-            self,
             args[1],
             self.devariables(args[2]),
             args[3],
@@ -138,16 +148,13 @@ Global Operator Precedence List:
             False
             ),
         "codestr": lambda self, args: codestr(
-            args[0],
-            self
+            args[0]
             ),
         "strcalc": lambda self, args: rawstrcalc(
-            args[0],
-            self
+            args[0]
             ),
         "derivfunc": lambda self, args: derivfunc(
             args[0],
-            self,
             args[1],
             self.devariables(args[2]),
             args[3],
@@ -164,7 +171,6 @@ Global Operator Precedence List:
             ),
         "integfunc": lambda self, args: integfunc(
             args[0],
-            self,
             args[1],
             self.devariables(args[2]),
             args[3],
@@ -179,7 +185,6 @@ Global Operator Precedence List:
             ),
         "usefunc": lambda self, args: usefunc(
             args[0],
-            self,
             args[1],
             args[2],
             args[3],
@@ -190,38 +195,26 @@ Global Operator Precedence List:
             self.devariables(args[8])
             ),
         "classcalc": lambda self, args: classcalc(
-            self,
             self.devariables(args[0]),
             selfvar=args[1],
             restricted=args[2]
             ),
         "namespace": lambda self, args: namespace(
-            self,
             self.devariables(args[0]),
             selfvar=args[1],
             restricted=args[2]
             ),
         "instancecalc": lambda self, args: instancecalc(
-            self,
             self.devariables(args[0]),
             top=False,
             selfvar=args[1],
             parentvar=args[2],
             restricted=args[3]
             ),
-        "makefunc": lambda self, args: makefunc(
-            args[0],
-            self,
-            args[1],
-            args[2],
-            self.devariables(args[3])
-            ),
         "brace": lambda self, args: brace(
-            self,
             args[0]
             ),
         "bracket": lambda self, args: bracket(
-            self,
             args[0]
             )
         }
@@ -256,8 +249,8 @@ Global Operator Precedence List:
     lambdamarker = "\u03bb"
     subparenops = ".^"
     callops = subparenops + lambdamarker + "%/*:"
-    calcops = "$"
-    multiargops = bools + callops + "+-@~|&;," + calcops + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
+    calcops = ["$", "::"]
+    multiargops = bools + callops + "+-@~|&;,$" + "".join(strgroupers.keys()) + "".join(groupers.keys()) + "".join(aliases.keys())
     reserved = multiargops + stringchars + "".join(strgroupers.values()) + "".join(groupers.values()) + parenchar + formatchars
     purechar = "-"
     digits = string.digits
@@ -282,6 +275,7 @@ Global Operator Precedence List:
 
     def __init__(self, variables=None, processor=None, color=None, speedy=False, maxrecursion=10):
         """Initializes The Evaluator."""
+        set_e(self)
         self.processor = processor
         try:
             self.processor.debug
@@ -327,13 +321,13 @@ Global Operator Precedence List:
             self.precalc_paren,
             self.precalc_block,
             self.precalc_dict,
-            self.precalc_brack
+            self.precalc_brack,
+            self.precalc_cmd
             ]
         self.calc_funcs = [
-            self.calc_cmd,
-            self.calc_format,
             self.calc_pure,
             self.calc_set,
+            self.calc_cmd,
             self.calc_with,
             self.calc_list,
             self.calc_pair,
@@ -386,160 +380,163 @@ Global Operator Precedence List:
             (self.call_method, True),
             (self.call_normal, True)
             ]
-        self.funcs = evalfuncs(self)
+        self.funcs = evalfuncs()
 
     def fresh(self):
         """Resets The Variables To Their Defaults."""
         self.parens = []
         self.variables = {
-            "Warning":classcalc(self, {
+            "Warning":classcalc({
                 self.errorvar: True,
                 self.fatalvar: False
                 }),
-            "Error":classcalc(self, {
+            "Error":classcalc({
                 self.errorvar: True,
                 self.fatalvar: True
                 }),
-            "pure":funcfloat(self.funcs.purecall, self, "pure", reqargs=1),
-            "env":funcfloat(self.funcs.envcall, self, "env"),
-            "call":funcfloat(self.funcs.callcall, self, "call", reqargs=1),
-            "copy":funcfloat(self.funcs.copycall, self, "copy", reqargs=1),
-            "type":funcfloat(self.funcs.typecall, self, "type"),
-            "str":funcfloat(self.funcs.strcall, self, "str"),
-            "repr":funcfloat(self.funcs.reprcall, self, "repr"),
-            "code":funcfloat(self.funcs.codecall, self, "code"),
-            "calc":funcfloat(self.funcs.docalc, self, "calc", reqargs=1),
-            "do":funcfloat(self.funcs.nonecalc, self, "do", reqargs=1),
-            "fold":funcfloat(self.funcs.foldcall, self, "fold", reqargs=1),
-            "row":funcfloat(rowmatrixlist, self, "row"),
-            "list":funcfloat(self.funcs.listcall, self, "list", reqargs=1),
-            "matrix":funcfloat(self.funcs.matrixcall, self, "matrix", reqargs=1),
-            "cont":funcfloat(self.funcs.getmatrixcall, self, "cont", reqargs=1),
-            "sum":funcfloat(self.funcs.sumcall, self, "sum", reqargs=1),
-            "prod":funcfloat(self.funcs.prodcall, self, "prod", reqargs=1),
-            "min":funcfloat(self.funcs.mincall, self, "min", reqargs=1),
-            "max":funcfloat(self.funcs.maxcall, self, "max", reqargs=1),
-            "join":funcfloat(self.funcs.joincall, self, "join", reqargs=2),
-            "connect":funcfloat(self.funcs.connectcall, self, "connect", reqargs=1),
-            "merge":funcfloat(self.funcs.mergecall, self, "merge", reqargs=1),
-            "sort":funcfloat(self.funcs.sortcall, self, "sort", reqargs=1),
-            "rev":funcfloat(self.funcs.reversecall, self, "rev", reqargs=1),
-            "round":funcfloat(self.funcs.roundcall, self, "round", reqargs=1),
-            "num":funcfloat(self.funcs.numcall, self, "num"),
-            "int":funcfloat(self.funcs.intcall, self, "int"),
-            "base":funcfloat(self.funcs.basecall, self, "base", reqargs=2),
-            "bin":funcfloat(self.funcs.bincall, self, "bin", reqargs=1),
-            "oct":funcfloat(self.funcs.octcall, self, "oct", reqargs=1),
-            "hex":funcfloat(self.funcs.hexcall, self, "hex", reqargs=1),
-            "pair":funcfloat(self.funcs.paircall, self, "pair"),
-            "dict":funcfloat(self.funcs.dictcall, self, "dict"),
-            "eval":funcfloat(self.funcs.evalcall, self, "eval", reqargs=1),
-            "find":funcfloat(self.funcs.findcall, self, "find", reqargs=2),
-            "split":funcfloat(self.funcs.splitcall, self, "split", reqargs=1),
-            "replace":funcfloat(self.funcs.replacecall, self, "replace", reqargs=1),
-            "in":funcfloat(self.funcs.containscall, self, "in", reqargs=2),
-            "range":funcfloat(self.funcs.rangecall, self, "range", reqargs=1),
-            "len":funcfloat(self.funcs.lencall, self, "len", reqargs=1),
-            "size":funcfloat(self.funcs.sizecall, self, "size", reqargs=1),
-            "abs":funcfloat(self.funcs.abscall, self, "abs", reqargs=1),
-            "from":funcfloat(self.funcs.instanceofcall, self, "from", reqargs=2),
-            "iserr":funcfloat(self.funcs.iserrcall, self, "iserr", reqargs=1),
-            "class":funcfloat(self.funcs.classcall, self, "class"),
-            "instance":funcfloat(self.funcs.instancecall, self, "instance"),
-            "function":funcfloat(self.funcs.functioncall, self, "function"),
-            "namespace":funcfloat(self.funcs.namespacecall, self, "namespace"),
-            "try":funcfloat(self.funcs.trycall, self, "try"),
-            "raise":funcfloat(self.funcs.raisecall, self, "raise"),
-            "except":funcfloat(self.funcs.exceptcall, self, "except"),
-            "read":funcfloat(self.funcs.readcall, self, "read", reqargs=1),
-            "write":funcfloat(self.funcs.writecall, self, "write", reqargs=1),
-            "is":funcfloat(self.funcs.iseqcall, self, "is", reqargs=2),
-            "include":funcfloat(self.funcs.includecall, self, "include", reqargs=1),
-            "def":funcfloat(self.funcs.defcall, self, "def", reqargs=1),
-            "effect":usefunc(self.setreturned, self, "effect"),
-            "require":funcfloat(self.funcs.requirecall, self, "require", reqargs=1),
-            "assert":funcfloat(self.funcs.assertcall, self, "assert", reqargs=1),
-            "install":funcfloat(self.funcs.installcall, self, "install", reqargs=1),
-            "bitnot":funcfloat(self.funcs.bitnotcall, self, "bitnot", reqargs=1),
-            "bitor":funcfloat(self.funcs.bitorcall, self, "bitor", reqargs=2),
-            "bitand":funcfloat(self.funcs.bitandcall, self, "bitand", reqargs=2),
-            "bitxor":funcfloat(self.funcs.bitxorcall, self, "bitxor", reqargs=2),
-            "rshift":funcfloat(self.funcs.rshiftcall, self, "rshift", reqargs=2),
-            "lshift":funcfloat(self.funcs.lshiftcall, self, "lshift", reqargs=2),
-            "divmod":funcfloat(self.funcs.divmodcall, self, "divmod", reqargs=2),
-            "union":funcfloat(self.funcs.unioncall, self, "union", reqargs=2),
-            "intersect":funcfloat(self.funcs.intersectcall, self, "intersect", reqargs=2),
-            "rand":funcfloat(self.funcs.randcall, self, "rand", reqargs=1),
-            "inside":funcfloat(self.funcs.insidecall, self, "inside", reqargs=1),
-            "Meta":classcalc(self, {
-                "var":funcfloat(self.funcs.getvarcall, self, "var", reqargs=1),
-                "val":funcfloat(self.funcs.getvalcall, self, "val", reqargs=1),
-                "use":funcfloat(self.funcs.usecall, self, "use"),
-                "using":funcfloat(self.funcs.usingcall, self, "using"),
-                "alias":funcfloat(self.funcs.aliascall, self, "alias", reqargs=1),
-                "aliases":funcfloat(self.funcs.aliasescall, self, "aliases"),
-                "paren":funcfloat(self.funcs.getparenvarcall, self, "paren"),
-                "parens":funcfloat(self.funcs.getparenscall, self, "parens"),
-                "unused":funcfloat(self.funcs.unusedcall, self, "unused"),
-                "getstate":funcfloat(self.funcs.getstatecall, self, "getstate"),
-                "fromstate":funcfloat(self.funcs.fromstatecall, self, "fromstate"),
-                "wrap":funcfloat(self.funcs.wrapcall, self, "wrap", reqargs=1),
-                "run":funcfloat(self.funcs.runcall, self, "run", reqargs=1),
-                "global":funcfloat(self.funcs.globalcall, self, "global", reqargs=1),
-                "del":funcfloat(self.funcs.delcall, self, "del", reqargs=1),
-                "to":funcfloat(self.funcs.tocall, self, "to", reqargs=1),
-                "exec":funcfloat(self.funcs.cmdcall, self, "exec", reqargs=1)
+            "pure":funcfloat(self.funcs.purecall, "pure", reqargs=1),
+            "env":funcfloat(self.funcs.envcall, "env"),
+            "call":funcfloat(self.funcs.callcall, "call", reqargs=1),
+            "copy":funcfloat(self.funcs.copycall, "copy", reqargs=1),
+            "type":funcfloat(self.funcs.typecall, "type"),
+            "str":funcfloat(self.funcs.strcall, "str"),
+            "repr":funcfloat(self.funcs.reprcall, "repr"),
+            "code":funcfloat(self.funcs.codecall, "code"),
+            "calc":funcfloat(self.funcs.docalc, "calc", reqargs=1),
+            "do":funcfloat(self.funcs.nonecalc, "do", reqargs=1),
+            "fold":funcfloat(self.funcs.foldcall, "fold", reqargs=1),
+            "row":funcfloat(rowmatrixlist, "row"),
+            "list":funcfloat(self.funcs.listcall, "list", reqargs=1),
+            "matrix":funcfloat(self.funcs.matrixcall, "matrix", reqargs=1),
+            "cont":funcfloat(self.funcs.getmatrixcall, "cont", reqargs=1),
+            "sum":funcfloat(self.funcs.sumcall, "sum", reqargs=1),
+            "prod":funcfloat(self.funcs.prodcall, "prod", reqargs=1),
+            "min":funcfloat(self.funcs.mincall, "min", reqargs=1),
+            "max":funcfloat(self.funcs.maxcall, "max", reqargs=1),
+            "join":funcfloat(self.funcs.joincall, "join", reqargs=2),
+            "connect":funcfloat(self.funcs.connectcall, "connect", reqargs=1),
+            "merge":funcfloat(self.funcs.mergecall, "merge", reqargs=1),
+            "sort":funcfloat(self.funcs.sortcall, "sort", reqargs=1),
+            "rev":funcfloat(self.funcs.reversecall, "rev", reqargs=1),
+            "round":funcfloat(self.funcs.roundcall, "round", reqargs=1),
+            "num":funcfloat(self.funcs.numcall, "num"),
+            "int":funcfloat(self.funcs.intcall, "int"),
+            "base":funcfloat(self.funcs.basecall, "base", reqargs=2),
+            "bin":funcfloat(self.funcs.bincall, "bin", reqargs=1),
+            "oct":funcfloat(self.funcs.octcall, "oct", reqargs=1),
+            "hex":funcfloat(self.funcs.hexcall, "hex", reqargs=1),
+            "pair":funcfloat(self.funcs.paircall, "pair"),
+            "dict":funcfloat(self.funcs.dictcall, "dict"),
+            "eval":funcfloat(self.funcs.evalcall, "eval", reqargs=1),
+            "find":funcfloat(self.funcs.findcall, "find", reqargs=2),
+            "split":funcfloat(self.funcs.splitcall, "split", reqargs=1),
+            "replace":funcfloat(self.funcs.replacecall, "replace", reqargs=1),
+            "in":funcfloat(self.funcs.containscall, "in", reqargs=2),
+            "range":funcfloat(self.funcs.rangecall, "range", reqargs=1),
+            "len":funcfloat(self.funcs.lencall, "len", reqargs=1),
+            "size":funcfloat(self.funcs.sizecall, "size", reqargs=1),
+            "abs":funcfloat(self.funcs.abscall, "abs", reqargs=1),
+            "from":funcfloat(self.funcs.instanceofcall, "from", reqargs=2),
+            "iserr":funcfloat(self.funcs.iserrcall, "iserr", reqargs=1),
+            "class":funcfloat(self.funcs.classcall, "class"),
+            "instance":funcfloat(self.funcs.instancecall, "instance"),
+            "function":funcfloat(self.funcs.functioncall, "function"),
+            "namespace":funcfloat(self.funcs.namespacecall, "namespace"),
+            "try":funcfloat(self.funcs.trycall, "try"),
+            "raise":funcfloat(self.funcs.raisecall, "raise"),
+            "except":funcfloat(self.funcs.exceptcall, "except"),
+            "read":funcfloat(self.funcs.readcall, "read", reqargs=1),
+            "write":funcfloat(self.funcs.writecall, "write", reqargs=1),
+            "is":funcfloat(self.funcs.iseqcall, "is", reqargs=2),
+            "include":funcfloat(self.funcs.includecall, "include", reqargs=1),
+            "def":funcfloat(self.funcs.defcall, "def", reqargs=1),
+            "effect":usefunc(self.setreturned, "effect"),
+            "require":funcfloat(self.funcs.requirecall, "require", reqargs=1),
+            "assert":funcfloat(self.funcs.assertcall, "assert", reqargs=1),
+            "import":funcfloat(self.funcs.importcall, "import", reqargs=1),
+            "bitnot":funcfloat(self.funcs.bitnotcall, "bitnot", reqargs=1),
+            "bitor":funcfloat(self.funcs.bitorcall, "bitor", reqargs=2),
+            "bitand":funcfloat(self.funcs.bitandcall, "bitand", reqargs=2),
+            "bitxor":funcfloat(self.funcs.bitxorcall, "bitxor", reqargs=2),
+            "rshift":funcfloat(self.funcs.rshiftcall, "rshift", reqargs=2),
+            "lshift":funcfloat(self.funcs.lshiftcall, "lshift", reqargs=2),
+            "divmod":funcfloat(self.funcs.divmodcall, "divmod", reqargs=2),
+            "union":funcfloat(self.funcs.unioncall, "union", reqargs=2),
+            "intersect":funcfloat(self.funcs.intersectcall, "intersect", reqargs=2),
+            "rand":funcfloat(self.funcs.randcall, "rand", reqargs=1),
+            "inside":funcfloat(self.funcs.insidecall, "inside", reqargs=1),
+            "python":funcfloat(self.funcs.pythonevalcall, "python", reqargs=1),
+            "Meta":classcalc({
+                "var":funcfloat(self.funcs.getvarcall, "var", reqargs=1),
+                "val":funcfloat(self.funcs.getvalcall, "val", reqargs=1),
+                "use":funcfloat(self.funcs.usecall, "use"),
+                "using":funcfloat(self.funcs.usingcall, "using"),
+                "alias":funcfloat(self.funcs.aliascall, "alias", reqargs=1),
+                "aliases":funcfloat(self.funcs.aliasescall, "aliases"),
+                "paren":funcfloat(self.funcs.getparenvarcall, "paren"),
+                "parens":funcfloat(self.funcs.getparenscall, "parens"),
+                "unused":funcfloat(self.funcs.unusedcall, "unused"),
+                "serialize":funcfloat(self.funcs.getstatecall, "serialize"),
+                "deserialize":funcfloat(self.funcs.fromstatecall, "deserialize"),
+                "wrap":funcfloat(self.funcs.wrapcall, "wrap", reqargs=1),
+                "run":funcfloat(self.funcs.runcall, "run", reqargs=1),
+                "global":funcfloat(self.funcs.globalcall, "global", reqargs=1),
+                "del":funcfloat(self.funcs.delcall, "del", reqargs=1),
+                "to":funcfloat(self.funcs.tocall, "to", reqargs=1),
+                "exec":funcfloat(self.funcs.cmdcall, "exec", reqargs=1),
+                "pipe":funcfloat(self.funcs.pipecall, "pipe"),
+                "caller":funcfloat(self.funcs.getcallcall, "caller", reqargs=1)
                 }, name="Meta"),
-            "Math":classcalc(self, {
-                "pow":usefunc(pow, self, "pow", ["y", "x", "m"]),
-                "data":funcfloat(self.funcs.datacall, self, "data"),
-                "frac":funcfloat(self.funcs.fractioncall, self, "frac"),
-                "simp":funcfloat(self.funcs.simpcall, self, "simp"),
-                "det":funcfloat(self.funcs.detcall, self, "det", reqargs=1),
-                "floor":usefunc(math.floor, self, "floor", ["x"]),
-                "ceil":usefunc(math.ceil, self, "ceil", ["x"]),
-                "log":usefunc(math.log10, self, "log", ["x"]),
-                "ln":usefunc(math.log, self, "ln", ["x"]),
-                "sqrt":usefunc(isqrt, self, "sqrt", ["x"]),
-                "tan":usefunc(math.tan, self, "tan", ["x"]),
-                "sin":usefunc(math.sin, self, "sin", ["x"]),
-                "cos":usefunc(math.cos, self, "cos", ["x"]),
-                "atan":usefunc(math.atan, self, "atan", ["x"]),
-                "asin":usefunc(math.asin, self, "asin", ["x"]),
-                "acos":usefunc(math.acos, self, "acos", ["x"]),
-                "rad":usefunc(math.degrees, self, "rad", ["x"]),
-                "deg":usefunc(math.radians, self, "deg", ["x"]),
-                "fact":usefunc(factorial, self, "fact", ["x"]),
-                "gcd":usefunc(gcd, self, "gcd", ["x", "y"]),
-                "lcm":usefunc(lcm, self, "lcm", ["x", "y"]),
-                "perm":usefunc(perm, self, "perm", ["n", "k"]),
-                "comb":usefunc(comb, self, "comb", ["n", "k"]),
-                "real":funcfloat(self.funcs.realcall, self, "real"),
-                "imag":funcfloat(self.funcs.imagcall, self, "imag"),
-                "complex":usefunc(complex, self, "complex", ["re", "im"]),
+            "Math":classcalc({
+                "pow":usefunc(pow, "pow", ["y", "x", "m"]),
+                "frac":funcfloat(self.funcs.fractioncall, "frac"),
+                "simp":funcfloat(self.funcs.simpcall, "simp"),
+                "det":funcfloat(self.funcs.detcall, "det", reqargs=1),
+                "floor":usefunc(math.floor, "floor", ["x"]),
+                "ceil":usefunc(math.ceil, "ceil", ["x"]),
+                "log":usefunc(math.log10, "log", ["x"]),
+                "ln":usefunc(math.log, "ln", ["x"]),
+                "sqrt":usefunc(isqrt, "sqrt", ["x"]),
+                "tan":usefunc(math.tan, "tan", ["x"]),
+                "sin":usefunc(math.sin, "sin", ["x"]),
+                "cos":usefunc(math.cos, "cos", ["x"]),
+                "atan":usefunc(math.atan, "atan", ["x"]),
+                "asin":usefunc(math.asin, "asin", ["x"]),
+                "acos":usefunc(math.acos, "acos", ["x"]),
+                "rad":usefunc(math.degrees, "rad", ["x"]),
+                "deg":usefunc(math.radians, "deg", ["x"]),
+                "fact":usefunc(factorial, "fact", ["x"]),
+                "gcd":usefunc(gcd, "gcd", ["x", "y"]),
+                "lcm":usefunc(lcm, "lcm", ["x", "y"]),
+                "perm":usefunc(perm, "perm", ["n", "k"]),
+                "comb":usefunc(comb, "comb", ["n", "k"]),
+                "real":funcfloat(self.funcs.realcall, "real"),
+                "imag":funcfloat(self.funcs.imagcall, "imag"),
+                "complex":usefunc(complex, "complex", ["re", "im"]),
                 "e":math.e,
                 "pi":math.pi,
-                "E":usefunc(E10, self, "E", ["x"]),
-                "D":funcfloat(self.funcs.derivcall, self, "D", reqargs=1),
-                "S":funcfloat(self.funcs.integcall, self, "S", reqargs=1),
+                "E":usefunc(E10, "E", ["x"]),
+                "D":funcfloat(self.funcs.derivcall, "D", reqargs=1),
+                "S":funcfloat(self.funcs.integcall, "S", reqargs=1),
                 "i":complex(0.0, 1.0)
                 }, name="Math"),
-            "Stats":classcalc(self, {
-                "gamma":usefunc(gamma, self, "gamma", ["x"]),
-                "normdist":usefunc(normdist, self, "normdist", ["x", "mean", "stdev"]),
-                "binomP":usefunc(binomP, self, "binomP", ["n", "p", "x"]),
-                "poissonP":usefunc(poissonP, self, "poissonP", ["lambda", "x"]),
-                "hypgeoP":usefunc(hypgeoP, self, "hypgeoP", ["x", "n", "K", "N"]),
-                "tdist":usefunc(tdist, self, "tdist", ["x", "df"]),
-                "teq":usefunc(teq, self, "teq", ["df"], evalinclude="e"),
-                "chisqdist":usefunc(chisqdist, self, "chisqdist", ["x", "df"]),
-                "chisqeq":usefunc(chisqeq, self, "chisqeq", ["df"], evalinclude="e"),
-                "Fdist":usefunc(Fdist, self, "Fdist", ["x", "dfT", "dfE"]),
-                "Feq":usefunc(Feq, self, "Feq", ["dfT", "dfE"], evalinclude="e"),
-                "normP":usefunc(normP, self, "normP", ["x", "y", "mean", "stdev"]),
-                "tP":usefunc(tP, self, "tP", ["x", "y", "df"], evalinclude="e"),
-                "chisqP":usefunc(chisqP, self, "chisqP", ["x", "df"], evalinclude="e"),
-                "FP":usefunc(FP, self, "FP", ["x", "dfT", "dfE"], evalinclude="e")
+            "Stats":classcalc({
+                "data":funcfloat(self.funcs.datacall, "data"),
+                "gamma":usefunc(gamma, "gamma", ["x"]),
+                "normdist":usefunc(normdist, "normdist", ["x", "mean", "stdev"]),
+                "binomP":usefunc(binomP, "binomP", ["n", "p", "x"]),
+                "poissonP":usefunc(poissonP, "poissonP", ["lambda", "x"]),
+                "hypgeoP":usefunc(hypgeoP, "hypgeoP", ["x", "n", "K", "N"]),
+                "tdist":usefunc(tdist, "tdist", ["x", "df"]),
+                "teq":usefunc(teq, "teq", ["df"], evalinclude="e"),
+                "chisqdist":usefunc(chisqdist, "chisqdist", ["x", "df"]),
+                "chisqeq":usefunc(chisqeq, "chisqeq", ["df"], evalinclude="e"),
+                "Fdist":usefunc(Fdist, "Fdist", ["x", "dfT", "dfE"]),
+                "Feq":usefunc(Feq, "Feq", ["dfT", "dfE"], evalinclude="e"),
+                "normP":usefunc(normP, "normP", ["x", "y", "mean", "stdev"]),
+                "tP":usefunc(tP, "tP", ["x", "y", "df"], evalinclude="e"),
+                "chisqP":usefunc(chisqP, "chisqP", ["x", "df"], evalinclude="e"),
+                "FP":usefunc(FP, "FP", ["x", "dfT", "dfE"], evalinclude="e")
                 }, name="Stats"),
             "none":matrix(0),
             "true":True,
@@ -548,14 +545,14 @@ Global Operator Precedence List:
             funcfloat.allargs : matrix(0)
             }
         self.variables.update({
-            "and":strfunc("x&y", self, ["x", "y"], name="and", lexical=False),
-            "or":strfunc("x|y", self, ["x", "y"], name="or", lexical=False),
-            "xor":strfunc("(x|y)&!(x&y)", self, ["x", "y"], name="xor", lexical=False),
-            "not":strfunc("!x", self, ["x"], name="not", lexical=False),
-            "bool":strfunc("?x", self, ["x"], name="bool", lexical=False),
-            "prop":strfunc("class\xab__value__(^self,getter:getter)=getter()\xbb()", self, ["getter"], name="prop"),
-            "Unicode":classcalc(self, {
-                "__include__" : strfunc("""self.includes$self.aliases~~Meta.alias""", self, ["self"], name="__include__"),
+            "and":strfunc("x&y", ["x", "y"], name="and", lexical=False),
+            "or":strfunc("x|y", ["x", "y"], name="or", lexical=False),
+            "xor":strfunc("(x|y)&!(x&y)", ["x", "y"], name="xor", lexical=False),
+            "not":strfunc("!x", ["x"], name="not", lexical=False),
+            "bool":strfunc("?x", ["x"], name="bool", lexical=False),
+            "prop":strfunc("class\xab__value__(^self,getter:getter)=getter()\xbb()", ["getter"], name="prop"),
+            "Unicode":classcalc({
+                "__include__" : strfunc("""self.includes$self.aliases~~Meta.alias""", ["self"], name="__include__"),
                 "aliases" : self.frompython({
                     "\xac":"!",
                     "\xf7":"/",
@@ -576,7 +573,7 @@ Global Operator Precedence List:
                     "\u2254":":=",
                     "\u225f":"?="
                     }),
-                "includes" : classcalc(self, {
+                "includes" : classcalc({
                     "\xf8" : "none",
                     "\u221e" : "inf",
                     "\u2211" : "sum",
@@ -597,47 +594,47 @@ Global Operator Precedence List:
                     "\xbc" : 0.25,
                     "\xbe" : 0.75,
                     "\u23E8" : "Math.E",
-                    "\u2400" : rawstrcalc("\x00", self),
-                    "\u2401" : rawstrcalc("\x01", self),
-                    "\u2402" : rawstrcalc("\x02", self),
-                    "\u2403" : rawstrcalc("\x03", self),
-                    "\u2404" : rawstrcalc("\x04", self),
-                    "\u2405" : rawstrcalc("\x05", self),
-                    "\u2406" : rawstrcalc("\x06", self),
-                    "\u2407" : rawstrcalc("\x07", self),
-                    "\u2408" : rawstrcalc("\x08", self),
-                    "\u2409" : rawstrcalc("\x09", self),
-                    "\u240a" : rawstrcalc("\n", self),
-                    "\u240b" : rawstrcalc("\x0b", self),
-                    "\u240c" : rawstrcalc("\x0c", self),
-                    "\u240d" : rawstrcalc("\r", self),
-                    "\u240e" : rawstrcalc("\x0e", self),
-                    "\u240f" : rawstrcalc("\x0f", self),
-                    "\u2410" : rawstrcalc("\x10", self),
-                    "\u2411" : rawstrcalc("\x11", self),
-                    "\u2412" : rawstrcalc("\x12", self),
-                    "\u2413" : rawstrcalc("\x13", self),
-                    "\u2414" : rawstrcalc("\x14", self),
-                    "\u2415" : rawstrcalc("\x15", self),
-                    "\u2416" : rawstrcalc("\x16", self),
-                    "\u2417" : rawstrcalc("\x17", self),
-                    "\u2418" : rawstrcalc("\x18", self),
-                    "\u2419" : rawstrcalc("\x19", self),
-                    "\u241a" : rawstrcalc("\x1a", self),
-                    "\u241b" : rawstrcalc("\x1b", self),
-                    "\u241c" : rawstrcalc("\x1c", self),
-                    "\u241d" : rawstrcalc("\x1d", self),
-                    "\u241e" : rawstrcalc("\x1e", self),
-                    "\u241f" : rawstrcalc("\x1f", self),
-                    "\u2420" : rawstrcalc(" ", self),
-                    "\u2421" : rawstrcalc("\x21", self),
-                    "\u2209" : strfunc("!\u2208(__)", self, name="\u2209", overflow=False),
-                    "\u220b" : strfunc("\u2208(rev(__))", self, name="\u220b", overflow=False),
-                    "\u220c" : strfunc("!\u220b(__)", self, name="\u220c", overflow=False),
-                    "\u221b" : strfunc("x^(1/3)", self, ["x"], name="\u221b", lexical=False),
-                    "\u221c" : strfunc("Math.sqrt(Math.sqrt(x))", self, ["x"], name="\u221c"),
-                    "\u222c" : strfunc("Math.S((Math.S((f,)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222c"),
-                    "\u222d" : strfunc("Math.S((Math.S((Math.S((f,)++args),)++args),)++args)", self, ["f", "args"], reqargs=1, name="\u222d")
+                    "\u2400" : rawstrcalc("\x00"),
+                    "\u2401" : rawstrcalc("\x01"),
+                    "\u2402" : rawstrcalc("\x02"),
+                    "\u2403" : rawstrcalc("\x03"),
+                    "\u2404" : rawstrcalc("\x04"),
+                    "\u2405" : rawstrcalc("\x05"),
+                    "\u2406" : rawstrcalc("\x06"),
+                    "\u2407" : rawstrcalc("\x07"),
+                    "\u2408" : rawstrcalc("\x08"),
+                    "\u2409" : rawstrcalc("\x09"),
+                    "\u240a" : rawstrcalc("\n"),
+                    "\u240b" : rawstrcalc("\x0b"),
+                    "\u240c" : rawstrcalc("\x0c"),
+                    "\u240d" : rawstrcalc("\r"),
+                    "\u240e" : rawstrcalc("\x0e"),
+                    "\u240f" : rawstrcalc("\x0f"),
+                    "\u2410" : rawstrcalc("\x10"),
+                    "\u2411" : rawstrcalc("\x11"),
+                    "\u2412" : rawstrcalc("\x12"),
+                    "\u2413" : rawstrcalc("\x13"),
+                    "\u2414" : rawstrcalc("\x14"),
+                    "\u2415" : rawstrcalc("\x15"),
+                    "\u2416" : rawstrcalc("\x16"),
+                    "\u2417" : rawstrcalc("\x17"),
+                    "\u2418" : rawstrcalc("\x18"),
+                    "\u2419" : rawstrcalc("\x19"),
+                    "\u241a" : rawstrcalc("\x1a"),
+                    "\u241b" : rawstrcalc("\x1b"),
+                    "\u241c" : rawstrcalc("\x1c"),
+                    "\u241d" : rawstrcalc("\x1d"),
+                    "\u241e" : rawstrcalc("\x1e"),
+                    "\u241f" : rawstrcalc("\x1f"),
+                    "\u2420" : rawstrcalc(" "),
+                    "\u2421" : rawstrcalc("\x21"),
+                    "\u2209" : strfunc("!\u2208(__)", name="\u2209", overflow=False),
+                    "\u220b" : strfunc("\u2208(rev(__))", name="\u220b", overflow=False),
+                    "\u220c" : strfunc("!\u220b(__)", name="\u220c", overflow=False),
+                    "\u221b" : strfunc("x^(1/3)", ["x"], name="\u221b", lexical=False),
+                    "\u221c" : strfunc("Math.sqrt(Math.sqrt(x))", ["x"], name="\u221c"),
+                    "\u222c" : strfunc("Math.S((Math.S((f,)++args),)++args)", ["f", "args"], reqargs=1, name="\u222c"),
+                    "\u222d" : strfunc("Math.S((Math.S((Math.S((f,)++args),)++args),)++args)", ["f", "args"], reqargs=1, name="\u222d")
                     })
                 }, name="Unicode").call([])
             })
@@ -715,12 +712,12 @@ Global Operator Precedence List:
     def converterr(self, err):
         """Converts A Caught Error Into An Error Instance."""
         if len(err) == 3 or (len(err) == 4 and err[3] is None):
-            out = instancecalc(self, {
+            out = instancecalc({
                 self.errorvar : True,
                 self.fatalvar : err[2]
                 })
-            out.store(self.namevar, strcalc(err[0], self))
-            out.store(self.messagevar, strcalc(err[1], self))
+            out.store(self.namevar, rawstrcalc(err[0]))
+            out.store(self.messagevar, rawstrcalc(err[1]))
             return out
         elif len(err) == 4:
             return err[3]
@@ -817,7 +814,7 @@ Global Operator Precedence List:
             if top:
                 out += "\n"
             for k,v in item.a.items():
-                out += " "+self.prepare(pair(self,k,v), False, bottom, indebug, maxrecursion)+","
+                out += " "+self.prepare(pair(k,v), False, bottom, indebug, maxrecursion)+","
                 if top:
                     out += "\n"
                 else:
@@ -854,7 +851,7 @@ Global Operator Precedence List:
             else:
                 out += "/"
             b = self.prepare(part_b, False, bottom, indebug, maxrecursion)
-            if not bottom or self.validvar(b):
+            if not bottom or self.validvar(b) or a == "()":
                 out += b
             else:
                 out += "("+b+")"
@@ -1008,7 +1005,7 @@ Global Operator Precedence List:
 
     def iseq(self, a, b):
         """Determines Whether Two Evaluator Objects Are Really Equal."""
-        return type(a) is type(b) and itemstate(a) == itemstate(b)
+        return itemstate(a) == itemstate(b)
 
     def wrap(self, item):
         """Wraps An Item In Parentheses."""
@@ -1126,13 +1123,14 @@ Global Operator Precedence List:
             self.printdebug("::> "+original)
             self.recursion += 1
             try:
-                out = self.getcall(self.using)([codestr(inputstring, self)])
+                out = self.getcall(self.using)([codestr(inputstring)])
                 self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
             finally:
                 self.recursion -= 1
             return out
         else:
-            return self.calc_next(inputstring, self.calc_funcs, True)
+            expression = self.remformat(inputstring)
+            return self.calc_next(expression, self.calc_funcs, True)
 
     def preproc_alias(self, inputstring, top=True):
         """Applies Aliases."""
@@ -1156,9 +1154,9 @@ Global Operator Precedence List:
                 else:
                     command += self.lambdamarker*2
             elif item[0] in self.rawstringchars:
-                command += self.wrap(rawstrcalc(item[1], self))
+                command += self.wrap(rawstrcalc(item[1]))
             elif item[0] in self.stringchars + "".join(self.strgroupers.keys()) + "".join(self.strgroupers.values()):
-                command += self.wrap(strcalc(item[1], self))
+                command += self.wrap(strcalc(item[1]))
         return command
 
     def preproc_format(self, inputstring, top=None):
@@ -1239,9 +1237,9 @@ Global Operator Precedence List:
             if istext(x):
                 command += x
             elif not x:
-                command += self.wrap(codestr("", self))
+                command += self.wrap(codestr(""))
             elif len(x) == 1:
-                command += self.wrap(codestr(x[0], self))
+                command += self.wrap(codestr(x[0]))
             else:
                 raise SyntaxError("Error in evaluating block len("+repr(x)+")>1")
         return command
@@ -1258,7 +1256,7 @@ Global Operator Precedence List:
                     original = ""
                 else:
                     original = x[0]
-                command += self.wrap(brace(self, self.splitdedent(original, lambda x: x.split(","))))
+                command += self.wrap(brace(self.splitdedent(original, lambda x: x.split(","))))
             else:
                 raise SyntaxError("Error in evaluating braces len("+repr(x)+")>1")
         return command
@@ -1275,10 +1273,18 @@ Global Operator Precedence List:
                     original = ""
                 else:
                     original = x[0]
-                command += self.wrap(bracket(self, self.splitdedent(original, lambda x: x.split(","))))
+                command += self.wrap(bracket(self.splitdedent(original, lambda x: x.split(","))))
             else:
                 raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
         return command
+
+    def precalc_cmd(self, inputstring):
+        """Evaluates Statements."""
+        inputlist = self.splitdedent(inputstring, lambda x: x.split("::"))
+        out = [inputlist[0]]
+        for x in xrange(1, len(inputlist)):
+            out.append(self.wrap(basicformat(inputlist[x])))
+        return "::".join(out)
 
     def calc_next(self, arg, funcs, top=False):
         """Calls The Next Function."""
@@ -1345,34 +1351,32 @@ Global Operator Precedence List:
         """Evaluates Statements."""
         inputlist = self.splitdedent(inputstring, lambda x: x.split("::"))
         func, args = inputlist[0], inputlist[1:]
-        func = basicformat(func)
         if len(args) > 0:
-            original = func+" :: "+strlist(args, " :: ")
-            self.printdebug("::> "+original)
+            func = basicformat(func)
+            original = []
+            for arg in args:
+                original.append(self.namefind(arg))
+            displayer = func+" :: "+strlist(original, " :: ")
+            self.printdebug("::> "+displayer)
             self.recursion += 1
             try:
                 if func:
                     cleaned = self.clean_begin()
                     item = self.funcfind(func)
                     params = []
-                    for x in xrange(0, len(args)):
-                        arg = basicformat(args[x])
-                        if x != len(args)-1 or arg:
-                            params.append(codestr(arg, self))
+                    for x in xrange(0, len(original)):
+                        if x != len(original)-1 or original[x]:
+                            params.append(codestr(original[x]))
                     self.clean_end(cleaned)
                     out = self.call_colon_set(item, params)
                 else:
-                    out = codestr(strlist(args, "::"), self)
-                self.printdebug(self.prepare(out, False, True, True)+" <:: "+original)
+                    out = codestr(strlist(original, " :: "))
+                self.printdebug(self.prepare(out, False, True, True)+" <:: "+displayer)
             finally:
                 self.recursion -= 1
             return out
         else:
             return self.calc_next(inputstring, calc_funcs)
-
-    def calc_format(self, expression, calc_funcs):
-        """Removes Unwanted Characters."""
-        return self.calc_next(self.remformat(expression), calc_funcs)
 
     def calc_pure(self, expression, calc_funcs):
         """Toggles Pure On And Off."""
@@ -1392,7 +1396,7 @@ Global Operator Precedence List:
             cleaned = self.clean_begin()
             inputlist.reverse()
             item = inputlist.pop()
-            withclass = classcalc(self, selfvar=self.withvar)
+            withclass = classcalc(selfvar=self.withvar)
             for x in inputlist:
                 inputstring = basicformat(x)
                 if x:
@@ -1520,7 +1524,7 @@ Global Operator Precedence List:
                         if docalc:
                             out = value[1]
                         else:
-                            out = strfloat(value[0], self, name=value[0])
+                            out = strfloat(value[0], name=value[0])
                     else:
                         if method:
                             doset[0].doset[doset[1]] = None
@@ -1541,7 +1545,7 @@ Global Operator Precedence List:
                         if docalc:
                             out = value[1]
                         else:
-                            out = strfunc(useclass.selfvar+"."+value[0], self, [], {useclass.selfvar:useclass}, value[0])
+                            out = strfunc(useclass.selfvar+"."+value[0], [], {useclass.selfvar:useclass}, value[0])
                     if delfrom is not None and value[0] in delfrom:
                         del delfrom[value[0]]
                     return out
@@ -1562,7 +1566,7 @@ Global Operator Precedence List:
             sides[0][0] = basicformat(sides[0][0])
             sides[0][1] = self.namefind(self.parenchar+sides[0][1])
             params, personals, allargs, reqargs, lexical = self.eval_set(sides[0][1])
-            return (sides[0][0], strfunc(sides[1], self, params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical))
+            return (sides[0][0], strfunc(sides[1], params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical))
 
     def set_normal(self, sides):
         """Performs =."""
@@ -1607,7 +1611,7 @@ Global Operator Precedence List:
                     itemlist.append(matrix(0))
             out = itemlist[-1]
             for x in reversed(xrange(0, len(itemlist)-1)):
-                out = pair(self, itemlist[x], out)
+                out = pair(itemlist[x], out)
             return out
 
     def calc_pieces(self, expression, calc_funcs):
@@ -1854,7 +1858,7 @@ Global Operator Precedence List:
                 for item in new:
                     if not isnull(item):
                         outstr += self.prepare(item, True, False)
-                out = rawstrcalc(outstr, self)
+                out = rawstrcalc(outstr)
             elif value.onlydiag():
                 out = diagmatrixlist(new)
             else:
@@ -1882,12 +1886,12 @@ Global Operator Precedence List:
             out = inputstring[1:].split(self.lambdamarker, 1)
             out[0] = self.namefind(out[0])
             if len(out) == 1:
-                return strfloat(out[0], self)
+                return strfloat(out[0])
             elif not out[0]:
-                return strfunc(out[1], self)
+                return strfunc(out[1])
             else:
                 params, personals, allargs, reqargs, lexical = self.eval_set(out[0])
-                return strfunc(out[1], self, params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical)
+                return strfunc(out[1], params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical)
 
     def eval_set(self, original):
         """Performs Setting."""
@@ -2023,7 +2027,7 @@ Global Operator Precedence List:
                     else:
                         tot -= 1
                 if dostr > 0:
-                    out = rawstrcalc("", self)
+                    out = rawstrcalc("")
                     for x in items:
                         out += x
                     return out
@@ -2034,7 +2038,7 @@ Global Operator Precedence List:
                             out.update(x.a)
                         else:
                             out[x.k] = x.v
-                    return dictionary(self, out)
+                    return dictionary(out)
                 elif doclass == len(items):
                     out = items[0].copy()
                     for x in xrange(1, len(items)):
@@ -2339,7 +2343,7 @@ Global Operator Precedence List:
 
     def convertable(self, item):
         """Determines If An Item Can Be Converted By eval_check."""
-        return hasnum(item) or islist(item) or isinstance(item, bool) or item is None
+        return hasnum(item) or islist(item)
 
     def call_var(self, inputstring):
         """Checks If Variable."""
@@ -2348,6 +2352,8 @@ Global Operator Precedence List:
             item, key = self.getfind(inputstring, True)
             if istext(item):
                 value = self.calc(str(item), " | var")
+            elif item is None:
+                value = matrix(0)
             elif self.convertable(item):
                 value = item
             else:
@@ -2369,6 +2375,8 @@ Global Operator Precedence List:
                         raise TailRecursion(item, self.variables.copy())
                     else:
                         value = self.calc(item, " | parenvar")
+                elif item is None:
+                    value = matrix(0)
                 elif self.convertable(item):
                     value = item
                 else:
@@ -2583,7 +2591,7 @@ Global Operator Precedence List:
                         item = matrix(0)
                     elif len(values) > 0 and startswithany(l[0], self.subparenops):
                         autoarg = self.unusedarg()
-                        item = strfunc(autoarg+l[0], self, [autoarg], overflow=False).call([values.pop()])
+                        item = strfunc(autoarg+l[0], [autoarg], overflow=False).call([values.pop()])
                     else:
                         item = self.eval_call(l[0], False)
                     args = []
@@ -2612,7 +2620,7 @@ Global Operator Precedence List:
             overflow, self.overflow = self.overflow, []
             arg = getcopy(arglist[x])
             if not isfunc(item):
-                if isinstance(arg, funcfloat) and arg.infix:
+                if isinstance(arg, funcfloat) and self.infix:
                     if x+1 < len(arglist):
                         arg = self.call_paren_do(arg, [arglist.pop(x+1)])
                     item = self.call_paren_do(arg, [item])
@@ -2642,7 +2650,7 @@ Global Operator Precedence List:
                 func = self.eval_call(item)
                 if not isnull(func):
                     funclist.append(self.wrap(func))
-            return strfunc(strlist(funclist, "(")+"("*bool(funclist)+strfunc.allargs+")"*len(funclist), self, overflow=False)
+            return strfunc(strlist(funclist, "(")+"("*bool(funclist)+strfunc.allargs+")"*len(funclist), overflow=False)
 
     def call_lambdacoeff(self, inputstring):
         """Evaluates Lambda Coefficients."""
@@ -2662,45 +2670,53 @@ Global Operator Precedence List:
                 itemlist[0] = self.funcfind(itemlist[0])
                 out = itemlist[0]
                 for x in xrange(1, len(itemlist)):
-                    new = None
-                    key = self.namefind(itemlist[x])
-                    if hasattr(out, "getmethod"):
-                        new = out.getmethod(key)
-                    elif isnull(out):
+                    if isnull(out):
                         raise ExecutionError("NoneError", "Nothing does not have methods")
-                    elif hasattr(out, key):
-                        test = getattr(out, key)
-                        if hasnum(test):
-                            new = test
-                        elif hasattr(test, "__doc__"):
-                            docstring = basicformat(test.__doc__)
-                            if docstring.startswith("[|") and "|]" in docstring:
-                                rabstring = superformat(docstring[2:].split("|]")[0])
-                                if ":" in rabstring:
-                                    rabcheck, rabstring = rabstring.split(":", 1)
-                                    if basicformat(rabcheck) == "rabbit":
-                                        name, rabargs = basicformat(rabstring).split(":", 1)
-                                        name = basicformat(name)
-                                        if not name:
-                                            new = eval(rabargs)
-                                        else:
-                                            if rabargs:
-                                                args, kwargs = eval(rabargs)
+                    else:
+                        new = None
+                        key = self.namefind(itemlist[x])
+                        if hasattr(out, "getmethod"):
+                            new = out.getmethod(key)
+                        elif hasattr(out, key):
+                            test = getattr(out, key)
+                            if hasnum(test):
+                                new = test
+                            elif hasattr(test, "__doc__"):
+                                docstring = basicformat(test.__doc__)
+                                if docstring.startswith("(|") and "|)" in docstring:
+                                    rabstring = docstring[2:].split("|)")[0]
+                                    if ":" in rabstring:
+                                        rabcheck, rabstring = rabstring.split(":", 1)
+                                        rabcheck = superformat(rabcheck)
+                                        if rabcheck == "rabbit":
+                                            rabstring = basicformat(rabstring)
+                                            if not rabstring:
+                                                new = evalwrap(self, test, inputstring)
+                                            elif rabstring.startswith("="):
+                                                rabarg = eval(basicformat(rabstring[1:]))
+                                                new = evalwrap(test, inputstring, rabarg)
+                                            elif ":" in rabstring:
+                                                name, rabargs = basicformat(rabstring).split(":", 1)
+                                                name = basicformat(name)
+                                                if not name:
+                                                    new = eval(rabargs)
+                                                else:
+                                                    if rabargs:
+                                                        args, kwargs = eval(rabargs)
+                                                    else:
+                                                        args, kwargs = [], {}
+                                                    if name == "usefunc":
+                                                        new = usefunc(test, *args, **kwargs)
+                                                    elif name == "funcfloat":
+                                                        new = funcfloat(test, *args, **kwargs)
+                                                    elif name == "unifunc":
+                                                        new = unifunc(test, *args, **kwargs)
+                                                    elif name == "evalwrap":
+                                                        new = evalwrap(test, *args, **kwargs)
+                                                    else:
+                                                        raise ExecutionError("ValueError", "Invalid Rabbit wrapper of "+name)
                                             else:
-                                                args, kwargs = [], {}
-                                            if name == "usefunc":
-                                                new = usefunc(test, self, *args, **kwargs)
-                                            elif name == "funcfloat":
-                                                args, kwargs = rabargs
-                                                new = funcfloat(test, self, *args, **kwargs)
-                                            elif name == "unifunc":
-                                                args, kwargs = rabargs
-                                                new = unifunc(test, self, *args, **kwargs)
-                                            elif name == "makefunc":
-                                                args, kwargs = rabargs
-                                                new = makefunc(test, self, *args, **kwargs)
-                                            else:
-                                                raise ExecutionError("ValueError", "Invalid Rabbit wrapper of "+name)
+                                                raise ExecutionError("ValueError", "Invalid Rabbit wrapping of "+rabstring)
                     if new is None:
                         raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
                     else:
@@ -2846,10 +2862,10 @@ Global Operator Precedence List:
 
     def typecalc(self, item):
         """Finds A Type."""
-        if isinstance(item, instancecalc):
+        if hasattr(item, "typecalc"):
             return item.typecalc()
         else:
-            return rawstrcalc(self.evaltypestr(item), self)
+            return rawstrcalc(self.evaltypestr(item))
 
     def getvars(self):
         """Gets Variables Absent selfvar."""
@@ -2860,12 +2876,12 @@ Global Operator Precedence List:
             del out[classcalc.selfvar]
         return out
 
-    def frompython(self, item, elsefunc=None):
+    def frompython(self, item, *args, **kwargs):
         """Converts A Python Object To A Rabbit Object."""
         if item is None:
-            out = matrix(0)
+            out = atom()
         elif istext(item):
-            out = strcalc(item, self)
+            out = rawstrcalc(item)
         elif isinstance(item, tuple):
             out = diagmatrixlist(map(self.frompython, item), clean=False)
         elif islist(item):
@@ -2874,18 +2890,16 @@ Global Operator Precedence List:
             out = {}
             for k,v in item.items():
                 out[self.frompython(k)] = self.frompython(v)
-            out = dictionary(self, out)
+            out = dictionary(out)
         elif hasnum(item):
             out = item
-        elif elsefunc is None:
-            raise TypeError("Cannot convert non-evaluator result type "+typestr(item))
         else:
-            out = elsefunc(item)
+            out = evalwrap(item, *args, **kwargs)
         return out
 
     def topython(self, item):
         """Converts A Rabbit Object To A Python Object."""
-        if isnull(item):
+        if isinstance(item, atom):
             out = None
         elif isinstance(item, strcalc):
             out = str(item)
@@ -2939,44 +2953,40 @@ class evalfuncs(object):
     typefuncs = {
         }
 
-    def __init__(self, e):
-        """Initializes The Functions."""
-        self.e = e
-
     def usecall(self, variables):
         """Uses A Default Statement."""
-        self.e.setreturned()
+        e.setreturned()
         if not variables:
-            self.e.using = None
+            e.using = None
         else:
-            self.e.overflow = variables[1:]
-            self.e.using = variables[0]
+            e.overflow = variables[1:]
+            e.using = variables[0]
         return matrix(0)
 
     def delcall(self, variables):
         """Deletes A Variable."""
-        self.e.setreturned()
+        e.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to del")
         else:
-            self.e.overflow = variables[1:]
+            e.overflow = variables[1:]
             if isinstance(variables[0], strcalc):
                 original = str(variables[0])
             else:
                 raise ExecutionError("ValueError", "Variable names must be strings")
-            if original in self.e.variables:
-                out = self.e.variables[original]
-                del self.e.variables[original]
+            if original in e.variables:
+                out = e.variables[original]
+                del e.variables[original]
             elif "." in original:
                 test = original.split(".")
                 item = test.pop()
-                useclass = self.e.find(test[0], True)
+                useclass = e.find(test[0], True)
                 if isinstance(useclass, classcalc):
                     last = useclass
                     for x in xrange(1, len(test)):
                         useclass = usecla(test[x])
                         if not isinstance(useclass, classcalc):
-                            raise ExecutionError("ClassError", "Could not delete "+test[x]+" in "+self.e.prepare(last, False, True, True))
+                            raise ExecutionError("ClassError", "Could not delete "+test[x]+" in "+e.prepare(last, False, True, True))
                 else:
                     raise ExecutionError("VariableError", "Could not find class "+test[0])
                 out = useclass.retrieve(item)
@@ -2998,7 +3008,7 @@ class evalfuncs(object):
 
     def includecall(self, variables):
         """Includes A Class In The Global Namespace."""
-        self.e.setreturned()
+        e.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to include")
         elif len(variables) == 1:
@@ -3010,8 +3020,8 @@ class evalfuncs(object):
                 else:
                     raise ExecutionError("LoopError", "Illegal infinite recursive loop in __include__")
             if isinstance(variables[0], classcalc):
-                oldvars = self.e.setvars(variables[0].getvars(True))
-                return classcalc(self.e, oldvars)
+                oldvars = e.setvars(variables[0].getvars(True))
+                return classcalc(oldvars)
             else:
                 raise ExecutionError("ValueError", "Can only include a class")
         else:
@@ -3022,24 +3032,24 @@ class evalfuncs(object):
 
     def usingcall(self, variables):
         """Retrieves The Current Function Being Used."""
-        self.e.setreturned()
-        self.e.overflow = variables
-        if self.e.using is None:
+        e.setreturned()
+        e.overflow = variables
+        if e.using is None:
             return matrix(0)
         else:
-            return self.e.using
+            return e.using
 
     def envcall(self, variables):
         """Retrieves A Class Of The Global Environment."""
-        self.e.setreturned()
-        self.e.overflow = variables
-        return classcalc(self.e, self.e.getvars())
+        e.setreturned()
+        e.overflow = variables
+        return classcalc(e.getvars())
 
     def trycall(self, variables):
         """Catches Errors."""
         result, err = catch(self.docalc, variables, " | try")
         if err:
-            return rowmatrixlist([matrix(0), self.e.converterr(err)])
+            return rowmatrixlist([matrix(0), e.converterr(err)])
         else:
             return rowmatrixlist([result, matrix(0)])
 
@@ -3049,26 +3059,26 @@ class evalfuncs(object):
             raise ExecutionError("Error", "An error occured")
         elif len(variables) == 1:
             if isinstance(variables[0], instancecalc) and self.iserrcall(variables):
-                name = variables[0].getmethod(self.e.namevar)
+                name = variables[0].getmethod(e.namevar)
                 if name:
-                    name = self.e.prepare(name, False, False)
+                    name = e.prepare(name, False, False)
                 else:
                     name = "Error"
-                message = variables[0].getmethod(self.e.messagevar)
+                message = variables[0].getmethod(e.messagevar)
                 if message:
-                    message = self.e.prepare(message, False, False)
+                    message = e.prepare(message, False, False)
                 else:
                     message = "An error occured"
-                fatal = variables[0].getmethod(self.e.fatalvar)
+                fatal = variables[0].getmethod(e.fatalvar)
                 if fatal:
                     fatal = bool(fatal)
                 else:
                     fatal = False
                 raise ExecutionError(name, message, fatal, variables[0])
             else:
-                raise ExecutionError("Error", self.e.prepare(variables[0], False, False))
+                raise ExecutionError("Error", e.prepare(variables[0], False, False))
         else:
-            raise ExecutionError(self.e.prepare(variables[0], False, False), strlist(variables[1:], "; ", lambda x: self.e.prepare(x, False, False)))
+            raise ExecutionError(e.prepare(variables[0], False, False), strlist(variables[1:], "; ", lambda x: e.prepare(x, False, False)))
 
     def exceptcall(self, variables):
         """Excepts Errors."""
@@ -3078,7 +3088,7 @@ class evalfuncs(object):
             items = variables[0].items()
             if self.iserrcall([items[1]]):
                 for check in variables[1:]:
-                    if items[1] == check or items[1].getmethod(self.e.namevar) == check:
+                    if items[1] == check or items[1].getmethod(e.namevar) == check:
                         return rowmatrixlist([items[0], True])
                 return self.raisecall([items[1]])
             else:
@@ -3091,99 +3101,107 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to from")
         else:
-            if isinstance(variables[0], classcalc):
+            if isinstance(variables[0], evalwrap):
+                for x in xrange(1, len(variables)):
+                    if isinstance(variables[x], evalwrap):
+                        other = variables[x].obj
+                    else:
+                        other = variables[x]
+                    if not isinstance(other, variables[0].obj):
+                        return False
+            elif isinstance(variables[0], classcalc):
                 for x in xrange(1, len(variables)):
                     if not (isinstance(variables[x], instancecalc) and variables[x].isfrom(variables[0])):
                         return False
             else:
-                check = self.e.typecalc(variables[0])
+                check = e.typecalc(variables[0])
                 for x in xrange(1, len(variables)):
-                    if check != self.e.typecalc(variables[x]):
+                    if check != e.typecalc(variables[x]):
                         return False
             return True
 
     def iserrcall(self, variables):
         """Determines Whether Something Is An Error."""
         for item in variables:
-            if not (isinstance(item, instancecalc) and item.getmethod(self.e.errorvar)):
+            if not (isinstance(item, instancecalc) and item.getmethod(e.errorvar)):
                 return False
         return True
 
     def classcall(self, variables):
         """Converts To A Class."""
-        self.e.overflow = variables[1:]
+        e.overflow = variables[1:]
         if not variables:
-            return classcalc(self.e)
+            return classcalc()
         elif isinstance(variables[0], instancecalc):
             return variables[0].toclass()
         elif isinstance(variables[0], classcalc):
             return variables[0]
         elif isinstance(variables[0], strcalc):
             original = str(variables[0])
-            out = classcalc(self.e)
-            for cmd in self.e.splitdedent(original, lambda x: x.splitlines()):
+            out = classcalc()
+            for cmd in e.splitdedent(original, lambda x: x.splitlines()):
                 out.process(cmd)
             return out
         else:
-            raise ExecutionError("ClassError", "Cannot convert "+self.e.prepare(variables[0], False, True, True)+" to class")
+            raise ExecutionError("ClassError", "Cannot convert "+e.prepare(variables[0], False, True, True)+" to class")
 
     def instancecall(self, variables):
         """Converts To An Instance."""
-        self.e.overflow = variables[1:]
+        e.overflow = variables[1:]
         if not variables:
-            return classcalc(self.e).call([])
+            return classcalc().call([])
         elif isinstance(variables[0], instancecalc):
             return variables[0]
         elif isinstance(variables[0], classcalc):
             return variables[0].toinstance()
         else:
-            raise ExecutionError("ClassError", "Cannot convert "+self.e.prepare(variables[0], False, True, True)+" to instance")
+            raise ExecutionError("ClassError", "Cannot convert "+e.prepare(variables[0], False, True, True)+" to instance")
 
     def namespacecall(self, variables):
         """Converts To A Namespace."""
-        self.e.overflow = variables[1:]
+        e.overflow = variables[1:]
         if not variables:
-            return namespace(self.e)
+            return namespace()
         elif isinstance(variables[0], namespace):
             return variables[0]
         elif isinstance(variables[0], classcalc):
             return namespace(variables[0].e, variables[0].getvars(True))
         else:
-            raise ExecutionError("ClassError", "Cannot convert "+self.e.prepare(variables[0], False, True, True)+" to namespace")
+            raise ExecutionError("ClassError", "Cannot convert "+e.prepare(variables[0], False, True, True)+" to namespace")
 
     def getvalcall(self, variables):
         """Calculates A Variable Without Changing It."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to val")
         else:
-            self.e.setreturned()
-            self.e.overflow = variables[1:]
+            e.setreturned()
+            e.overflow = variables[1:]
             if isinstance(variables[0], strcalc):
                 original = str(variables[0])
             else:
                 raise ExecutionError("ValueError", "Variable names must be strings")
-            if original in self.e.variables:
-                return self.e.funcfind(original)
+            if original in e.variables:
+                return e.funcfind(original)
             else:
                 raise ExecutionError("KeyError", "Could not find "+original+" in variables")
 
     def getparenscall(self, variables):
         """Retreives The Number Of Parentheses."""
-        self.e.setreturned()
-        self.e.overflow = variables
-        return float(len(self.e.parens))
+        e.setreturned()
+        e.overflow = variables
+        return float(len(e.parens))
 
     def getparenvarcall(self, variables):
         """Gets The Value Of A Paren."""
-        self.e.setreturned()
+        e.setreturned()
         if not variables:
             variables = [-1]
-        self.e.overflow = variables[1:]
+        e.overflow = variables[1:]
         original = getint(variables[0])
         if original < 0:
-            original += len(self.e.parens)
-        if 0 < original and original < len(self.e.parens):
-            return codestr(self.e.prepare(self.e.getparen(original), False, True), self.e)
+            original += len(e.parens)
+        if 0 < original and original < len(e.parens):
+            return codestr(e.prepare(e.getparen(original), False, True))
         else:
             raise ExecutionError("KeyError", "Could not find "+self.parenchar+str(original)+self.parenchar+" in parens")
 
@@ -3192,14 +3210,14 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to var")
         else:
-            self.e.setreturned()
-            self.e.overflow = variables[1:]
+            e.setreturned()
+            e.overflow = variables[1:]
             if isinstance(variables[0], strcalc):
                 original = str(variables[0])
             else:
                 raise ExecutionError("ValueError", "Variable names must be strings")
-            if original in self.e.variables:
-                return rawstrcalc(self.e.prepare(self.e.variables[original], False, True), self.e)
+            if original in e.variables:
+                return rawstrcalc(e.prepare(e.variables[original], False, True))
             else:
                 raise ExecutionError("KeyError", "Could not find "+original+" in variables")
 
@@ -3208,7 +3226,7 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to copy")
         else:
-            self.e.overflow = variables[1:]
+            e.overflow = variables[1:]
             return getcopy(variables[0])
 
     def getmatrixcall(self, variables):
@@ -3421,9 +3439,9 @@ class evalfuncs(object):
         if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to base")
         else:
-            self.e.overflow = variables[2:]
+            e.overflow = variables[2:]
             base = getnum(variables[0])
-            num = self.e.prepare(variables[1], False, False)
+            num = e.prepare(variables[1], False, False)
             return int(num, base)
 
     def reprstrip(self, inputrepr):
@@ -3437,8 +3455,8 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to bin")
         else:
-            self.e.overflow = variables[1:]
-            return rawstrcalc(self.reprstrip(func(variables[0])), self.e)
+            e.overflow = variables[1:]
+            return rawstrcalc(self.reprstrip(func(variables[0])))
 
     def octcall(self, variables):
         """Performs oct."""
@@ -3485,8 +3503,8 @@ class evalfuncs(object):
                         if isinstance(x, matrix) and x.onlydiag():
                             temp = ""
                             for y in x.getitems():
-                                temp += self.e.prepare(y, True, False)
-                            new.append(rawstrcalc(temp, self))
+                                temp += e.prepare(y, True, False)
+                            new.append(rawstrcalc(temp))
                         else:
                             new.append(x)
                     return new
@@ -3525,8 +3543,8 @@ class evalfuncs(object):
                 if isinstance(out, matrix) and out.onlydiag():
                     new = ""
                     for x in out.getitems():
-                        new += self.e.prepare(x, True, False)
-                    return rawstrcalc(new, self)
+                        new += e.prepare(x, True, False)
+                    return rawstrcalc(new)
                 else:
                     return out
             elif ismatrix(variables[0]):
@@ -3613,13 +3631,13 @@ class evalfuncs(object):
     def typecall(self, variables):
         """Finds Types."""
         if len(variables) == 0:
-            return self.e.typecalc(matrix(0))
+            return e.typecalc(matrix(0))
         elif len(variables) == 1:
-            return self.e.typecalc(variables[0])
+            return e.typecalc(variables[0])
         else:
             out = []
             for x in variables:
-                out.append(self.e.typecalc(x))
+                out.append(e.typecalc(x))
             return diagmatrixlist(out)
 
     def tocall(self, variables, varstrings="xyzwpqrabchjklmABFGHJKMOTUVWXY"):
@@ -3629,12 +3647,12 @@ class evalfuncs(object):
         elif len(variables) == 1:
             if isinstance(variables[0], (strcalc, funcfloat)):
                 variables[0] = self.typestr(variables[0])
-                if variables[0] in self.e.variables and isinstance(self.e.variables[variables[0]], funcfloat):
-                    return self.e.variables[variables[0]]
-                elif variables[0] in self.e.variables and (istext(variables[0]) or isnum(variables[0]) or isinstance(self.e.variables[variables[0]], bool) or (iseval(value) and not hascall(value))):
-                    return strfloat(variables[0], self.e, [])
+                if variables[0] in e.variables and isinstance(e.variables[variables[0]], funcfloat):
+                    return e.variables[variables[0]]
+                elif variables[0] in e.variables and (istext(variables[0]) or isnum(variables[0]) or isinstance(e.variables[variables[0]], bool) or (iseval(value) and not hascall(value))):
+                    return strfloat(variables[0], [])
                 else:
-                    return strfunc(variables[0]+":"+varstrings[0], self.e, [varstrings[0]])
+                    return strfunc(variables[0]+":"+varstrings[0], [varstrings[0]])
             elif isinstance(variables[0], matrix):
                 funcs = []
                 for t in variables[0].getitems():
@@ -3652,7 +3670,7 @@ class evalfuncs(object):
                     out += funcs[x]+":"+args[x]+","
                 if len(out) > 0:
                     out = out[:-1]
-                return strfunc(out, self.e, args)
+                return strfunc(out, args)
             else:
                 raise ExecutionError("TypeError", "Unable to create a converter for "+repr(variables[0]))
         else:
@@ -3660,7 +3678,7 @@ class evalfuncs(object):
 
     def typestr(self, item):
         """Processes A Type Identifier."""
-        item = self.e.prepare(item, False, False)
+        item = e.prepare(item, False, False)
         if item in self.typefuncs:
             return self.typefuncs[item]
         else:
@@ -3669,23 +3687,26 @@ class evalfuncs(object):
     def codecall(self, variables):
         """Converts To Code."""
         if not variables:
-            return codestr("", self.e)
+            return codestr("")
         else:
-            self.e.overflow = variables[1:]
-            return codestr(self.e.prepare(variables[0], True, False), self.e)
+            e.overflow = variables[1:]
+            if isinstance(variables[0], strcalc):
+                return codestr(str(variables[0]))
+            else:
+                return codestr(e.prepare(variables[0], False, True))
 
     def strcall(self, variables):
         """Finds A String."""
         out = []
         for x in variables:
-            out.append(self.e.prepare(x, True, False))
-        return rawstrcalc(strlist(out, ""), self.e)
+            out.append(e.prepare(x, True, False))
+        return rawstrcalc(strlist(out, " "))
 
     def reprcall(self, variables):
         """Finds A Representation."""
         if len(variables) != 1:
             variables = diagmatrixlist(variables)
-        return rawstrcalc(self.e.prepare(variables[0], True, True), self.e)
+        return rawstrcalc(e.prepare(variables[0], True, True))
 
     def joincall(self, variables):
         """Joins Variables By A Delimiter."""
@@ -3707,7 +3728,7 @@ class evalfuncs(object):
                 out += [item, delim]
             out.pop()
             if tostring:
-                return rawstrcalc("".join(map(str, out)), self.e)
+                return rawstrcalc("".join(map(str, out)))
             elif len(out) == 1:
                 return out[0]
             else:
@@ -3767,9 +3788,9 @@ class evalfuncs(object):
         out = []
         for x in variables:
             if isinstance(x, codestr):
-                out.append(self.e.calc(str(x), info))
+                out.append(e.calc(str(x), info))
             elif isinstance(x, strcalc):
-                out.append(self.e.calc(str(x), info, -1))
+                out.append(e.calc(str(x), info, -1))
             else:
                 raise ExecutionError("ValueError", "Can't calc non-string values")
         if len(out) == 1:
@@ -3781,9 +3802,9 @@ class evalfuncs(object):
         """Performs calc And Returns null."""
         for x in variables:
             if isinstance(x, codestr):
-                self.e.process(str(x), " | do", top=False)
+                e.process(str(x), " | do", top=False)
             elif isinstance(x, strcalc):
-                self.e.process(str(x), " | do", top=-1)
+                e.process(str(x), " | do", top=-1)
             else:
                 raise ExecutionError("ValueError", "Can't calc non-string values")
         return matrix(0)
@@ -3792,7 +3813,7 @@ class evalfuncs(object):
         """Performs exec."""
         for item in variables:
             if isinstance(item, strcalc):
-                self.e.processor.evaltext(str(item))
+                e.processor.evaltext(str(item))
             else:
                 raise ExecutionError("ValueError", "Can't exec non-string values")
         return matrix(0)
@@ -3802,14 +3823,14 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to fold")
         elif len(variables) == 1:
-            return self.e.getcall(self.e.funcfind(variables[0]))(self.e.variables)
+            return e.getcall(e.funcfind(variables[0]))(e.variables)
         else:
-            func = func or self.e.getcall(self.e.funcfind(variables[0]))
+            func = func or e.getcall(e.funcfind(variables[0]))
             item = variables[1]
             if len(variables) >= 3:
                 start = variables[2]
                 if overflow:
-                    self.e.overflow = variables[3:]
+                    e.overflow = variables[3:]
             else:
                 start = None
             if isinstance(variables[0], strcalc):
@@ -3839,7 +3860,7 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to D")
         else:
             n = 1
-            varname = self.e.varname
+            varname = e.varname
             accuracy = 0.0001
             scaledown = 1.25
             func = variables[0]
@@ -3854,12 +3875,11 @@ class evalfuncs(object):
                 accuracy = float(variables[3])
             if len(variables) > 4:
                 scaledown = float(variables[4])
-                self.e.overflow = variables[5:]
+                e.overflow = variables[5:]
             if isinstance(func, strfunc):
                 if len(func.variables):
                     varname = func.variables.pop(0)
                 return derivfunc(func.funcstr,
-                                 self.e,
                                  personals=func.personals,
                                  name=func.name,
                                  overflow=func.overflow,
@@ -3874,16 +3894,16 @@ class evalfuncs(object):
                                  scaledown=scaledown,
                                  varname=varname)
             elif isinstance(func, funcfloat):
-                return derivfuncfloat(func, n, accuracy, scaledown, self.e)
+                return derivfuncfloat(func, n, accuracy, scaledown)
             else:
-                return derivfunc(self.e.prepare(func, False, True), self.e, n=n, accuracy=accuracy, scaledown=scaledown, varname=varname)
+                return derivfunc(e.prepare(func, False, True), n=n, accuracy=accuracy, scaledown=scaledown, varname=varname)
 
     def integcall(self, variables):
         """Returns The Integral Of A Function."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to S")
         else:
-            varname = self.e.varname
+            varname = e.varname
             accuracy = 0.0001
             func = variables[0]
             if len(variables) > 1:
@@ -3893,12 +3913,11 @@ class evalfuncs(object):
                     raise ExecutionError("ValueError", "Variable names must be strings")
             if len(variables) > 2:
                 accuracy = float(variables[2])
-                self.e.overflow = variables[3:]
+                e.overflow = variables[3:]
             if isinstance(func, strfunc):
                 if len(func.variables):
                     varname = func.variables.pop(0)
                 return integfunc(func.funcstr,
-                                 self.e,
                                  personals=func.personals,
                                  name=func.name,
                                  overflow=func.overflow,
@@ -3911,30 +3930,30 @@ class evalfuncs(object):
                                  accuracy=accuracy,
                                  varname=varname)
             elif isinstance(func, funcfloat):
-                return integfuncfloat(func, accuracy, self.e)
+                return integfuncfloat(func, accuracy)
             else:
-                return integfunc(self.e.prepare(func, False, True), self.e, accuracy=accuracy, varname=varname)
+                return integfunc(e.prepare(func, False, True), accuracy=accuracy, varname=varname)
 
     def randcall(self, variables):
         """Returns A Random Number Generator Object."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to d")
         else:
-            self.e.setreturned()
+            e.setreturned()
             stop = getnum(variables[0])
             key = None
             if len(variables) > 1:
-                key = self.e.prepare(variables[1], True, False)
-                self.e.overflow = variables[2:]
-            return rollfunc(stop, self.e, key)
+                key = e.prepare(variables[1], True, False)
+                e.overflow = variables[2:]
+            return rollfunc(stop, key)
 
     def writecall(self, variables):
         """Writes To A File."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to write")
         else:
-            self.e.setreturned()
-            self.e.overflow = variables[2:]
+            e.setreturned()
+            e.overflow = variables[2:]
             if isinstance(variables[0], strcalc):
                 name = str(variables[0])
             else:
@@ -3942,7 +3961,7 @@ class evalfuncs(object):
             if len(variables) == 1:
                 writer = ""
             else:
-                writer = self.e.prepare(variables[1], False, False)
+                writer = e.prepare(variables[1], False, False)
             with openfile(name, "wb") as f:
                 writefile(f, writer)
             return matrix(0)
@@ -3952,46 +3971,46 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to read")
         else:
-            self.e.setreturned()
-            self.e.overflow = variables[1:]
+            e.setreturned()
+            e.overflow = variables[1:]
             if isinstance(variables[0], strcalc):
                 name = str(variables[0])
             else:
                 raise ExecutionError("ValueError", "File names must be strings")
             with openfile(name) as f:
-                return rawstrcalc(readfile(f), self.e)
+                return rawstrcalc(readfile(f))
 
     def purecall(self, variables):
         """Ensures Purity."""
-        pure, self.e.pure = self.e.pure, True
+        pure, e.pure = e.pure, True
         try:
             out = self.docalc(variables)
         finally:
-            self.e.pure = pure
+            e.pure = pure
         return out
 
     def defcall(self, variables):
         """Defines A Variable."""
-        redef, self.e.redef = self.e.redef, True
+        redef, e.redef = e.redef, True
         try:
             out = self.docalc(variables)
         finally:
-            self.e.redef = redef
+            e.redef = redef
         return out
 
     def globalcall(self, variables):
         """Defines A Global Variable."""
-        self.e.useclass = (self.e.useclass,)
+        e.useclass = (e.useclass,)
         try:
             out = self.docalc(variables)
         finally:
-            self.e.useclass = self.e.useclass[0]
+            e.useclass = e.useclass[0]
         return out
 
     def aliascall(self, variables):
         """Makes Aliases."""
-        self.e.setreturned()
-        self.e.overflow = variables[2:]
+        e.setreturned()
+        e.overflow = variables[2:]
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to alias")
         elif len(variables) == 1:
@@ -3999,9 +4018,9 @@ class evalfuncs(object):
                 key = str(variables[0])
             else:
                 raise ExecutionError("ValueError", "Aliases must be strings")
-            if key in self.e.aliases:
-                out = rawstrcalc(self.e.aliases[key], self.e)
-                del self.e.aliases[key]
+            if key in e.aliases:
+                out = rawstrcalc(e.aliases[key])
+                del e.aliases[key]
             else:
                 out = matrix(0)
             return out
@@ -4014,15 +4033,15 @@ class evalfuncs(object):
                 value = str(variables[1])
             else:
                 raise ExecutionError("ValueError", "Aliases must be strings")
-            self.e.aliases[key] = value
-            return diagmatrixlist([rawstrcalc(key, self.e), rawstrcalc(value, self.e)])
+            e.aliases[key] = value
+            return diagmatrixlist([rawstrcalc(key), rawstrcalc(value)])
 
     def aliasescall(self, variables):
         """Gets Aliases."""
-        self.e.overflow = variables
-        out = dictionary(self.e)
-        for k,v in self.e.aliases.items():
-            out.store(rawstrcalc(k, self.e), rawstrcalc(v, self.e))
+        e.overflow = variables
+        out = dictionary()
+        for k,v in e.aliases.items():
+            out.store(rawstrcalc(k), rawstrcalc(v))
         return out
 
     def bitnotcall(self, variables):
@@ -4092,7 +4111,7 @@ class evalfuncs(object):
         if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to lshift")
         else:
-            self.e.overflow = variables[2:]
+            e.overflow = variables[2:]
             q,r = divmod(variables[0], variables[1])
             return diagmatrixlist([q,r])
 
@@ -4103,27 +4122,27 @@ class evalfuncs(object):
         elif len(variables) == 1:
             return collapse(variables[0])
         else:
-            return self.e.getcall(variables[0])(variables[1:])
+            return e.getcall(variables[0])(variables[1:])
 
     def paircall(self, variables):
         """Creates A Pair."""
         if not variables:
-            return pair(self.e, matrix(0), matrix(0))
+            return pair(matrix(0), matrix(0))
         elif len(variables) == 1:
-            return pair(self.e, variables[0], matrix(0))
+            return pair(variables[0], matrix(0))
         else:
-            self.e.overflow = variables[2:]
-            return pair(self.e, variables[0], variables[1])
+            e.overflow = variables[2:]
+            return pair(variables[0], variables[1])
 
     def dictcall(self, variables):
         """Creates A Dictionary."""
         if not variables:
-            return dictionary(self.e)
+            return dictionary()
         elif len(variables) == 1:
             if isinstance(variables[0], dictionary):
                 return variables[0]
             else:
-                raise TypeError("Received non-dictionary object "+self.e.prepare(variables[0], False, True, True))
+                raise TypeError("Received non-dictionary object "+e.prepare(variables[0], False, True, True))
         else:
             out = []
             for arg in variables:
@@ -4166,7 +4185,7 @@ class evalfuncs(object):
 
     def runcall(self, variables):
         """Performs run."""
-        self.e.setreturned()
+        e.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to run")
         elif len(variables) == 1:
@@ -4179,10 +4198,10 @@ class evalfuncs(object):
                     original += ".rab"
                 else:
                     raise ExecutionError("IOError", "Could not find file "+str(original))
-            if not self.e.processor.evalfile(original):
+            if not e.processor.evalfile(original):
                 raise ExecutionError("IOError", "Failed to execute file "+str(original))
             else:
-                self.e.processor.dumpdebug(True)
+                e.processor.dumpdebug(True)
         else:
             for arg in variables:
                 self.runcall([arg])
@@ -4193,22 +4212,20 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to require")
         elif len(variables) == 1:
-            self.e.setreturned()
+            e.setreturned()
+            old_e = e
             try:
-                e = self.e.new()
-                self.e.processor.e = e
-                self.e.processor.fresh(None)
-                out = classcalc(e)
+                new_e = old_e.new()
+                new_e.processor.e = new_e
+                new_e.processor.fresh(None)
+                out = classcalc()
                 params = out.begin()
-                e.funcs.runcall(variables)
+                new_e.funcs.runcall(variables)
                 out.end(params)
-            except ExecutionError as err:
-                if err.instance is not None:
-                    err.instance = self.e.deitem(itemstate(err.instance))
-                raise
             finally:
-                self.e.processor.e = self.e
-            return self.e.deitem(itemstate(out))
+                set_e(old_e)
+                old_e.processor.e = old_e
+            return out
         else:
             out = []
             for arg in variables:
@@ -4218,24 +4235,22 @@ class evalfuncs(object):
     def evalcall(self, variables):
         """Performs eval."""
         out = []
+        old_e = e
         try:
-            e = self.e.new()
-            self.e.processor.e = e
-            self.e.processor.fresh(None)
+            new_e = old_e.new()
+            new_e.processor.e = new_e
+            new_e.processor.fresh(None)
             for x in variables:
                 if isinstance(x, codestr):
-                    item = e.calc(str(x), " | eval")
+                    item = new_e.calc(str(x), " | eval")
                 elif isinstance(x, strcalc):
-                    item = e.calc(str(x), " | eval", -1)
+                    item = new_e.calc(str(x), " | eval", -1)
                 else:
                     raise ExecutionError("ValueError", "Can't eval non-string values")
-                out.append(self.e.deitem(itemstate(item)))
-        except ExecutionError as err:
-            if err.instance is not None:
-                err.instance = self.e.deitem(itemstate(err.instance))
-            raise
+                out.append(item)
         finally:
-            self.e.processor.e = self.e
+            set_e(old_e)
+            old_e.processor.e = old_e
         if len(out) == 1:
             return out[0]
         else:
@@ -4246,66 +4261,53 @@ class evalfuncs(object):
         out = []
         for x in variables:
             if isinstance(x, codestr):
-                test = self.e.calc(str(x), " | assertion")
+                test = e.calc(str(x), " | assertion")
             elif isinstance(x, strcalc):
-                test = self.e.calc(str(x), " | assertion", -1)
+                test = e.calc(str(x), " | assertion", -1)
             else:
                 raise ExecutionError("ValueError", "Can't calc non-string values")
             if test:
                 out.append(test)
             else:
-                raise ExecutionError("AssertionError", "Assertion failed that "+str(x)+" (Result = "+self.e.prepare(test, False, True, True)+")")
+                raise ExecutionError("AssertionError", "Assertion failed that "+str(x)+" (Result = "+e.prepare(test, False, True, True)+")")
         if len(out) == 1:
             return out[0]
         else:
             return diagmatrixlist(out)
 
-    def installcall(self, variables):
-        """Performs install."""
-        self.setreturned()
+    def importcall(self, variables):
+        """Performs import."""
+        e.setreturned()
         if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
-        elif len(variables) == 1:
-            if isinstance(variables[0], strcalc):
-                name = str(variables[0])
-            else:
-                raise ExecutionError("ValueError", "File names must be strings")
-            name = self.prepare(variables[0], False, False)
-            try:
-                impbaseclass = dirimport(inputstring)
-            except IOError:
-                raise ExecutionError("IOError", "Could not find for install file "+name)
-            else:
+        else:
+            for item in variables:
+                if isinstance(variables[0], strcalc):
+                    name = str(variables[0])
+                else:
+                    raise ExecutionError("ValueError", "Module names must be strings")
+                impbaseclass = doimport(name)
+                funcname = "import:`"+name+"`"
                 if hasattr(impbaseclass, "__rabbit__"):
-                    impclass = impbaseclass.__rabbit__
-                    funcname = "install`"+name+"`"
+                    impclass = impbaseclass.__rabbit__(e)
                     if impclass is None:
                         return matrix(0)
                     elif iseval(impclass):
-                        return impclass(self)
+                        return impclass
                     elif "`" in name:
                         raise ExecutionError("ValueError", "Cannot install files with a backtick in them")
                     elif hascall(impclass):
-                        return funcfloat(self.e.getcall(impclass(self)), self, funcname)
+                        return funcfloat(e.getcall(impclass), funcname)
+                    elif hasattr(impclass, "precall"):
+                        return usefunc(impclass.precall, funcname)
+                    elif hasattr(impclass, "unicall"):
+                        return unifunc(impclass.unicall, funcname)
                     else:
-                        try:
-                            impclass.precall
-                        except AttributeError:
-                            try:
-                                impclass.unicall
-                            except AttributeError:
-                                return impclass(self)
-                            else:
-                                return unifunc(impclass(self).unicall, self, funcname)
-                        else:
-                            return usefunc(impclass(self).precall, self, funcname)
+                        return evalwrap(impclass, funcname)
+                elif "`" in name:
+                    raise ExecutionError("ValueError", "Cannot import files with a backtick in them")
                 else:
-                    raise ExecutionError("ImportError", "Found no __rabbit__ variable in file "+name)
-        else:
-            out = []
-            for x in variables:
-                out.append(self.installcall([x]))
-            return diagmatrixlist(out)
+                    return evalwrap(impbaseclass, funcname)
 
     def insidecall(self, variables):
         """Performs inside."""
@@ -4319,7 +4321,7 @@ class evalfuncs(object):
                 if hasattr(variables[1], "inside_exit"):
                     outside = variables[1].inside_exit
                 else:
-                    outside = self.e.getcall(variables[1])
+                    outside = e.getcall(variables[1])
             elif hasattr(inside, "inside_exit"):
                 outside = inside.inside_exit
             else:
@@ -4327,7 +4329,7 @@ class evalfuncs(object):
             if hasattr(inside, "inside_enter"):
                 inside = inside.inside_enter
             else:
-                inside = self.e.getcall(inside)
+                inside = e.getcall(inside)
             def _outside(variables):
                 arg = inside(args)
                 out = None
@@ -4341,26 +4343,26 @@ class evalfuncs(object):
                             return outside([arg, out])
                     elif not isnull(arg):
                         if out is None:
-                            return self.e.getcall(arg)([])
+                            return e.getcall(arg)([])
                         else:
-                            return self.e.getcall(arg)([out])
+                            return e.getcall(arg)([out])
                     else:
                         return out
-            return funcfloat(_outside, self.e, "inside:("+strlist(variables, "):(", lambda x: self.e.prepare(x, False, True))+")", reqargs=1)
+            return funcfloat(_outside, "inside:("+strlist(variables, "):(", lambda x: e.prepare(x, False, True))+")", reqargs=1)
 
     def unusedcall(self, variables):
         """Gets Unused Variables."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to unused")
         else:
-            self.e.setreturned()
-            self.e.overflow = variables[1:]
+            e.setreturned()
+            e.overflow = variables[1:]
             if isinstance(variables[0], classcalc):
                 out = {}
                 for k,v in variables[0].getvars(True).items():
                     if istext(v):
                         out[k] = v
-                return classcalc(self.e, out)
+                return classcalc(out)
             else:
                 raise TypeError("Only classes can have their variables analyzed")
 
@@ -4369,42 +4371,42 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to wrap")
         else:
-            ref = "wrap:("+self.e.prepare(variables[0], False, True)+")"
+            ref = "wrap:("+e.prepare(variables[0], False, True)+")"
             if len(variables) > 1:
-                ref += ":("+self.e.prepare(variables[1], False, True)+")"
+                ref += ":("+e.prepare(variables[1], False, True)+")"
                 safe = []
                 for item in getmatrix(variables[1]).getitems():
                     if isinstance(item, strcalc):
                         out.append(str(item))
                     else:
                         raise ExecutionError("ValueError", "Method names must be strings")
-                self.e.overflow = variables[2:]
+                e.overflow = variables[2:]
             else:
                 safe = None
             if not isinstance(variables[0], evalwrap):
-                return evalwrap(self.e, variables[0], ref, safe)
+                return evalwrap(variables[0], ref, safe)
             elif safe is None:
                 return variables[0]
             else:
-                self.e.setreturned()
-                return evalwrap(self.e, variables[0].obj, ref, safe)
+                e.setreturned()
+                return evalwrap(variables[0].obj, ref, safe)
 
     def functioncall(self, variables):
         """Converts To A Function."""
         if not variables:
-            return strfunc("", self.e)
+            return strfunc("")
         elif not isinstance(variables[0], strcalc):
-            self.e.overflow = variables[1:]
+            e.overflow = variables[1:]
             if isfunc(variables[0]):
                 return variables[0]
             else:
                 raise ExecutionError("ValueError", "Could not convert to function "+self.prepare(variables[0]))
         elif len(variables) == 1:
-            return strfloat(str(variables[0]), self.e)
+            return strfloat(str(variables[0]))
         elif isinstance(variables[1], strcalc):
-            self.e.overflow = variables[2:]
-            params, personals, allargs, reqargs, lexical = self.e.eval_set(str(variables[1]))
-            return strfunc(str(variables[0]), self.e, params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical)
+            e.overflow = variables[2:]
+            params, personals, allargs, reqargs, lexical = e.eval_set(str(variables[1]))
+            return strfunc(str(variables[0]), params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical)
         else:
             raise ExecutionError("ValueError", "Variable lists must be strings")
 
@@ -4416,7 +4418,7 @@ class evalfuncs(object):
             item = variables[0]
         else:
             item = diagmatrixlist(variables)
-        return self.e.frompython(itemstate(item))
+        return e.frompython(itemstate(item))
 
     def fromstatecall(self, variables):
         """Converts From A State."""
@@ -4426,4 +4428,47 @@ class evalfuncs(object):
             item = variables[0]
         else:
             item = diagmatrixlist(variables)
-        return self.e.deitem(self.e.topython(item))
+        return e.deitem(e.topython(item))
+
+    def pipecall(self, variables):
+        """Wraps A Python Global."""
+        if not variables:
+            return e.frompython(globals().keys(), "wrap()")
+        else:
+            e.overflow = variables[1:]
+            if isinstance(variables[0], strcalc):
+                key = str(variables[0])
+                search = globals()
+                if key in search:
+                    def _ref():
+                        return "wrap:`"+key+"`"
+                    return e.frompython(search[key], _ref)
+                else:
+                    raise ExecutionError("AttributError", "Python has no variable "+key)
+            else:
+                raise ExecutionError("ValueError", "Variable names must be strings")
+
+    def pythonevalcall(self, variables):
+        """Wraps Python eval."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to python")
+        else:
+            out = []
+            for item in variables:
+                if isinstance(item, strcalc):
+                    inputstring = basicformat(item)
+                else:
+                    raise ExecutionError("ValueError", "Can only eval strings")
+                out.append(e.frompython(compute(inputstring, builtins=True)))
+            if len(out) == 1:
+                return out[0]
+            else:
+                return diagmatrixlist(out)
+
+    def getcallcall(self, variables):
+        """Wraps getcall."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to caller")
+        else:
+            e.overflow = variables[1:]
+            return evalwrap(e.getcall(variables[0]), "caller:("+e.prepare(variables[0], False, True)+")")

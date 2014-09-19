@@ -54,6 +54,7 @@ class matrix(mctobject):
                 out[-1].append(itemstate(item))
         return ("matrix", out, self.y, self.x, self.converter, self.onlydiag())
 
+    @rabbit
     def new(self, y=None, x=None, fake=None):
         """Creates A New Matrix With The Same Basic Attributes."""
         if fake is None:
@@ -97,12 +98,14 @@ class matrix(mctobject):
         """Stores A Value."""
         self.a[int(y)][int(x)] = self.prepare(v)
 
+    @rabbit
     def retrieve(self, y=0, x=None):
         """Retrieves A Value."""
         if x is None:
             x = y
         return self.a[int(y)][int(x)]
 
+    @rabbit
     def items(self):
         """Returns A List Of All Items In A Matrix."""
         out = []
@@ -110,9 +113,10 @@ class matrix(mctobject):
             out.append(self.retrieve(y, x))
         return out
 
+    @rabbit
     def trans(self):
         """Finds The Transpose."""
-        out = self.copy()
+        out = getcopy(self)
         out.flip()
         return out
 
@@ -129,22 +133,27 @@ class matrix(mctobject):
         self.y = x
         self.x = y
 
+    @rabbit
     def __len__(self):
         """Performs len."""
         return self.y*self.x
 
+    @rabbit
     def __repr__(self):
         """Gets A Representation."""
         return str(self.a)
 
+    @rabbit
     def __str__(self):
         """Performs str."""
         return strlist(self.a, "\n")
 
+    @rabbit
     def __getitem__(self, y):
         """Retrieves A Row."""
         return self.a[y][:]
 
+    @rabbit
     def __mul__(self, other):
         """Performs Multiplication."""
         if isinstance(other, matrix):
@@ -182,6 +191,7 @@ class matrix(mctobject):
                 self.store(y, x, self.retrieve(y, x)*other)
         return self
 
+    @rabbit
     def __add__(self, other):
         """Performs Addition."""
         if isinstance(other, matrix):
@@ -192,7 +202,7 @@ class matrix(mctobject):
             else:
                 raise IndexError("Matrix addition invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
         elif other == 0:
-            out = self.copy()
+            out = getcopy(self)
         elif self.onlydiag():
             length = self.lendiag()
             out = self.new(length, length)
@@ -221,12 +231,13 @@ class matrix(mctobject):
                 self.store(y, x, self.retrieve(y, x)+other)
         return self
 
+    @rabbit
     def __pow__(self, other):
         """Performs Exponentiation."""
         if hasnum(other):
             other = int(other)
             if other > 0:
-                out = self.copy()
+                out = getcopy(self)
                 for x in xrange(1, other):
                     out *= self
                 return out
@@ -253,6 +264,7 @@ class matrix(mctobject):
         else:
             raise TypeError("Matrix exponentiation invalid with "+repr(other))
 
+    @rabbit
     def __div__(self, other):
         """Performs Division."""
         if hasnum(other):
@@ -272,14 +284,7 @@ class matrix(mctobject):
         else:
             raise TypeError("Matrix division invalid with "+repr(other))
 
-    def __imod__(self, other):
-        """Performs Modulus In-Place."""
-        if isinstance(other, matrix):
-            self = self.cross(other)
-        else:
-            self.code(lambda x: x%other)
-        return self
-
+    @rabbit
     def __mod__(self, other):
         """Performs Modulus."""
         if isinstance(other, matrix):
@@ -290,6 +295,15 @@ class matrix(mctobject):
                 out.store(y, x, self.retrieve(y, x)%other)
         return out
 
+    def __imod__(self, other):
+        """Performs Modulus In-Place."""
+        if isinstance(other, matrix):
+            self = self.cross(other)
+        else:
+            self.code(lambda x: x%other)
+        return self
+
+    @rabbit
     def __abs__(self):
         """Performs abs."""
         out = self**2.0
@@ -297,6 +311,7 @@ class matrix(mctobject):
             out = sum(out.items())
         return out**0.5
 
+    @rabbit
     def entries(self):
         """Returns A List Of Items With Coordinates."""
         out = []
@@ -304,6 +319,7 @@ class matrix(mctobject):
             out.append((y,x,self.retrieve(y,x)))
         return out
 
+    @rabbit
     def coords(self):
         """Returns A List Of Coordinates."""
         out = []
@@ -312,6 +328,7 @@ class matrix(mctobject):
                 out.append((y,x))
         return out
 
+    @rabbit
     def scaledrow(self, y, scaler=1.0):
         """Retrieves A Scaled Row."""
         out = self[y]
@@ -329,6 +346,7 @@ class matrix(mctobject):
         for x in xrange(0, self.x):
             self.store(y,x, self.retrieve(y,x)+addlist[x])
 
+    @rabbit
     def addedrow(self, y, addlist):
         """Retrieves A Row Added With A List."""
         out = self[y]
@@ -366,13 +384,15 @@ class matrix(mctobject):
         self.delrow(x)
         self.flip()
 
+    @rabbit
     def minor(self, y, x):
         """Returns The Minor Matrix Without The Given Row And Column."""
-        out = self.copy()
+        out = getcopy(self)
         out.delrow(y)
         out.delcol(x)
         return out
 
+    @rabbit
     def dot(self, other):
         """Finds The Dot Product With Another Matrix."""
         if self.onlyrow() and other.onlyrow() and self.x == other.x:
@@ -381,13 +401,14 @@ class matrix(mctobject):
         else:
             raise IndexError("Matrix dot product invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
 
+    @rabbit
     def cross(self, other):
         """Finds The Cross Product With Another Matrix."""
         if self.x == other.x:
             if self.x == 0:
                 return other
             else:
-                cross = self.copy()
+                cross = getcopy(self)
                 for row in other.a:
                     cross.newrow(row)
                 cross.newrow([self.prepare(1.0)]*cross.x)
@@ -398,10 +419,12 @@ class matrix(mctobject):
         else:
             raise IndexError("Matrix cross product invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
 
+    @rabbit
     def C(self, y, x):
         """Finds The Cofactor For The Given Row And Column."""
         return self.minor(y,x).det()*(-1.0)**(y+x+2.0)
 
+    @rabbit
     def det(self):
         """Finds The Determinant Of The Matrix."""
         if self.x == 0 or self.y == 0:
@@ -414,6 +437,7 @@ class matrix(mctobject):
                 out += self.retrieve(1,x)*self.C(1,x)
             return out
 
+    @rabbit
     def inv(self, check=True, maxtries=float("inf"), debug=False):
         """Finds The Inverse Of The Matrix."""
         if self.x == 0 or self.y == 0:
@@ -422,7 +446,7 @@ class matrix(mctobject):
             return self*self.retrieve(0,0)**-1.0
         elif not (check and self.det() == 0.0):
             size = self.y
-            out = self.copy()
+            out = getcopy(self)
             out.augment(diagmatrix(size))
             out.keepsolvingfull(False, maxtries, debug)
             return matrixlist(out.getaugment(size), self.converter).trans()
@@ -439,6 +463,14 @@ class matrix(mctobject):
                 self.newrow(row)
         self.flip()
 
+    @rabbit
+    def augmented(self, aug):
+        """Gets The Augmented Matrix."""
+        out = getcopy(self)
+        out.augment(aug)
+        return out
+
+    @rabbit
     def getaugment(self, auglen=None):
         """Gets The Augment."""
         if auglen is None:
@@ -559,6 +591,7 @@ class matrix(mctobject):
         """Swaps Two Rows."""
         self.a[ya], self.a[yb] = self[yb], self[ya]
 
+    @rabbit
     def lendiag(self):
         """Returns The Length Of The Main Diagonal."""
         if self.y <= self.x:
@@ -566,6 +599,7 @@ class matrix(mctobject):
         else:
             return self.x
 
+    @rabbit
     def getdiag(self):
         """Returns The Main Diagonal."""
         out = []
@@ -573,6 +607,7 @@ class matrix(mctobject):
             out.append(self.retrieve(x))
         return out
 
+    @rabbit
     def onlydiag(self):
         """Determines If The Matrix Is A Diagonal List."""
         for y in xrange(0, len(self.a)):
@@ -580,6 +615,7 @@ class matrix(mctobject):
                 return False
         return True
 
+    @rabbit
     def rows(self):
         """Returns The Rows As Matrices."""
         out = []
@@ -589,10 +625,12 @@ class matrix(mctobject):
             out.append(new)
         return out
 
+    @rabbit
     def onlyrow(self):
         """Determines If The Matrix Is A Row List."""
         return self.y <= 1
 
+    @rabbit
     def getitems(self):
         """Gets Items Or The Diagonal."""
         if self.onlydiag():
@@ -600,6 +638,7 @@ class matrix(mctobject):
         else:
             return self.items()
 
+    @rabbit
     def getlen(self):
         """Gets The Length Of Items Or The Diagonal."""
         if self.onlydiag():
@@ -607,21 +646,25 @@ class matrix(mctobject):
         else:
             return len(self)
 
+    @rabbit
     def __round__(self, n=0):
         """Performs round."""
-        out = self.copy()
+        out = getcopy(self)
         for y,x in out.coords():
             out.store(y,x, round(out.retrieve(y,x), n))
         return out
 
+    @rabbit
     def df(self):
         """Finds The Degrees Of Freedom."""
         return (self.x-1.0)*(self.y-1.0)
 
+    @rabbit
     def ymarg(self, y):
         """Calculates A Marginal For The Given Row."""
         return sum(self.a[y])
 
+    @rabbit
     def xmarg(self, x):
         """Calculates A Marginal For The Given Column."""
         self.flip()
@@ -629,10 +672,12 @@ class matrix(mctobject):
         self.flip()
         return out
 
+    @rabbit
     def sum(self):
         """Calculates The Sum Of All The Items."""
         return sum(self.items())
 
+    @rabbit
     def indep(self):
         """Returns Expected Values For A Chi Squared Independence Test."""
         out = self.new()
@@ -640,6 +685,7 @@ class matrix(mctobject):
             out.store(y,x, float(self.xmarg(x)*self.ymarg(y))/float(self.sum()))
         return out
 
+    @rabbit
     def chisq(self, expected=None):
         """Calculates Chi Squared For Independence."""
         if expected is None:
@@ -652,10 +698,12 @@ class matrix(mctobject):
         else:
             raise IndexError("Matrix Chi Squared invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
 
+    @rabbit
     def tomatrix(self):
         """Returns self."""
         return self
 
+    @rabbit
     def evaltype(item):
         """Calculates The Type."""
         if item.onlydiag():
@@ -665,6 +713,7 @@ class matrix(mctobject):
         else:
             return "matrix"
 
+    @rabbit
     def __eq__(self, other):
         """Determines Equality."""
         if isinstance(other, matrix):

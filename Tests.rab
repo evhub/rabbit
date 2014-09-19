@@ -321,6 +321,12 @@ passert:: abs'(2) ?= 2 & abs'(0) ?= 0 & abs'(-2) ?= 2 $
     $ done, out = list:parts
     )
 
+# Method Tests:
+passert:: "a,b,c".split(",") ?= ["a", "b", "c"]
+passert:: ",".join(["a", "b", "c"]) ?= "a,b,c"
+passert:: data(1,2,3).mean() ?= 2
+passert:: data[1,2,3].med() ?= 2
+
 # End Pure Section:
 ---------------------
 
@@ -417,7 +423,15 @@ passert:: max(1,0,5,4) ?= 5
 passert:: min(1,0,5,4) ?= 0
 passert:: 5x^2 ?= 20                $ (do:: x = 2)
 passert:: (function:: x :: x) ?= \x\x
+passert:: deserialize(serialize(class<<>>)) ?= class<<>>
 passert:: wrap(\x\x).getstate() ?= getstate(\x\x)
+passert:: str(1,2) ?= "1 2"
+passert:: python"1+1" ?= 2
+
+# Import Tests:
+math = import:: math
+passert:: math.sin(1) ?= Math.sin(1)
+passert:: math.pi ?= Math.pi
 
 # New Feature Tests:
 passert:: f..g(2) ?= 9                       $ f(x) = x^2 $ g(x) = x+1

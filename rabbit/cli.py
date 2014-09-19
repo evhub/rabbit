@@ -56,15 +56,15 @@ class commandline(mathbase):
         if not top:
             self.e.fresh()
         self.e.makevars({
-            "debug":funcfloat(self.debugcall, self.e, "debug"),
-            "make":funcfloat(self.e.funcs.docalc, self.e, "make", reqargs=1),
-            "cmd":funcfloat(self.e.funcs.docalc, self.e, "cmd", reqargs=1),
-            "save":funcfloat(self.savecall, self.e, "save", reqargs=1),
-            "print":funcfloat(self.printcall, self.e, "print"),
-            "show":funcfloat(self.showcall, self.e, "show"),
-            "ans":funcfloat(self.anscall, self.e, "ans"),
-            "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "exit":usefunc(self.doexit, self.e, "exit")
+            "debug":funcfloat(self.debugcall, "debug"),
+            "make":funcfloat(self.e.funcs.docalc, "make", reqargs=1),
+            "cmd":funcfloat(self.e.funcs.docalc, "cmd", reqargs=1),
+            "save":funcfloat(self.savecall, "save", reqargs=1),
+            "print":funcfloat(self.printcall, "print"),
+            "show":funcfloat(self.showcall, "show"),
+            "ans":funcfloat(self.anscall, "ans"),
+            "grab":funcfloat(self.grabcall, "grab"),
+            "exit":usefunc(self.doexit, "exit")
             })
 
     def doexit(self):
@@ -73,8 +73,8 @@ class commandline(mathbase):
         self.on = False
 
     def fatalerror(self):
-        """Exits Upon Fatal Error."""
-        self.on = False
+        """Has A Fatal Error."""
+        self.e.setreturned()
 
     def start(self):
         """Starts The Command Line Main Loop."""
@@ -87,7 +87,7 @@ class commandline(mathbase):
                 print(addcolor("\n<!> KeyboardInterrupt: Action has been terminated, to quit type exit()", self.e.color))
             except EOFError as detail:
                 print(addcolor("\n<!!> EOFInterrupt: Program has been terminated", self.e.color))
-                self.fatalerror()
+                selfon = False
 
     def handler(self, original, old=None):
         """Handles Raw Input."""
@@ -104,7 +104,7 @@ class commandline(mathbase):
                 return whole
             else:
                 if self.e.insideouter(old):
-                    old = 'raise("SyntaxError", "Unmatched tokens in "+ ' + self.e.prepare(rawstrcalc(old, self.e), False, True) + ' )'
+                    old = 'raise("SyntaxError", "Unmatched tokens in "+ ' + self.e.prepare(rawstrcalc(old), False, True) + ' )'
                 return old+"\n"+cmd
         elif fcmd and endswithany(fcmd, self.e.multiargops):
             return whole

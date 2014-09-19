@@ -119,3 +119,8 @@ def search(directory, symlinks=True):
 def openphoto(filename):
     """Opens An Image File."""
     return Tkinter.PhotoImage(file=str(filename))
+
+def doimport(modname):
+    """Imports A Module."""
+    filename, pathname, description = imp.find_module(modname)
+    return imp.load_module(modname, filename, pathname, description)

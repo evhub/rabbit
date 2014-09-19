@@ -20,6 +20,20 @@ from __future__ import with_statement, print_function, absolute_import, unicode_
 
 from .matrix import *
 
+global e
+try:
+    set_e
+except:
+    old_set_e = None
+else:
+    old_set_e = set_e
+def set_e(new_e):
+    """Sets The Evaluator Global."""
+    global e
+    if old_set_e is not None:
+        old_set_e(new_e)
+    e = new_e
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -114,10 +128,12 @@ class negative(numobject):
         """Copies The Negative Object."""
         return negative(getcopy(self.n))
 
+    @rabbit
     def calc(self):
         """Calculates The Negative Object."""
         return -self.n
 
+    @rabbit
     def __iadd__(self, other):
         """Does The Curried Subtraction."""
         return other - self.n
@@ -131,13 +147,12 @@ class funcfloat(numobject):
     allargs = "__"
     reqargs = -1
 
-    def __init__(self, func, e, funcstr=None, reqargs=None, memoize=None, memo=None):
+    def __init__(self, func, funcstr=None, reqargs=None, memoize=None, memo=None):
         """Constructs The Float Function."""
-        self.e = e
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = self.e.unusedarg()
+            self.funcstr = e.unusedarg()
         if memoize is not None:
             self.memoize = memoize
         if memo is None:
@@ -154,12 +169,14 @@ class funcfloat(numobject):
 
     def copy(self):
         """Returns A Copy Of The Float Function."""
-        return funcfloat(self.base_func, self.e, self.funcstr, self.reqargs, self.memoize, self.memo)
+        return funcfloat(self.base_func, self.funcstr, self.reqargs, self.memoize, self.memo)
 
+    @rabbit
     def __hash__(self):
         """Returns A Hash."""
         return hash(self.funcstr)
 
+    @rabbit
     def keyhash(self, args):
         """Creates An Argument Hash."""
         if islist(args) or isinstance(args, tuple):
@@ -188,19 +205,19 @@ class funcfloat(numobject):
             if arghash in self.memo:
                 return self.memo[arghash]
         if self.memoize:
-            returned = self.e.returned
-            self.e.setreturned(False)
+            returned = e.returned
+            e.setreturned(False)
             try:
                 out = self.base_func(*args, **kwargs)
             except:
                 raise
             else:
-                if not returned and not self.e.returned:
+                if not returned and not e.returned:
                     if arghash is None:
                         arghash = (self.keyhash(args), self.keyhash(kwargs))
                     self.memo[arghash] = out
             finally:
-                self.e.returned = self.e.returned or returned
+                e.returned = e.returned or returned
         else:
             out = self.base_func(*args, **kwargs)
         if out is not None:
@@ -210,6 +227,7 @@ class funcfloat(numobject):
         else:
             raise ExecutionError("PythonError", "Functions should never return Python None")
 
+    @rabbit
     def calc(self, variables=None):
         """Calculates The Float Function."""
         if variables is None:
@@ -234,8 +252,9 @@ class funcfloat(numobject):
         old_func = self.func
         self.func = lambda variables: old_func([arg]+variables)
         self.reqargs -= 1
-        self.funcstr += ":("+self.e.prepare(arg, False, True)+")"
+        self.funcstr += ":("+e.prepare(arg, False, True)+")"
 
+    @rabbit
     def __str__(self):
         """Retrieves The Function String."""
         return self.funcstr
@@ -245,57 +264,62 @@ class funcfloat(numobject):
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.funcstr+"("+self.allargs+"))+"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.funcstr+"("+self.allargs+"))+"+e.wrap(other), [self.allargs], {self.funcstr:self})
 
     def __idiv__(self, other):
         """Performs Division."""
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.funcstr+"("+self.allargs+"))/"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.funcstr+"("+self.allargs+"))/"+e.wrap(other), [self.allargs], {self.funcstr:self})
 
     def __imul__(self, other):
         """Performs Multiplication."""
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.funcstr+"("+self.allargs+"))*"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.funcstr+"("+self.allargs+"))*"+e.wrap(other), [self.allargs], {self.funcstr:self})
 
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.funcstr+"("+self.allargs+"))^"+self.e.wrap(other), self.e, [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.funcstr+"("+self.allargs+"))^"+e.wrap(other), [self.allargs], {self.funcstr:self})
 
+    @rabbit
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"+("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc(e.wrap(other)+"+("+self.funcstr+"("+self.allargs+"))", [self.allargs], {self.funcstr:self})
 
+    @rabbit
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"^("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc(e.wrap(other)+"^("+self.funcstr+"("+self.allargs+"))", [self.allargs], {self.funcstr:self})
 
+    @rabbit
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"/("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc(e.wrap(other)+"/("+self.funcstr+"("+self.allargs+"))", [self.allargs], {self.funcstr:self})
 
+    @rabbit
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"*("+self.funcstr+"("+self.allargs+"))", self.e, [self.allargs], {self.funcstr:self})
+            return strfunc(e.wrap(other)+"*("+self.funcstr+"("+self.allargs+"))", [self.allargs], {self.funcstr:self})
 
+    @rabbit
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, funcfloat) and not isinstance(other, strfunc):
@@ -310,14 +334,13 @@ class strfunc(funcfloat):
     personalsvar = "__class__"
     method = None
 
-    def __init__(self, funcstr, e, variables=None, personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None, method=None, lexical=True):
+    def __init__(self, funcstr, variables=None, personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None, method=None, lexical=True):
         """Creates A Callable String Function."""
-        self.e = e
-        self.funcstr = self.e.namefind(str(funcstr))
+        self.funcstr = e.namefind(str(funcstr))
         if name:
             self.name = str(name)
         else:
-            self.name = self.e.unusedarg()
+            self.name = e.unusedarg()
         if allargs is not None:
             self.allargs = str(allargs)
         if variables is None:
@@ -353,8 +376,8 @@ class strfunc(funcfloat):
             if not lexical:
                 parentvars = {}
             else:
-                parentvars = self.e.variables.copy()
-            self.personals = instancecalc(self.e, childvars, namespace(self.e, parentvars, selfvar=self.personalsvar), top=False, selfvar=self.personalsvar, parentvar=self.snapshotvar)
+                parentvars = e.variables.copy()
+            self.personals = instancecalc(childvars, namespace(parentvars, selfvar=self.personalsvar), top=False, selfvar=self.personalsvar, parentvar=self.snapshotvar)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -366,7 +389,7 @@ class strfunc(funcfloat):
 
     def copy(self):
         """Copies The String Function."""
-        return strfunc(self.funcstr, self.e, self.variables, getcopy(self.personals), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, False)
+        return strfunc(self.funcstr, self.variables, getcopy(self.personals), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, False)
 
     def calc(self, personals=None):
         """Calculates The String."""
@@ -383,26 +406,26 @@ class strfunc(funcfloat):
         funcstr = self.funcstr
         out = None
         while out is None:
-            if self.e.tailing and self.e.all_clean:
-                newvars = self.e.variables.copy()
+            if e.tailing and e.all_clean:
+                newvars = e.variables.copy()
                 newvars.update(variables)
                 raise TailRecursion(funcstr, newvars)
             else:
-                cleaned = self.e.clean_begin(True, True)
-                tailing, self.e.tailing = self.e.tailing, True
-                oldvars = self.e.setvars(variables)
+                cleaned = e.clean_begin(True, True)
+                tailing, e.tailing = e.tailing, True
+                oldvars = e.setvars(variables)
                 try:
-                    out = self.e.calc(funcstr, " \\>")
+                    out = e.calc(funcstr, " \\>")
                 except TailRecursion as params:
-                    if not self.e.returned and funcstr == params.funcstr and variables == params.variables:
+                    if not e.returned and funcstr == params.funcstr and variables == params.variables:
                         raise ExecutionError("LoopError", "Illegal infinite recursive loop in "+funcstr)
                     else:
                         funcstr = params.funcstr
                         variables = params.variables
                 finally:
-                    self.e.tailing = tailing
-                    self.e.clean_end(cleaned)
-                    self.e.setvars(oldvars)
+                    e.tailing = tailing
+                    e.clean_end(cleaned)
+                    e.setvars(oldvars)
         return out
 
     def call(self, variables):
@@ -418,7 +441,7 @@ class strfunc(funcfloat):
         else:
             allvars = diagmatrixlist(variables)
             if self.overflow:
-                items, self.e.overflow = useparams(variables, self.variables, matrix(0))
+                items, e.overflow = useparams(variables, self.variables, matrix(0))
             else:
                 items, _ = useparams(variables, self.variables, matrix(0))
             items[self.allargs] = allvars
@@ -439,60 +462,60 @@ class strfunc(funcfloat):
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.name+":"+strlist(self.variables,":")+")+"+self.e.wrap(other), self.e, self.variables, {self.name:self})
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")+"+e.wrap(other), self.variables, {self.name:self})
 
     def __idiv__(self, other):
         """Performs Division."""
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.name+":"+strlist(self.variables,":")+")/"+self.e.wrap(other), self.e, self.variables, {self.name:self})
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")/"+e.wrap(other), self.variables, {self.name:self})
 
     def __imul__(self, other):
         """Performs Multiplication."""
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.name+":"+strlist(self.variables,":")+")*"+self.e.wrap(other), self.e, self.variables, {self.name:self})
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")*"+e.wrap(other), self.variables, {self.name:self})
 
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.name+":"+strlist(self.variables,":")+")^"+self.e.wrap(other), self.e, self.variables, {self.name:self})
+            return strfunc("("+self.name+":"+strlist(self.variables,":")+")^"+e.wrap(other), self.variables, {self.name:self})
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"+("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+            return strfunc(e.wrap(other)+"+("+self.name+":"+strlist(self.variables,":")+")", self.variables, {self.name:self})
 
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"^("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+            return strfunc(e.wrap(other)+"^("+self.name+":"+strlist(self.variables,":")+")", self.variables, {self.name:self})
 
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"/("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+            return strfunc(e.wrap(other)+"/("+self.name+":"+strlist(self.variables,":")+")", self.variables, {self.name:self})
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
         if isnull(other):
             return self
         else:
-            return strfunc(self.e.wrap(other)+"*("+self.name+":"+strlist(self.variables,":")+")", self.e, self.variables, {self.name:self})
+            return strfunc(e.wrap(other)+"*("+self.name+":"+strlist(self.variables,":")+")", self.variables, {self.name:self})
 
     def find(self):
         """Simplifies The Function String."""
-        self.funcstr = self.e.find(self.funcstr, False)
+        self.funcstr = e.find(self.funcstr, False)
 
     def getvars(self):
         """Returns The Original Variable List."""
@@ -572,7 +595,7 @@ class strfloat(strfunc):
     def __init__(self, *args, **kwargs):
         """Initializes The String Float."""
         strfunc.__init__(self, *args, **kwargs)
-        test = self.e.find(self.funcstr, True)
+        test = e.find(self.funcstr, True)
         if isinstance(test, strfunc):
             self.merge(test)
 
@@ -582,9 +605,8 @@ class strcalc(numobject):
     notmatrix = True
     check = 2
 
-    def __init__(self, calcstr, e):
+    def __init__(self, calcstr):
         """Initializes An Evaluator String."""
-        self.e = e
         self.calcstr = ""
         func = False
         for x in str(calcstr):
@@ -616,7 +638,7 @@ class strcalc(numobject):
 
     def copy(self):
         """Returns A Copy Of The Evaluator String."""
-        return rawstrcalc(self.calcstr, self.e)
+        return rawstrcalc(self.calcstr)
 
     def getfloat(self):
         """Attempts To Get A Float."""
@@ -625,10 +647,6 @@ class strcalc(numobject):
     def __int__(self):
         """Attempts To Get An Integer."""
         return int(self.calcstr)
-
-    def __round__(self, n=None):
-        """Performs round."""
-        return self
 
     def __repr__(self):
         """Retrieves A Representation."""
@@ -659,13 +677,13 @@ class strcalc(numobject):
     def __iadd__(self, other):
         """Performs Addition."""
         if not isnull(other):
-            self.calcstr += self.e.prepare(other, True, False)
+            self.calcstr += e.prepare(other, True, False)
         return self
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
         if not isnull(other):
-            self.calcstr = self.e.prepare(other, True, False)+self.calcstr
+            self.calcstr = e.prepare(other, True, False)+self.calcstr
         return self
 
     def __idiv__(self, other):
@@ -721,29 +739,29 @@ class strcalc(numobject):
 
     def __contains__(self, other):
         """Performs in."""
-        return self.e.prepare(other, True, False) in self.calcstr
+        return e.prepare(other, True, False) in self.calcstr
 
     def __isub__(self, other):
         """Performs Subtraction."""
-        self.calcstr.replace(self.e.prepare(other, True, False), "")
+        self.calcstr.replace(e.prepare(other, True, False), "")
 
     def tomatrix(self):
         """Returns A Matrix Of The Characters."""
         out = []
         for x in self.calcstr:
-            out.append(strcalc(x, self.e))
+            out.append(rawstrcalc(x))
         return diagmatrixlist(out)
 
     def itemcall(self, params):
         """Performs A Colon Splice."""
         item = self.calcstr
         if len(params) == 0:
-            value = rawstrcalc(item[-1], self)
+            value = rawstrcalc(item[-1])
         elif len(params) == 1:
-            value = rawstrcalc(item[int(params[0])], self)
+            value = rawstrcalc(item[int(params[0])])
         else:
-            value = rawstrcalc(item[int(params[0]):int(params[1])], self)
-            self.e.overflow = params[2:]
+            value = rawstrcalc(item[int(params[0]):int(params[1])])
+            e.overflow = params[2:]
         return value
 
     def getrepr(self, top, bottom, indebug, maxrecursion):
@@ -762,11 +780,17 @@ class strcalc(numobject):
         else:
             raise TypeError("Strings can only be formatted by dictionaries and matrices")
 
+    def getmethod(self, key):
+        """Gets A Method."""
+        if hasattr(self.calcstr, key):
+            return evalwrap(getattr(self.calcstr, key), repr(self)+"."+key, True)
+        else:
+            return None
+
 class rawstrcalc(strcalc):
     """A Raw Evaluator String."""
-    def __init__(self, calcstr, e):
+    def __init__(self, calcstr):
         """Initializes A Raw Evaluator String."""
-        self.e = e
         self.calcstr = str(calcstr)
 
 class codestr(rawstrcalc):
@@ -775,9 +799,8 @@ class codestr(rawstrcalc):
     evaltype = "code"
     check = 1
 
-    def __init__(self, calcstr, e):
+    def __init__(self, calcstr):
         """Initializes A Code Evaluator String."""
-        self.e = e
         self.calcstr = basicformat(calcstr)
 
     def getstate(self):
@@ -786,18 +809,18 @@ class codestr(rawstrcalc):
 
     def copy(self):
         """Returns A Copy Of The Code String."""
-        return codestr(self.calcstr, self.e)
+        return codestr(self.calcstr)
 
     def calc(self):
         """Calculates The Code String."""
-        return self.e.calc(self.calcstr, " ::>")
+        return e.calc(self.calcstr, " ::>")
 
     def call(self, variables):
         """Calls The Code String."""
         if variables is None:
             return self
         else:
-            self.e.overflow = variables
+            e.overflow = variables
             return self.calc()
 
     def getrepr(self, top, bottom, indebug, maxrecursion):
@@ -811,13 +834,12 @@ class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
     allownone = True
 
-    def __init__(self, func, e, funcstr=None, variables=None, extras=None, overflow=True, reqargs=None, evalinclude=False, memoize=None, memo=None):
+    def __init__(self, func, funcstr=None, variables=None, extras=None, overflow=True, reqargs=None, evalinclude=False, memoize=None, memo=None):
         """Creates A Callable Function."""
-        self.e = e
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = self.e.unusedarg()
+            self.funcstr = e.unusedarg()
         self.overflow = bool(overflow)
         if variables is None:
             self.variables = []
@@ -847,13 +869,13 @@ class usefunc(funcfloat):
 
     def copy(self):
         """Copies The Function."""
-        return usefunc(self.base_func, self.e, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, self.memo)
+        return usefunc(self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, self.memo)
 
     def getextras(self):
         """Retrieves Extras."""
         out = self.extras.copy()
         if self.evalinclude:
-            out[self.evalinclude] = self.e
+            out[self.evalinclude] = e
         return out
 
     def curry(self, arg):
@@ -861,51 +883,50 @@ class usefunc(funcfloat):
         self.func = curry(self.func, arg)
         self.variables.pop(0)
         self.reqargs -= 1
-        self.funcstr += ":("+self.e.prepare(arg, False, True)+")"
+        self.funcstr += ":("+e.prepare(arg, False, True)+")"
 
     def call(self, params):
         """Calls The Function."""
         params = varproc(params)
         if params is None:
-            return strfunc(self.funcstr+":"+strlist(self.variables,":"), self.e, self.variables)
+            return strfunc(self.funcstr+":"+strlist(self.variables,":"), self.variables)
         elif len(params) < self.reqargs:
             out = getcopy(self)
             for arg in params:
                 out.curry(arg)
             return out
         elif self.overflow and len(params) > len(self.variables):
-            self.e.overflow = params[len(self.variables):]
+            e.overflow = params[len(self.variables):]
             params = params[:len(self.variables)]
-        return self.e.frompython(self.func(*params, **self.getextras()))
+        return e.frompython(self.func(*params, **self.getextras()))
 
 class unifunc(funcfloat):
     """Universalizes Function Calls."""
-    def __init__(self, precall, e, funcstr=None):
+    def __init__(self, precall, funcstr=None):
         """Constructs The Universalizer."""
-        self.e = e
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = self.e.unusedarg()
+            self.funcstr = e.unusedarg()
         self.store = []
         self.precall = precall
 
     def copy(self):
         """Copies The Universalizer Function."""
-        return unifunc(self.precall, self.e, self.funcstr)
+        return unifunc(self.precall, self.funcstr)
 
     def call(self, args):
         """Performs A Universalized Function Call."""
         args = varproc(args)
         if args is None:
-            otherarg = self.e.unusedarg()
-            return strfunc(self.funcstr+":"+otherarg, self.e, [otherarg])
+            otherarg = e.unusedarg()
+            return strfunc(self.funcstr+":"+otherarg, [otherarg])
         elif islist(args):
             x = args[0]
             if len(args) > 1:
-                self.e.overflow = []
+                e.overflow = []
                 for x in xrange(1, len(args)):
-                    self.e.overflow.append(args[x])
+                    e.overflow.append(args[x])
         x = getint(x)
         try:
             self.store[x]
@@ -914,53 +935,10 @@ class unifunc(funcfloat):
                 self.store.append(self.precall())
         return self.store[x]
 
-class makefunc(funcfloat):
-    """Creates A Normal Single-Variable Evaluator Function."""
-    def __init__(self, func, e, funcstr=None, memoize=None, memo=None):
-        """Initializes The Evaluator Function."""
-        self.e = e
-        if funcstr:
-            self.funcstr = str(funcstr)
-        else:
-            self.funcstr = self.e.unusedarg()
-        if memoize is not None:
-            self.memoize = memoize
-        if memo is None:
-            self.memo = {}
-        else:
-            self.memo = memo
-        self.base_func = func
-
-    def getstate(self):
-        """Returns A Pickleable Reference Object."""
-        if typestr(self.base_func) == "instancemethod":
-            return ("find", self.funcstr)
-        else:
-            return ("makefunc", self.base_func, self.funcstr, self.memoize, getstates(self.memo))
-
-    def copy(self):
-        """Copies The Evaluator Function."""
-        return makefunc(self.base_func, self.e, self.funcstr, self.memoize, self.memo)
-
-    def call(variables):
-        """Calls The Evaluator Function."""
-        variables = varproc(variables)
-        if variables is None:
-            otherarg = self.e.unusedarg()
-            return strfunc(self.funcstr+":"+otherarg, self.e, [otherarg])
-        elif len(variables) == 0:
-            return matrix(0)
-        elif len(variables) == 1:
-            return self.func(variables[0])
-        else:
-            out = []
-            for x in variables:
-                out.append(self.func(x))
-            return diagmatrixlist(out)
-
 class derivbase(object):
     """Holds Methods Used In Derivative Functions."""
 
+    @rabbit
     def calc(self, x=None):
         """Calculates The Derivative Function."""
         items = dict(self.personals)
@@ -969,11 +947,11 @@ class derivbase(object):
         else:
             items[self.variables[0]] = float(x)
             items[self.allargs] = matrix(1,1, x, fake=True)
-            oldvars = self.e.setvars(items)
+            oldvars = e.setvars(items)
             try:
-                out = self.e.calc(self.funcstr, " \\>")
+                out = e.calc(self.funcstr, " \\>")
             finally:
-                self.e.setvars(oldvars)
+                e.setvars(oldvars)
             return out
 
     def call(self, variables):
@@ -984,9 +962,10 @@ class derivbase(object):
         elif len(variables) == 0:
             return matrix(0)
         else:
-            self.e.overflow = variables[1:]
+            e.overflow = variables[1:]
             return self.func(float(variables[0]))
 
+    @rabbit
     def base_func(self, arg):
         """The Base Derivative Function."""
         return deriv(self.calc, arg, self.n, self.accuracy, self.scaledown)
@@ -1001,9 +980,10 @@ class integbase(derivbase):
         elif len(variables) < 2:
             return matrix(0)
         else:
-            self.e.overflow = variables[2:]
+            e.overflow = variables[2:]
             return self.func(float(variables[0]), float(variables[1]))
 
+    @rabbit
     def base_func(self, arg1, arg2):
         """The Base Integral Function."""
         return defint(self.calc, arg1, arg2, self.accuracy)
@@ -1039,7 +1019,6 @@ class derivfunc(derivbase, strfunc):
     def copy(self):
         """Returns A Copy Of The Derivative Function."""
         return derivfunc(self.funcstr,
-                         self.e,
                          self.variables,
                          self.personals,
                          self.name,
@@ -1093,7 +1072,6 @@ class integfunc(integbase, strfunc):
     def copy(self):
         """Returns A Copy Of The Integral Function."""
         return integfunc(self.funcstr,
-                         self.e,
                          self.variables,
                          self.personals,
                          self.name,
@@ -1108,16 +1086,15 @@ class integfunc(integbase, strfunc):
 
 class derivfuncfloat(derivbase, funcfloat):
     """Implements A Derivative Function Of A Fake Function."""
-    def __init__(self, func, n, accuracy, scaledown, e, funcstr=None, memoize=None, memo=None):
+    def __init__(self, func, n, accuracy, scaledown, funcstr=None, memoize=None, memo=None):
         """Creates The Derivative Function."""
-        self.e = e
         self.n = int(n)
         self.accuracy = float(accuracy)
         self.scaledown = float(scaledown)
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = self.e.unusedarg()
+            self.funcstr = e.unusedarg()
         if memoize is not None:
             self.memoize = memoize
         if memo is None:
@@ -1128,8 +1105,9 @@ class derivfuncfloat(derivbase, funcfloat):
 
     def copy(self):
         """Returns A Copy Of The Derivative Float Function."""
-        return integfunc(self.other_func, self.n, self.accuracy, self.scaledown, self.e, self.funcstr, self.memoize, self.memo)
+        return integfunc(self.other_func, self.n, self.accuracy, self.scaledown, self.funcstr, self.memoize, self.memo)
 
+    @rabbit
     def calc(self, x=None):
         """Calculates The Derivative Function."""
         if x is None:
@@ -1139,14 +1117,13 @@ class derivfuncfloat(derivbase, funcfloat):
 
 class integfuncfloat(integbase, funcfloat):
     """Implements An Integral Function Of A Fake Function."""
-    def __init__(self, func, accuracy, e, funcstr=None, memoize=None, memo=None):
+    def __init__(self, func, accuracy, funcstr=None, memoize=None, memo=None):
         """Creates The Integral Float Function."""
-        self.e = e
         self.accuracy = float(accuracy)
         if funcstr:
             self.funcstr = str(funcstr)
         else:
-            self.funcstr = self.e.unusedarg()
+            self.funcstr = e.unusedarg()
         if memoize is not None:
             self.memoize = memoize
         if memo is None:
@@ -1157,7 +1134,7 @@ class integfuncfloat(integbase, funcfloat):
 
     def copy(self):
         """Returns A Copy Of The Integral Function."""
-        return integfuncfloat(self.other_func, self.accuracy, self.e, self.funcstr, self.memoize, self.memo)
+        return integfuncfloat(self.other_func, self.accuracy, self.funcstr, self.memoize, self.memo)
 
 class classcalc(cotobject):
     """Implements An Evaluator Class."""
@@ -1166,9 +1143,8 @@ class classcalc(cotobject):
     doset = False
     selfvar = "__self__"
 
-    def __init__(self, e, variables=None, name=None, selfvar=None, restricted=None):
+    def __init__(self, variables=None, name=None, selfvar=None, restricted=None):
         """Initializes The Class."""
-        self.e = e
         if selfvar is not None:
             self.selfvar = str(selfvar)
         if restricted is None:
@@ -1187,39 +1163,39 @@ class classcalc(cotobject):
 
     def copy(self):
         """Copies The Class."""
-        return classcalc(self.e, getcopy(self.getvars()), selfvar=self.selfvar, restricted=self.restricted)
+        return classcalc(getcopy(self.getvars()), selfvar=self.selfvar, restricted=self.restricted)
 
     def process(self, command, inglobal=False):
         """Processes A Command And Puts The Result In The Variables."""
-        self.calc(command, inglobal, self.e.process)
+        self.calc(command, inglobal, e.process)
 
     def begin(self, inglobal=False):
         """Enters The Class."""
         if inglobal:
-            oldset = self.e.setvars(self.variables)
+            oldset = e.setvars(self.variables)
             oldclass = False
         else:
-            oldclass, self.e.useclass = self.e.useclass, self.selfvar
-            oldset, self.doset = self.doset, self.e.setvars(self.variables)
+            oldclass, e.useclass = e.useclass, self.selfvar
+            oldset, self.doset = self.doset, e.setvars(self.variables)
         return oldset, oldclass
 
     def end(self, params):
         """Exits The Class."""
         oldset, oldclass = params
         if oldclass is False:
-            self.e.setvars(oldset)
+            e.setvars(oldset)
             return True
         else:
-            self.e.setvars(self.doset)
+            e.setvars(self.doset)
             self.doset = oldset
-            self.e.useclass = oldclass
+            e.useclass = oldclass
             return False
 
     def calc(self, command, inglobal=False, func=None):
         """Calculates A String In The Environment Of The Class."""
         if func is None:
-            func = self.e.calc
-        command = self.e.namefind(basicformat(command))
+            func = e.calc
+        command = e.namefind(basicformat(command))
         params = self.begin(inglobal)
         try:
             out = func(command, " | class")
@@ -1254,9 +1230,9 @@ class classcalc(cotobject):
                 if self is v:
                     out += self.selfvar
                 elif maxrecursion <= 0 and isinstance(v, classcalc):
-                    out += self.e.speedyprep(v, False, bottom, indebug, maxrecursion)
+                    out += e.speedyprep(v, False, bottom, indebug, maxrecursion)
                 else:
-                    out += self.e.prepare(v, False, True, indebug, maxrecursion)
+                    out += e.prepare(v, False, True, indebug, maxrecursion)
             if top:
                 out += "\n"
             else:
@@ -1271,26 +1247,26 @@ class classcalc(cotobject):
 
     def store(self, key, value, bypass=False, name=None):
         """Stores An Item."""
-        test = basicformat(self.e.prepare(key, False, False))
+        test = basicformat(e.prepare(key, False, False))
         if test in self.restricted:
             raise ExecutionError("RedefinitionError", "The "+test+" variable cannot be redefined")
-        elif not bypass and not self.e.validvar(test):
-            raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
+        elif not bypass and not e.validvar(test):
+            raise ExecutionError("ClassError", "Could not store "+test+" in "+e.prepare(self, False, True, True))
         else:
             if name is not None and isinstance(value, funcfloat) and not isinstance(value, strfunc):
                 value.funcstr = str(name)+"."+value.funcstr
             self.variables[test] = value
             if self.doset:
-                self.doset[test] = haskey(self.e.variables, test)
-                self.e.variables[test] = self.variables[test]
+                self.doset[test] = haskey(e.variables, test)
+                e.variables[test] = self.variables[test]
 
     def getmethod(self, key):
         """Attempts To Get An Item."""
         if istext(key):
             test = key
         else:
-            test = basicformat(self.e.prepare(key, False, False))
-        if self.e.validvar(test) and test in self.variables:
+            test = basicformat(e.prepare(key, False, False))
+        if e.validvar(test) and test in self.variables:
             return self.getitem(test)
         else:
             return None
@@ -1304,13 +1280,13 @@ class classcalc(cotobject):
             out = matrix(0)
         else:
             out = self.variables[test]
-        return self.e.deprop(out)
+        return e.deprop(out)
 
     def retrieve(self, key):
         """Retrieves An Item."""
         test = self.getmethod(key)
         if test is None:
-            raise ExecutionError("ClassError", "Could not find "+key+" in "+self.e.prepare(self, False, True, True))
+            raise ExecutionError("ClassError", "Could not find "+key+" in "+e.prepare(self, False, True, True))
         else:
             return test
 
@@ -1330,7 +1306,7 @@ class classcalc(cotobject):
                 item.curryself(self)
                 if item.overflow and args is not None and len(args) > len(item.variables):
                     args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
-            return self.e.getcall(item)(args)
+            return e.getcall(item)(args)
         else:
             return item
 
@@ -1341,15 +1317,15 @@ class classcalc(cotobject):
             if isfunc(item):
                 value = self.domethod(item, params)
             else:
-                self.e.overflow = params
+                e.overflow = params
                 value = item
         else:
-            self.e.overflow = params
+            e.overflow = params
             value = self
         if isinstance(value, classcalc) and not isinstance(value, instancecalc):
             return value.toinstance()
         else:
-            raise ExecutionError("ClassError", "Constructor returned non-class object "+self.e.prepare(value, False, True, True))
+            raise ExecutionError("ClassError", "Constructor returned non-class object "+e.prepare(value, False, True, True))
 
     def __delitem__(self, key):
         """Wraps remove."""
@@ -1358,11 +1334,11 @@ class classcalc(cotobject):
 
     def remove(self, key):
         """Removes An Item."""
-        test = self.e.prepare(key, False, False)
-        if self.e.validvar(test) and test in self.variables:
+        test = e.prepare(key, False, False)
+        if e.validvar(test) and test in self.variables:
             del self.variables[test]
         else:
-            raise ExecutionError("ClassError", "Could not remove "+test+" from "+self.e.prepare(self, False, True, True))
+            raise ExecutionError("ClassError", "Could not remove "+test+" from "+e.prepare(self, False, True, True))
 
     def extend(self, other):
         """Extends The Class."""
@@ -1452,13 +1428,13 @@ class classcalc(cotobject):
 
     def toinstance(self):
         """Creates An Instance Of The Class."""
-        return instancecalc(self.e, self.variables)
+        return instancecalc(self.variables)
 
     def tomatrix(self):
         """Returns A Matrix Of The Variables."""
         out = []
         for key in self.getvars().keys():
-            out.append(strcalc(key, self.e))
+            out.append(rawstrcalc(key))
         return diagmatrixlist(out)
 
     def __contains__(self, item):
@@ -1478,7 +1454,7 @@ class namespace(classcalc):
 
     def copy(self):
         """Copies The Class."""
-        return namespace(self.e, getcopy(self.getvars()), selfvar=self.selfvar, restricted=self.restricted)
+        return namespace(getcopy(self.getvars()), selfvar=self.selfvar, restricted=self.restricted)
 
     def getrepr(self, *args, **kwargs):
         """Wraps classcalc.getrepr."""
@@ -1489,17 +1465,16 @@ class namespace(classcalc):
         if not variables:
             return self
         else:
-            self.e.overflow = variables[1:]
-            return self.calc(self.e.prepare(variables[0], True, False))
+            e.overflow = variables[1:]
+            return self.calc(e.prepare(variables[0], True, False))
 
 class instancecalc(numobject, classcalc):
     """An Evaluator Class Instance."""
     evaltype = "instance"
     parentvar = "__parent__"
 
-    def __init__(self, e, variables=None, parent=None, name=None, top=True, selfvar=None, parentvar=None, restricted=None):
+    def __init__(self, variables=None, parent=None, name=None, top=True, selfvar=None, parentvar=None, restricted=None):
         """Creates An Instance Of An Evaluator Class."""
-        self.e = e
         if selfvar is not None:
             self.selfvar = str(selfvar)
         if restricted is None:
@@ -1516,7 +1491,7 @@ class instancecalc(numobject, classcalc):
             else:
                 if classcalc.selfvar in variables:
                     del variables[classcalc.selfvar]
-                parent = classcalc(self.e, variables)
+                parent = classcalc(variables)
                 variables = None
         self.variables = {
             self.selfvar : self,
@@ -1531,7 +1506,7 @@ class instancecalc(numobject, classcalc):
 
     def copy(self):
         """Copies The Instance."""
-        return instancecalc(self.e, getcopy(self.getvars()), top=False, selfvar=self.selfvar, parentvar=self.parentvar, restricted=self.restricted)
+        return instancecalc(getcopy(self.getvars()), top=False, selfvar=self.selfvar, parentvar=self.parentvar, restricted=self.restricted)
 
     def getparent(self):
         """Reconstructs The Parent Class."""
@@ -1539,7 +1514,7 @@ class instancecalc(numobject, classcalc):
 
     def toclass(self):
         """Converts To A Normal Class."""
-        out = classcalc(self.e, self.getvars(True))
+        out = classcalc(self.getvars(True))
         return out
 
     def isfrom(self, parent):
@@ -1554,11 +1529,11 @@ class instancecalc(numobject, classcalc):
         if istext(key):
             test = key
         else:
-            test = basicformat(self.e.prepare(key, False, False))
-        if self.e.validvar(test) and test in self.variables:
+            test = basicformat(e.prepare(key, False, False))
+        if e.validvar(test) and test in self.variables:
             return self.getitem(test)
         elif "__get__" in self.variables:
-            return self.domethod(self.getitem("__get__"), rawstrcalc(test, self.e))
+            return self.domethod(self.getitem("__get__"), rawstrcalc(test))
         else:
             return self.getparent().getmethod(test)
 
@@ -1573,16 +1548,16 @@ class instancecalc(numobject, classcalc):
             if isinstance(self.variables[test], strfunc):
                 self.variables[test].curryself(self)
             out = self.variables[test]
-        return self.e.deprop(out)
+        return e.deprop(out)
 
     def store(self, key, value, bypass=False, name=None):
         """Stores An Item."""
-        test = basicformat(self.e.prepare(key, False, False))
+        test = basicformat(e.prepare(key, False, False))
         value = getcopy(value)
         if test in self.restricted:
             raise ExecutionError("RedefinitionError", "The "+test+" variable cannot be redefined.")
-        elif not bypass and not self.e.validvar(test):
-            raise ExecutionError("ClassError", "Could not store "+test+" in "+self.e.prepare(self, False, True, True))
+        elif not bypass and not e.validvar(test):
+            raise ExecutionError("ClassError", "Could not store "+test+" in "+e.prepare(self, False, True, True))
         else:
             if isinstance(value, strfunc):
                 value.curryself(self)
@@ -1590,8 +1565,8 @@ class instancecalc(numobject, classcalc):
                 value.funcstr = str(name)+"."+value.funcstr
             self.variables[test] = value
             if self.doset:
-                self.doset[test] = haskey(self.e.variables, test)
-                self.e.variables[test] = self.variables[test]
+                self.doset[test] = haskey(e.variables, test)
+                e.variables[test] = self.variables[test]
 
     def isprop(self):
         """Determines Whether The Class Is A Property."""
@@ -1619,7 +1594,7 @@ class instancecalc(numobject, classcalc):
             if func is None:
                 return self
             else:
-                self.e.setreturned()
+                e.setreturned()
                 return self.domethod(func)
         else:
             func = self.getmethod("__call__")
@@ -1994,7 +1969,7 @@ class instancecalc(numobject, classcalc):
         """Retrieves A String."""
         check_str = self.getmethod("__str__")
         if check_str:
-            return self.e.prepare(self.domethod(check_str), True, False)
+            return e.prepare(self.domethod(check_str), True, False)
         else:
             return self.getrepr(True)
 
@@ -2030,7 +2005,7 @@ class instancecalc(numobject, classcalc):
         if item:
             return self.domethod(item)
         else:
-            return strcalc("instance", self.e)
+            return rawstrcalc(self.evaltype)
 
     def op_repeat(self, other):
         """Performs **."""
@@ -2067,7 +2042,7 @@ class instancecalc(numobject, classcalc):
     def getrepr(self, top, bottom, indebug, maxrecursion):
         """Gets A Representation."""
         if indebug or maxrecursion <= 0:
-            return self.e.speedyprep(self, False, bottom, indebug, maxrecursion)
+            return e.speedyprep(self, False, bottom, indebug, maxrecursion)
         elif not bottom:
             return str(self)
         elif not top:
@@ -2075,7 +2050,7 @@ class instancecalc(numobject, classcalc):
         else:
             check_repr = self.getmethod("__repr__")
             if check_repr:
-                return self.e.prepare(self.domethod(check_repr), top, False, indebug, maxrecursion)
+                return e.prepare(self.domethod(check_repr), top, False, indebug, maxrecursion)
             else:
                 return classcalc.getrepr(self, top, bottom, indebug, maxrecursion)+" ( )"
 
@@ -2125,10 +2100,12 @@ class atom(evalobject):
         """Makes Another Atom."""
         return atom()
 
+    @rabbit
     def calc(self):
         """Converts To Nothing."""
         return matrix(0)
 
+    @rabbit
     def __eq__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
@@ -2136,6 +2113,7 @@ class atom(evalobject):
         else:
             return False
 
+    @rabbit
     def __ne__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
@@ -2143,6 +2121,7 @@ class atom(evalobject):
         else:
             return False
 
+    @rabbit
     def __gt__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
@@ -2150,6 +2129,7 @@ class atom(evalobject):
         else:
             return False
 
+    @rabbit
     def __lt__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
@@ -2157,6 +2137,7 @@ class atom(evalobject):
         else:
             return False
 
+    @rabbit
     def __ge__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
@@ -2164,6 +2145,7 @@ class atom(evalobject):
         else:
             return False
 
+    @rabbit
     def __le__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
@@ -2175,50 +2157,62 @@ class atom(evalobject):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __radd__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __isub__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __rsub__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __imul__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __rmul__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __idiv__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __rdiv__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __ipow__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __rpow__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __imod__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __rmod__(self, other):
         """Always Returns self."""
         return self
 
+    @rabbit
     def __str__(self):
         """Gets A Representation."""
         return "_"
@@ -2228,9 +2222,8 @@ class rollfunc(strfunc):
     memoize = False
     variables = ["__times__"]
 
-    def __init__(self, stop, e, key=None, name=None, counter=None):
+    def __init__(self, stop, key=None, name=None, counter=None):
         """Creates The Random Number Generator."""
-        self.e = e
         self.gen = random(key)
         if counter is not None:
             self.gen.counter = int(counter)
@@ -2239,7 +2232,7 @@ class rollfunc(strfunc):
         if name:
             self.name = str(name)
         else:
-            self.name = self.e.unusedarg()
+            self.name = e.unusedarg()
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -2247,11 +2240,12 @@ class rollfunc(strfunc):
 
     def copy(self):
         """Copies The Random Number Generator."""
-        return rollfunc(self.stop, self.e, self.gen.key, self.name, self.gen.counter)
+        return rollfunc(self.stop, self.gen.key, self.name, self.gen.counter)
 
+    @rabbit
     def calc(self, m=1.0):
         """Generates A Random Number."""
-        self.e.setreturned()
+        e.setreturned()
         stop = self.stop*m
         if stop > 1 and stop == int(stop):
             return 1+self.gen.chooseint(int(stop))
@@ -2278,6 +2272,7 @@ class rollfunc(strfunc):
                 out += self.calc(stop-int(stop))
         return out
 
+    @rabbit
     def __eq__(self, other):
         """Performs Equals."""
         if isinstance(other, rollfunc):
@@ -2290,9 +2285,8 @@ class pair(cotobject):
     evaltype = "pair"
     notmatrix = True
 
-    def __init__(self, e, key, value):
+    def __init__(self, key, value):
         """Creates The Key-Value Pair."""
-        self.e = e
         self.k = key
         self.v = value
 
@@ -2302,18 +2296,19 @@ class pair(cotobject):
 
     def copy(self):
         """Copies The Key-Value Pair."""
-        return pair(self.e, getcopy(self.k), getcopy(self.v))
+        return pair(getcopy(self.k), getcopy(self.v))
 
     def call(self, variables):
         """Retrieves A Value."""
-        self.e.overflow = variables[1:]
+        e.overflow = variables[1:]
         if not variables:
             return self
         elif self.k == variables[0]:
             return self.v
         else:
-            raise ExecutionError("KeyError", "Could not find key "+self.e.prepare(variables[0])+" in "+self.e.prepare(self))
+            raise ExecutionError("KeyError", "Could not find key "+e.prepare(variables[0])+" in "+e.prepare(self))
 
+    @rabbit
     def items(self):
         """Gets A List Containing The Key And The Value."""
         return [self.k, self.v]
@@ -2333,7 +2328,7 @@ class pair(cotobject):
                 self.k : self.v,
                 item.k : item.v
                 }
-            return dictionary(self.e, out)
+            return dictionary(out)
         else:
             raise TypeError("Pairs only support addition by other pairs")
 
@@ -2342,6 +2337,7 @@ class pair(cotobject):
         self += item
         return self
 
+    @rabbit
     def __eq__(self, other):
         """Performs Equality."""
         if isinstance(other, pair) and not isinstance(other, dictionary):
@@ -2353,9 +2349,8 @@ class dictionary(pair):
     """A Key-Value Dictionary."""
     evaltype = "dict"
 
-    def __init__(self, e, items=None):
+    def __init__(self, items=None):
         """Creates The Dictionary."""
-        self.e = e
         if items is None:
             self.a = {}
         else:
@@ -2363,7 +2358,7 @@ class dictionary(pair):
 
     def copy(self):
         """Copies The Dictionary."""
-        return dictionary(self.e, self.a)
+        return dictionary(self.a)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -2373,19 +2368,20 @@ class dictionary(pair):
         """Stores An Item."""
         self.a[key] = value
 
+    @rabbit
     def items(self):
         """Gets Items."""
         return list(self.a.items())
 
     def call(self, variables):
         """Retrieves A Value."""
-        self.e.overflow = variables[1:]
+        e.overflow = variables[1:]
         if not variables:
             return self
         elif variables[0] in self.a:
             return self.a[variables[0]]
         else:
-            raise ExecutionError("KeyError", "Could not find key "+self.e.prepare(variables[0])+" in "+self.e.prepare(self))
+            raise ExecutionError("KeyError", "Could not find key "+e.prepare(variables[0])+" in "+e.prepare(self))
 
     def remove(self, arg):
         """Removes An Item."""
@@ -2406,6 +2402,7 @@ class dictionary(pair):
         else:
             raise TypeError("Dictionaries only support addition with pairs and other dictionaries")
 
+    @rabbit
     def __eq__(self, other):
         """Performs Equality."""
         if isinstance(other, dictionary):
@@ -2413,14 +2410,17 @@ class dictionary(pair):
         else:
             return False
 
+    @rabbit
     def __len__(self):
         """Finds A Length."""
         return len(self.a)
 
+    @rabbit
     def __contains__(self, other):
         """Performs in."""
         return other in self.a
 
+    @rabbit
     def tomatrix(self):
         """Converts To A Matrix."""
         items = list(self.a.items())
@@ -2434,6 +2434,7 @@ class dictionary(pair):
         """Deletes An Item."""
         del self.a[key]
 
+    @rabbit
     def __cmp__(self, other):
         """Performs Comparison."""
         if isinstance(other, dictionary):
@@ -2441,6 +2442,7 @@ class dictionary(pair):
         else:
             raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
 
+    @rabbit
     def __gt__(self, other):
         """Determines If Proper Subset."""
         if isinstance(other, dictionary):
@@ -2451,6 +2453,7 @@ class dictionary(pair):
         else:
             raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
 
+    @rabbit
     def __ge__(self, other):
         """Determines If Subset."""
         if isinstance(other, dictionary):
@@ -2461,6 +2464,7 @@ class dictionary(pair):
         else:
             raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
 
+    @rabbit
     def __lt__(self, other):
         """Wraps Greater Than."""
         if isinstance(other, dictionary):
@@ -2468,6 +2472,7 @@ class dictionary(pair):
         else:
             raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
 
+    @rabbit
     def __le__(self, other):
         """Wraps Greater Than Or Equal."""
         if isinstance(other, dictionary):
@@ -2477,18 +2482,18 @@ class dictionary(pair):
 
 class bracket(evalobject):
     """A To-Be-Calculated Row."""
-    def __init__(self, e, items):
+    def __init__(self, items):
         """Constructs The Row."""
-        self.e = e
         self.items = items
 
+    @rabbit
     def calc(self):
         """Calculates The Row."""
         out = []
         for item in self.items:
             item = basicformat(item)
             if item:
-                out.append(self.e.calc(item))
+                out.append(e.calc(item))
         return rowmatrixlist(out)
 
     def getstate(self):
@@ -2498,20 +2503,21 @@ class bracket(evalobject):
 class brace(bracket):
     """A To-Be-Calculated Dictionary."""
 
+    @rabbit
     def calc(self):
         """Calculates The Dictionary."""
         out = {}
         for item in self.items:
             item = basicformat(item)
             if item:
-                value = self.e.calc(item)
+                value = e.calc(item)
                 if isinstance(value, dictionary):
                     out.update(value.a)
                 elif isinstance(value, pair):
                     out[value.k] = value.v
                 else:
-                    raise ExecutionError("ValueError", "Dictionary got non-pair item "+self.e.prepare(value, False, True, True))
-        return dictionary(self.e, out)
+                    raise ExecutionError("ValueError", "Dictionary got non-pair item "+e.prepare(value, False, True, True))
+        return dictionary(out)
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -2523,15 +2529,17 @@ class evalwrap(evalobject):
     evaltype = "Meta.wrap"
     notmatrix = True
 
-    def __init__(self, e, inputobj, reference=None, safemethods=None):
+    def __init__(self, inputobj, reference=None, safemethods=None):
         """Constructs The Wrapper."""
-        self.e = e
+        if reference is None or istext(reference):
+            self.ref = reference
+        else:
+            self.ref = reference()
         if safemethods is None:
             self.safe = []
         else:
             self.safe = safemethods
         self.obj = inputobj
-        self.ref = reference
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -2542,11 +2550,11 @@ class evalwrap(evalobject):
 
     def copy(self):
         """Copies The Wrapper."""
-        return evalwrap(self.e, self.obj, self.ref, self.safe)
+        return evalwrap(self.obj, self.ref, self.safe)
 
     def convert(self, item):
         """Converts An Item."""
-        return self.e.topython(item)
+        return e.topython(item)
 
     def argproc(self, variables):
         """Converts Variables."""
@@ -2561,12 +2569,7 @@ class evalwrap(evalobject):
 
     def prepare(self, output, ref=None):
         """Prepares The Output Of A Python Call."""
-        def _else(item):
-            if ref is None or istext(ref):
-                return evalwrap(self.e, item, ref)
-            else:
-                return evalwrap(self.e, item, ref())
-        return self.e.frompython(output, _else)
+        return e.frompython(output, ref)
 
     def getref(self):
         """Gets The Reference."""
@@ -2577,14 +2580,14 @@ class evalwrap(evalobject):
 
     def checksafe(self, name):
         """Sets Returned If name Isn't Safe."""
-        if self.safe is not True and name not in self.safe:
-            self.e.setreturned()
+        if self.safe is not True and (self.safe is False or name not in self.safe):
+            e.setreturned()
 
     def call(self, variables):
         """Calls The Function."""
         self.checksafe("__call__")
         def _ref():
-            return self.getref()+"(("+strlist(variables, "),(", lambda x: self.e.prepare(x, False, True))+"))"
+            return self.getref()+"(("+strlist(variables, "),(", lambda x: e.prepare(x, False, True))+"))"
         args, kwargs = self.argproc(variables)
         return self.prepare(self.obj(*args, **kwargs), _ref)
 
@@ -2625,7 +2628,7 @@ class evalwrap(evalobject):
             if kwargs or len(args) > 1:
                 args = slice(*args, **kwargs)
             def _ref():
-                return self.getref()+":("+strlist(variables, "):(", lambda x: self.e.prepare(x, False, True))+")"
+                return self.getref()+":("+strlist(variables, "):(", lambda x: e.prepare(x, False, True))+")"
             return self.prepare(self.obj[args[0]], _ref)
         else:
             return self.call(variables)
@@ -2705,168 +2708,168 @@ class evalwrap(evalobject):
         """Performs Addition."""
         self.checksafe("__add__")
         def _ref():
-            return self.getref()+"+("+self.e.prepare(other, False, True)+")"
+            return self.getref()+"+("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj + self.convert(other), _ref)
 
     def __radd__(self, other):
         """Performs Reverse Addition."""
         self.checksafe("__radd__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+")+"+self.getref()
+            return "("+e.prepare(other, False, True)+")+"+self.getref()
         return self.prepare(self.convert(other) + self.obj, _ref)
 
     def __sub__(self, other):
         """Performs Subtraction."""
         self.checksafe("__sub__")
         def _ref():
-            return self.getref()+"-("+self.e.prepare(other, False, True)+")"
+            return self.getref()+"-("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj - self.convert(other), _ref)
 
     def __rsub__(self, other):
         """Performs Reverse Subtraction."""
         self.checksafe("__rsub__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+")-"+self.getref()
+            return "("+e.prepare(other, False, True)+")-"+self.getref()
         return self.prepare(self.convert(other) - self.obj, _ref)
 
     def __mul__(self, other):
         """Performs Multiplication."""
         self.checksafe("__mul__")
         def _ref():
-            return self.getref()+"*("+self.e.prepare(other, False, True)+")"
+            return self.getref()+"*("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj * self.convert(other), _ref)
 
     def __rmul__(self, other):
         """Performs Reverse Multiplication."""
         self.checksafe("__rmul__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+")*"+self.getref()
+            return "("+e.prepare(other, False, True)+")*"+self.getref()
         return self.prepare(self.convert(other) * self.obj, _ref)
 
     def __div__(self, other):
         """Performs Division."""
         self.checksafe("__div__")
         def _ref():
-            return self.getref()+"/("+self.e.prepare(other, False, True)+")"
+            return self.getref()+"/("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj / self.convert(other), _ref)
 
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         self.checksafe("__rdiv__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+")/"+self.getref()
+            return "("+e.prepare(other, False, True)+")/"+self.getref()
         return self.prepare(self.convert(other) / self.obj, _ref)
 
     def __floordiv__(self, other):
         """Performs Floor Division."""
         self.checksafe("__floordiv__")
         def _ref():
-            return self.getref()+"//("+self.e.prepare(other, False, True)+")"
+            return self.getref()+"//("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj // self.convert(other), _ref)
 
     def __rfloordiv__(self, other):
         """Performs Reverse Floor Division."""
         self.checksafe("__rfloordiv__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+")//"+self.getref()
+            return "("+e.prepare(other, False, True)+")//"+self.getref()
         return self.prepare(self.convert(other) // self.obj, _ref)
 
     def __mod__(self, other):
         """Performs Modulus."""
         self.checksafe("__mod__")
         def _ref():
-            return self.getref()+"%("+self.e.prepare(other, False, True)+")"
+            return self.getref()+"%("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj % self.convert(other), _ref)
 
     def __rmod__(self, other):
         """Performs Reverse Modulus."""
         self.checksafe("__rmod__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+")%"+self.getref()
+            return "("+e.prepare(other, False, True)+")%"+self.getref()
         return self.prepare(self.convert(other) % self.obj, _ref)
 
     def __pow__(self, other):
         """Performs Exponentiation."""
         self.checksafe("__pow__")
         def _ref():
-            return self.getref()+"^("+self.e.prepare(other, False, True)+")"
+            return self.getref()+"^("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj ** self.convert(other), _ref)
 
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         self.checksafe("__rpow__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+")^"+self.getref()
+            return "("+e.prepare(other, False, True)+")^"+self.getref()
         return self.prepare(self.convert(other) ** self.obj, _ref)
 
     def __lshift__(self, other):
         """Performs Left Shift."""
         self.checksafe("__lshift__")
         def _ref():
-            return self.getref()+" lshift ("+self.e.prepare(other, False, True)+")"
+            return self.getref()+" lshift ("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj << self.convert(other), _ref)
 
     def __rlshift__(self, other):
         """Performs Reverse Left Shift."""
         self.checksafe("__rlshift__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+") lshift "+self.getref()
+            return "("+e.prepare(other, False, True)+") lshift "+self.getref()
         return self.prepare(self.convert(other) << self.obj, _ref)
 
     def __rshift__(self, other):
         """Performs Right Shift."""
         self.checksafe("__rshift__")
         def _ref():
-            return self.getref()+" rshift ("+self.e.prepare(other, False, True)+")"
+            return self.getref()+" rshift ("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj >> self.convert(other), _ref)
 
     def __rrshift__(self, other):
         """Performs Reverse Right Shift."""
         self.checksafe("__rrshift__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+") rshift "+self.getref()
+            return "("+e.prepare(other, False, True)+") rshift "+self.getref()
         return self.prepare(self.convert(other) >> self.obj, _ref)
 
     def __or__(self, other):
         """Performs Bitwise Or."""
         self.checksafe("__or__")
         def _ref():
-            return self.getref()+" bitor ("+self.e.prepare(other, False, True)+")"
+            return self.getref()+" bitor ("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj | self.convert(other), _ref)
 
     def __ror__(self, other):
         """Performs Reverse Bitwise Or."""
         self.checksafe("__ror__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+") bitor "+self.getref()
+            return "("+e.prepare(other, False, True)+") bitor "+self.getref()
         return self.prepare(self.convert(other) | self.obj, _ref)
 
     def __and__(self, other):
         """Performs Bitwise And."""
         self.checksafe("__and__")
         def _ref():
-            return self.getref()+" bitand ("+self.e.prepare(other, False, True)+")"
+            return self.getref()+" bitand ("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj & self.convert(other), _ref)
 
     def __rand__(self, other):
         """Performs Reverse Bitwise And."""
         self.checksafe("__rand__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+") bitand "+self.getref()
+            return "("+e.prepare(other, False, True)+") bitand "+self.getref()
         return self.prepare(self.convert(other) & self.obj, _ref)
 
     def __xor__(self, other):
         """Performs Bitwise Xor."""
         self.checksafe("__xor__")
         def _ref():
-            return self.getref()+" bitxor ("+self.e.prepare(other, False, True)+")"
+            return self.getref()+" bitxor ("+e.prepare(other, False, True)+")"
         return self.prepare(self.obj ^ self.convert(other), _ref)
 
     def __rxor__(self, other):
         """Performs Reverse Bitwise Xor."""
         self.checksafe("__rxor__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+") bitxor "+self.getref()
+            return "("+e.prepare(other, False, True)+") bitxor "+self.getref()
         return self.prepare(self.convert(other) ^ self.obj, _ref)
 
     def __neg__(self):
@@ -2908,39 +2911,39 @@ class evalwrap(evalobject):
         """Performs Round."""
         self.checksafe("__round__")
         def _ref():
-            return "round:"+self.getref()+":("+self.e.prepare(place, False, True)+")"
+            return "round:"+self.getref()+":("+e.prepare(place, False, True)+")"
         return self.prepare(round(self.obj, place), _ref)
 
     def __divmod__(self, other):
         """Performs divmod."""
         self.checksafe("__divmod__")
         def _ref():
-            return self.getref()+" divmod ("+self.e.prepare(other, False, True)+")"
+            return self.getref()+" divmod ("+e.prepare(other, False, True)+")"
         return self.prepare(divmod(self.obj, other), _ref)
 
     def __rdivmod__(self, other):
         """Performs Reverse divmod."""
         self.checksafe("__rdivmod__")
         def _ref():
-            return "("+self.e.prepare(other, False, True)+") divmod "+self.getref()
+            return "("+e.prepare(other, False, True)+") divmod "+self.getref()
         return self.prepare(divmod(other, self.obj), _ref)
 
     def __contains__(self, item):
         """Performs in."""
         self.checksafe("__contains__")
         def _ref():
-            return "("+self.e.prepare(item, False, True)+") in "+self.getref()
+            return "("+e.prepare(item, False, True)+") in "+self.getref()
         return item in self.obj
 
     def inside_enter(self, args):
         """Enters The Inside."""
         if len(args) > 1:
-            raise ExecutionError("ArgumentError", "Excess arguments "+strlist(args[1:], ", ", lambda x: self.e.prepare(x, False, True)))
+            raise ExecutionError("ArgumentError", "Excess arguments "+strlist(args[1:], ", ", lambda x: e.prepare(x, False, True)))
         elif hasattr(self.obj, "__enter__"):
             self.checksafe("__enter__")
             out = self.prepare(self.obj.__enter__())
             if args:
-                return self.e.getcall(args[0])([out])
+                return e.getcall(args[0])([out])
             else:
                 return out
         else:
@@ -2971,15 +2974,5 @@ class evalwrap(evalobject):
             out.append(item)
         return diagmatrixlist(out)
 
-class revwrap(evalwrap):
-    """A Wrapper For Converting A Rabbit Object Into A Python Object."""
-    # This could also just be implemented as evalobject methods if there was an evaluator global
-    pass
-
-# Tools to give access to:
-##    Python.repr
-##    Python.calc
-##    Python.eval
-##    Rabbit.getstate
-##    Rabbit.fromstate
-##    Rabbit.prepare
+# Do reverse wrapping!
+# Fix dictionary/pair display issues (from pipe).

@@ -59,7 +59,7 @@ def FP(stop, dfT, dfE, e):
 
 class data(mctobject):
     """Implements A Data Set."""
-    evaltype = "data"
+    evaltype = "Stats.data"
 
     def __init__(self, units=None, gotsort=False):
         """Initializes The Data."""
@@ -68,14 +68,20 @@ class data(mctobject):
         if units is not None:
             self.extend(units)
 
+    def copy(self):
+        """Creates A Copy Of The Data Set."""
+        return data(self.items(), self.gotsort)
+
     def getstate(self):
         """Returns A Pickleable Reference Object."""
         return ("data", self.units, self.gotsort)
 
+    @rabbit
     def __len__(self):
         """Performs len"""
         return len(self.units)
 
+    @rabbit
     def items(self, sort=False):
         """Returns A List Of Items."""
         if sort:
@@ -119,12 +125,14 @@ class data(mctobject):
                 self.units.append(x)
         self.gotsort = False
 
+    @dirty_rabbit
     def choose(self, gen=None):
         """Returns A Random Value."""
         if gen is None:
             gen = random()
         return gen.choose(self.units)
 
+    @dirty_rabbit
     def take(self, num=None, gen=None):
         """Samples From The Data."""
         if gen is None:
@@ -148,14 +156,17 @@ class data(mctobject):
             self.units.sort()
             self.gotsort = True
 
-    def total(self):
+    @rabbit
+    def sum(self):
         """Finds The Sum."""
         return sum(self.units)
 
+    @rabbit
     def mean(self):
         """Finds The Arithmetic Mean."""
         return sum(self.units)/float(len(self))
 
+    @rabbit
     def geomean(self):
         """Finds The Geometric Mean."""
         tot = 1.0
@@ -163,6 +174,7 @@ class data(mctobject):
             tot *= x
         return tot**(1.0/len(self))
 
+    @rabbit
     def harmean(self):
         """Finds The Harmonic Mean."""
         tot = 0.0
@@ -170,6 +182,7 @@ class data(mctobject):
             tot += 1.0/x
         return len(self)/tot
 
+    @rabbit
     def rms(self):
         """Finds The Root Mean Square."""
         out = 0.0
@@ -177,6 +190,7 @@ class data(mctobject):
             out += x**2
         return math.sqrt(out/len(self))
 
+    @rabbit
     def mad(self, mean=None):
         """Finds The Mean Absolute Deviation."""
         if mean is None:
@@ -188,6 +202,7 @@ class data(mctobject):
             out += abs(x-mean)
         return out/len(self)
 
+    @rabbit
     def stdev(self, sample=True, mean=None):
         """Finds The Standard Deviation."""
         if mean is None:
@@ -200,6 +215,7 @@ class data(mctobject):
             out += (x-mean)**2.0
         return math.sqrt(out/(len(self)-float(sample)))
 
+    @rabbit
     def truncmean(self, trunc=0.05):
         """Finds The Truncated Mean."""
         self.sort()
@@ -210,6 +226,7 @@ class data(mctobject):
             tot += self.units[x]
         return tot/(last-first)
 
+    @rabbit
     def devs(self, point=None):
         """Finds The Deviation From A Point."""
         if point is None:
@@ -221,6 +238,7 @@ class data(mctobject):
             out[x] = x-point
         return out
 
+    @rabbit
     def freq(self):
         """Returns A Frequency Dictionary."""
         out = {}
@@ -231,6 +249,7 @@ class data(mctobject):
                 out[x] = 1
         return out
 
+    @rabbit
     def relfreq(self):
         """Returns A Relative Frequency Dictionary."""
         out = self.freq()
@@ -238,6 +257,7 @@ class data(mctobject):
             out[x] /= float(len(self))
         return out
 
+    @rabbit
     def cumfreq(self):
         """Returns A Cumulative Frequency Dictionary."""
         out = self.freq()
@@ -249,6 +269,7 @@ class data(mctobject):
             last = out[x]
         return out
 
+    @rabbit
     def mode(self, dev=0.0):
         """Finds The Modes."""
         dev = float(dev)
@@ -272,6 +293,7 @@ class data(mctobject):
         out.sort()
         return out
 
+    @rabbit
     def med(self, point=None, sort=True):
         """Finds The Median."""
         if sort:
@@ -282,6 +304,7 @@ class data(mctobject):
             point = float(point)
         return (self.units[int(math.floor(point))]+self.units[int(math.ceil(point)-1)])/2.0
 
+    @rabbit
     def quantiles(self, num=3):
         """Finds The Quantiles."""
         self.sort()
@@ -299,31 +322,37 @@ class data(mctobject):
                 dividers.append(self.med(point, sort=False))
             return dividers
 
+    @rabbit
     def iqr(self, num=3):
         """Finds The Inter-Quantile Range."""
         quantiles = self.quantiles(num)
         return quantiles[num-1]-quantiles[0]
 
+    @rabbit
     def max(self):
         """Finds The Maximum."""
         self.sort()
         return self.units[-1]
 
+    @rabbit
     def min(self):
         """Finds The Minimum."""
         self.sort()
         return self.units[0]
 
+    @rabbit
     def full(self, diff=0):
         """Finds The Range."""
         self.sort()
         point = int(diff)
         return self.units[-1*(diff+1)]-self.units[diff]
 
+    @rabbit
     def midrange(self, diff=0):
         """Finds The Mean Of The Minimum And Maximum."""
         return self.full(diff)/2.0
 
+    @rabbit
     def display(self, interval):
         """Creates A Table Of Values."""
         self.sort()
@@ -340,6 +369,7 @@ class data(mctobject):
                 out += str(x)+", "
         return out[:-2]
 
+    @rabbit
     def graph(self, interval, dot="x"):
         """Creates A Dot Plot."""
         self.sort()
@@ -358,6 +388,7 @@ class data(mctobject):
                 out += dot
         return out
 
+    @rabbit
     def plot(self, scale=None, edge="-", center="_", left="[", right="]", divider="|"):
         """Creates A Box Plot."""
         if scale is None:
@@ -373,6 +404,7 @@ class data(mctobject):
             toplot = [int((quartiles[0]-first)/scale), int((quartiles[1]-quartiles[0])/scale), int((quartiles[2]-quartiles[1])/scale), int((last-quartiles[2])/scale)]
             return edge*toplot[0] +left+ center*toplot[1] +divider+ center*toplot[2] +right+ edge*toplot[3]
 
+    @rabbit
     def posplot(self, start, end, plotfunc=None, scale=None, edge="-", center="_", left="[", right="]", divider="|", space=" "):
         """Creates A Box Plot Between Two Specific Values."""
         start = float(start)
@@ -391,6 +423,7 @@ class data(mctobject):
                 plotfunc = self.plot
             return space*toplot[0]+ plotfunc(scale, edge, center, left, right, divider) +space*toplot[1]
 
+    @rabbit
     def modplot(self, scale=None, edge="-", center="_", left="[", right="]", divider="|", point=".", space=" "):
         """Creates A Modified Box Plot."""
         if scale is None:
@@ -433,6 +466,7 @@ class data(mctobject):
                 atend += space*int((ups[x]-belowpoint)/scale)+point
             return atstart+ self.plot(scale, edge, center, left, right, divider) +atend
 
+    @rabbit
     def basic(self, num=3):
         """Finds The Quantiles With The Maximum And Minimum."""
         out = self.quantiles(num)
@@ -442,16 +476,19 @@ class data(mctobject):
         out.append(self.units[-1])
         return out
 
+    @rabbit
     def midhinge(self, num=3):
         """Finds The Mean Of The First And Last Quantiles."""
         out = self.quantiles(num)
         return (out[0]+out[num-1])/2.0
 
+    @rabbit
     def trimean(self):
         """Finds The Trimean."""
         quantiles = self.quantiles()
         return (quantiles[0]+2*quantiles[1]+quantiles[2])/4.0
 
+    @rabbit
     def p(self, result, dev=0):
         """Finds The Proportional Probability Of An Event."""
         correct = 0.0
@@ -460,6 +497,7 @@ class data(mctobject):
                 correct += 1.0
         return correct/len(self)
 
+    @rabbit
     def funcp(self, testfunc):
         """Finds The Proportional Probability Of A Function."""
         acc = 0.0
@@ -467,18 +505,21 @@ class data(mctobject):
             acc += float(testfunc(x))
         return acc/len(self)
 
+    @rabbit
     def rangep(self, start, stop):
         """Finds The Proportional Probability Of A Range."""
         start = float(start)
         stop = float(stop)
         return self.p((start+stop)/2.0, abs(stop-start)/2.0)
 
+    @rabbit
     def finpopcor(self, N):
         """Finds The Finite Population Correction Factor."""
         n = len(self)
         N = float(N)
         return ((N-n)/(N-1))**0.5
 
+    @rabbit
     def medme(self, dev=1.96, N=None):
         """Finds The Rank Margin Of Error For A Median."""
         dev = float(dev)
@@ -487,6 +528,7 @@ class data(mctobject):
             dev *= self.finpopcor(N)
         return dev*n**0.5/2.0
 
+    @rabbit
     def meanme(self, dev=1.96, stdev=None, N=None):
         """Finds The Margin Of Error For A Mean."""
         dev = float(dev)
@@ -499,6 +541,7 @@ class data(mctobject):
             stdev *= self.finpopcor(N)
         return dev*stdev/n**0.5
 
+    @rabbit
     def me(self, dev=1.96, num=1.0, stdev=None, N=None):
         """Finds The Margin Of Error For Multiple Of The Same Item."""
         dev = float(dev)
@@ -511,6 +554,7 @@ class data(mctobject):
             stdev *= self.finpopcor(N)
         return dev*stdev*num**0.5
 
+    @rabbit
     def addme(self, dev=1.96, stdevs=None, N=None):
         """Finds The Margin Of Error For Multiple Different Items."""
         dev = float(dev)
@@ -526,6 +570,7 @@ class data(mctobject):
             stdev *= self.finpopcor(N)
         return dev*stdev
 
+    @rabbit
     def propme(self, dev=1.96, plist=None, N=None):
         """Finds The Margin Of Error For Proportions."""
         dev = float(dev)
@@ -542,14 +587,17 @@ class data(mctobject):
             stdev *= self.finpopcor(N)
         return dev*stdev
 
+    @rabbit
     def var(self):
         """Finds The Variance."""
         return self.stdev()**2.0
 
+    @rabbit
     def cv(self):
         """Finds The Coefficient Of Variation."""
         return self.stdev()/self.mean()
 
+    @rabbit
     def dev(self, point, stdev=None, mean=None):
         """Finds The Standard Deviations From The Mean."""
         point = float(point)
@@ -563,10 +611,8 @@ class data(mctobject):
             mean = float(mean)
         return abs(mean-point)/stdev
 
-    def copy(self):
-        """Creates A Copy Of The Data Set."""
-        return data(self.items(), self.gotsort)
 
+    @rabbit
     def combine(self, other, func=lambda x,y: x+y):
         """Combines Two Data Sets."""
         if islist(other):
@@ -581,6 +627,7 @@ class data(mctobject):
                 new.append(func(x,y))
         return data(new)
 
+    @rabbit
     def chisqn(self, expected, n=None):
         """Calculates Chi Squared Based On Size."""
         expected = float(expected)
@@ -589,6 +636,7 @@ class data(mctobject):
         n = float(n)
         return (n-expected)**2.0/expected
 
+    @rabbit
     def chisq(self, expected):
         """Calculates Chi Squared Based On Data."""
         chisum = 0.0
@@ -596,18 +644,22 @@ class data(mctobject):
             chisum += (self.units[x]-expected[x])**2.0/expected[x]
         return chisum
 
+    @rabbit
     def vartest(self, expected):
         """Calculates Chi Squared Based On Variance."""
         return (len(self)-1.0)*self.var()/float(expected)
 
+    @rabbit
     def df(self):
         """Finds The Degrees Of Freedom."""
         return len(self)-1.0
 
+    @rabbit
     def tomatrix(self):
         """Creates A Matrix Out Of The Data."""
         return diagmatrixlist(self.items())
 
+    @rabbit
     def teststat(self, expected=0.0, observed=None, mefunc=None):
         """Calculates A z Or t Value For A Hypothesis Test."""
         expected = float(expected)
@@ -619,6 +671,7 @@ class data(mctobject):
             mefunc = self.meanme
         return (observed-expected)/float(mefunc(dev=1.0))
 
+    @rabbit
     def skew(self):
         """Finds The Coefficient Of Skewness."""
         mean = float(self.mean())
@@ -627,6 +680,7 @@ class data(mctobject):
             tot += (x-mean)**3.0
         return tot/(float(len(self))*float(self.stdev())**3.0)
 
+    @rabbit
     def I(self, med=None, stdev=None):
         """Finds The Spearnan Index Of Skewness."""
         if med is None:
@@ -640,6 +694,7 @@ class data(mctobject):
         mean = float(self.mean())
         return (mean-median)*3.0/stdev
 
+    @rabbit
     def __contains__(self, other):
         """Searches For An Item."""
         if float(other) in self.units:
@@ -647,10 +702,12 @@ class data(mctobject):
         else:
             return False
 
+    @rabbit
     def __repr__(self):
         """Performs str."""
         return str(self.units)
 
+    @rabbit
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, data):
@@ -665,6 +722,7 @@ class data(mctobject):
         else:
             return False
 
+    @rabbit
     def __getitem__(self, index, sort=False):
         """Finds An Item."""
         if sort:
@@ -673,7 +731,7 @@ class data(mctobject):
 
 class multidata(mctobject):
     """Implements A Multivariate Data Set."""
-    evaltype = "data"
+    evaltype = "Stats.data"
 
     def __init__(self, x=None, y=None):
         """Creates A Joint Data Set."""
@@ -728,6 +786,7 @@ class multidata(mctobject):
                 return True
         return False
 
+    @rabbit
     def items(self):
         """Returns A List Of Pairs."""
         out = []
@@ -735,6 +794,7 @@ class multidata(mctobject):
             out.append((self.x.units[n], self.y.units[n]))
         return out
 
+    @rabbit
     def todict(self):
         """Returns A Dictionary Of Pairs."""
         out = {}
@@ -745,6 +805,7 @@ class multidata(mctobject):
                 out[x] = [y]
         return out
 
+    @rabbit
     def covar(self):
         """Finds The Covariance."""
         tot = 0.0
@@ -754,6 +815,7 @@ class multidata(mctobject):
             tot += (x-xmean)*(y-ymean)
         return tot/(len(self)-1.0)
 
+    @rabbit
     def rankdata(self):
         """Creates Data Based On Ranks."""
         tx = self.x.copy()
@@ -767,11 +829,12 @@ class multidata(mctobject):
         for i in xrange(0, len(self)):
             nx.append(tx.units.index(self.x.units[i]))
             ny.append(ty.units.index(self.y.units[i]))
-        out = self.copy()
+        out = getcopy(self)
         out.x.units = nx
         out.y.units = ny
         return out
 
+    @rabbit
     def rs(self):
         """Finds The Spearman Correlation Coefficient."""
         tot = 0.0
@@ -779,32 +842,60 @@ class multidata(mctobject):
             tot += (x-y)**2.0
         return 1.0-6.0*tot/(len(self)*(len(self)**2.0-1.0))
 
+    @rabbit
     def r(self):
         """Finds The Corellation Coefficient."""
         return self.covar()/(self.x.stdev()*self.y.stdev())
 
+    @rabbit
     def rsq(self, p=2.0):
         """Finds The Coefficient Of Determination."""
         p = float(p)
         return 1.0 - (1.0-self.r()**2.0) * (len(self)-1.0)/(len(self)-p-1.0)
 
+    @rabbit
     def b(self):
         """Finds The Slope Of The Regression Line."""
         return self.r()*self.y.stdev()/self.x.stdev()
 
+    @rabbit
     def a(self):
         """Finds The Y-Intercept Of The Regression Line."""
         return self.y.mean()-self.b()*self.x.mean()
 
+    @rabbit
     def flip(self):
         """Swaps x And y."""
         self.x, self.y = self.y, self.x
 
-    def linreg(self, e):
-        """Finds The Linear Regression Line."""
-        return strfunc(e.prepare(self.b(), False, True)+"*x+"+e.prepare(self.a(), False, True), e, ["x"])
+    def copy(self):
+        """Creates A Copy Of The Data Set."""
+        return multidata(self.x.copy(), self.y.copy())
 
-    def medmed(self, e):
+    @rabbit
+    def expdata(self):
+        """Takes ln Of All The y Values."""
+        new = getcopy(self)
+        new.y.code(math.log)
+        return new
+
+    @rabbit
+    def powdata(self):
+        """Takes ln Of All The Values."""
+        new = getcopy(self)
+        new.y.code(math.log)
+        new.x.code(math.log)
+        return new
+
+    @rabbit
+    def linreg(self):
+        """Finds The Linear Regression Line."""
+        b = self.b()
+        a = self.a()
+        return lambda x: a+b*x
+
+    @rabbit
+    def medmed(self):
         """Finds The Median-Median Regression Line."""
         first = multidata(self.items()[0:int(math.floor(len(self)/3.0))])
         mid = multidata(self.items()[int(math.ceil(len(self)/3.0)):int(math.floor(2.0*len(self)/3.0))])
@@ -818,62 +909,57 @@ class multidata(mctobject):
         b = (ylast-yfirst)/(xlast-xfirst)
         yhat = b*(xmid-xfirst)+yfirst
         a = yhat + (ymid-yhat)/3.0 - b*xmid
-        return strfunc(e.prepare(b, False, True)+"*x+"+e.prepare(a, False, True), e, ["x"])
+        return lambda x: a+b*x
 
-    def copy(self):
-        """Creates A Copy Of The Data Set."""
-        return multidata(self.x.copy(), self.y.copy())
-
-    def expdata(self):
-        """Takes ln Of All The y Values."""
-        new = self.copy()
-        new.y.code(math.log)
-        return new
-
-    def powdata(self):
-        """Takes ln Of All The Values."""
-        new = self.copy()
-        new.y.code(math.log)
-        new.x.code(math.log)
-        return new
-
-    def poweq(self, e):
+    @rabbit
+    def poweq(self):
         """Finds The Power Regression Line Given That This Is powdata."""
-        return strfunc(e.prepare(math.e**self.a(), False, True)+"*x^"+e.prepare(self.b(), False, True), e, ["x"])
+        a = math.e**self.a()
+        b = self.b()
+        return lambda x: a*x**b
 
-    def expeq(self, e):
+    @rabbit
+    def expeq(self):
         """Finds The Exponential Regression Line Given That This Is expdata."""
-        return strfunc(e.prepare(math.e**self.a(), False, True)+"*"+e.prepare(math.e**self.b(), False, True)+"^x", e, ["x"])
+        a = math.e**self.a()
+        b = math.e**self.b()
+        return lambda x: a*b**x
 
-    def powreg(self, e):
+    @rabbit
+    def powreg(self):
         """Performs Power Regression."""
-        return self.powdata().poweq(e)
+        return self.powdata().poweq()
 
-    def expreg(self, e):
+    @rabbit
+    def expreg(self):
         """Performs Exponential Regression."""
-        return self.expdata().expeq(e)
+        return self.expdata().expeq()
 
-    def regs(self, e):
+    @rabbit
+    def regs(self):
         """Finds Regression Lines."""
         eqs = {}
-        eqs[self.r()] = self.linreg(e)
+        eqs[self.r()] = self.linreg()
         test = self.powdata()
-        eqs[test.r()] = test.poweq(e)
+        eqs[test.r()] = test.poweq()
         test = self.expdata()
-        eqs[test.r()] = test.expeq(e)
+        eqs[test.r()] = test.expeq()
         return eqs
 
-    def bestfit(self, e):
+    @rabbit
+    def bestfit(self):
         """Finds The Best Fit Regression Equation."""
-        eqs = self.regs(e)
+        eqs = self.regs()
         test = eqs.keys()
         test.sort()
         return eqs[test[-1]]
 
+    @rabbit
     def resid(self, func, x):
         """Finds A Residual."""
         return func(x)-self.y.units[self.x.units.index(x)]
 
+    @rabbit
     def gof(self, expected="x"):
         """Calculates Chi Squared For Goodness Of Fit."""
         if expected == "x":
@@ -883,20 +969,22 @@ class multidata(mctobject):
         else:
             raise ValueError
 
+    @rabbit
     def chisq(self):
         """Calculates Chi Squared For Independence."""
         return self.tomatrix().chisq()
 
+    @rabbit
     def resids(self, func=None):
         """Finds Residuals."""
         if func is None:
-            eq = self.linreg()
-            func = lambda x: eq.call([x])
+            func = self.linreg()
         values = {}
         for z in xrange(0, len(self)):
             values[self.x.units[z]] = func(self.x.units[z])-self.y.units[z]
         return values
 
+    @rabbit
     def se(self, func=None):
         """Calculates The Standard Error Of The Estimate."""
         tot = 0.0
@@ -905,18 +993,22 @@ class multidata(mctobject):
             tot += x**2.0/(n-2.0)
         return tot**0.5
 
+    @rabbit
     def sb(self, func=None):
         """Calculates The Standard Error Of The Slope Of A Regression Line."""
         return self.se(func)/(self.x.stdev()*(len(self)-1.0)**0.5)
 
+    @rabbit
     def df(self):
         """Finds The Degrees Of Freedom."""
         return self.x.df()-1.0
 
+    @rabbit
     def dfE(self):
         """Finds The Error Degrees Of Freedom."""
         return self.x.df()+self.y.df()
 
+    @rabbit
     def tomatrix(self):
         """Creates A Matrix Out Of The Data."""
         out = matrix(len(self), 2)
@@ -925,21 +1017,21 @@ class multidata(mctobject):
             out.store(y,1, self.y[y])
         return out
 
-    def regtest(self, e, expected=0.0, observed=None, mefunc=None, regeq=None):
+    @rabbit
+    def regtest(self, func=None, expected=0.0, observed=None, mefunc=None):
         """Finds The t Value For The Slope Of The Regression Line."""
+        if func is None:
+            func = self.linreg()
         expected = float(expected)
         if observed is None:
             observed = self.b()
         else:
             observed = float(observed)
-        if regeq is None:
-            regeq = self.linreg()
-        else:
-            regeq = str(regeq)
         if mefunc is None:
             mefunc = self.sb
-        return (observed-expected)/float(mefunc(func=lambda x: regeq.call([x])))
+        return (observed-expected)/float(mefunc(func=func))
 
+    @rabbit
     def __len__(self):
         """Performs len."""
         if len(self.x) >= len(self.y):
@@ -947,10 +1039,12 @@ class multidata(mctobject):
         else:
             return len(self.y)
 
+    @rabbit
     def __getitem__(self, index):
         """Retrieves A Data Point."""
         return (self.x.units[index], self.y.units[index])
 
+    @rabbit
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, multidata):
@@ -958,6 +1052,7 @@ class multidata(mctobject):
         else:
             return self.items() == other
 
+    @rabbit
     def itemcall(self, params):
         """Performs A Colon Call."""
         if len(params) == 0:

@@ -119,15 +119,15 @@ class mathbase(safebase):
         if not top:
             self.e.fresh()
         self.e.makevars({
-            "debug":funcfloat(self.debugcall, self.e, "debug"),
-            "make":funcfloat(self.e.funcs.docalc, self.e, "make", reqargs=1),
-            "cmd":funcfloat(self.e.funcs.docalc, self.e, "cmd", reqargs=1),
-            "save":funcfloat(self.savecall, self.e, "save", reqargs=1),
-            "print":funcfloat(self.printcall, self.e, "print"),
-            "show":funcfloat(self.showcall, self.e, "show"),
-            "ans":funcfloat(self.anscall, self.e, "ans"),
-            "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "clear":usefunc(self.clear, self.e, "clear")
+            "debug":funcfloat(self.debugcall, "debug"),
+            "make":funcfloat(self.e.funcs.docalc, "make", reqargs=1),
+            "cmd":funcfloat(self.e.funcs.docalc, "cmd", reqargs=1),
+            "save":funcfloat(self.savecall, "save", reqargs=1),
+            "print":funcfloat(self.printcall, "print"),
+            "show":funcfloat(self.showcall, "show"),
+            "ans":funcfloat(self.anscall, "ans"),
+            "grab":funcfloat(self.grabcall, "grab"),
+            "clear":usefunc(self.clear, "clear")
             })
 
     def clear(self):
@@ -243,7 +243,7 @@ class mathbase(safebase):
             self.show(out)
         else:
             func(out)
-        return rawstrcalc(out, self.e)
+        return rawstrcalc(out)
 
     def showcall(self, variables):
         """Performs show."""
@@ -264,16 +264,16 @@ class mathbase(safebase):
         if variables is None or len(variables) == 0:
             out = self.app.get().split("\n")[-1]
             if out in self.messages:
-                return rawstrcalc(out, self.e)
+                return rawstrcalc(out)
             else:
-                return strfloat(out, self.e)
+                return strfloat(out)
         else:
             self.e.overflow = variables[1:]
             out = self.app.getlines()[getint(variables[0])]
             if out in self.messages:
-                return rawstrcalc(out, self.e)
+                return rawstrcalc(out)
             else:
-                return strfloat(out, self.e)
+                return strfloat(out)
 
     def savecall(self, variables):
         """Performs save."""

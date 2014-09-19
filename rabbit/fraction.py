@@ -42,17 +42,19 @@ class reciprocal(numobject):
         """Copies The Reciprocal Object."""
         return reciprocal(getcopy(self.d))
 
+    @rabbit
     def calc(self):
         """Calculates The Reciprocal."""
         return self.n/self.d
 
+    @rabbit
     def __imul__(self, other):
         """Does The Curried Division."""
         return self.n*other/self.d
 
 class fraction(numobject):
     """Implements A Fraction."""
-    evaltype = "frac"
+    evaltype = "Math.frac"
 
     def __init__(self, n=0, d=1):
         """Constructs The Fraction."""
@@ -67,6 +69,7 @@ class fraction(numobject):
         """Copies The Fraction Object."""
         return fraction(self.n, self.d)
 
+    @rabbit
     def __hash__(self):
         """Gets A Hash."""
         return hash(self.n) ^ hash(self.d)
@@ -116,18 +119,22 @@ class fraction(numobject):
         else:
             self.d = float(di+"."+df)
 
+    @rabbit
     def collapse(self):
         """Performs The Division."""
         return self.n/self.d
 
+    @rabbit
     def getfloat(self):
         """Retrieves A Float."""
         return float(self.n)/float(self.d)
 
+    @rabbit
     def __int__(self):
         """Retrieves An Integer."""
         return int(self.n//self.d)
 
+    @rabbit
     def __repr__(self):
         """Retrieves A String."""
         return "("+str(self.n)+")/("+str(self.d)+")"
@@ -150,6 +157,7 @@ class fraction(numobject):
             self.n *= other
         return self
 
+    @rabbit
     def __div__(self, other):
         """Performs Division."""
         out = fraction(self.n, self.d)
@@ -160,6 +168,7 @@ class fraction(numobject):
             out.d *= other
         return out
 
+    @rabbit
     def __mul__(self, other):
         """Performs Multiplication."""
         out = fraction(self.n, self.d)
@@ -180,6 +189,7 @@ class fraction(numobject):
             self.d **= other
         return self
 
+    @rabbit
     def __pow__(self, other):
         """Performs Exponentiation."""
         out = fraction(self.n, self.d)
@@ -191,10 +201,12 @@ class fraction(numobject):
             out.d **= other
         return out
 
+    @rabbit
     def __rpow__(self, other):
         """Performs Reverse Exponentiation."""
         return other**self.n/other**self.d
 
+    @rabbit
     def __rdiv__(self, other):
         """Performs Reverse Division."""
         return other*fraction(self.d, self.n)
@@ -209,6 +221,7 @@ class fraction(numobject):
             self.n += other*self.d
         return self
 
+    @rabbit
     def __add__(self, other):
         """Performs Addition."""
         out = fraction(self.n, self.d)
@@ -220,6 +233,7 @@ class fraction(numobject):
             out.n += other*self.d
         return out
 
+    @rabbit
     def same(self, other):
         """Tests Identity."""
         if isinstance(other, fraction):
