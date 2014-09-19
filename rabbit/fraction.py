@@ -67,6 +67,10 @@ class fraction(numobject):
         """Copies The Fraction Object."""
         return fraction(self.n, self.d)
 
+    def __hash__(self):
+        """Gets A Hash."""
+        return hash(self.n) ^ hash(self.d)
+
     def simplify(self):
         """Simplifies The Fraction."""
         ns = primefactor(self.n)

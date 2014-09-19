@@ -125,12 +125,11 @@ class negative(numobject):
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
     allownone = False
-    evaltype = "\\\\"
+    evaltype = "function"
     overflow = False
     memoize = True
     allargs = "__"
     reqargs = -1
-    infix = True
 
     def __init__(self, func, e, funcstr=None, reqargs=None, memoize=None, memo=None):
         """Constructs The Float Function."""
@@ -156,6 +155,10 @@ class funcfloat(numobject):
     def copy(self):
         """Returns A Copy Of The Float Function."""
         return funcfloat(self.base_func, self.e, self.funcstr, self.reqargs, self.memoize, self.memo)
+
+    def __hash__(self):
+        """Returns A Hash."""
+        return hash(self.funcstr)
 
     def keyhash(self, args):
         """Creates An Argument Hash."""
@@ -189,6 +192,8 @@ class funcfloat(numobject):
             self.e.setreturned(False)
             try:
                 out = self.base_func(*args, **kwargs)
+            except:
+                raise
             else:
                 if not returned and not self.e.returned:
                     if arghash is None:
@@ -1230,7 +1235,6 @@ class classcalc(cotobject):
         """Returns The Variables."""
         return list(self.variables.items())
 
-
     def __repr__(self):
         """Gets A Representation."""
         return repr(self.getvars())
@@ -1635,6 +1639,16 @@ class instancecalc(numobject, classcalc):
             raise ExecutionError("ClassError", "The class being converted to a container has no __cont__ method")
         else:
             return self.domethod(func)
+
+    def __contains__(self, item):
+        """Determines Whether item in self."""
+        check_in = self.getmethod("__in__")
+        if check_in:
+            return self.domethod(check_in, item)
+        check_cont = self.getmethod("__cont__")
+        if check_cont:
+            return item in self.domethod(check_cont)
+        raise ExecutionError("TypeError", "Insufficient methods defined for in")
 
     def __iadd__(self, other):
         """Performs Addition."""
@@ -2056,6 +2070,8 @@ class instancecalc(numobject, classcalc):
             return self.e.speedyprep(self, False, bottom, indebug, maxrecursion)
         elif not bottom:
             return str(self)
+        elif not top:
+            return classcalc.getrepr(self, top, bottom, indebug, maxrecursion)+" ( )"
         else:
             check_repr = self.getmethod("__repr__")
             if check_repr:
@@ -2084,8 +2100,12 @@ class instancecalc(numobject, classcalc):
         item = self.getmethod("__exit__")
         if item:
             return self.domethod(item, args)
+        elif len(args) == 1:
+            return args[0]
+        elif len(args) == 2 and isnull(args[0]):
+            return args[1]
         else:
-            return matrix(0)
+            return rowmatrixlist(args)
 
     def merge(self, other):
         """Merges Two Classes."""
@@ -2455,8 +2475,7 @@ class dictionary(pair):
         else:
             raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
 
-
-class bracket(object):
+class bracket(evalobject):
     """A To-Be-Calculated Row."""
     def __init__(self, e, items):
         """Constructs The Row."""
@@ -2500,96 +2519,467 @@ class brace(bracket):
 
 class evalwrap(evalobject):
     """A Wrapper For Converting An Arbitrary Python Object Into A Rabbit Object."""
-    def __init__(self, inputobj):
+    check = 2
+    evaltype = "Meta.wrap"
+    notmatrix = True
+
+    def __init__(self, e, inputobj, reference=None, safemethods=None):
         """Constructs The Wrapper."""
+        self.e = e
+        if safemethods is None:
+            self.safe = []
+        else:
+            self.safe = safemethods
         self.obj = inputobj
+        self.ref = reference
 
-# Need to be directly implemented:
-##    getstate
-##    copy
-##    check
-##    getcall
-##    call
-##    isfunc
-##    ismatrix
-##    tomatrix
-##    notmatrix
-##    isprop
-##    getrepr
-##    op_repeat
-##    rop_repeat
-##    itemcall
-##    getmethod
-##    evaltype
-##    __hash__
-##    __lt__
-##    __gt__
-##    __le__
-##    __ge__
-##    __eq__
-##    __ne__
-##    __cmp__
-##    __nonzero__
-##    __len__
-##    __add__
-##    __iadd__
-##    __radd__
-##    __sub__
-##    __isub__
-##    __rsub__
-##    __mul__
-##    __imul__
-##    __rmul__
-##    __floordiv__
-##    __ifloordiv__
-##    __rfloordiv__
-##    __mod__
-##    __imod__
-##    __rmod__
-##    __pow__
-##    __ipow__
-##    __rpow__
-##    __lshift__
-##    __ilshift__
-##    __rlshift__
-##    __rshift__
-##    __irshift__
-##    __rrshift__
-##    __and__
-##    __iand__
-##    __rand__
-##    __or__
-##    __ior__
-##    __ror__
-##    __xor__
-##    __ixor__
-##    __rxor__
-##    __neg__
-##    __pos__
-##    __abs__
-##    __invert__
-##    __complex__
-##    __int__
-##    __long__
-##    __float__
-##    __oct__
-##    __hex__
-##    __index__
+    def getstate(self):
+        """Returns A Pickleable Reference Object."""
+        if self.ref is None:
+            raise ExecutionError("WrapperError", "Cannot get the state of a temporary wrapper object")
+        else:
+            return ("find", self.ref)
 
-# Need to be indirectly implemented:
-##    __getitem__
-##    __setitem__
-##    __delitem__
-##    __getattr__
-##    __setattr__
-##    __delattr__
-##    __get__
-##    __set__
-##    __delete__
-##    __metaclass__
-##    __instancecheck__
-##    __subclasscheck__
-##    __iter__
-##    __contains__
-##    __enter__
-##    __exit__
+    def copy(self):
+        """Copies The Wrapper."""
+        return evalwrap(self.e, self.obj, self.ref, self.safe)
+
+    def convert(self, item):
+        """Converts An Item."""
+        return self.e.topython(item)
+
+    def argproc(self, variables):
+        """Converts Variables."""
+        args, kwargs = [], {}
+        for var in variables:
+            item = self.convert(var)
+            if isinstance(item, pair):
+                kwargs[self.convert(item.k)] = self.convert(item.v)
+            else:
+                args.append(item)
+        return args, kwargs
+
+    def prepare(self, output, ref=None):
+        """Prepares The Output Of A Python Call."""
+        def _else(item):
+            if ref is None or istext(ref):
+                return evalwrap(self.e, item, ref)
+            else:
+                return evalwrap(self.e, item, ref())
+        return self.e.frompython(output, _else)
+
+    def getref(self):
+        """Gets The Reference."""
+        if self.ref is None:
+            raise ExecutionError("WrapperError", "Cannot do operations on an unreferenced wrapper")
+        else:
+            return "("+self.ref+")"
+
+    def checksafe(self, name):
+        """Sets Returned If name Isn't Safe."""
+        if self.safe is not True and name not in self.safe:
+            self.e.setreturned()
+
+    def call(self, variables):
+        """Calls The Function."""
+        self.checksafe("__call__")
+        def _ref():
+            return self.getref()+"(("+strlist(variables, "),(", lambda x: self.e.prepare(x, False, True))+"))"
+        args, kwargs = self.argproc(variables)
+        return self.prepare(self.obj(*args, **kwargs), _ref)
+
+    def isfunc(self):
+        """Determines Whether Or Not The Object Is A Function."""
+        return hasattr(self.obj, "__call__")
+
+    def ismatrix(self):
+        """Determines Whether Or Not The Object Is A Matrix."""
+        return hasattr(self.obj, "__iter__")
+
+    def getrepr(self, top, bottom, indebug, maxrecursion):
+        """Gets A Representation."""
+        if indebug or maxrecursion <= 0:
+            return self.ref
+        elif not bottom:
+            return str(self)
+        elif not top:
+            return self.ref
+        else:
+            return repr(self)
+
+    def __repr__(self):
+        """Gets A Representation."""
+        self.checksafe("__repr__")
+        return repr(self.obj)
+
+    def __str__(self):
+        """Gets A String."""
+        self.checksafe("__str__")
+        return str(self.obj)
+
+    def itemcall(self, variables):
+        """Gets An Item."""
+        if hasattr(self, "__getitem__"):
+            self.checksafe("__getitem__")
+            args, kwargs = self.argproc(variables)
+            if kwargs or len(args) > 1:
+                args = slice(*args, **kwargs)
+            def _ref():
+                return self.getref()+":("+strlist(variables, "):(", lambda x: self.e.prepare(x, False, True))+")"
+            return self.prepare(self.obj[args[0]], _ref)
+        else:
+            return self.call(variables)
+
+    def getmethod(self, key):
+        """Gets A Method."""
+        if hasattr(self.obj, key):
+            self.checksafe(key)
+            return self.prepare(getattr(self.obj, key), self.getref()+"."+key)
+        else:
+            return None
+
+    def __bool__(self):
+        """Converts To A Boolean."""
+        self.checksafe("__bool__")
+        return bool(self.obj)
+
+    def __int__(self):
+        """Converts To An Integer."""
+        self.checksafe("__int__")
+        return int(self.obj)
+
+    def __float__(self):
+        """Converts To A Float."""
+        self.checksafe("__float__")
+        return old_float(self.obj)
+
+    def __index__(self):
+        """Gets An Index."""
+        if hasattr(self.obj, "__index__"):
+            self.checksafe("__index__")
+            return self.obj.__index__()
+        else:
+            return int(self)
+
+    def __len__(self):
+        """Gets A Length."""
+        self.checksafe("__len__")
+        return len(self.obj)
+
+    def __complex__(self):
+        """Gets A Complex Number."""
+        self.checksafe("__complex__")
+        return complex(self.obj)
+
+    def __eq__(self, other):
+        """Performs ==."""
+        self.checksafe("__eq__")
+        return self.obj == self.convert(other)
+
+    def __ne__(self, other):
+        """Performs !=."""
+        self.checksafe("__ne__")
+        return self.obj != self.convert(other)
+
+    def __lt__(self, other):
+        """Performs <."""
+        self.checksafe("__lt__")
+        return self.obj < self.convert(other)
+
+    def __gt__(self, other):
+        """Performs >."""
+        self.checksafe("__gt__")
+        return self.obj > self.convert(other)
+
+    def __le__(self, other):
+        """Performs <=."""
+        self.checksafe("__le__")
+        return self.obj <= self.convert(other)
+
+    def __ge__(self, other):
+        """Performs >=."""
+        self.checksafe("__ge__")
+        return self.obj >= self.convert(other)
+
+    def __add__(self, other):
+        """Performs Addition."""
+        self.checksafe("__add__")
+        def _ref():
+            return self.getref()+"+("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj + self.convert(other), _ref)
+
+    def __radd__(self, other):
+        """Performs Reverse Addition."""
+        self.checksafe("__radd__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+")+"+self.getref()
+        return self.prepare(self.convert(other) + self.obj, _ref)
+
+    def __sub__(self, other):
+        """Performs Subtraction."""
+        self.checksafe("__sub__")
+        def _ref():
+            return self.getref()+"-("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj - self.convert(other), _ref)
+
+    def __rsub__(self, other):
+        """Performs Reverse Subtraction."""
+        self.checksafe("__rsub__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+")-"+self.getref()
+        return self.prepare(self.convert(other) - self.obj, _ref)
+
+    def __mul__(self, other):
+        """Performs Multiplication."""
+        self.checksafe("__mul__")
+        def _ref():
+            return self.getref()+"*("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj * self.convert(other), _ref)
+
+    def __rmul__(self, other):
+        """Performs Reverse Multiplication."""
+        self.checksafe("__rmul__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+")*"+self.getref()
+        return self.prepare(self.convert(other) * self.obj, _ref)
+
+    def __div__(self, other):
+        """Performs Division."""
+        self.checksafe("__div__")
+        def _ref():
+            return self.getref()+"/("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj / self.convert(other), _ref)
+
+    def __rdiv__(self, other):
+        """Performs Reverse Division."""
+        self.checksafe("__rdiv__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+")/"+self.getref()
+        return self.prepare(self.convert(other) / self.obj, _ref)
+
+    def __floordiv__(self, other):
+        """Performs Floor Division."""
+        self.checksafe("__floordiv__")
+        def _ref():
+            return self.getref()+"//("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj // self.convert(other), _ref)
+
+    def __rfloordiv__(self, other):
+        """Performs Reverse Floor Division."""
+        self.checksafe("__rfloordiv__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+")//"+self.getref()
+        return self.prepare(self.convert(other) // self.obj, _ref)
+
+    def __mod__(self, other):
+        """Performs Modulus."""
+        self.checksafe("__mod__")
+        def _ref():
+            return self.getref()+"%("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj % self.convert(other), _ref)
+
+    def __rmod__(self, other):
+        """Performs Reverse Modulus."""
+        self.checksafe("__rmod__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+")%"+self.getref()
+        return self.prepare(self.convert(other) % self.obj, _ref)
+
+    def __pow__(self, other):
+        """Performs Exponentiation."""
+        self.checksafe("__pow__")
+        def _ref():
+            return self.getref()+"^("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj ** self.convert(other), _ref)
+
+    def __rpow__(self, other):
+        """Performs Reverse Exponentiation."""
+        self.checksafe("__rpow__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+")^"+self.getref()
+        return self.prepare(self.convert(other) ** self.obj, _ref)
+
+    def __lshift__(self, other):
+        """Performs Left Shift."""
+        self.checksafe("__lshift__")
+        def _ref():
+            return self.getref()+" lshift ("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj << self.convert(other), _ref)
+
+    def __rlshift__(self, other):
+        """Performs Reverse Left Shift."""
+        self.checksafe("__rlshift__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+") lshift "+self.getref()
+        return self.prepare(self.convert(other) << self.obj, _ref)
+
+    def __rshift__(self, other):
+        """Performs Right Shift."""
+        self.checksafe("__rshift__")
+        def _ref():
+            return self.getref()+" rshift ("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj >> self.convert(other), _ref)
+
+    def __rrshift__(self, other):
+        """Performs Reverse Right Shift."""
+        self.checksafe("__rrshift__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+") rshift "+self.getref()
+        return self.prepare(self.convert(other) >> self.obj, _ref)
+
+    def __or__(self, other):
+        """Performs Bitwise Or."""
+        self.checksafe("__or__")
+        def _ref():
+            return self.getref()+" bitor ("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj | self.convert(other), _ref)
+
+    def __ror__(self, other):
+        """Performs Reverse Bitwise Or."""
+        self.checksafe("__ror__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+") bitor "+self.getref()
+        return self.prepare(self.convert(other) | self.obj, _ref)
+
+    def __and__(self, other):
+        """Performs Bitwise And."""
+        self.checksafe("__and__")
+        def _ref():
+            return self.getref()+" bitand ("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj & self.convert(other), _ref)
+
+    def __rand__(self, other):
+        """Performs Reverse Bitwise And."""
+        self.checksafe("__rand__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+") bitand "+self.getref()
+        return self.prepare(self.convert(other) & self.obj, _ref)
+
+    def __xor__(self, other):
+        """Performs Bitwise Xor."""
+        self.checksafe("__xor__")
+        def _ref():
+            return self.getref()+" bitxor ("+self.e.prepare(other, False, True)+")"
+        return self.prepare(self.obj ^ self.convert(other), _ref)
+
+    def __rxor__(self, other):
+        """Performs Reverse Bitwise Xor."""
+        self.checksafe("__rxor__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+") bitxor "+self.getref()
+        return self.prepare(self.convert(other) ^ self.obj, _ref)
+
+    def __neg__(self):
+        """Performs Unary Negation."""
+        self.checksafe("__neg__")
+        return self.prepare(-self.obj, "-"+self.getref()+"")
+
+    def __pos__(self):
+        """Performs Unary Positive."""
+        self.checksafe("__pos__")
+        return self.prepare(+self.obj, "+"+self.getref()+"")
+
+    def __invert__(self):
+        """Performs Bitwise Inverse."""
+        self.checksafe("__invert__")
+        return self.prepare(~self.obj, "bitnot:"+self.getref())
+
+    def __abs__(self):
+        """Performs Absolute Value."""
+        self.checksafe("__abs__")
+        return self.prepare(abs(self.obj), "abs:"+self.getref())
+
+    def __bin__(self):
+        """Gets A Binary Representation."""
+        self.checksafe("__bin__")
+        return self.prepare(bin(self.obj), "bin:"+self.getref())
+
+    def __oct__(self):
+        """Gets An Octal Representation."""
+        self.checksafe("__oct__")
+        return self.prepare(oct(self.obj), "oct:"+self.getref())
+
+    def __hex__(self):
+        """Gets A Hex Representation."""
+        self.checksafe("__hex__")
+        return self.prepare(hex(self.obj), "hex:"+self.getref())
+
+    def __round__(self, place):
+        """Performs Round."""
+        self.checksafe("__round__")
+        def _ref():
+            return "round:"+self.getref()+":("+self.e.prepare(place, False, True)+")"
+        return self.prepare(round(self.obj, place), _ref)
+
+    def __divmod__(self, other):
+        """Performs divmod."""
+        self.checksafe("__divmod__")
+        def _ref():
+            return self.getref()+" divmod ("+self.e.prepare(other, False, True)+")"
+        return self.prepare(divmod(self.obj, other), _ref)
+
+    def __rdivmod__(self, other):
+        """Performs Reverse divmod."""
+        self.checksafe("__rdivmod__")
+        def _ref():
+            return "("+self.e.prepare(other, False, True)+") divmod "+self.getref()
+        return self.prepare(divmod(other, self.obj), _ref)
+
+    def __contains__(self, item):
+        """Performs in."""
+        self.checksafe("__contains__")
+        def _ref():
+            return "("+self.e.prepare(item, False, True)+") in "+self.getref()
+        return item in self.obj
+
+    def inside_enter(self, args):
+        """Enters The Inside."""
+        if len(args) > 1:
+            raise ExecutionError("ArgumentError", "Excess arguments "+strlist(args[1:], ", ", lambda x: self.e.prepare(x, False, True)))
+        elif hasattr(self.obj, "__enter__"):
+            self.checksafe("__enter__")
+            out = self.prepare(self.obj.__enter__())
+            if args:
+                return self.e.getcall(args[0])([out])
+            else:
+                return out
+        else:
+            raise ExecutionError("WrapperError", "Object has no __enter__ method")
+
+    def inside_exit(self, args):
+        """Exits The Inside."""
+        if hasattr(self.obj, "__exit__"):
+            self.checksafe("__exit__")
+            self.obj.__exit__(None, None, None)
+        if len(args) == 1:
+            return args[0]
+        elif len(args) == 2 and isnull(args[0]):
+            return args[1]
+        else:
+            return rowmatrixlist(args)
+
+    def __hash__(self):
+        """Returns A Hash."""
+        self.checksafe("__hash__")
+        return hash(self.obj)
+
+    def tomatrix(self):
+        """Converts To A Matrix."""
+        self.checksafe("__iter__")
+        out = []
+        for item in self.obj:
+            out.append(item)
+        return diagmatrixlist(out)
+
+class revwrap(evalwrap):
+    """A Wrapper For Converting A Rabbit Object Into A Python Object."""
+    # This could also just be implemented as evalobject methods if there was an evaluator global
+    pass
+
+# Tools to give access to:
+##    Python.repr
+##    Python.calc
+##    Python.eval
+##    Rabbit.getstate
+##    Rabbit.fromstate
+##    Rabbit.prepare

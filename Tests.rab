@@ -129,6 +129,7 @@ nothing := class <<
  __rep__(self, other) = [self]**other
  __rrep__(self, other) = ()
  __rjoin__(self, __) = self
+ __in__(self, item) = false
  >>
 nil := nothing()
 passert:: type(nil) ?= "nil"
@@ -161,6 +162,7 @@ passert:: class<<>> ++ class << x = 1 >> ?= class << x = 1 >>
 passert:: type(class<<>>() ++ class << x = 1 >>) ?= "instance"
 passert:: class << nothing := nothing ;; nil := nil >> ?= class << nil := nil ;; nothing := nothing >>
 passert:: nil ++ 1 ?= nil
+passert:: ! nil in nil
 
 # Multi-Line Tests:
 passert:: # A mid-line comment
@@ -381,8 +383,8 @@ passert:: env().a ?= a ?= 2         $ a = 2
 passert:: iserr(Error())
 passert:: iserr((try::raise()):1)
 passert:: iserr(Warning())
-passert:: inherits(Error, Error())
-passert:: inherits(Error, (try::raise()):1)
+passert:: from(Error, Error())
+passert:: from(Error, (try::raise()):1)
 passert:: var:"a" ?= "b"            $ a = b
 passert:: a ?= 5                    $ exec("a = 5")
 passert:: num(i) ?= i
@@ -414,6 +416,8 @@ passert:: dict() ?= {}
 passert:: max(1,0,5,4) ?= 5
 passert:: min(1,0,5,4) ?= 0
 passert:: 5x^2 ?= 20                $ (do:: x = 2)
+passert:: (function:: x :: x) ?= \x\x
+passert:: wrap(\x\x).getstate() ?= getstate(\x\x)
 
 # New Feature Tests:
 passert:: f..g(2) ?= 9                       $ f(x) = x^2 $ g(x) = x+1
@@ -507,7 +511,7 @@ passert:: 10 != 1
 passert:: type(class<<>>) ?= "class"
 passert:: 270394572394085723904572394857203495793457 ?= 270394572394085723904572394857203495793457.0
 passert:: 5 in [1,5,2]
-passert:: (class<<x=1>>()) inherits (class<<x=1>>)
+passert:: (class<<x=1>>()) from (class<<x=1>>)
 passert:: 5 // 2 ?= 2
 passert:: ! (1,2,3,4) ~ \x\($())
 passert:: len( [1,2,3,4] ~ \x\($()) ) ?= 4
@@ -614,9 +618,11 @@ passert:: pure<<sin(pi/4)>>
 passert:: noshow                              $ noshow = class<<__repr__=raise("Unrepresentable")>>()
 passert:: f(1) ?= 1                           $ f ( x ) = x
 passert:: f . ( __closure__ )                 $ f(x) = x
-tag = "tag"
+passert:: [1,2,3] != (1,2,3)
+passert:: type([true]:0) ?= "bool"
 
 # Final Testing:
+tag = "tag"
 passert:: print("<#> Make sure you see this message three times")
 passert:: save("Tests.save");true
 contents = read("Tests.save")

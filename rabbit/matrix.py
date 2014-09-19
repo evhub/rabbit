@@ -28,7 +28,7 @@ from .carrot.rand import *
 class matrix(mctobject):
     """Implements A Mathematical Matrix."""
 
-    def __init__(self, y, x=None, empty=0.0, converter=float, fake=False):
+    def __init__(self, y, x=None, empty=0.0, converter=getnum, fake=False):
         """Constructs The Matrix."""
         self.y = int(y)
         if x is None:
@@ -665,7 +665,14 @@ class matrix(mctobject):
         else:
             return "matrix"
 
-def diagmatrix(size=2, full=1.0, empty=0.0, converter=float, fake=True):
+    def __eq__(self, other):
+        """Determines Equality."""
+        if isinstance(other, matrix):
+            return self.a == other.a
+        else:
+            return False
+
+def diagmatrix(size=2, full=1.0, empty=0.0, converter=getnum, fake=True):
     """Constructs Matrix I."""
     size = int(size)
     I = matrix(size, size, empty, converter, fake)
@@ -673,7 +680,7 @@ def diagmatrix(size=2, full=1.0, empty=0.0, converter=float, fake=True):
         I.store(x, x, full)
     return I
 
-def matrixitems(inputitems, y, x=None, converter=float, fake=False):
+def matrixitems(inputitems, y, x=None, converter=getnum, fake=False):
     """Constructs A Matrix From Items."""
     if x is None:
         x = len(inputitems)/y
@@ -684,7 +691,7 @@ def matrixitems(inputitems, y, x=None, converter=float, fake=False):
         z += 1
     return out
 
-def domatrixlist(inputlist, converter=float):
+def domatrixlist(inputlist, converter=getnum):
     """Turns A List Into A Matrix."""
     try:
         out = matrixlist(inputlist, converter)
@@ -700,7 +707,7 @@ def nonull(inputlist):
     """Cleans The Input Of Empty Matrices."""
     return clean(inputlist, isnull, True)
 
-def diagmatrixlist(inputlist=None, converter=float, func=None, fake=True, clean=True):
+def diagmatrixlist(inputlist=None, converter=getnum, func=None, fake=True, clean=True):
     """Constructs A Diagonal Matrix From A List."""
     if inputlist is None:
         inputlist = []
@@ -717,7 +724,7 @@ def diagmatrixlist(inputlist=None, converter=float, func=None, fake=True, clean=
         out.store(x,x, outlist[x])
     return out
 
-def rowmatrixlist(inputlist=None, converter=float, func=None, fake=False, clean=False):
+def rowmatrixlist(inputlist=None, converter=getnum, func=None, fake=False, clean=False):
     """Constructs A Row Matrix From A List."""
     if inputlist is None:
         inputlist = []
@@ -731,7 +738,7 @@ def rowmatrixlist(inputlist=None, converter=float, func=None, fake=False, clean=
             out.store(0,x, inputlist[x])
     return out
 
-def matrixstr(inputstr, converter=float):
+def matrixstr(inputstr, converter=getnum):
     """Converts A Matrix String Back Into A Matrix."""
     ys = basicformat(inputstr).split("\n")
     for x in xrange(0,len(ys)):
@@ -740,7 +747,7 @@ def matrixstr(inputstr, converter=float):
             ys[x][z] = converter(ys[x][z])
     return matrixlist(ys, converter)
 
-def matrixlist(inputlist, converter=float, fake=False):
+def matrixlist(inputlist, converter=getnum, fake=False):
     """Converts A List Of Lists Into A Matrix."""
     if converter is None:
         converter = type(inputlist[0][0])
@@ -753,7 +760,7 @@ def matrixlist(inputlist, converter=float, fake=False):
     out.convert()
     return out
 
-def rangematrix(start, stop, step=1.0, fake=True, converter=float):
+def rangematrix(start, stop, step=1.0, fake=True, converter=getnum):
     """Constructs A Matrix On A Range."""
     start = float(start)
     stop = float(stop)

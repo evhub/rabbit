@@ -201,10 +201,6 @@ class evalobject(object):
         """Raises An Error."""
         raise ExecutionError("OperatorError", "Comparison not defined for object")
 
-    def __index__(self):
-        """Wraps int."""
-        return int(self)
-
     def __unicode__(self):
         """Converts To A String."""
         if hasattr(self, "__str__"):
@@ -220,6 +216,30 @@ class evalobject(object):
             return self.__len__()
         else:
             return True
+
+    def __index__(self):
+        """Wraps int."""
+        return int(self)
+
+    def __divmod__(self, other):
+        """Performs Division With Remainder."""
+        return self//other, self%other
+
+    def __rdivmod__(self, other):
+        """Performs Reverse Division With Remainder."""
+        return other//self, other%self
+
+    def __bin__(self):
+        """Gets A Binary Representation."""
+        return bin(float(self))
+
+    def __oct__(self):
+        """Gets An Octal Representation."""
+        return oct(float(self))
+
+    def __hex__(self):
+        """Gets A Hex Representation."""
+        return hex(float(self))
 
 class numobject(evalobject):
     """A Base Class For Objects."""
@@ -427,7 +447,7 @@ class cotobject(evalobject):
             return False
 
     def __cmp__(self, other):
-        """Performs comparison."""
+        """Performs Comparison."""
         try:
             test = tuple(other.items())
         except AttributeError:
@@ -443,6 +463,13 @@ class cotobject(evalobject):
     def tomatrix(self):
         """Converts To A Matrix."""
         return diagmatrixlist(self.items())
+
+    def __hash__(self):
+        """Returns A Hash."""
+        out = 0
+        for item in items:
+            out ^= hash(item)
+        return out
 
 class mctobject(cotobject, numobject):
     """A Base Class For Mathematical Container Objects."""
