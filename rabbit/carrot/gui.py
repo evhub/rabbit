@@ -471,7 +471,7 @@ class displayer(object):
             x = self.x/2
         if y is None:
             y = self.y/2
-        if typestr(photo) != "instance":
+        if istext(photo):
             photo = openphoto(str(photo))
             return photo, self.main.create_image(x, y, image=photo)
         else:
@@ -479,9 +479,9 @@ class displayer(object):
 
     def change(self, identifier, photo):
         """Changes A Displayed Image."""
-        if typestr(photo) == "instance":
+        if istext(photo):
             photo = openphoto(str(photo))
-            return photo, self.main.itemconfigure(identifier, image=openphoto(photo))
+            return photo, self.main.itemconfigure(identifier, image=photo)
         else:
             return self.main.itemconfigure(identifier, image=photo)
 

@@ -2973,6 +2973,3 @@ class evalwrap(evalobject):
         for item in self.obj:
             out.append(item)
         return diagmatrixlist(out)
-
-# Do reverse wrapping!
-# Fix dictionary/pair display issues (from pipe).

@@ -19,7 +19,7 @@
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
 from .base import *
-import copy
+import sys
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
@@ -120,14 +120,16 @@ def makeint(inputobject):
     else:
         return getint(inputobject)
 
-def getcopy(inputobject):
-    """Copies The Object If It Has A copy Method."""
-    if isinstance(inputobject, list):
-        return map(getcopy, inputobject[:])
-    elif hasattr(inputobject, "copy"):
-        return inputobject.copy()
+def dotry(function, *args, **kwargs):
+    """Gets The Error From A Function."""
+    result = None
+    try:
+        result = function(*args, **kwargs)
+    except:
+        err_type, err, err_tb = sys.exc_info()
     else:
-        return inputobject
+        err = None
+    return result, err
 
 def catch(function, *args, **kwargs):
     """Gets The Errors From A Function."""

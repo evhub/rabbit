@@ -157,8 +157,9 @@ class mathbase(safebase):
         elif len(self.box.commands) > 1:
             self.evaltext(self.box.commands[-2])
 
-    def evalfile(self, name):
+    def evalfile(self, original):
         """Runs A File."""
+        name = self.e.findfile(original)
         try:
             tempfile = openfile(name, "rb")
         except IOError:

@@ -56,13 +56,13 @@ class grapher(mathbase):
                 inputstring = popup("Entry", "Unable to find Pixel.gif. This file is necessary for rendering anything. Please enter the location where the file can be found:")
                 if inputstring:
                     try:
-                        self.pixel = openphoto(sanitize(inputstring)+"/Pixel.gif")
+                        self.pixel = openphoto(os.path.join(inputstring, "Pixel.gif"))
                     except:
                         go = False
                     else:
                         go = True
                 else:
-                    raise IOError("Unable to find Pixel.gif.")
+                    raise IOError("Unable to find Pixel.gif")
         try:
             self.graph = openphoto(os.path.join(directory, "Graph.gif"))
         except:

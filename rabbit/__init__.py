@@ -38,13 +38,15 @@ File List:
 
     data (func, carrot.stats) : Utilities for managing statistical data.
 
-    eval (data, fraction, carrot.file) : Utilities for implementing the Rabbit language.
+    prelude (data, fraction, carrot.file) : The builtin functions for the Rabbit language.
+
+    eval (prelude) : The base evaluator for the Rabbit language.
 
     cmd (eval, carrot.app) : The standard Rabbit language interpreter.
 
     cli (cmd) : The Rabbit Command Line Interface.
     ride (cmd) : The Rabbit Integrated Development Environment.
-    graph (cmd) : A Graphing Module For Rabbit Functions.
+    graph (cmd) : A graphing module for Rabbit functions.
 
     comp (cli) : The Rabbit Semi-Compiler.
 

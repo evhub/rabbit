@@ -18,8 +18,8 @@
 
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
-from .ctrl import *
 from .math import *
+from .ctrl import *
 import hashlib
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

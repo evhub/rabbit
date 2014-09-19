@@ -20,6 +20,20 @@ from __future__ import with_statement, print_function, absolute_import, unicode_
 
 from .obj import *
 
+global e
+try:
+    set_e
+except:
+    old_set_e = None
+else:
+    old_set_e = set_e
+def set_e(new_e):
+    """Sets The Evaluator Global."""
+    global e
+    if old_set_e is not None:
+        old_set_e(new_e)
+    e = new_e
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -278,6 +292,14 @@ class evalobject(object):
     def __hex__(self):
         """Gets A Hex Representation."""
         return hex(float(self))
+
+    def __call__(self, *args):
+        """Calls The Rabbit Function."""
+        return e.getcall(self)(list(map(e.frompython, args)))
+
+    def __getitem__(self, *args):
+        """Gets An Item."""
+        return self.itemcall(list(map(e.frompython, args)))
 
 class numobject(evalobject):
     """A Base Class For Objects."""

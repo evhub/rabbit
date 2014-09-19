@@ -18,8 +18,8 @@
 
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
-from .carrot.format import *
 from .carrot.math import *
+from .carrot.format import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)

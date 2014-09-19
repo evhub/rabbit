@@ -206,6 +206,15 @@ def getstates(variables):
         out[itemstate(k)] = itemstate(v)
     return out
 
+def getcopy(inputobject):
+    """Copies The Object If It Has A copy Method."""
+    if isinstance(inputobject, list):
+        return map(getcopy, inputobject[:])
+    elif hasattr(inputobject, "copy"):
+        return inputobject.copy()
+    else:
+        return inputobject
+
 class memoizer(object):
     """A Memoized Function."""
     def __init__(self, func):

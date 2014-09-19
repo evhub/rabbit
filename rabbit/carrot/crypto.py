@@ -18,8 +18,8 @@
 
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
-from .format import *
 from .rand import *
+from .format import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
