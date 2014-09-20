@@ -25,36 +25,32 @@ from .func import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def teq(df, e):
+def teq(df):
     """Finds The t Distribution For The Given Degrees Of Freedom."""
-    v = float(df)
     n = v+1.0
-    return strfunc(e.prepare(gamma(n/2.0) / ((math.pi*v)**0.5 * gamma(v/2.0))) + "/" + "(1+x^2/" + e.prepare(v) + ")^" + e.prepare(n/2.0), e, ["x"])
+    return strfunc(e.prepare(gamma(n/2.0) / ((math.pi*v)**0.5 * gamma(v/2.0))) + "/" + "(1+x^2/" + e.prepare(v) + ")^" + e.prepare(n/2.0), ["x"])
 
-def tP(start, stop, df, e):
+def tP(start, stop, df):
     """Finds The Cumulative Probability Between Two t Values."""
-    eq = teq(df, e)
+    eq = teq(df)
     return defint(lambda x: eq.call([x]), start, stop)
 
-def chisqeq(df, e):
+def chisqeq(df):
     """Finds The Chi Squared Distribution For The Given Degrees Of Freedom."""
-    v = float(df)
-    return strfunc("x^"+e.prepare((v-2.0)/2.0)+"*e^(-x/2)/"+e.prepare(2.0**(v/2.0)*gamma(v/2.0)), e, ["x"])
+    return strfunc("x^"+e.prepare((v-2.0)/2.0)+"*e^(-x/2)/"+e.prepare(2.0**(v/2.0)*gamma(v/2.0)), ["x"])
 
-def chisqP(stop, df, e):
+def chisqP(stop, df):
     """Finds The Probability Beyond A Chi Squared Value."""
-    eq = chisqeq(df, e)
+    eq = chisqeq(df)
     return 1.0-defint(lambda x: eq.call([x]), 0.0, stop)
 
-def Feq(dfT, dfE, e):
+def Feq(dfT, dfE):
     """Finds The F Distribution For The Given Degrees Of Freedom."""
-    v = float(dfT)
-    w = float(dfE)
-    return strfunc(e.prepare((v/w)**(v/2)*gamma((v+w)/2.0)/(gamma(v/2.0)*gamma(w/2.0)))+"*x^"+e.prepare((v-2.0)/2.0)+"/(1+"+e.prepare(v/w)+"x)^"+e.prepare((v+w)/2.0), e, ["x"])
+    return strfunc(e.prepare((v/w)**(v/2)*gamma((v+w)/2.0)/(gamma(v/2.0)*gamma(w/2.0)))+"*x^"+e.prepare((v-2.0)/2.0)+"/(1+"+e.prepare(v/w)+"x)^"+e.prepare((v+w)/2.0), ["x"])
 
-def FP(stop, dfT, dfE, e):
+def FP(stop, dfT, dfE):
     """Finds The Probability Beyond An F Value."""
-    eq = Feq(dfT, dfE, e)
+    eq = Feq(dfT, dfE)
     return 1.0-defint(lambda x: eq.call([x]), 0.0, stop)
 
 class data(mctobject):

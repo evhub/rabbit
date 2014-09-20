@@ -74,7 +74,7 @@ class commandline(mathbase):
 
     def fatalerror(self):
         """Has A Fatal Error."""
-        self.e.setreturned()
+        pass
 
     def start(self):
         """Starts The Command Line Main Loop."""

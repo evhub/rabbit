@@ -257,7 +257,7 @@ class evalfuncs(object):
         elif isinstance(variables[0], namespace):
             return variables[0]
         elif isinstance(variables[0], classcalc):
-            return namespace(variables[0].e, variables[0].getvars(True))
+            return namespace(variables[0].getvars(True))
         else:
             raise ExecutionError("ClassError", "Cannot convert "+e.prepare(variables[0], False, True, True)+" to namespace")
 
@@ -354,7 +354,7 @@ class evalfuncs(object):
                 else:
                     return diagmatrixlist(variables[0].rows())
             elif hasmatrix(variables[0]):
-                return getmatrix(variables[0])
+                return self.listcall([getmatrix(variables[0])])
             else:
                 return matrix(1,1, variables[0], fake=True)
         else:
@@ -818,7 +818,7 @@ class evalfuncs(object):
         out = []
         for x in variables:
             out.append(e.prepare(x, True, False))
-        return rawstrcalc(strlist(out, " "))
+        return rawstrcalc("".join(out))
 
     def reprcall(self, variables):
         """Finds A Representation."""

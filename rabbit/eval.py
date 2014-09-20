@@ -539,15 +539,15 @@ Global Operator Precedence List:
                 "poissonP":usefunc(poissonP, "poissonP", ["lambda", "x"]),
                 "hypgeoP":usefunc(hypgeoP, "hypgeoP", ["x", "n", "K", "N"]),
                 "tdist":usefunc(tdist, "tdist", ["x", "df"]),
-                "teq":usefunc(teq, "teq", ["df"], evalinclude="e"),
+                "teq":usefunc(teq, "teq", ["df"]),
                 "chisqdist":usefunc(chisqdist, "chisqdist", ["x", "df"]),
-                "chisqeq":usefunc(chisqeq, "chisqeq", ["df"], evalinclude="e"),
+                "chisqeq":usefunc(chisqeq, "chisqeq", ["df"]),
                 "Fdist":usefunc(Fdist, "Fdist", ["x", "dfT", "dfE"]),
-                "Feq":usefunc(Feq, "Feq", ["dfT", "dfE"], evalinclude="e"),
+                "Feq":usefunc(Feq, "Feq", ["dfT", "dfE"]),
                 "normP":usefunc(normP, "normP", ["x", "y", "mean", "stdev"]),
-                "tP":usefunc(tP, "tP", ["x", "y", "df"], evalinclude="e"),
-                "chisqP":usefunc(chisqP, "chisqP", ["x", "df"], evalinclude="e"),
-                "FP":usefunc(FP, "FP", ["x", "dfT", "dfE"], evalinclude="e")
+                "tP":usefunc(tP, "tP", ["x", "y", "df"]),
+                "chisqP":usefunc(chisqP, "chisqP", ["x", "df"]),
+                "FP":usefunc(FP, "FP", ["x", "dfT", "dfE"])
                 }, name="Stats"),
             "none":matrix(0),
             "true":True,
@@ -1291,10 +1291,15 @@ Global Operator Precedence List:
 
     def precalc_cmd(self, inputstring):
         """Evaluates Statements."""
-        inputlist = self.splitdedent(inputstring, lambda x: x.split("::"))
+        inputlist = carefulsplit(inputstring, "::", counters={self.indentchar:self.dedentchar})
         out = [inputlist[0]]
         for x in xrange(1, len(inputlist)):
-            out.append(self.wrap(basicformat(inputlist[x])))
+            if ";;" in inputlist[x]:
+                a,b = inputlist[x].split(";;", 1)
+                new = self.wrap(basicformat(a))+" ;; "+basicformat(b)
+            else:
+                new = self.wrap(basicformat(inputlist[x]))
+            out.append(new)
         return "::".join(out)
 
     def calc_next(self, arg, funcs, top=False):
@@ -2468,7 +2473,7 @@ Global Operator Precedence List:
                 raise ExecutionError("NoneError", "Nothing cannot be called")
             else:
                 return item
-        elif hasattr(item, "itemcall") and item.itemcall is not None:
+        elif hasitemcall(item):
             value = item.itemcall(params)
         elif ismatrix(item):
             item = getmatrix(item)
@@ -2709,6 +2714,7 @@ Global Operator Precedence List:
                             if check:
                                 return True
                             rabstring = basicformat(rabstring)
+                            inputstring = self.prepare(item, False, True)+".("+key+")"
                             if not rabstring:
                                 new = evalwrap(self, test, inputstring)
                             elif rabstring.startswith("="):

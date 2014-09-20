@@ -49,13 +49,17 @@ def collapse(item):
     """Collapses An Argument."""
     if isinstance(item, funcfloat):
         if item.reqargs > 0:
-            raise ExecutionError("ArgumentError", "Not enough arguments supplied to collapse "+item.e.prepare(item, False, True, True))
+            raise ExecutionError("ArgumentError", "Not enough arguments supplied to collapse "+e.prepare(item, False, True, True))
         else:
             return item.calc()
     elif isinstance(item, codestr):
         return item.calc()
     else:
         return item
+
+def hasitemcall(inputobject):
+    """Determines Whether An Object Is Item-Callable."""
+    return hasattr(inputobject, "itemcall") and inputobject.itemcall is not None and (not hasattr(inputobject, "hasitemcall") or inputobject.hasitemcall())
 
 def isbuiltin(inputobject):
     """Checks Whether An Object Is A Builtin."""
@@ -1541,6 +1545,8 @@ class instancecalc(numobject, classcalc):
         """Retrieves An Item At The Base Level."""
         if istext(self.variables[test]):
             out = self.calc(self.variables[test])
+            if isinstance(out, strfunc):
+                out.curryself(self)
             self.store(test, out)
         elif self.variables[test] is None:
             out = matrix(0)
@@ -2619,6 +2625,10 @@ class evalwrap(evalobject):
         """Gets A String."""
         self.checksafe("__str__")
         return str(self.obj)
+
+    def hasitemcall(self):
+        """Determines Whether Or Not The Object Has An Item Call."""
+        return hasattr(self.obj, "__getitem__")
 
     def itemcall(self, variables):
         """Gets An Item."""

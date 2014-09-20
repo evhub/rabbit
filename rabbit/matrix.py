@@ -716,8 +716,8 @@ class matrix(mctobject):
     @rabbit
     def __eq__(self, other):
         """Determines Equality."""
-        if isinstance(other, matrix):
-            return self.a == other.a
+        if isinstance(other, matrix) and self.y == other.y and self.x == other.x:
+            return self.items() == other.items()
         else:
             return False
 
