@@ -237,7 +237,7 @@ class funcfloat(numobject):
         elif self.allownone:
             return matrix(0)
         else:
-            raise ExecutionError("PythonError", "Functions should never return Python None")
+            raise SyntaxError("Functions should never return Python None")
 
     @rabbit
     def calc(self, variables=None):
@@ -402,7 +402,7 @@ class strfunc(funcfloat):
 
     def copy(self):
         """Copies The String Function."""
-        return strfunc(self.funcstr, self.variables, getcopy(self.personals), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, False)
+        return strfunc(self.funcstr, self.variables[:], getcopy(self.personals), self.name, self.overflow, self.allargs, self.reqargs, self.memoize, self.memo, self.method, False)
 
     def calc(self, personals=None):
         """Calculates The String."""
@@ -888,7 +888,7 @@ class usefunc(funcfloat):
 
     def copy(self):
         """Copies The Function."""
-        return usefunc(self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, self.memo, self.curried[:])
+        return usefunc(self.base_func, self.funcstr, self.variables[:], self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, self.memo, self.curried[:])
 
     def getextras(self):
         """Retrieves Extras."""
