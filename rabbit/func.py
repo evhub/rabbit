@@ -181,7 +181,7 @@ class funcfloat(numobject):
 
     def copy(self):
         """Returns A Copy Of The Float Function."""
-        return funcfloat(self.base_func, self.name, self.reqargs, self.memoize, self.memo, self.funcstr, self.curried)
+        return funcfloat(self.base_func, self.name, self.reqargs, self.memoize, self.memo, self.funcstr, self.curried[:])
 
     @rabbit
     def __hash__(self):
