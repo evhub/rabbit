@@ -151,7 +151,7 @@ class funcfloat(numobject):
     allargs = "__"
     reqargs = -1
 
-    def __init__(self, func, name=None, reqargs=None, memoize=None, memo=None, funcstr=None):
+    def __init__(self, func, name=None, reqargs=None, memoize=None, memo=None, funcstr=None, curried=None):
         """Constructs The Float Function."""
         if name:
             self.name = str(name)
@@ -170,6 +170,10 @@ class funcfloat(numobject):
         self.base_func = func
         if reqargs is not None:
             self.reqargs = reqargs
+        if curried is None:
+            self.curried = []
+        else:
+            self.curried = curried
 
     def getstate(self):
         """Returns A Pickleable Reference Object."""
@@ -177,7 +181,7 @@ class funcfloat(numobject):
 
     def copy(self):
         """Returns A Copy Of The Float Function."""
-        return funcfloat(self.base_func, self.name, self.reqargs, self.memoize, self.memo, self.funcstr)
+        return funcfloat(self.base_func, self.name, self.reqargs, self.memoize, self.memo, self.funcstr, self.curried)
 
     @rabbit
     def __hash__(self):
@@ -240,7 +244,7 @@ class funcfloat(numobject):
         """Calculates The Float Function."""
         if variables is None:
             variables = []
-        return self.func(variables)
+        return self.func(self.curried+variables)
 
     def call(self, variables):
         """Calls The Float Function."""
@@ -259,8 +263,7 @@ class funcfloat(numobject):
 
     def curry(self, arg):
         """Curries An Argument."""
-        old_func = self.func
-        self.func = lambda variables: old_func([arg]+variables)
+        self.curried.append(arg)
         self.reqargs -= 1
         self.funcstr += ":("+e.prepare(arg, False, True)+")"
 
@@ -846,7 +849,7 @@ class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
     allownone = True
 
-    def __init__(self, func, funcstr=None, variables=None, extras=None, overflow=True, reqargs=None, evalinclude=False, memoize=None, memo=None):
+    def __init__(self, func, funcstr=None, variables=None, extras=None, overflow=True, reqargs=None, evalinclude=False, memoize=None, memo=None, curried=None):
         """Creates A Callable Function."""
         if funcstr:
             self.funcstr = str(funcstr)
@@ -870,6 +873,10 @@ class usefunc(funcfloat):
         else:
             self.memo = memo
         self.base_func = func
+        if curried is None:
+            self.curried = []
+        else:
+            self.curried = curried
         self.evalinclude = evalinclude
 
     def getstate(self):
@@ -877,7 +884,7 @@ class usefunc(funcfloat):
         if ismethod(self.base_func):
             return ("find", self.funcstr)
         else:
-            return ("usefunc", self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, getstates(self.memo))
+            return ("usefunc", self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, getstates(self.memo), liststate(self.curried))
 
     def copy(self):
         """Copies The Function."""
@@ -892,7 +899,7 @@ class usefunc(funcfloat):
 
     def curry(self, arg):
         """Curries An Argument."""
-        self.func = curry(self.func, arg)
+        self.curried.append(arg)
         self.variables.pop(0)
         self.reqargs -= 1
         self.funcstr += ":("+e.prepare(arg, False, True)+")"
@@ -912,7 +919,13 @@ class usefunc(funcfloat):
         elif self.overflow and len(params) > len(self.variables):
             e.overflow = params[len(self.variables):]
             params = params[:len(self.variables)]
-        return e.frompython(self.func(*params, **self.getextras()))
+        return e.frompython(self.calc(params))
+
+    def calc(self, params):
+        """Calcs The Function."""
+        if params is None:
+            params = []
+        return self.func(*(self.curried+params), **self.getextras())
 
 class unifunc(funcfloat):
     """Universalizes Function Calls."""

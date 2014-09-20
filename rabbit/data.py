@@ -21,11 +21,25 @@ from __future__ import with_statement, print_function, absolute_import, unicode_
 from .carrot.stats import *
 from .func import *
 
+global e
+try:
+    set_e
+except:
+    old_set_e = None
+else:
+    old_set_e = set_e
+def set_e(new_e):
+    """Sets The Evaluator Global."""
+    global e
+    if old_set_e is not None:
+        old_set_e(new_e)
+    e = new_e
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-def teq(df):
+def teq(v):
     """Finds The t Distribution For The Given Degrees Of Freedom."""
     n = v+1.0
     return strfunc(e.prepare(gamma(n/2.0) / ((math.pi*v)**0.5 * gamma(v/2.0))) + "/" + "(1+x^2/" + e.prepare(v) + ")^" + e.prepare(n/2.0), ["x"])
@@ -35,7 +49,7 @@ def tP(start, stop, df):
     eq = teq(df)
     return defint(lambda x: eq.call([x]), start, stop)
 
-def chisqeq(df):
+def chisqeq(v):
     """Finds The Chi Squared Distribution For The Given Degrees Of Freedom."""
     return strfunc("x^"+e.prepare((v-2.0)/2.0)+"*e^(-x/2)/"+e.prepare(2.0**(v/2.0)*gamma(v/2.0)), ["x"])
 
@@ -44,7 +58,7 @@ def chisqP(stop, df):
     eq = chisqeq(df)
     return 1.0-defint(lambda x: eq.call([x]), 0.0, stop)
 
-def Feq(dfT, dfE):
+def Feq(v, w):
     """Finds The F Distribution For The Given Degrees Of Freedom."""
     return strfunc(e.prepare((v/w)**(v/2)*gamma((v+w)/2.0)/(gamma(v/2.0)*gamma(w/2.0)))+"*x^"+e.prepare((v-2.0)/2.0)+"/(1+"+e.prepare(v/w)+"x)^"+e.prepare((v+w)/2.0), ["x"])
 
