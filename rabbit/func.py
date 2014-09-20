@@ -888,7 +888,7 @@ class usefunc(funcfloat):
 
     def copy(self):
         """Copies The Function."""
-        return usefunc(self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, self.memo)
+        return usefunc(self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, self.memo, self.curried[:])
 
     def getextras(self):
         """Retrieves Extras."""
