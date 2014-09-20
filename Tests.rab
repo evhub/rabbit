@@ -84,8 +84,8 @@ passert:: f 1 2 ?= (1,2)                       $ f(x,y) = x,y
 passert:: 2 f 1 2 ?= (2,4)                     $ f(x,y) = x,y
 passert:: 2 f(1, 2) ?= (2,4)                   $ f(x,y) = x,y
 passert:: f (1,2) f (1,2) ?= (1,4)             $ f(x,y) = x,y
-passert:: f 1 2 f 3 ?= ((1,2),3)               $ f(x,y) = x,y
-passert:: f f(1,2) 3 ?= ((1,2),3)              $ f(x,y) = x,y
+passert:: f 1 2 f 3 ?= (3,(1,2))               $ f(x,y) = x,y
+passert:: f (f 1 2) 3 ?= ((1,2),3)             $ f(x,y) = x,y
 
 # String Tests:
 passert:: "hello, "+"world" ?= "hello, world"
