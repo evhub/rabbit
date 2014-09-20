@@ -2972,4 +2972,4 @@ class evalwrap(evalobject):
         out = []
         for item in self.obj:
             out.append(item)
-        return diagmatrixlist(out)
+        return self.prepare(out)

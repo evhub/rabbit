@@ -427,11 +427,16 @@ passert:: deserialize(serialize(class<<>>)) ?= class<<>>
 passert:: wrap(\x\x).getstate() ?= getstate(\x\x)
 passert:: str(1,2) ?= "1 2"
 passert:: python"1+1" ?= 2
+passert:: has(\x\x, "__closure__")
+passert:: map(\x\x+1, [1,2]) ?= [2,3]
+passert:: filter(\x\(x<3), [0,1,2,3,4,5]) ?= [0,1,2]
+passert:: fold(\x,y\x+y, 1**5) ?= 5
 
 # Import Tests:
 math = import:: math
 passert:: math.sin(1) ?= Math.sin(1)
 passert:: math.pi ?= Math.pi
+passert:: get(math, "acos"):1 ?= Math.acos(1)
 
 # New Feature Tests:
 passert:: f..g(2) ?= 9                       $ f(x) = x^2 $ g(x) = x+1
@@ -641,6 +646,7 @@ passert:: print("<#> Make sure you see this message three times")
 passert:: save("Tests.save");true
 contents = read("Tests.save")
 passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents)
+passert:: contents ?= "\n".join(cont(open("Tests.save")))
 passert:: ! using()
 use(calc) ;; use(using())
 passert:: using() ?= calc ?= used             $ used = prop(using)

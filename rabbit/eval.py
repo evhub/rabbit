@@ -402,7 +402,9 @@ Global Operator Precedence List:
             "code":funcfloat(self.funcs.codecall, "code"),
             "calc":funcfloat(self.funcs.docalc, "calc", reqargs=1),
             "do":funcfloat(self.funcs.nonecalc, "do", reqargs=1),
-            "fold":funcfloat(self.funcs.foldcall, "fold", reqargs=1),
+            "fold":funcfloat(self.funcs.foldcall, "fold", reqargs=2),
+            "map":funcfloat(self.funcs.mapcall, "map", reqargs=2),
+            "filter":funcfloat(self.funcs.filtercall, "filter", reqargs=2),
             "row":funcfloat(rowmatrixlist, "row"),
             "list":funcfloat(self.funcs.listcall, "list", reqargs=1),
             "matrix":funcfloat(self.funcs.matrixcall, "matrix", reqargs=1),
@@ -465,6 +467,9 @@ Global Operator Precedence List:
             "inside":funcfloat(self.funcs.insidecall, "inside", reqargs=1),
             "python":funcfloat(self.funcs.pythonevalcall, "python", reqargs=1),
             "input":funcfloat(self.funcs.inputcall, "input"),
+            "any":funcfloat(self.funcs.anycall, "any"),
+            "all":funcfloat(self.funcs.allcall, "all"),
+            "open":funcfloat(self.funcs.opencall, "open", reqargs=1),
             "Meta":classcalc({
                 "var":funcfloat(self.funcs.getvarcall, "var", reqargs=1),
                 "val":funcfloat(self.funcs.getvalcall, "val", reqargs=1),
@@ -484,7 +489,9 @@ Global Operator Precedence List:
                 "to":funcfloat(self.funcs.tocall, "to", reqargs=1),
                 "exec":funcfloat(self.funcs.cmdcall, "exec", reqargs=1),
                 "pipe":funcfloat(self.funcs.pipecall, "pipe"),
-                "caller":funcfloat(self.funcs.getcallcall, "caller", reqargs=1)
+                "caller":funcfloat(self.funcs.getcallcall, "caller", reqargs=1),
+                "get":funcfloat(self.funcs.getattrcall, "get", reqargs=2),
+                "has":funcfloat(self.funcs.hasattrcall, "has", reqargs=2)
                 }, name="Meta"),
             "Math":classcalc({
                 "pow":usefunc(pow, "pow", ["y", "x", "m"]),
@@ -2669,58 +2676,65 @@ Global Operator Precedence List:
                 itemlist[0] = self.funcfind(itemlist[0])
                 out = itemlist[0]
                 for x in xrange(1, len(itemlist)):
-                    if isnull(out):
-                        raise ExecutionError("NoneError", "Nothing does not have methods")
-                    else:
-                        new = None
-                        key = self.namefind(itemlist[x])
-                        if hasattr(out, "getmethod"):
-                            new = out.getmethod(key)
-                        elif hasattr(out, key):
-                            test = getattr(out, key)
-                            if hasnum(test):
-                                new = test
-                            elif hasattr(test, "__doc__"):
-                                docstring = basicformat(test.__doc__)
-                                if docstring.startswith("(|") and "|)" in docstring:
-                                    rabstring = docstring[2:].split("|)")[0]
-                                    if ":" in rabstring:
-                                        rabcheck, rabstring = rabstring.split(":", 1)
-                                        rabcheck = superformat(rabcheck)
-                                        if rabcheck == "rabbit":
-                                            rabstring = basicformat(rabstring)
-                                            if not rabstring:
-                                                new = evalwrap(self, test, inputstring)
-                                            elif rabstring.startswith("="):
-                                                rabarg = eval(basicformat(rabstring[1:]))
-                                                new = evalwrap(test, inputstring, rabarg)
-                                            elif ":" in rabstring:
-                                                name, rabargs = basicformat(rabstring).split(":", 1)
-                                                name = basicformat(name)
-                                                if not name:
-                                                    new = eval(rabargs)
-                                                else:
-                                                    if rabargs:
-                                                        args, kwargs = eval(rabargs)
-                                                    else:
-                                                        args, kwargs = [], {}
-                                                    if name == "usefunc":
-                                                        new = usefunc(test, *args, **kwargs)
-                                                    elif name == "funcfloat":
-                                                        new = funcfloat(test, *args, **kwargs)
-                                                    elif name == "unifunc":
-                                                        new = unifunc(test, *args, **kwargs)
-                                                    elif name == "evalwrap":
-                                                        new = evalwrap(test, *args, **kwargs)
-                                                    else:
-                                                        raise ExecutionError("ValueError", "Invalid Rabbit wrapper of "+name)
-                                            else:
-                                                raise ExecutionError("ValueError", "Invalid Rabbit wrapping of "+rabstring)
+                    new = self.getmethod(out, itemlist[x])
                     if new is None:
-                        raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(out, False, True, True))
+                        raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(item, False, True, True))
                     else:
                         out = new
                 return out
+
+    def getmethod(self, item, methodname, check=False):
+        """Gets A Method."""
+        new = None
+        key = self.namefind(methodname)
+        if hasattr(item, "getmethod"):
+            new = item.getmethod(key)
+        elif hasattr(item, key):
+            test = getattr(item, key)
+            if hasnum(test):
+                new = test
+            elif hasattr(test, "__doc__"):
+                docstring = basicformat(test.__doc__)
+                if docstring.startswith("(|") and "|)" in docstring:
+                    rabstring = docstring[2:].split("|)")[0]
+                    if ":" in rabstring:
+                        rabcheck, rabstring = rabstring.split(":", 1)
+                        rabcheck = superformat(rabcheck)
+                        if rabcheck == "rabbit":
+                            if check:
+                                return True
+                            rabstring = basicformat(rabstring)
+                            if not rabstring:
+                                new = evalwrap(self, test, inputstring)
+                            elif rabstring.startswith("="):
+                                rabarg = eval(basicformat(rabstring[1:]))
+                                new = evalwrap(test, inputstring, rabarg)
+                            elif ":" in rabstring:
+                                name, rabargs = basicformat(rabstring).split(":", 1)
+                                name = basicformat(name)
+                                if not name:
+                                    new = eval(rabargs)
+                                else:
+                                    if rabargs:
+                                        args, kwargs = eval(rabargs)
+                                    else:
+                                        args, kwargs = [], {}
+                                    if name == "usefunc":
+                                        new = usefunc(test, *args, **kwargs)
+                                    elif name == "funcfloat":
+                                        new = funcfloat(test, *args, **kwargs)
+                                    elif name == "unifunc":
+                                        new = unifunc(test, *args, **kwargs)
+                                    elif name == "evalwrap":
+                                        new = evalwrap(test, *args, **kwargs)
+                                    else:
+                                        raise ExecutionError("ValueError", "Invalid Rabbit wrapper of "+name)
+                            else:
+                                raise ExecutionError("ValueError", "Invalid Rabbit wrapping of "+rabstring)
+        if check:
+            return new is not None
+        else:
+            return new
 
     def call_normal(self, inputstring):
         """Returns Argument."""
@@ -2949,10 +2963,11 @@ Global Operator Precedence List:
 
     def findfile(self, original):
         """Does A file."""
-        filename = os.path.normcase(original)
-        while not os.path.isfile(filename):
-            if "." not in filename:
-                filename += ".rab"
-            else:
-                raise ExecutionError("IOError", "Could not find file "+str(original))
-        return filename
+        filename = os.path.relpath(os.path.normcase(original))
+        tests = [filename, filename+".rab"]
+        for dirpath in sys.path:
+            for filepath in tests:
+                test = os.path.abspath(os.path.join(dirpath, filepath))
+                if os.path.isfile(test):
+                    return test
+        raise ExecutionError("IOError", "Could not find file "+str(original))

@@ -374,6 +374,24 @@ class evalfuncs(object):
         else:
             return diagmatrixlist(variables)
 
+    def anycall(self, variables):
+        """Wraps any."""
+        if not variables:
+            return False
+        elif len(variables) == 1 and ismatrix(variables[0]):
+            return any(getmatrix(variables[0]).getitems())
+        else:
+            return any(variables)
+
+    def allcall(self, variables):
+        """Wraps all."""
+        if not variables:
+            return True
+        elif len(variables) == 1 and ismatrix(variables[0]):
+            return all(getmatrix(variables[0]).getitems())
+        else:
+            return all(variables)
+
     def sumcall(self, variables):
         """Finds A Sum."""
         value = 0.0
@@ -910,41 +928,49 @@ class evalfuncs(object):
                 raise ExecutionError("ValueError", "Can't exec non-string values")
         return matrix(0)
 
-    def foldcall(self, variables, func=None, overflow=True):
+    def foldcall(self, variables):
         """Folds A Function Over A Matrix."""
-        if not variables:
+        if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to fold")
-        elif len(variables) == 1:
-            return e.getcall(e.funcfind(variables[0]))(e.variables)
         else:
-            func = func or e.getcall(e.funcfind(variables[0]))
-            item = variables[1]
-            if len(variables) >= 3:
-                start = variables[2]
-                if overflow:
-                    e.overflow = variables[3:]
+            e.overflow = variables[2:]
+            func = e.getcall(variables[0])
+            items = getmatrix(variables[1]).getitems()
+            if not items:
+                return matrix(0)
             else:
-                start = None
-            if isinstance(variables[0], strcalc):
-                variables[0] = None
-                variables[1] = item
-                variables = variables[:3]
-                return self.strcall([self.foldcall(variables, func, False)])
-            elif hasmatrix(item):
-                item = getmatrix(item)
-                if len(item) == 0:
-                    return matrix(0)
-                else:
-                    items = item.getitems()
-                    if start is None:
-                        start = items.pop(0)
-                    for x in items:
-                        start = func([start, x])
-                    return start
-            elif start is not None:
-                return func([start, item])
+                acc = items[0]
+                for x in xrange(1, len(items)):
+                    acc = func([acc, items[x]])
+                return acc
+
+    def mapcall(self, variables):
+        """Maps A Function Over A Matrix."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to map")
+        else:
+            e.overflow = variables[2:]
+            func = e.getcall(variables[0])
+            cont = getmatrix(variables[1])
+            cont.code(lambda x: func([x]))
+            return cont
+
+    def filtercall(self, variables):
+        """Filters A Function Over A Matrix."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to filter")
+        else:
+            e.overflow = variables[2:]
+            func = e.getcall(variables[0])
+            cont = getmatrix(variables[1])
+            out = []
+            for item in cont.getitems():
+                if func([item]):
+                    out.append(item)
+            if cont.onlydiag():
+                return diagmatrixlist(out)
             else:
-                return item
+                return rowmatrixlist(out)
 
     def derivcall(self, variables):
         """Returns The nth Derivative Of A Function."""
@@ -1368,6 +1394,7 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
         else:
+            out = []
             for item in variables:
                 if isinstance(variables[0], strcalc):
                     name = str(variables[0])
@@ -1378,23 +1405,28 @@ class evalfuncs(object):
                 if hasattr(impbaseclass, "__rabbit__"):
                     impclass = impbaseclass.__rabbit__(e)
                     if impclass is None:
-                        return matrix(0)
+                        value = matrix(0)
                     elif iseval(impclass):
-                        return impclass
+                        value = impclass
                     elif "`" in name:
                         raise ExecutionError("ValueError", "Cannot install files with a backtick in them")
                     elif hascall(impclass):
-                        return funcfloat(e.getcall(impclass), funcname)
+                        value = funcfloat(e.getcall(impclass), funcname)
                     elif hasattr(impclass, "precall"):
-                        return usefunc(impclass.precall, funcname)
+                        value = usefunc(impclass.precall, funcname)
                     elif hasattr(impclass, "unicall"):
-                        return unifunc(impclass.unicall, funcname)
+                        value = unifunc(impclass.unicall, funcname)
                     else:
-                        return evalwrap(impclass, funcname)
+                        value = evalwrap(impclass, funcname)
                 elif "`" in name:
                     raise ExecutionError("ValueError", "Cannot import files with a backtick in them")
                 else:
-                    return evalwrap(impbaseclass, funcname)
+                    value = evalwrap(impbaseclass, funcname)
+                out.append(value)
+            if len(out) == 1:
+                return out[0]
+            else:
+                return diagmatrixlist(out)
 
     def insidecall(self, variables):
         """Performs inside."""
@@ -1570,3 +1602,48 @@ class evalfuncs(object):
                 raise ExecutionError("ValueError", "Prompts must be strings")
         else:
             return rawstrcalc(raw_input())
+
+    def getattrcall(self, variables):
+        """Gets An Attribute."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to get")
+        else:
+            e.overflow = variables[2:]
+            if isinstance(variables[1], strcalc):
+                name = str(variables[1])
+            else:
+                raise ExecutionError("ValueError", "Variable names must be strings")
+            return e.getmethod(variables[0], name)
+
+    def hasattrcall(self, variables):
+        """Checks An Attribute."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to has")
+        else:
+            e.overflow = variables[2:]
+            if isinstance(variables[1], strcalc):
+                name = str(variables[1])
+            else:
+                raise ExecutionError("ValueError", "Variable names must be strings")
+            return e.getmethod(variables[0], name, True)
+
+    def opencall(self, variables):
+        """Opens A File."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to open")
+        else:
+            if isinstance(variables[0], strcalc):
+                name = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "File names must be strings")
+            ref = "open:`name`"
+            if len(variables) > 1:
+                e.overflow = variables[2:]
+                if isinstance(variables[1], strcalc):
+                    opentype = str(variables[1])
+                else:
+                    raise ExecutionError("ValueError", "Open types must be strings")
+                ref += ":`"+opentype+"`"
+                return evalwrap(openfile(name, opentype), ref)
+            else:
+                return evalwrap(openfile(name), ref)
