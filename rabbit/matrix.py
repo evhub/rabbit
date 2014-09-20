@@ -778,13 +778,16 @@ def rowmatrixlist(inputlist=None, converter=geteval, func=None, fake=False, clea
     if inputlist is None:
         inputlist = []
     if func is None:
-        func = rowmatrixlist
-    out = matrix(1, len(inputlist), converter=converter, fake=fake)
-    for x in xrange(0, len(inputlist)):
-        if islist(inputlist[x]):
-            inputlist[x] = func(inputlist[x])
-        if not clean or not isnull(inputlist[x]):
-            out.store(0,x, inputlist[x])
+        func = diagmatrixlist
+    outlist = []
+    for item in inputlist:
+        if islist(item):
+            item = func(item)
+        if not clean or not isnull(item):
+            outlist.append(item)
+    out = matrix(1, len(outlist), converter=converter, fake=fake)
+    for x in xrange(0, len(outlist)):
+        out.store(0,x, outlist[x])
     return out
 
 def matrixstr(inputstr, converter=geteval):
