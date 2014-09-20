@@ -1993,13 +1993,13 @@ class instancecalc(numobject, classcalc):
         """Converts To A Boolean."""
         check_bool = self.getmethod("__bool__")
         if check_bool:
-            return self.domethod(check_bool)
+            return bool(self.domethod(check_bool))
         check_num = self.getmethod("__num__")
         if check_num:
             return bool(self.domethod(check_num))
         check_len = self.getmethod("__len__")
         if check_len:
-            return self.domethod(check_len)
+            return bool(self.domethod(check_len))
         check_cont = self.getmethod("__matrix__")
         if check_cont:
             return bool(self.domethod(check_cont))

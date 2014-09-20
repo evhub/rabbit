@@ -289,7 +289,7 @@ class evalfuncs(object):
         if not variables:
             variables = [-1]
         e.overflow = variables[1:]
-        if not isinstance(variables[0], int):
+        if not isint(variables[0]):
             raise ExecutionError("ValueError", "Only integers can be indexes")
         elif variables[0] < 0:
             variables[0] += len(e.parens)

@@ -259,7 +259,7 @@ class evalobject(object):
         if hasattr(self, "__bool__"):
             return self.__bool__()
         elif hasattr(self, "__len__"):
-            return self.__len__()
+            return bool(len(self))
         else:
             return True
 

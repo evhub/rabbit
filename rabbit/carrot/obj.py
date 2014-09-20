@@ -164,6 +164,10 @@ def hasreal(value):
     else:
         return value
 
+def isint(inputobject):
+    """Determines If An Object Is An Integer."""
+    return isinstance(inputobject, (old_int, long))
+
 def isnum(inputobject):
     """Determines If An Object Is A Number."""
     return isinstance(inputobject, (old_float, old_int, long, complex, bool))
