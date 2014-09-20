@@ -2613,7 +2613,8 @@ Global Operator Precedence List:
                         item = self.eval_call(l[0], False)
                     args = []
                     for x in xrange(1, len(l)):
-                        args.append(self.eval_call(l[x], False))
+                        if l[x]:
+                            args.append(self.eval_call(l[x], False))
                     item = self.call_paren_do(item, args)
                     if values and isfunc(item) and self.infix:
                         values.append(self.call_paren_do(item, [values.pop()]))
@@ -2646,24 +2647,23 @@ Global Operator Precedence List:
                         item = item * arg
                 else:
                     return item
-            overflow, self.overflow = self.overflow, []
-            item = getcopy(item)
             if not arglist:
-                if not infixed:
-                    item = self.getcall(item)([])
-                    if self.overflow:
-                        raise ExecutionError("ArgumentError", "Excess arguments of "+strlist(self.overflow, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(item, False, True, True))
+                if infixed:
+                    args = None
+                else:
+                    args = []
             elif isinstance(arglist[0], matrix) and arglist[0].onlydiag():
                 args = arglist.pop(0).getdiag()
                 if isinstance(item, (strfunc, usefunc)) and item.overflow and len(args) > len(item.variables):
                     args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
-                item = self.getcall(item)(getcopy(args))
+            else:
+                args = [arglist.pop(0)]
+            if args is not None:
+                overflow, self.overflow = self.overflow, []
+                item = self.getcall(getcopy(item))(getcopy(args))
                 if self.overflow:
                     raise ExecutionError("ArgumentError", "Excess arguments of "+strlist(self.overflow, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(item, False, True, True))
-            else:
-                item = self.getcall(item)(getcopy(arglist))
-                arglist = self.overflow
-            self._overflow = overflow
+                self._overflow = overflow
         return item
 
     def call_comp(self, inputstring):
