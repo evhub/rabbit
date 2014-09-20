@@ -79,6 +79,13 @@ passert:: (\(-x:1)\x): ?= 1
 passert:: gen_func:2:5 ?= 1                    $ gen_func(n) = \x\(x%n)
 passert:: gen_func:2:5 ?= 1                    $ gen_func(n) = \x,n:n\(x%n)
 passert:: inlist[1,2,3] ?= ([1,2,3],)          $ inlist(l) = l,
+passert:: f ( 1, 2 ) ?= (1,2)                 $ f(x,y) = x,y
+passert:: f 1 2 ?= (1,2)                      $ f(x,y) = x,y
+passert:: 2 f 1 2 ?= (2,4)                    $ f(x,y) = x,y
+passert:: 2 f(1, 2) ?= (2,4)                  $ f(x,y) = x,y
+passert:: f (1,2) f (1,2) ?= (1,4)            $ f(x,y) = x,y
+passert:: f 1 2 f 3 ?= ((1,2),3)              $ f(x,y) = x,y
+passert:: f f(1,2) 3 ?= ((1,2),3)             $ f(x,y) = x,y
 
 # String Tests:
 passert:: "hello, "+"world" ?= "hello, world"
@@ -339,6 +346,30 @@ passert:: ",".join(["a", "b", "c"]) ?= "a,b,c"
 passert:: data(1,2,3).mean() ?= 2
 passert:: data[1,2,3].med() ?= 2
 
+# Syntax Tests:
+passert:: (try<< ~ >>:1).name ?= "SyntaxError"
+passert:: (try<< ! >>:1).name ?= "SyntaxError"
+passert:: (try<< @ >>:1).name ?= "SyntaxError"
+passert:: (try<< % >>:1).name ?= "SyntaxError"
+passert:: (try<< ^ >>:1).name ?= "SyntaxError"
+passert:: (try<< & >>:1).name ?= "SyntaxError"
+passert:: (try<< * >>:1).name ?= "SyntaxError"
+passert:: (try<< - >>:1).name ?= "SyntaxError"
+passert:: (try<< -- >>:1).name ?= "SyntaxError"
+passert:: (try<< + >>:1).name ?= "SyntaxError"
+passert:: (try<< ++ >>:1).name ?= "SyntaxError"
+passert:: (try<< == >>:1).name ?= "SyntaxError"
+passert:: (try<< | >>:1).name ?= "SyntaxError"
+passert:: (try<< : >>:1).name ?= "SyntaxError"
+passert:: (try<< ; >>:1).name ?= "SyntaxError"
+passert:: (try<< . >>:1).name ?= "VariableError"
+passert:: (try<< $ >>:1).name ?= "SyntaxError"
+passert:: (try<< .. >>:1).name ?= "SyntaxError"
+passert:: (try<< ? >>:1).name ?= "SyntaxError"
+passert:: (try<< ?= >>:1).name ?= "SyntaxError"
+passert:: (try<< >= >>:1).name ?= "SyntaxError"
+passert:: (try<< <= >>:1).name ?= "SyntaxError"
+
 # End Pure Section:
 ---------------------
 
@@ -447,6 +478,8 @@ passert:: sqrt(-1) ?= i
 passert:: chr(ord("a")) ?= "a"
 passert:: zip([1,2,3], [3,4,5])
 passert:: list[1,2,3] ?= (1,2,3)
+passert:: [1,2,3] union [1,2,4] ?= [1,2,3,4]
+passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
 
 # Import Tests:
 math = import:: math
@@ -581,8 +614,6 @@ passert:: class<<x=1;;y=2>> ?= (
   x=1
   y=2
  )
-passert:: [1,2,3] union [1,2,4] ?= [1,2,3,4]
-passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
 passert:: a.x ?= 1 $ (def:: a.x = 1) $ a = class<< b = class<<>> >>
 passert:: [][] ?= []
 passert:: class(inst) ?= class<<__parent__=class<<meta=1>>;;meta=1;;x=1>> $ (def:: inst.x = 1) $ inst = class<<meta=1>>()
@@ -627,28 +658,6 @@ passert:: md5 ?= "hash"                       $ md5 = "hash"
 passert:: md5 ?= 10                           $ md = 2
 passert:: hello world ?= "hello world"        $ hello world = "hello world"
 passert:: hello world ?= "hellohello"         $ hello = "hello" $ world = 2
-passert:: (try<< ~ >>:1).name ?= "SyntaxError"
-passert:: (try<< ! >>:1).name ?= "SyntaxError"
-passert:: (try<< @ >>:1).name ?= "SyntaxError"
-passert:: (try<< % >>:1).name ?= "SyntaxError"
-passert:: (try<< ^ >>:1).name ?= "SyntaxError"
-passert:: (try<< & >>:1).name ?= "SyntaxError"
-passert:: (try<< * >>:1).name ?= "SyntaxError"
-passert:: (try<< - >>:1).name ?= "SyntaxError"
-passert:: (try<< -- >>:1).name ?= "SyntaxError"
-passert:: (try<< + >>:1).name ?= "SyntaxError"
-passert:: (try<< ++ >>:1).name ?= "SyntaxError"
-passert:: (try<< == >>:1).name ?= "SyntaxError"
-passert:: (try<< | >>:1).name ?= "SyntaxError"
-passert:: (try<< : >>:1).name ?= "SyntaxError"
-passert:: (try<< ; >>:1).name ?= "SyntaxError"
-passert:: (try<< . >>:1).name ?= "VariableError"
-passert:: (try<< $ >>:1).name ?= "SyntaxError"
-passert:: (try<< .. >>:1).name ?= "SyntaxError"
-passert:: (try<< ? >>:1).name ?= "SyntaxError"
-passert:: (try<< ?= >>:1).name ?= "SyntaxError"
-passert:: (try<< >= >>:1).name ?= "SyntaxError"
-passert:: (try<< <= >>:1).name ?= "SyntaxError"
 passert:: pure<<sin(pi/4)>>
 passert:: noshow                              $ noshow = class<<__repr__=raise("Unrepresentable")>>()
 passert:: f(1) ?= 1                           $ f ( x ) = x
@@ -656,6 +665,7 @@ passert:: f . ( __closure__ )                 $ f(x) = x
 passert:: [1,2,3] != (1,2,3)
 passert:: type([true]:0) ?= "bool"
 passert:: type([i]:0) ?= "complex"
+passert:: type((1,2)*(3,4)) ?= "list"
 
 # Final Testing:
 tag = "tag"

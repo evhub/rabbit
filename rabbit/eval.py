@@ -1292,7 +1292,7 @@ Global Operator Precedence List:
     def precalc_cmd(self, inputstring):
         """Evaluates Statements."""
         inputlist = carefulsplit(inputstring, "::", counters={self.indentchar:self.dedentchar})
-        out = [inputlist[0]]
+        out = [basicformat(inputlist[0])]
         for x in xrange(1, len(inputlist)):
             if ";;" in inputlist[x]:
                 a,b = inputlist[x].split(";;", 1)
@@ -1300,7 +1300,7 @@ Global Operator Precedence List:
             else:
                 new = self.wrap(basicformat(inputlist[x]))
             out.append(new)
-        return "::".join(out)
+        return " :: ".join(out)
 
     def calc_next(self, arg, funcs, top=False):
         """Calls The Next Function."""
@@ -1371,7 +1371,7 @@ Global Operator Precedence List:
             func = basicformat(func)
             original = []
             for arg in args:
-                original.append(self.namefind(arg))
+                original.append(self.namefind(basicformat(arg)))
             displayer = func+" :: "+strlist(original, " :: ")
             self.printdebug("::> "+displayer)
             self.recursion += 1
@@ -2629,33 +2629,32 @@ Global Operator Precedence List:
                 self.recursion -= 1
             return value
 
-    def call_paren_do(self, item, arglist, top=True):
+    def call_paren_do(self, item, arglist):
         """Does Parentheses Calling."""
-        if top:
-            item = getcopy(item)
-        x = 0
-        while x < len(arglist):
+        while arglist:
+            while not isfunc(item):
+                if arglist:
+                    arg = arglist.pop(0)
+                    if isfunc(arg) and self.infix:
+                        arglist = [item]+arglist
+                        item = arg
+                    elif not isnull(arg):
+                        item = item * arg
+                else:
+                    return item
             overflow, self.overflow = self.overflow, []
-            arg = getcopy(arglist[x])
-            if not isfunc(item):
-                if isinstance(arg, funcfloat) and self.infix:
-                    if x+1 < len(arglist):
-                        arg = self.call_paren_do(arg, [arglist.pop(x+1)], top=False)
-                    item = self.call_paren_do(arg, [item], top=False)
-                elif not isnull(arg):
-                    item = item * arg
-            elif isinstance(arg, matrix) and arg.onlydiag():
-                args = arg.getdiag()
+            item = getcopy(item)
+            if not arglist:
+                item = self.getcall(item)([])
+            elif isinstance(arglist[0], matrix) and arglist[0].onlydiag():
+                args = arglist.pop(0).getdiag()
                 if isinstance(item, (strfunc, usefunc)) and item.overflow and len(args) > len(item.variables):
                     args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
-                item = self.getcall(item)(args)
+                item = self.getcall(item)(getcopy(args))
             else:
-                item = self.getcall(item)([arg])
-            if self.overflow:
-                out, self.overflow = self.overflow, overflow
-                raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(out) > 1)+" of "+strlist(out, ", ", lambda x: self.prepare(x, False, True, True)))
-            else:
-                x += 1
+                item = self.getcall(item)(getcopy(arglist))
+                arglist = []
+            arglist += self.overflow
             self._overflow = overflow
         return item
 

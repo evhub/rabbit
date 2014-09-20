@@ -151,12 +151,16 @@ class funcfloat(numobject):
     allargs = "__"
     reqargs = -1
 
-    def __init__(self, func, funcstr=None, reqargs=None, memoize=None, memo=None):
+    def __init__(self, func, name=None, reqargs=None, memoize=None, memo=None, funcstr=None):
         """Constructs The Float Function."""
-        if funcstr:
-            self.funcstr = str(funcstr)
+        if name:
+            self.name = str(name)
         else:
-            self.funcstr = e.unusedarg()
+            self.name = e.unusedarg()
+        if funcstr is None:
+            self.funcstr = self.name
+        else:
+            self.funcstr = str(funcstr)
         if memoize is not None:
             self.memoize = memoize
         if memo is None:
@@ -173,7 +177,7 @@ class funcfloat(numobject):
 
     def copy(self):
         """Returns A Copy Of The Float Function."""
-        return funcfloat(self.base_func, self.funcstr, self.reqargs, self.memoize, self.memo)
+        return funcfloat(self.base_func, self.name, self.reqargs, self.memoize, self.memo, self.funcstr)
 
     @rabbit
     def __hash__(self):
@@ -243,6 +247,8 @@ class funcfloat(numobject):
         variables = varproc(variables)
         if variables is None:
             return self
+        elif not variables and self.reqargs > 0:
+            raise ExecutionError("ArgumentError", "No arguments were passed to a function that requires arguments")
         elif len(variables) < self.reqargs:
             out = getcopy(self)
             for arg in variables:
@@ -268,28 +274,28 @@ class funcfloat(numobject):
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.funcstr+"("+self.allargs+"))+"+e.wrap(other), [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.name+"("+self.allargs+"))+"+e.wrap(other), [self.allargs], {self.name:self})
 
     def __idiv__(self, other):
         """Performs Division."""
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.funcstr+"("+self.allargs+"))/"+e.wrap(other), [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.name+"("+self.allargs+"))/"+e.wrap(other), [self.allargs], {self.name:self})
 
     def __imul__(self, other):
         """Performs Multiplication."""
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.funcstr+"("+self.allargs+"))*"+e.wrap(other), [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.name+"("+self.allargs+"))*"+e.wrap(other), [self.allargs], {self.name:self})
 
     def __ipow__(self, other):
         """Performs Exponentiation."""
         if isnull(other):
             return self
         else:
-            return strfunc("("+self.funcstr+"("+self.allargs+"))^"+e.wrap(other), [self.allargs], {self.funcstr:self})
+            return strfunc("("+self.name+"("+self.allargs+"))^"+e.wrap(other), [self.allargs], {self.name:self})
 
     @rabbit
     def __radd__(self, other):
@@ -297,7 +303,7 @@ class funcfloat(numobject):
         if isnull(other):
             return self
         else:
-            return strfunc(e.wrap(other)+"+("+self.funcstr+"("+self.allargs+"))", [self.allargs], {self.funcstr:self})
+            return strfunc(e.wrap(other)+"+("+self.name+"("+self.allargs+"))", [self.allargs], {self.name:self})
 
     @rabbit
     def __rpow__(self, other):
@@ -305,7 +311,7 @@ class funcfloat(numobject):
         if isnull(other):
             return self
         else:
-            return strfunc(e.wrap(other)+"^("+self.funcstr+"("+self.allargs+"))", [self.allargs], {self.funcstr:self})
+            return strfunc(e.wrap(other)+"^("+self.name+"("+self.allargs+"))", [self.allargs], {self.name:self})
 
     @rabbit
     def __rdiv__(self, other):
@@ -313,7 +319,7 @@ class funcfloat(numobject):
         if isnull(other):
             return self
         else:
-            return strfunc(e.wrap(other)+"/("+self.funcstr+"("+self.allargs+"))", [self.allargs], {self.funcstr:self})
+            return strfunc(e.wrap(other)+"/("+self.name+"("+self.allargs+"))", [self.allargs], {self.name:self})
 
     @rabbit
     def __rmul__(self, other):
@@ -321,7 +327,7 @@ class funcfloat(numobject):
         if isnull(other):
             return self
         else:
-            return strfunc(e.wrap(other)+"*("+self.funcstr+"("+self.allargs+"))", [self.allargs], {self.funcstr:self})
+            return strfunc(e.wrap(other)+"*("+self.name+"("+self.allargs+"))", [self.allargs], {self.name:self})
 
     @rabbit
     def __eq__(self, other):
@@ -437,6 +443,8 @@ class strfunc(funcfloat):
         variables = varproc(variables)
         if variables is None:
             return self
+        elif not variables and self.reqargs > 0:
+            raise ExecutionError("ArgumentError", "No arguments were passed to a function that requires arguments")
         elif len(variables) < self.reqargs:
             out = getcopy(self)
             for arg in variables:
@@ -894,6 +902,8 @@ class usefunc(funcfloat):
         params = varproc(params)
         if params is None:
             return strfunc(self.funcstr+":"+strlist(self.variables,":"), self.variables)
+        elif not params and self.reqargs > 0:
+            raise ExecutionError("ArgumentError", "No arguments were passed to a function that requires arguments")
         elif len(params) < self.reqargs:
             out = getcopy(self)
             for arg in params:
@@ -963,11 +973,11 @@ class derivbase(object):
         variables = varproc(variables)
         if variables is None:
             return self
-        elif len(variables) == 0:
-            return matrix(0)
+        elif not variables:
+            raise ExecutionError("ArgumentError", "No arguments were passed to a function that requires arguments")
         else:
             e.overflow = variables[1:]
-            return self.func(float(variables[0]))
+            return self.func(variables[0])
 
     @rabbit
     def base_func(self, arg):
@@ -976,16 +986,24 @@ class derivbase(object):
 
 class integbase(derivbase):
     """Holdes Methods Used In Integral Functions."""
+    bound = None
 
     def call(self, variables):
         """Calls The Integral Function."""
         if variables is None:
             return self
-        elif len(variables) < 2:
-            return matrix(0)
+        elif not variables:
+            raise ExecutionError("ArgumentError", "No arguments were passed to a function that requires arguments")
+        elif self.bound is not None:
+            e.overflow = variables[1:]
+            return self.func(self.bound, variables[0])
+        elif len(variables) == 1:
+            out = getcopy(self)
+            out.bound = variables[0]
+            return out
         else:
             e.overflow = variables[2:]
-            return self.func(float(variables[0]), float(variables[1]))
+            return self.func(variables[0], variables[1])
 
     @rabbit
     def base_func(self, arg1, arg2):

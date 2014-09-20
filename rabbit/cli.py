@@ -87,7 +87,7 @@ class commandline(mathbase):
                 print(addcolor("\n<!> KeyboardInterrupt: Action has been terminated, to quit type exit()", self.e.color))
             except EOFError as detail:
                 print(addcolor("\n<!!> EOFInterrupt: Program has been terminated", self.e.color))
-                selfon = False
+                self.on = False
 
     def handler(self, original, old=None):
         """Handles Raw Input."""

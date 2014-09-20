@@ -218,7 +218,7 @@ def getstates(variables):
 def getcopy(inputobject):
     """Copies The Object If It Has A copy Method."""
     if isinstance(inputobject, list):
-        return map(getcopy, inputobject[:])
+        return list(map(getcopy, inputobject[:]))
     elif hasattr(inputobject, "copy"):
         return inputobject.copy()
     else:

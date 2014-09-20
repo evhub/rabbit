@@ -25,10 +25,17 @@ from .carrot.format import *
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+def proper(inputnum):
+    """Puts A Number In Its Proper Form."""
+    if isinstance(inputnum, (bool, complex)):
+        return inputnum
+    else:
+        return float(inputnum)
+
 class matrix(mctobject):
     """Implements A Mathematical Matrix."""
 
-    def __init__(self, y, x=None, empty=0.0, converter=geteval, fake=False):
+    def __init__(self, y, x=None, empty=0.0, converter=proper, fake=False):
         """Constructs The Matrix."""
         self.y = int(y)
         if x is None:
@@ -721,7 +728,7 @@ class matrix(mctobject):
         else:
             return False
 
-def diagmatrix(size=2, full=1.0, empty=0.0, converter=geteval, fake=True):
+def diagmatrix(size=2, full=1.0, empty=0.0, converter=proper, fake=True):
     """Constructs Matrix I."""
     size = int(size)
     I = matrix(size, size, empty, converter, fake)
@@ -729,7 +736,7 @@ def diagmatrix(size=2, full=1.0, empty=0.0, converter=geteval, fake=True):
         I.store(x, x, full)
     return I
 
-def matrixitems(inputitems, y, x=None, converter=geteval, fake=False):
+def matrixitems(inputitems, y, x=None, converter=proper, fake=False):
     """Constructs A Matrix From Items."""
     if x is None:
         x = len(inputitems)/y
@@ -740,7 +747,7 @@ def matrixitems(inputitems, y, x=None, converter=geteval, fake=False):
         z += 1
     return out
 
-def domatrixlist(inputlist, converter=geteval):
+def domatrixlist(inputlist, converter=proper):
     """Turns A List Into A Matrix."""
     try:
         out = matrixlist(inputlist, converter)
@@ -756,7 +763,7 @@ def nonull(inputlist):
     """Cleans The Input Of Empty Matrices."""
     return clean(inputlist, isnull, True)
 
-def diagmatrixlist(inputlist=None, converter=geteval, func=None, fake=True, clean=True):
+def diagmatrixlist(inputlist=None, converter=proper, func=None, fake=True, clean=True):
     """Constructs A Diagonal Matrix From A List."""
     if inputlist is None:
         inputlist = []
@@ -773,7 +780,7 @@ def diagmatrixlist(inputlist=None, converter=geteval, func=None, fake=True, clea
         out.store(x,x, outlist[x])
     return out
 
-def rowmatrixlist(inputlist=None, converter=geteval, func=None, fake=False, clean=False):
+def rowmatrixlist(inputlist=None, converter=proper, func=None, fake=False, clean=False):
     """Constructs A Row Matrix From A List."""
     if inputlist is None:
         inputlist = []
@@ -790,7 +797,7 @@ def rowmatrixlist(inputlist=None, converter=geteval, func=None, fake=False, clea
         out.store(0,x, outlist[x])
     return out
 
-def matrixstr(inputstr, converter=geteval):
+def matrixstr(inputstr, converter=proper):
     """Converts A Matrix String Back Into A Matrix."""
     ys = basicformat(inputstr).split("\n")
     for x in xrange(0,len(ys)):
@@ -799,7 +806,7 @@ def matrixstr(inputstr, converter=geteval):
             ys[x][z] = converter(ys[x][z])
     return matrixlist(ys, converter)
 
-def matrixlist(inputlist, converter=geteval, fake=False):
+def matrixlist(inputlist, converter=proper, fake=False):
     """Converts A List Of Lists Into A Matrix."""
     if converter is None:
         converter = type(inputlist[0][0])
@@ -812,7 +819,7 @@ def matrixlist(inputlist, converter=geteval, fake=False):
     out.convert()
     return out
 
-def rangematrix(start, stop, step=1.0, fake=True, converter=geteval):
+def rangematrix(start, stop, step=1.0, fake=True, converter=proper):
     """Constructs A Matrix On A Range."""
     if step == 0:
         return matrix(0)
