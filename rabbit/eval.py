@@ -2636,7 +2636,7 @@ Global Operator Precedence List:
                 if arglist:
                     arg = arglist.pop(0)
                     if isfunc(arg) and self.infix:
-                        arglist = [item]+arglist
+                        arglist.append(item)
                         item = arg
                     elif not isnull(arg):
                         item = item * arg
