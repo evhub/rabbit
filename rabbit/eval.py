@@ -2629,9 +2629,10 @@ Global Operator Precedence List:
                 self.recursion -= 1
             return value
 
-    def call_paren_do(self, item, arglist):
+    def call_paren_do(self, item, arglist, top=True):
         """Does Parentheses Calling."""
-        item = getcopy(item)
+        if top:
+            item = getcopy(item)
         x = 0
         while x < len(arglist):
             overflow, self.overflow = self.overflow, []
@@ -2639,8 +2640,8 @@ Global Operator Precedence List:
             if not isfunc(item):
                 if isinstance(arg, funcfloat) and self.infix:
                     if x+1 < len(arglist):
-                        arg = self.call_paren_do(arg, [arglist.pop(x+1)])
-                    item = self.call_paren_do(arg, [item])
+                        arg = self.call_paren_do(arg, [arglist.pop(x+1)], top=False)
+                    item = self.call_paren_do(arg, [item], top=False)
                 elif not isnull(arg):
                     item = item * arg
             elif isinstance(arg, matrix) and arg.onlydiag():
