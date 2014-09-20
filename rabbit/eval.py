@@ -2638,8 +2638,7 @@ Global Operator Precedence List:
                 if arglist:
                     arg = arglist.pop(0)
                     if isfunc(arg) and self.infix:
-                        arglist = [item, diagmatrixlist(arglist)]
-                        item = arg
+                        item = self.call_paren_do(self.call_paren_do(arg, [arglist.pop(0)]), [item])
                         infixed = True
                     elif not isnull(arg):
                         item = item * arg
@@ -2650,15 +2649,18 @@ Global Operator Precedence List:
             if not arglist:
                 if not infixed:
                     item = self.getcall(item)([])
+                    if self.overflow:
+                        raise ExecutionError("ArgumentError", "Excess arguments of "+strlist(self.overflow, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(item, False, True, True))
             elif isinstance(arglist[0], matrix) and arglist[0].onlydiag():
                 args = arglist.pop(0).getdiag()
                 if isinstance(item, (strfunc, usefunc)) and item.overflow and len(args) > len(item.variables):
                     args = args[:len(item.variables)-1] + [diagmatrixlist(args[len(item.variables)-1:])]
                 item = self.getcall(item)(getcopy(args))
+                if self.overflow:
+                    raise ExecutionError("ArgumentError", "Excess arguments of "+strlist(self.overflow, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(item, False, True, True))
             else:
                 item = self.getcall(item)(getcopy(arglist))
-                arglist = []
-            arglist += self.overflow
+                arglist = self.overflow
             self._overflow = overflow
         return item
 
