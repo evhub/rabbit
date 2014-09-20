@@ -2631,12 +2631,13 @@ Global Operator Precedence List:
 
     def call_paren_do(self, item, arglist):
         """Does Parentheses Calling."""
+        infix = []
         while arglist:
             while not isfunc(item):
                 if arglist:
                     arg = arglist.pop(0)
                     if isfunc(arg) and self.infix:
-                        arglist = arglist[:1]+[item]+arglist[1:]
+                        infix.append(item)
                         item = arg
                     elif not isnull(arg):
                         item = item * arg
@@ -2656,7 +2657,10 @@ Global Operator Precedence List:
                 arglist = []
             arglist += self.overflow
             self._overflow = overflow
-        return item
+        if infix:
+            return self.call_paren_do(item, infix)
+        else:
+            return item
 
     def call_comp(self, inputstring):
         """Performs Function Composition."""
