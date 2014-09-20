@@ -2631,6 +2631,7 @@ Global Operator Precedence List:
 
     def call_paren_do(self, item, arglist):
         """Does Parentheses Calling."""
+        item = getcopy(item)
         x = 0
         while x < len(arglist):
             overflow, self.overflow = self.overflow, []
