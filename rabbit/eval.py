@@ -2638,7 +2638,9 @@ Global Operator Precedence List:
                 if arglist:
                     arg = arglist.pop(0)
                     if isfunc(arg) and self.infix:
-                        item = self.call_paren_do(self.call_paren_do(arg, [arglist.pop(0)]), [item])
+                        if arglist:
+                            arg = self.call_paren_do(arg, [arglist.pop(0)])
+                        item = self.call_paren_do(arg, [item])
                         infixed = True
                     elif not isnull(arg):
                         item = item * arg
