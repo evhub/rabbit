@@ -241,7 +241,7 @@ class evalfuncs(object):
         """Converts To An Instance."""
         e.overflow = variables[1:]
         if not variables:
-            return classcalc().call([])
+            return e.getcall(classcalc())([])
         elif isinstance(variables[0], instancecalc):
             return variables[0]
         elif isinstance(variables[0], classcalc):
@@ -289,13 +289,14 @@ class evalfuncs(object):
         if not variables:
             variables = [-1]
         e.overflow = variables[1:]
-        original = getint(variables[0])
-        if original < 0:
-            original += len(e.parens)
-        if 0 < original and original < len(e.parens):
-            return codestr(e.prepare(e.getparen(original), False, True))
+        if not isinstance(variables[0], int):
+            raise ExecutionError("ValueError", "Only integers can be indexes")
+        elif variables[0] < 0:
+            variables[0] += len(e.parens)
+        if 0 < variables[0] and variables[0] < len(e.parens):
+            return codestr(e.prepare(e.getparen(variables[0]), False, True))
         else:
-            raise ExecutionError("KeyError", "Could not find "+self.parenchar+str(original)+self.parenchar+" in parens")
+            raise ExecutionError("KeyError", "Could not find "+self.parenchar+str(variables[0])+self.parenchar+" in parens")
 
     def getvarcall(self, variables):
         """Gets The Value Of A Variable."""
@@ -321,19 +322,50 @@ class evalfuncs(object):
             e.overflow = variables[1:]
             return getcopy(variables[0])
 
-    def getmatrixcall(self, variables):
-        """Converts To Matrices."""
+    def rowcall(self, variables):
+        """Constructs A Matrix Row."""
         if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to cont")
+            return rowmatrixlist([])
         elif len(variables) == 1:
-            return getmatrix(variables[0])
+            if isinstance(variables[0], matrix):
+                if variables[0].onlyrow():
+                    return variables[0]
+                elif variables[0].onlydiag():
+                    return rowmatrixlist(variables[0].getitems())
+                else:
+                    return rowmatrixlist(variables[0].rows())
+            elif hasmatrix(variables[0]):
+                return self.rowcall([getmatrix(variables[0])])
+            else:
+                return matrix(1,1, variables[0])
+        else:
+            return rowmatrixlist(variables)
+
+    def listcall(self, variables):
+        """Constructs A Matrix List."""
+        if not variables:
+            return matrix(0)
+        elif len(variables) == 1:
+            if isinstance(variables[0], matrix):
+                if variables[0].onlydiag():
+                    return variables[0]
+                elif variables[0].onlyrow():
+                    return diagmatrixlist(variables[0].items())
+                else:
+                    return diagmatrixlist(variables[0].rows())
+            elif hasmatrix(variables[0]):
+                return getmatrix(variables[0])
+            else:
+                return matrix(1,1, variables[0], fake=True)
         else:
             return diagmatrixlist(variables)
 
     def matrixcall(self, variables):
         """Constructs A Matrix."""
         if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to matrix")
+            return rowmatrixlist([])
+        elif len(variables) == 1:
+            return getmatrix(variables[0])
         else:
             tomatrix = []
             for x in variables:
@@ -356,23 +388,6 @@ class evalfuncs(object):
             for v in variables:
                 value *= v
             return value
-
-    def listcall(self, variables):
-        """Constructs A Matrix List."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to list")
-        elif len(variables) == 1:
-            if isinstance(variables[0], matrix):
-                if variables[0].onlyrow():
-                    return diagmatrixlist(variables[0].items())
-                else:
-                    return variables[0]
-            elif hasmatrix(variables[0]):
-                return getmatrix(variables[0])
-            else:
-                return matrix(1,1, variables[0], fake=True)
-        else:
-            return diagmatrixlist(variables)
 
     def anycall(self, variables):
         """Wraps any."""
@@ -506,11 +521,11 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to range")
         elif len(variables) == 1:
-            return rangematrix(0.0, getnum(variables[0]))
+            return rangematrix(0, variables[0])
         elif len(variables) == 2:
-            return rangematrix(getnum(variables[0]), getnum(variables[1]))
+            return rangematrix(variables[0], variables[1])
         else:
-            return rangematrix(getnum(variables[0]), getnum(variables[1]), getnum(variables[2]))
+            return rangematrix(variables[0], variables[1], variables[2])
 
     def roundcall(self, variables):
         """Performs round."""
@@ -550,9 +565,8 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to base")
         else:
             e.overflow = variables[2:]
-            base = getnum(variables[0])
             num = e.prepare(variables[1], False, False)
-            return int(num, base)
+            return int(num, variables[0])
 
     def reprstrip(self, inputrepr):
         """Strips A Python Base Representation."""
@@ -640,16 +654,15 @@ class evalfuncs(object):
         else:
             pairs = {}
             for x in xrange(1, len(variables)):
-                if x%2 == 1:
-                    temp = variables[x]
+                if isinstance(variables[x], dictionary):
+                    for k,v in variables[x].a.items():
+                        pairs[k] = v
+                elif isinstance(variables[x], pair):
+                    pairs[variables[x].k] = variables[x].v
                 else:
-                    pairs[temp] = variables[x]
+                    raise ExecutionError("ValueError", "Can only replace pairs")
             if isinstance(variables[0], strcalc):
-                items = [getmatrix(variables[0])]
-                for k,v in pairs.items():
-                    items.append(k)
-                    items.append(v)
-                out = self.replacecall(items)
+                out = self.replacecall([getmatrix(variables[0]), dictionary(pairs)])
                 if isinstance(out, matrix) and out.onlydiag():
                     new = ""
                     for x in out.getitems():
@@ -659,21 +672,16 @@ class evalfuncs(object):
                     return out
             elif ismatrix(variables[0]):
                 variables[0] = getmatrix(variables[0])
-                keys = []
-                values = []
-                for k,v in pairs.items():
-                    keys.append(k)
-                    values.append(v)
                 if variables[0].onlydiag():
                     for x in xrange(0, variables[0].lendiag()):
                         temp = variables[0].retrieve(x)
-                        if temp in keys:
-                            variables[0].store(x,x, values[keys.index(temp)])
+                        if temp in pairs:
+                            variables[0].store(x,x, pairs[temp])
                 else:
                     for y,x in variables[0].coords():
                         temp = variables[0].retrieve(y,x)
-                        if temp in keys:
-                            variables[0].store(y,x, values[keys.index(temp)])
+                        if temp in pairs:
+                            variables[0].store(y,x, pairs[temp])
             else:
                 while variables[0] in pairs:
                     variables[0] = pairs[variables[0]]
@@ -972,6 +980,77 @@ class evalfuncs(object):
             else:
                 return rowmatrixlist(out)
 
+    def forcall(self, variables):
+        """Calls A Function Over A Matrix."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to for")
+        else:
+            e.overflow = variables[2:]
+            func = e.getcall(variables[0])
+            for item in getmatrix(variables[1]).getitems():
+                func(item)
+            return matrix(0)
+
+    def whilecall(self, variables):
+        """Calls A Function While True."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to while")
+        else:
+            e.overflow = variables[1:]
+            func = e.getcall(variables[0])
+            while func([]):
+                pass
+            return matrix(0)
+
+    def zipcall(self, variables):
+        """Zips Matrices."""
+        if not variables:
+            return matrix(0)
+        else:
+            conts = []
+            for item in variables:
+                conts.append(getmatrix(item).getitems())
+            out = []
+            while True:
+                do = True
+                new = []
+                for cont in conts:
+                    if cont:
+                        new.append(cont.pop(0))
+                    else:
+                        do = False
+                        break
+                if do:
+                    out.append(new)
+                else:
+                    break
+            return matrixlist(out)
+
+    def zipwithcall(self, variables):
+        """Zips Matrices With A Function."""
+        if not variables:
+            return matrix(0)
+        else:
+            func = e.getcall(variables[0])
+            conts = []
+            for x in xrange(1, len(variables)):
+                conts.append(getmatrix(variables[x]).getitems())
+            out = []
+            while True:
+                do = True
+                new = []
+                for cont in conts:
+                    if cont:
+                        new.append(cont.pop(0))
+                    else:
+                        do = False
+                        break
+                if do:
+                    out.append(func(new))
+                else:
+                    break
+            return diagmatrixlist(out)
+
     def derivcall(self, variables):
         """Returns The nth Derivative Of A Function."""
         if not variables:
@@ -1058,12 +1137,11 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to d")
         else:
             e.setreturned()
-            stop = getnum(variables[0])
             key = None
             if len(variables) > 1:
                 key = e.prepare(variables[1], True, False)
                 e.overflow = variables[2:]
-            return rollfunc(stop, key)
+            return rollfunc(variables[0], key)
 
     def writecall(self, variables):
         """Writes To A File."""
@@ -1647,3 +1725,23 @@ class evalfuncs(object):
                 return evalwrap(openfile(name, opentype), ref)
             else:
                 return evalwrap(openfile(name), ref)
+
+    def chrcall(self, variables):
+        """Wraps unichr."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to chr")
+        else:
+            e.overflow = variables[1:]
+            return rawstrcalc(chr(variables[0]))
+
+    def ordcall(self, variables):
+        """Wraps ord."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to ord")
+        else:
+            e.overflow = variables[1:]
+            if isinstance(variables[0], strcalc):
+                inputstring = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "Only strings can be characters")
+            return ord(inputstring)

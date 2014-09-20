@@ -47,6 +47,13 @@ def iseval(inputobject):
     """Tests If An Object Is An Evaluator Class."""
     return getcheck(inputobject) > 0
 
+def geteval(inputobject):
+    """Ensures An Object Is Evaluator-Ready."""
+    if hasnum(inputobject):
+        return inputobject
+    else:
+        raise ExecutionError("ValueError", "Non-evaluator object "+repr(inputobject))
+
 def isfunc(inputobject):
     """Tests If An Object Is A Function."""
     check = getcheck(inputobject)

@@ -1605,13 +1605,13 @@ class instancecalc(numobject, classcalc):
 
     def ismatrix(self):
         """Determines Whether The Class Can Be A Matrix."""
-        return bool(self.getmethod("__cont__"))
+        return bool(self.getmethod("__matrix__"))
 
     def tomatrix(self):
         """Converts To Matrix."""
-        func = self.getmethod("__cont__")
+        func = self.getmethod("__matrix__")
         if func is None:
-            raise ExecutionError("ClassError", "The class being converted to a container has no __cont__ method")
+            raise ExecutionError("ClassError", "The class being converted to a matrix has no __matrix__ method")
         else:
             return self.domethod(func)
 
@@ -1620,7 +1620,7 @@ class instancecalc(numobject, classcalc):
         check_in = self.getmethod("__in__")
         if check_in:
             return self.domethod(check_in, item)
-        check_cont = self.getmethod("__cont__")
+        check_cont = self.getmethod("__matrix__")
         if check_cont:
             return item in self.domethod(check_cont)
         raise ExecutionError("TypeError", "Insufficient methods defined for in")
@@ -1978,7 +1978,7 @@ class instancecalc(numobject, classcalc):
         check_len = self.getmethod("__len__")
         if check_len:
             return self.domethod(check_len)
-        check_cont = self.getmethod("__cont__")
+        check_cont = self.getmethod("__matrix__")
         if check_cont:
             return len(self.domethod(check_cont))
         raise ExecutionError("ClassError", "Insufficient methods defined for len")
@@ -1994,7 +1994,7 @@ class instancecalc(numobject, classcalc):
         check_len = self.getmethod("__len__")
         if check_len:
             return self.domethod(check_len)
-        check_cont = self.getmethod("__cont__")
+        check_cont = self.getmethod("__matrix__")
         if check_cont:
             return bool(self.domethod(check_cont))
         return True

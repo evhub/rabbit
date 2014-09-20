@@ -36,6 +36,11 @@ except NameError:
 
 encoding = "UTF"
 
+try:
+    unichr
+except NameError:
+    unichr = chr
+
 old_print = print
 def_str = str
 try:

@@ -103,7 +103,7 @@ nothing := class <<
  __type__(self) = "nil"
  __new__(self) = self
  __call__(self, args) = args
- __cont__(self) = []
+ __matrix__(self) = []
  __add__(self, other) = other
  __sub__(self, other) = -other
  __mul__(self, other) = 0
@@ -134,7 +134,7 @@ nothing := class <<
 nil := nothing()
 passert:: type(nil) ?= "nil"
 passert:: nil(1,2) ?= (1,2)
-passert:: cont(nil) ?= []
+passert:: matrix(nil) ?= []
 passert:: nil+1 ?= 1 ?= 1+nil
 passert:: nil-1 ?= -1 ?= -(1-nil)
 passert:: nil*1 ?= 0 ?= 1*nil
@@ -345,7 +345,7 @@ passert:: 1.999 < (S:\x\x):0:2 < 2.001
 passert:: row(1,2,3) ?= [1,2,3]
 passert:: list[1,2,3] ?= 1,2,3
 passert:: matrix:[1,2]:[3,4]+1 ?= matrix:[2,3]:[4,5]
-passert:: cont:"abc" ?= "a","b","c"
+passert:: matrix:"abc" ?= "a","b","c"
 passert:: det:(matrix:[1,2]:[3,4]) ?= -2
 passert:: sum(2,2,3) ?= 7
 passert:: prod(2,2,3) ?= 12
@@ -358,13 +358,13 @@ passert:: round(1.5) ?= 2
 passert:: eval"Math.i" ?= j $ (def:: i = 1) $ j := i
 passert:: find:"a":(0,1,"a",3,4) ?= 2
 passert:: split:"abcde":"c" ?= ("ab","de")
-passert:: replace:"abc":"b":"" ?= "ac"
+passert:: replace:"abc":("b"->"") ?= "ac"
 passert:: in:(0,1,2,3):2
 passert:: range(1,6,2) ?= (1,3,5)
 passert:: len:(0,0,(0,0)) ?= 3
 passert:: size:(0,(0,0),0) ?= 4
 passert:: abs([3,4]) ?= 5
-passert:: cont:(data:(1,2,3)) ?= (1,2,3)
+passert:: matrix:(data:(1,2,3)) ?= (1,2,3)
 passert:: frac:1:2 ?= 0.5
 passert:: simp:2:4 ?= frac:1:2
 passert:: 2 <= 2d6: <= 12
@@ -431,6 +431,9 @@ passert:: has(\x\x, "__closure__")
 passert:: map(\x\x+1, [1,2]) ?= [2,3]
 passert:: filter(\x\(x<3), [0,1,2,3,4,5]) ?= [0,1,2]
 passert:: fold(\x,y\x+y, 1**5) ?= 5
+passert:: sqrt(-1) ?= i
+passert:: chr(ord("a")) ?= "a"
+passert:: zip([1,2,3], [3,4,5])
 
 # Import Tests:
 math = import:: math
@@ -639,6 +642,7 @@ passert:: f(1) ?= 1                           $ f ( x ) = x
 passert:: f . ( __closure__ )                 $ f(x) = x
 passert:: [1,2,3] != (1,2,3)
 passert:: type([true]:0) ?= "bool"
+passert:: type([i]:0) ?= "complex"
 
 # Final Testing:
 tag = "tag"
@@ -646,7 +650,7 @@ passert:: print("<#> Make sure you see this message three times")
 passert:: save("Tests.save");true
 contents = read("Tests.save")
 passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents)
-passert:: contents ?= "\n".join(cont(open("Tests.save")))
+passert:: contents ?= "\n".join(list(open("Tests.save")))
 passert:: ! using()
 use(calc) ;; use(using())
 passert:: using() ?= calc ?= used             $ used = prop(using)
