@@ -1607,6 +1607,12 @@ class evalfuncs(object):
         else:
             raise ExecutionError("ValueError", "Variable lists must be strings")
 
+    def memoizecall(self, variables):
+        """Memoizes Functions."""
+        out = self.functioncall(variables)
+        out.memoize = True
+        return out
+
     def getstatecall(self, variables):
         """Gets A State."""
         if not variables:

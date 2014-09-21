@@ -147,7 +147,7 @@ class funcfloat(numobject):
     allownone = False
     evaltype = "function"
     overflow = False
-    memoize = True
+    memoize = False
     allargs = "__"
     reqargs = 0
 

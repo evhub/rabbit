@@ -497,7 +497,9 @@ Global Operator Precedence List:
                 "pipe":funcfloat(self.funcs.pipecall, "pipe"),
                 "caller":funcfloat(self.funcs.getcallcall, "caller", reqargs=1),
                 "get":funcfloat(self.funcs.getattrcall, "get", reqargs=2),
-                "has":funcfloat(self.funcs.hasattrcall, "has", reqargs=2)
+                "has":funcfloat(self.funcs.hasattrcall, "has", reqargs=2),
+                "memoize":funcfloat(self.funcs.memoizecall, "memoize"),
+                "hash":usefunc(hash, "hash", ["x"])
                 }, name="Meta"),
             "Math":classcalc({
                 "pow":usefunc(pow, "pow", ["y", "x", "m"]),
@@ -879,7 +881,7 @@ Global Operator Precedence List:
             personals = item.getpers()
             if item.method:
                 personals[item.method] = item.method
-            out += "\\"+"^"*(not item.didsnapshot())+strlist(variables,",")
+            out += "\\"+"^"*(not item.didsnapshot())+"%"*(item.memoize)+strlist(variables,",")
             if len(variables) > 0:
                 out += ","
             for x,y in personals.items():
@@ -1582,8 +1584,7 @@ Global Operator Precedence List:
             sides[0] = sides[0].split(self.parenchar, 1)
             sides[0][0] = basicformat(sides[0][0])
             sides[0][1] = self.namefind(self.parenchar+sides[0][1])
-            params, personals, allargs, reqargs, lexical = self.eval_set(sides[0][1])
-            return (sides[0][0], strfunc(sides[1], params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical))
+            return (sides[0][0], self.eval_set(sides[0][1], sides[1]))
 
     def set_normal(self, sides):
         """Performs =."""
@@ -1907,10 +1908,9 @@ Global Operator Precedence List:
             elif not out[0]:
                 return strfunc(out[1])
             else:
-                params, personals, allargs, reqargs, lexical = self.eval_set(out[0])
-                return strfunc(out[1], params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical)
+                return self.eval_set(out[0], out[1])
 
-    def eval_set(self, original):
+    def eval_set(self, original, funcstr):
         """Performs Setting."""
         temp = self.outersplit(self.namefind(basicformat(original)), ",", top=False)
         params = []
@@ -1918,11 +1918,18 @@ Global Operator Precedence List:
         allargs = None
         inopt = 0
         reqargs = None
-        if temp[0].startswith("^"):
-            temp[0] = temp[0][1:]
-            lexical = False
-        else:
-            lexical = True
+        lexical = True
+        memoize = False
+        done = False
+        while done == False:
+            if lexical and temp[0].startswith("^"):
+                temp[0] = temp[0][1:]
+                lexical = False
+            elif not memoize and temp[0].startswith("%"):
+                temp[0] = temp[0][1:]
+                memoize = True
+            else:
+                done = True
         for i in xrange(0, len(temp)):
             x = basicformat(temp[i])
             if x:
@@ -1974,7 +1981,7 @@ Global Operator Precedence List:
                     params.append(x)
                 if inopt > 1:
                     inopt = 1
-        return params, personals, allargs, reqargs, lexical
+        return strfunc(funcstr, params, personals, allargs=allargs, reqargs=reqargs, memoize=memoize, lexical=lexical)
 
     def eval_join(self, inputlist, eval_funcs):
         """Performs Concatenation."""

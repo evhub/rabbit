@@ -11,6 +11,12 @@ assert:: iserr((try::(passert::0)):1)
 passert:: include Meta
 passert:: unused(env()) ?= class<<x="don't touch me">>
 passert:: include(Math, Stats, Unicode)
+def:: sin = memoize(sin)
+def:: cos = memoize(cos)
+def:: tan = memoize(tan)
+def:: asin = memoize(asin)
+def:: acos = memoize(acos)
+def:: atan = memoize(atan)
 d = rand
 
 # Begin Pure Section:
@@ -203,9 +209,9 @@ passert:: g(4) ?= 6          $ g(x) = (m(z) $ z = x^2 $ m(z) = z%10)
 passert:: g(4) ?= 6          $ g(x) = namespace(class << m(z) = z%10 ;; z = x^2 >>) : "m(z)"
 
 # Loop Tests:
-passert:: (1,2,3)~ \x\x ?= (1,2,3)
-passert:: (1,2,3,4)~~ \(x,y)\(x+y) ?= (3,7)
-passert:: (10,20)~ (1,2)~ \(x,y)\(x+y) ?= ((11,12),(21,22))
+passert:: (1,2,3)~ \%x\x ?= (1,2,3)
+passert:: (1,2,3,4)~~ \(%x,y)\(x+y) ?= (3,7)
+passert:: (10,20)~ (1,2)~ \(%x,y)\(x+y) ?= ((11,12),(21,22))
 
 # Multi-Set Tests:
 passert:: (a,b) ?= (1,2)                  $ a,b = (1,2)
@@ -252,7 +258,7 @@ passert:: {"a" -> "b", "c" -> "d"} : "c" ?= "d"
 # Complex Tests:
 passert:: mod:3:2 ?= 1 $
  mod(x,y) = (xy+-1*floor:(xy))*y $ xy = x/y
-passert:: slope:(\x\x):1:2 ?= 1 $
+passert:: slope:(\%x\x):1:2 ?= 1 $
  slope(f, a,b) = (f:b+-f:a)/(b+-a)
 passert:: parts:(1,2,3,4) ?= 1,(2,3,4) $
  parts(l) = (
@@ -284,7 +290,7 @@ passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9) $
    ) @ len:l
 passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9) $
  qsort(l) = (
-   qsort:(as~\x\(x@x<=a)) ++ a ++ qsort:(as~\x\(x@x>a))
+   qsort:(as~\^%x,a:a\(x@x<=a)) ++ a ++ qsort:(as~\^%x,a:a\(x@x>a))
    $ a,as = l
    ) @ (l,)
 passert:: range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop") $
@@ -314,7 +320,7 @@ passert:: (crackle pop) (10) ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","
   ( (crackle pop) (end, x+1, (mod three+1) % 3, (mod five+1) % 5)
     @ x < end
     )
-passert:: sum( 2**20~~ \(x,y)\(x!=y) ) ?= 0
+passert:: sum( 2**20~~ \(%x,y)\(x!=y) ) ?= 0
 passert:: z ?= 3 $
  (
   if (x < 1) ::
@@ -383,8 +389,8 @@ passert:: str:"a" ?= "a"
 passert:: repr:"a" ?= "\'a\'"
 passert:: calc:"1" ?= 1
 passert:: fold:\(x,y)\(x+y):(1,2,3) ?= 6
-passert:: (D:\x\x):0 ?= 1
-passert:: 1.999 < (S:\x\x):0:2 < 2.001
+passert:: (D:\^x\x):0 ?= 1
+passert:: 1.999 < (S:\^x\x):0:2 < 2.001
 passert:: row(1,2,3) ?= [1,2,3]
 passert:: list[1,2,3] ?= 1,2,3
 passert:: matrix:[1,2]:[3,4]+1 ?= matrix:[2,3]:[4,5]
@@ -466,6 +472,8 @@ passert:: max(1,0,5,4) ?= 5
 passert:: min(1,0,5,4) ?= 0
 passert:: 5x^2 ?= 20                $ (do:: x = 2)
 passert:: (function:: x :: x) ?= \x\x
+passert:: memoize:\x\x != \x\x
+passert:: memoize:\x\x ?= \%x\x
 passert:: deserialize(serialize(class<<>>)) ?= class<<>>
 passert:: wrap(\x\x).getstate() ?= serialize(\x\x)
 passert:: str(1,2) ?= "12"
