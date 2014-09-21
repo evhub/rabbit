@@ -682,7 +682,7 @@ passert:: type:((1,2)*(3,4)) ?= "list"
 
 # Final Testing:
 tag = "tag"
-passert:: print("<#> Make sure you see this message three times")
+passert:: print("<#> Make sure you see this message twice")
 passert:: save("Tests.save");true
 contents = read("Tests.save")
 passert:: contents ?= read("Tests.save")      $ write("Tests.save", contents)
@@ -692,10 +692,7 @@ use(calc) ;; use(using())
 passert:: using() ?= calc ?= used             $ used = prop(using)
 passert:: require("Tests.save").tag ?= "tag"
 use() ;; use(using())
-passert:: class <<
-           exec: contents
-           >> . tag ?= "tag"
 passert:: ! using()
-passert:: paren(parens()-1) ?= "123"          $ (123)
+passert:: paren(parens()-1) ?= "parens()-1"
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
 passert:: printdone() ?= printdone()          $ printdone() = print("    Message sent.")
