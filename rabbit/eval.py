@@ -396,6 +396,7 @@ Global Operator Precedence List:
             "pure":funcfloat(self.funcs.purecall, "pure", reqargs=1),
             "env":funcfloat(self.funcs.envcall, "env"),
             "call":funcfloat(self.funcs.callcall, "call", reqargs=1),
+            "retrieve":funcfloat(self.funcs.itemcallcall, "retrieve", reqargs=1),
             "copy":funcfloat(self.funcs.copycall, "copy", reqargs=1),
             "type":funcfloat(self.funcs.typecall, "type"),
             "str":funcfloat(self.funcs.strcall, "str"),
@@ -496,6 +497,7 @@ Global Operator Precedence List:
                 "exec":funcfloat(self.funcs.cmdcall, "exec", reqargs=1),
                 "pipe":funcfloat(self.funcs.pipecall, "pipe"),
                 "caller":funcfloat(self.funcs.getcallcall, "caller", reqargs=1),
+                "retriever":funcfloat(self.funcs.getitemcallcall, "retriever", reqargs=1),
                 "get":funcfloat(self.funcs.getattrcall, "get", reqargs=2),
                 "has":funcfloat(self.funcs.hasattrcall, "has", reqargs=2),
                 "memoize":funcfloat(self.funcs.memoizecall, "memoize"),
@@ -715,6 +717,10 @@ Global Operator Precedence List:
     def getcall(self, item):
         """Gets The Callable Part Of An Item."""
         return getcall(item, self)
+
+    def getitemcall(self, item):
+        """Gets The Item-Callable Part Of An Item."""
+        return getitemcall(item)
 
     def forshow(self, arg):
         """Prepares An Item For Showing."""
@@ -2482,69 +2488,9 @@ Global Operator Precedence List:
             else:
                 return item
         elif hasitemcall(item):
-            value = item.itemcall(params)
+            value = self.getitemcall(item)(params)
         elif ismatrix(item):
-            item = getmatrix(item)
-            if not params:
-                value = item.retrieve(0)
-            elif len(params) == 1:
-                if isinstance(params[0], matrix):
-                    value = item.retrieve(int(params[0].retrieve(0)), int(params[0].retrieve(1)))
-                elif item.onlyrow():
-                    value = item.retrieve(0, int(params[0]))
-                else:
-                    value = item.retrieve(int(params[0]))
-            elif isinstance(params[0], matrix) and isinstance(params[1], matrix):
-                if params[0].retrieve(0) < 0:
-                    params[0].store(0,0, params[0].retrieve(0)+item.y+1.0)
-                if params[0].retrieve(1) < 0:
-                    params[0].store(1,1, params[0].retrieve(1)+item.x+1.0)
-                if params[1].retrieve(0) < 0:
-                    params[1].store(0,0, params[1].retrieve(0)+item.y+1.0)
-                if params[1].retrieve(1) < 0:
-                    params[1].store(1,1, params[1].retrieve(1)+item.x+1.0)
-                if params[0].getdiag() == params[1].getdiag():
-                    value = matrix(1,1, item.retrieve(int(params[0].retrieve(0)), int(params[0].retrieve(1))), fake=True)
-                elif params[0].retrieve(0) == params[1].retrieve(0):
-                    out = item[int(params[0].retrieve(0))][int(params[0].retrieve(1)):int(params[1].retrieve(1))+1]
-                    value = diagmatrixlist(out)
-                elif params[0].retrieve(1) == params[1].retrieve(1):
-                    item.flip()
-                    out = item[int(params[0].retrieve(1))][int(params[0].retrieve(0)):int(params[1].retrieve(0))+1]
-                    value = diagmatrixlist(out)
-                else:
-                    out = []
-                    if params[0].retrieve(0) <= params[1].retrieve(0):
-                        ymin, ymax = int(params[0].retrieve(0)), int(params[1].retrieve(0))
-                    else:
-                        ymin, ymax = int(params[1].retrieve(0)), int(params[0].retrieve(0))
-                    if params[0].retrieve(1) <= params[1].retrieve(1):
-                        xmin, xmax = int(params[0].retrieve(1)), int(params[1].retrieve(1))
-                    else:
-                        xmin, xmax = int(params[1].retrieve(1)), int(params[0].retrieve(1))
-                    for y in xrange(ymin, ymax+1):
-                        out.append([])
-                        for x in xrange(xmin, xmax+1):
-                            out[-1].append(item.retrieve(y,x))
-                    value = matrixlist(out, float)
-            else:
-                length = item.lendiag()
-                params[0] = float(params[0])
-                params[1] = float(params[1])
-                if params[0] < 0:                
-                    params[0] += length+1.0
-                if params[1] < 0:
-                    params[1] += length+1.0
-                if params[0] == params[1]:
-                    value = matrix(1,1, item.retrieve(int(params[1])), fake=True)
-                elif params[0] < params[1]:
-                    out = item.getdiag()[int(params[0]):int(params[1])]
-                    value = diagmatrixlist(out)
-                else:
-                    out = item.getdiag()[int(params[1]):int(params[0])]
-                    out.reverse()
-                    value = diagmatrixlist(out)
-            self._overflow = params[2:]
+            value = self.getitemcall(getmatrix(item))(params)
         elif isfunc(item):
             value = self.getcall(item)(params)
         elif len(params) == 0:

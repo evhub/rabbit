@@ -61,6 +61,13 @@ def hasitemcall(inputobject):
     """Determines Whether An Object Is Item-Callable."""
     return hasattr(inputobject, "itemcall") and inputobject.itemcall is not None and (not hasattr(inputobject, "hasitemcall") or inputobject.hasitemcall())
 
+def getitemcall(inputobject):
+    """Gets An itemcall."""
+    if hasitemcall(func):
+        return func.itemcall
+    else:
+        raise AttributeError("Function has no itemcall method")
+
 def isbuiltin(inputobject):
     """Checks Whether An Object Is A Builtin."""
     return isinstance(inputobject, funcfloat) and not isinstance(inputobject, strfunc)

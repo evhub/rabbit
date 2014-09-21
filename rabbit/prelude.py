@@ -1315,10 +1315,19 @@ class evalfuncs(object):
         """Calls A Function."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to call")
-        elif len(variables) == 1:
-            return collapse(variables[0])
-        else:
+        elif hascall(variables[0]):
             return e.getcall(variables[0])(variables[1:])
+        else:
+            raise ExecutionError("ArgumentError", "Uncallable object "+e.prepare(variables[0], False, True, True))
+
+    def itemcallcall(self, variables):
+        """Item Calls A Function."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to retrieve")
+        elif hasitemcall(variables[0]):
+            return variables[0].itemcall(variables[1:])
+        else:
+            raise ExecutionError("ArgumentError", "Un-item-callable object "+e.prepare(variables[0], False, True, True))
 
     def paircall(self, variables):
         """Creates A Pair."""
@@ -1675,6 +1684,14 @@ class evalfuncs(object):
         else:
             e.overflow = variables[1:]
             return evalwrap(e.getcall(variables[0]), "caller:("+e.prepare(variables[0], False, True)+")")
+
+    def getitemcallcall(self, variables):
+        """Wraps getcall."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to retriever")
+        else:
+            e.overflow = variables[1:]
+            return evalwrap(e.getitemcall(variables[0]), "retriever:("+e.prepare(variables[0], False, True)+")")
 
     def inputcall(self, variables):
         """Wraps raw_input."""

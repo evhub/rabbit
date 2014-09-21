@@ -21,6 +21,20 @@ from __future__ import with_statement, print_function, absolute_import, unicode_
 from .carrot.rand import *
 from .carrot.format import *
 
+global e
+try:
+    set_e
+except:
+    old_set_e = None
+else:
+    old_set_e = set_e
+def set_e(new_e):
+    """Sets The Evaluator Global."""
+    global e
+    if old_set_e is not None:
+        old_set_e(new_e)
+    e = new_e
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -75,6 +89,69 @@ class matrix(mctobject):
             item = self.retrieve(y,x)
             out.store(y,x, getcopy(item))
         return out
+
+    def itemcall(self, params):
+        """Retrieves Items."""
+        e.overflow = params[2:]
+        if not params:
+            value = item.retrieve(0)
+        elif len(params) == 1:
+            if isinstance(params[0], matrix):
+                value = item.retrieve(params[0].retrieve(0), params[0].retrieve(1))
+            elif item.onlyrow():
+                value = item.retrieve(0, params[0])
+            else:
+                value = item.retrieve(params[0])
+        elif isinstance(params[0], matrix) and isinstance(params[1], matrix):
+            if params[0].retrieve(0) < 0:
+                params[0].store(0,0, params[0].retrieve(0)+item.y+1)
+            if params[0].retrieve(1) < 0:
+                params[0].store(1,1, params[0].retrieve(1)+item.x+1)
+            if params[1].retrieve(0) < 0:
+                params[1].store(0,0, params[1].retrieve(0)+item.y+1)
+            if params[1].retrieve(1) < 0:
+                params[1].store(1,1, params[1].retrieve(1)+item.x+1)
+            if params[0].getdiag() == params[1].getdiag():
+                value = matrix(1,1, item.retrieve(params[0].retrieve(0), params[0].retrieve(1)), fake=True)
+            elif params[0].retrieve(0) == params[1].retrieve(0):
+                out = item[params[0].retrieve(0)][params[0].retrieve(1):params[1].retrieve(1)+1]
+                value = diagmatrixlist(out)
+            elif params[0].retrieve(1) == params[1].retrieve(1):
+                item.flip()
+                out = item[params[0].retrieve(1)][params[0].retrieve(0):params[1].retrieve(0)+1]
+                value = diagmatrixlist(out)
+            else:
+                out = []
+                if params[0].retrieve(0) <= params[1].retrieve(0):
+                    ymin, ymax = int(params[0].retrieve(0)), int(params[1].retrieve(0))
+                else:
+                    ymin, ymax = int(params[1].retrieve(0)), int(params[0].retrieve(0))
+                if params[0].retrieve(1) <= params[1].retrieve(1):
+                    xmin, xmax = int(params[0].retrieve(1)), int(params[1].retrieve(1))
+                else:
+                    xmin, xmax = int(params[1].retrieve(1)), int(params[0].retrieve(1))
+                for y in xrange(ymin, ymax+1):
+                    out.append([])
+                    for x in xrange(xmin, xmax+1):
+                        out[-1].append(item.retrieve(y,x))
+                value = matrixlist(out)
+        else:
+            length = item.lendiag()
+            params[0] = float(params[0])
+            params[1] = float(params[1])
+            if params[0] < 0:                
+                params[0] += length+1.0
+            if params[1] < 0:
+                params[1] += length+1.0
+            if params[0] == params[1]:
+                value = matrix(1,1, item.retrieve(int(params[1])), fake=True)
+            elif params[0] < params[1]:
+                out = item.getdiag()[int(params[0]):int(params[1])]
+                value = diagmatrixlist(out)
+            else:
+                out = item.getdiag()[int(params[1]):int(params[0])]
+                out.reverse()
+                value = diagmatrixlist(out)
 
     def calc(self):
         """Retrieves A Boolean."""
