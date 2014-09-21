@@ -693,6 +693,5 @@ passert:: using() ?= calc ?= used             $ used = prop(using)
 passert:: require("Tests.save").tag ?= "tag"
 use() ;; use(using())
 passert:: ! using()
-passert:: paren(parens()-1) ?= "parens()-1"
 passert:: "Make sure you get two messages after this:" ?= print("Make", "sure", "you", "get", "two", "messages", "after", "this:")
 passert:: printdone() ?= printdone()          $ printdone() = print("    Message sent.")
