@@ -500,6 +500,7 @@ passert:: math.sin(1) ?= Math.sin(1)
 passert:: purify(math, "cos").cos(1) ?= Math.cos(1)
 passert:: get(math, "tan")(1) ?= Math.tan(1)
 passert:: math.pi ?= Math.pi
+passert:: super(math)
 
 # New Feature Tests:
 passert:: f..g(2) ?= 9                       $ f(x) = x^2 $ g(x) = x+1

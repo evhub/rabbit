@@ -502,7 +502,8 @@ Global Operator Precedence List:
                 "get":funcfloat(self.funcs.getattrcall, "get", reqargs=2),
                 "has":funcfloat(self.funcs.hasattrcall, "has", reqargs=2),
                 "memoize":funcfloat(self.funcs.memoizecall, "memoize"),
-                "hash":usefunc(hash, "hash", ["x"])
+                "hash":usefunc(hash, "hash", ["x"]),
+                "super":funcfloat(self.funcs.supercall, "super", reqargs=1)
                 }, name="Meta"),
             "Math":classcalc({
                 "pow":usefunc(pow, "pow", ["y", "x", "m"]),

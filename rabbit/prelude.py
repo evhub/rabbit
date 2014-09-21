@@ -1569,7 +1569,7 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to wrap")
         else:
-            ref = "wrap:("+e.prepare(variables[0], False, True)+")"
+            ref = "Meta.wrap:("+e.prepare(variables[0], False, True)+")"
             if len(variables) > 1:
                 ref += ":("+e.prepare(variables[1], False, True)+")"
                 safe = []
@@ -1702,7 +1702,7 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to caller")
         else:
             e.overflow = variables[1:]
-            return evalwrap(e.getcall(variables[0]), "caller:("+e.prepare(variables[0], False, True)+")")
+            return evalwrap(e.getcall(variables[0]), "Meta.caller:("+e.prepare(variables[0], False, True)+")")
 
     def getitemcallcall(self, variables):
         """Wraps getcall."""
@@ -1710,7 +1710,7 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to retriever")
         else:
             e.overflow = variables[1:]
-            return evalwrap(e.getitemcall(variables[0]), "retriever:("+e.prepare(variables[0], False, True)+")")
+            return evalwrap(e.getitemcall(variables[0]), "Meta.retriever:("+e.prepare(variables[0], False, True)+")")
 
     def inputcall(self, variables):
         """Wraps raw_input."""
@@ -1787,3 +1787,14 @@ class evalfuncs(object):
             else:
                 raise ExecutionError("ValueError", "Only strings can be characters")
             return ord(inputstring)
+
+    def supercall(self, variables):
+        """Wraps type."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to super")
+        else:
+            e.overflow = variables[1:]
+            if isinstance(variables[0], evalwrap):
+                return evalwrap(type(variables[0].obj), "Meta.super:("+variables[0].ref+")")
+            else:
+                raise ExecutionError("ValueError", "Can only get the super of a wrap")
