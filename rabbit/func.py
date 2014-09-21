@@ -149,7 +149,7 @@ class funcfloat(numobject):
     overflow = False
     memoize = True
     allargs = "__"
-    reqargs = -1
+    reqargs = 0
 
     def __init__(self, func, name=None, reqargs=None, memoize=None, memo=None, funcstr=None, curried=None):
         """Constructs The Float Function."""
@@ -860,12 +860,14 @@ class usefunc(funcfloat):
             self.variables = []
         else:
             self.variables = variables
+        if reqargs is None:
+            self.reqargs = len(self.variables)
+        else:
+            self.reqargs = reqargs
         if extras is None:
             self.extras = {}
         else:
             self.extras = dict(extras)
-        if reqargs is not None:
-            self.reqargs = reqargs
         if memoize is not None:
             self.memoize = memoize
         if memo is None:
