@@ -11,12 +11,12 @@ assert:: iserr((try::(passert::0)):1)
 passert:: include Meta
 passert:: unused(env()) ?= class<<x="don't touch me">>
 passert:: include(Math, Stats, Unicode)
-def:: sin = memoize(sin)
-def:: cos = memoize(cos)
-def:: tan = memoize(tan)
-def:: asin = memoize(asin)
-def:: acos = memoize(acos)
-def:: atan = memoize(atan)
+def:: sin := memoize(sin)
+def:: cos := memoize(cos)
+def:: tan := memoize(tan)
+def:: asin := memoize(asin)
+def:: acos := memoize(acos)
+def:: atan := memoize(atan)
 d = rand
 
 # Begin Pure Section:
