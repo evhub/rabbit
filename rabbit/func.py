@@ -433,7 +433,7 @@ class strfunc(funcfloat):
                     if not e.returned and funcstr == params.funcstr and variables == params.variables:
                         raise ExecutionError("LoopError", "Illegal infinite recursive loop in "+funcstr)
                     else:
-                        print(e.returned, (funcstr, params.funcstr), (variables, params.variables))
+                        print(e.returned, (funcstr, params.funcstr))
                         funcstr = params.funcstr
                         variables = params.variables
                 finally:
