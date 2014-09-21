@@ -2695,11 +2695,7 @@ Global Operator Precedence List:
                 itemlist[0] = self.funcfind(itemlist[0])
                 out = itemlist[0]
                 for x in xrange(1, len(itemlist)):
-                    new = self.getmethod(out, itemlist[x])
-                    if new is None:
-                        raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(item, False, True, True))
-                    else:
-                        out = new
+                    out = self.getmethod(out, itemlist[x])
                 return out
 
     def getmethod(self, item, methodname, check=False):
@@ -2753,6 +2749,8 @@ Global Operator Precedence List:
                                 raise ExecutionError("ValueError", "Invalid Rabbit wrapping of "+rabstring)
         if check:
             return new is not None
+        elif new is None:
+            raise ExecutionError("AttributeError", "Cannot get method "+key+" from "+self.prepare(item, False, True, True))
         else:
             return new
 

@@ -558,7 +558,7 @@ class cotobject(evalobject):
     def __hash__(self):
         """Returns A Hash."""
         out = 0
-        for item in items:
+        for item in self.items:
             out ^= hash(item)
         return out
 
