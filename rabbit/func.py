@@ -1310,7 +1310,7 @@ class classcalc(cotobject):
         else:
             return None
 
-    def getitem(self, test):
+    def getitem(self, test, deprop=True):
         """Retrieves An Item At The Base Level."""
         if istext(self.variables[test]):
             out = self.calc(self.variables[test])
@@ -1319,7 +1319,9 @@ class classcalc(cotobject):
             out = matrix(0)
         else:
             out = self.variables[test]
-        return e.deprop(out)
+        if deprop:
+            out = e.deprop(out)
+        return out
 
     def retrieve(self, key):
         """Retrieves An Item."""
@@ -1402,7 +1404,7 @@ class classcalc(cotobject):
     def calcall(self):
         """Calculates All Strings."""
         for item in self.variables:
-            self.getitem(item)
+            self.getitem(item, False)
 
     def __eq__(self, other):
         """Performs ==."""
@@ -1576,7 +1578,7 @@ class instancecalc(numobject, classcalc):
         else:
             return self.getparent().getmethod(test)
 
-    def getitem(self, test):
+    def getitem(self, test, deprop=True):
         """Retrieves An Item At The Base Level."""
         if istext(self.variables[test]):
             out = self.calc(self.variables[test])
@@ -1589,7 +1591,9 @@ class instancecalc(numobject, classcalc):
             if isinstance(self.variables[test], strfunc):
                 self.variables[test].curryself(self)
             out = self.variables[test]
-        return e.deprop(out)
+        if deprop:
+            out = e.deprop(out)
+        return out
 
     def store(self, key, value, bypass=False, name=None):
         """Stores An Item."""
@@ -2158,9 +2162,9 @@ class atom(evalobject):
     def __ne__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
-            return False
-        else:
             return True
+        else:
+            return False
 
     @rabbit
     def __gt__(self, other):
