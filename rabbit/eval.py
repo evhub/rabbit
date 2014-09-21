@@ -490,6 +490,7 @@ Global Operator Precedence List:
                 "serialize":funcfloat(self.funcs.getstatecall, "serialize"),
                 "deserialize":funcfloat(self.funcs.fromstatecall, "deserialize"),
                 "wrap":funcfloat(self.funcs.wrapcall, "wrap", reqargs=1),
+                "purify":funcfloat(self.funcs.purifycall, "purify", reqargs=2),
                 "run":funcfloat(self.funcs.runcall, "run", reqargs=1),
                 "global":funcfloat(self.funcs.globalcall, "global", reqargs=1),
                 "del":funcfloat(self.funcs.delcall, "del", reqargs=1),

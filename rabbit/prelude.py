@@ -1597,6 +1597,24 @@ class evalfuncs(object):
                 e.setreturned()
                 return evalwrap(variables[0].obj, ref, safe)
 
+    def purifycall(self, variables):
+        """Purifies A Wrapper Method."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to purify")
+        else:
+            e.overflow = variables[2:]
+            if isinstance(variables[1], strcalc):
+                name = str(variables[1])
+            else:
+                raise ExecutionError("ValueError", "Variable names must be strings")
+            if isinstance(variables[0], evalwrap):
+                if name in variables[0].safe:
+                    raise ExecutionError("ValueError", "The variable "+name+" is already pure")
+                else:
+                    return evalwrap(variables[0].obj, variables[0].ref, variables[0].safe+[name])
+            else:
+                raise ExecutionError("ValueError", "Can only purify wraps")
+
     def functioncall(self, variables):
         """Converts To A Function."""
         if not variables:
