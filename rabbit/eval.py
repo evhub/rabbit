@@ -2524,7 +2524,6 @@ Global Operator Precedence List:
         """Evaluates Parentheses."""
         inputstring = (self.parenchar*2).join(switchsplit(self.replacer.sub(self.parenchar*2, original), self.digits, notstring=self.reserved))
         if self.parenchar in inputstring:
-            self.unclean()
             self.printdebug("(|) "+inputstring) 
             templist = inputstring.split(self.parenchar)
             checkops = delspace(self.callops, self.subparenops)
@@ -2556,7 +2555,9 @@ Global Operator Precedence List:
             self.recursion += 1
             try:
                 values = []
-                for l in inputlist:
+                cleaned = self.clean_begin()
+                for i in xrange(0, len(inputlist)):
+                    l = inputlist[i]
                     x = 0
                     while x < len(l):
                         if endswithany(l[x], self.subparenops) and x+1 < len(l):
@@ -2576,6 +2577,8 @@ Global Operator Precedence List:
                     for x in xrange(1, len(l)):
                         if l[x]:
                             args.append(self.eval_call(l[x], False))
+                    if i == len(inputlist)-1 and not values:
+                        self.clean_end(cleaned)
                     item = self.call_paren_do(item, args)
                     if values and isfunc(item) and self.infix:
                         values.append(self.call_paren_do(item, [values.pop()]))
@@ -2600,9 +2603,11 @@ Global Operator Precedence List:
                 if arglist:
                     arg = arglist.pop(0)
                     if isfunc(arg) and self.infix:
+                        cleaned = self.clean_begin()
                         if arglist:
                             arg = self.call_paren_do(arg, [arglist.pop(0)])
                         item = self.call_paren_do(arg, [item])
+                        self.clean_end(cleaned)
                         infixed = True
                     elif not isnull(arg):
                         item = item * arg
