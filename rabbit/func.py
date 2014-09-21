@@ -336,7 +336,7 @@ class funcfloat(numobject):
     def __eq__(self, other):
         """Performs ==."""
         if isinstance(other, funcfloat) and not isinstance(other, strfunc):
-            return self.base_func == other.base_func and self.reqargs == other.reqargs
+            return self.memoize == other.memoize and self.reqargs == other.reqargs and self.base_func == other.base_func
         else:
             return False
 
@@ -433,6 +433,7 @@ class strfunc(funcfloat):
                     if not e.returned and funcstr == params.funcstr and variables == params.variables:
                         raise ExecutionError("LoopError", "Illegal infinite recursive loop in "+funcstr)
                     else:
+                        print(e.returned, (funcstr, params.funcstr), (variables, params.variables))
                         funcstr = params.funcstr
                         variables = params.variables
                 finally:
@@ -581,6 +582,7 @@ class strfunc(funcfloat):
                     self.overflow == other.overflow and
                     self.reqargs == other.reqargs and
                     self.allargs == other.allargs and
+                    self.memoize == other.memoize and
                     self.method == other.method and
                     self.variables == other.variables and
                     personals == other.getpers())
