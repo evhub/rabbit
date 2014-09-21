@@ -1343,11 +1343,13 @@ Global Operator Precedence List:
             else:
                 func = funcs.pop(0)
                 cleaned = self.clean_begin(None, None)
-                if funcs:
-                    out = func(arg, funcs)
-                else:
-                    out = func(arg)
-                self.clean_end(cleaned)
+                try:
+                    if funcs:
+                        out = func(arg, funcs)
+                    else:
+                        out = func(arg)
+                finally:
+                    self.clean_end(cleaned)
                 return out
 
     def unclean(self):
@@ -2332,6 +2334,7 @@ Global Operator Precedence List:
         self.printdebug("=> "+inputstring)
         if inputstring:
             self.recursion += 1
+            cleaned = self.clean_begin()
             try:
                 for func, ifbottom in self.calls:
                     if ifbottom or top:
@@ -2340,6 +2343,7 @@ Global Operator Precedence List:
                             break
                 self.printdebug(self.prepare(out, False, True, True)+" <= "+inputstring)
             finally:
+                self.clean_end(cleaned)
                 self.recursion -= 1
             return out
         else:

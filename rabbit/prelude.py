@@ -1611,8 +1611,7 @@ class evalfuncs(object):
             return strfloat(str(variables[0]))
         elif isinstance(variables[1], strcalc):
             e.overflow = variables[2:]
-            params, personals, allargs, reqargs, lexical = e.eval_set(str(variables[1]))
-            return strfunc(str(variables[0]), params, personals, allargs=allargs, reqargs=reqargs, lexical=lexical)
+            return e.eval_set(str(variables[0]), str(variables[1]))
         else:
             raise ExecutionError("ValueError", "Variable lists must be strings")
 
