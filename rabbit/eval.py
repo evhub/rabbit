@@ -718,9 +718,12 @@ Global Operator Precedence List:
         """Gets The Callable Part Of An Item."""
         return getcall(item, self)
 
-    def getitemcall(self, item):
-        """Gets The Item-Callable Part Of An Item."""
-        return getitemcall(item)
+    def getitemcall(self, func):
+        """Gets The Item-Callable Part Of A Function."""
+        if hasitemcall(func):
+            return func.itemcall
+        else:
+            raise AttributeError("Function has no itemcall method")
 
     def forshow(self, arg):
         """Prepares An Item For Showing."""
