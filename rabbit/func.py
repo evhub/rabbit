@@ -217,8 +217,7 @@ class funcfloat(numobject):
             if arghash in self.memo:
                 return self.memo[arghash]
         if self.memoize:
-            returned = e.returned
-            e.setreturned(False)
+            returned, e.returned = e.returned, False
             try:
                 out = self.base_func(*args, **kwargs)
             except:
@@ -425,6 +424,7 @@ class strfunc(funcfloat):
                 raise TailRecursion(funcstr, newvars)
             else:
                 cleaned = e.clean_begin(True, True)
+                returned, e.returned = e.returned, False
                 tailing, e.tailing = e.tailing, True
                 oldvars = e.setvars(variables)
                 try:
@@ -433,11 +433,11 @@ class strfunc(funcfloat):
                     if not e.returned and funcstr == params.funcstr and variables == params.variables:
                         raise ExecutionError("LoopError", "Illegal infinite recursive loop in "+funcstr)
                     else:
-                        print(e.returned, (funcstr, params.funcstr))
                         funcstr = params.funcstr
                         variables = params.variables
                 finally:
                     e.tailing = tailing
+                    e.returned = returned
                     e.clean_end(cleaned)
                     e.setvars(oldvars)
         return out
@@ -2158,9 +2158,9 @@ class atom(evalobject):
     def __ne__(self, other):
         """Always Is True For Evaluator Objects."""
         if hasnum(other):
-            return True
-        else:
             return False
+        else:
+            return True
 
     @rabbit
     def __gt__(self, other):
