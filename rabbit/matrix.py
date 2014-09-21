@@ -90,7 +90,7 @@ class matrix(mctobject):
             out.store(y,x, getcopy(item))
         return out
 
-    def itemcall(self, params):
+    def itemcall(item, params):
         """Retrieves Items."""
         e.overflow = params[2:]
         if not params:
@@ -152,6 +152,7 @@ class matrix(mctobject):
                 out = item.getdiag()[int(params[1]):int(params[0])]
                 out.reverse()
                 value = diagmatrixlist(out)
+        return value
 
     def calc(self):
         """Retrieves A Boolean."""
