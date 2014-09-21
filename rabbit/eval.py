@@ -2334,7 +2334,7 @@ Global Operator Precedence List:
         self.printdebug("=> "+inputstring)
         if inputstring:
             self.recursion += 1
-            cleaned = self.clean_begin()
+            cleaned = self.clean_begin(None, None)
             try:
                 for func, ifbottom in self.calls:
                     if ifbottom or top:
