@@ -100,27 +100,28 @@ class evalfuncs(object):
 
     def includecall(self, variables):
         """Includes A Class In The Global Namespace."""
-        e.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to include")
-        elif len(variables) == 1:
-            last = None
-            while isinstance(variables[0], instancecalc):
-                if last is None or not self.iseq(last, variables[0]):
-                    last = variables[0]
-                    variables[0] = variables[0].include()
-                else:
-                    raise ExecutionError("LoopError", "Illegal infinite recursive loop in __include__")
-            if isinstance(variables[0], classcalc):
-                oldvars = e.setvars(variables[0].getvars(True))
-                return classcalc(oldvars)
-            else:
-                raise ExecutionError("ValueError", "Can only include a class")
         else:
+            e.setreturned()
             out = []
             for arg in variables:
-                out.append(self.includecall([arg]))
-            return diagmatrixlist(out)
+                last = None
+                while isinstance(arg, instancecalc):
+                    if last is None or not self.iseq(last, arg):
+                        last = arg
+                        arg = arg.include()
+                    else:
+                        raise ExecutionError("LoopError", "Illegal infinite recursive loop in __include__")
+                if isinstance(arg, classcalc):
+                    oldvars = e.setvars(arg.getvars(True))
+                    out.append(classcalc(oldvars))
+                else:
+                    raise ExecutionError("ValueError", "Can only include a class")
+            if len(out) == 1:
+                return out[0]
+            else:
+                return diagmatrixlist(out)
 
     def usingcall(self, variables):
         """Retrieves The Current Function Being Used."""
@@ -1205,11 +1206,11 @@ class evalfuncs(object):
 
     def aliascall(self, variables):
         """Makes Aliases."""
-        e.setreturned()
         e.overflow = variables[2:]
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to alias")
         elif len(variables) == 1:
+            e.setreturned()
             if isinstance(variables[0], strcalc):
                 key = str(variables[0])
             else:
@@ -1221,6 +1222,7 @@ class evalfuncs(object):
                 out = matrix(0)
             return out
         else:
+            e.setreturned()
             if isinstance(variables[0], strcalc):
                 key = str(variables[0])
             else:
@@ -1390,47 +1392,37 @@ class evalfuncs(object):
 
     def runcall(self, variables):
         """Performs run."""
-        e.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to run")
-        elif len(variables) == 1:
-            if isinstance(variables[0], strcalc):
-                original = str(variables[0])
-            else:
-                raise ExecutionError("ValueError", "Can't run non-string valueS")
-            if not e.processor.evalfile(original):
-                raise ExecutionError("IOError", "Failed to execute file "+str(original))
-            else:
-                e.processor.dumpdebug(True)
         else:
+            e.setreturned()
             for arg in variables:
-                self.runcall([arg])
-        return matrix(0)
+                if isinstance(arg, strcalc):
+                    original = str(arg)
+                else:
+                    raise ExecutionError("ValueError", "Can't run non-string valueS")
+                if not e.processor.evalfile(original):
+                    raise ExecutionError("IOError", "Failed to execute file "+str(original))
+                else:
+                    e.processor.dumpdebug(True)
+            return matrix(0)
 
     def requirecall(self, variables):
         """Performs require."""
-        if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to require")
-        elif len(variables) == 1:
-            e.setreturned()
-            old_e = e
-            try:
-                new_e = old_e.new()
-                new_e.processor.e = new_e
-                new_e.processor.fresh(None)
-                out = classcalc()
-                params = out.begin()
-                new_e.funcs.runcall(variables)
-                out.end(params)
-            finally:
-                set_e(old_e)
-                old_e.processor.e = old_e
-            return out
-        else:
-            out = []
-            for arg in variables:
-                out.append(self.requirecall([arg]))
-            return diagmatrixlist(out)
+        e.setreturned()
+        old_e = e
+        try:
+            new_e = old_e.new()
+            new_e.processor.e = new_e
+            new_e.processor.fresh(None)
+            out = classcalc()
+            params = out.begin()
+            new_e.funcs.runcall(variables)
+            out.end(params)
+        finally:
+            set_e(old_e)
+            old_e.processor.e = old_e
+        return out
 
     def evalcall(self, variables):
         """Performs eval."""
@@ -1477,10 +1469,10 @@ class evalfuncs(object):
 
     def importcall(self, variables):
         """Performs import."""
-        e.setreturned()
         if not variables:
             raise ExecutionError("NoneError", "Nothing is not a file name")
         else:
+            e.setreturned()
             out = []
             for item in variables:
                 if isinstance(variables[0], strcalc):
@@ -1602,16 +1594,26 @@ class evalfuncs(object):
         if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to purify")
         else:
+            e.setreturned()
             e.overflow = variables[2:]
             if isinstance(variables[1], strcalc):
-                name = str(variables[1])
+                names = [str(variables[1])]
+            elif isinstance(variables[1], matrix):
+                names = []
+                for item in variables[1].getitems():
+                    if isinstance(item, strcalc):
+                        names.append(str(item))
+                    else:
+                        raise ExecutionError("ValueError", "Variable names must be strings")
             else:
                 raise ExecutionError("ValueError", "Variable names must be strings")
             if isinstance(variables[0], evalwrap):
-                if name in variables[0].safe:
-                    raise ExecutionError("ValueError", "The variable "+name+" is already pure")
-                else:
-                    return evalwrap(variables[0].obj, variables[0].ref, variables[0].safe+[name])
+                for name in names:
+                    if name in variables[0].safe:
+                        raise ExecutionError("ValueError", "The variable "+name+" is already pure")
+                    else:
+                        variables[0].safe.append(name)
+                return variables[0]
             else:
                 raise ExecutionError("ValueError", "Can only purify wraps")
 
