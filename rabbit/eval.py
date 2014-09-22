@@ -1190,6 +1190,7 @@ Global Operator Precedence List:
         if top:
             inputlist = inputstring.split(self.directchar)
             out = []
+            openstr, closestr = self.indentchar, self.dedentchar
             for x in xrange(0, len(inputlist)):
                 if x%2 == 0:
                     lines = []
@@ -1200,22 +1201,23 @@ Global Operator Precedence List:
                         lines.append("")
                     new = []
                     levels = []
-                    openstr, closestr = self.indentchar, self.dedentchar
                     for x in xrange(0, len(lines)):
                         check = leading(lines[x])
-                        if levels:
-                            if check > levels[-1]:
-                                levels.append(check)
+                        if x:
+                            if check > current:
+                                levels.append(current)
+                                current = check
                                 lines[x-1] = lines[x-1]+openstr
                             elif check in levels:
                                 point = levels.index(check)+1
-                                lines[x-1] += closestr*(len(levels[point:]))
+                                lines[x-1] += closestr*(len(levels[point:])+1)
                                 levels = levels[:point]
-                            else:
+                                current = levels.pop()
+                            elif current != check:
                                 raise ExecutionError("IndentationError", "Illegal dedent to unused indentation level in line "+lines[x]+" (#"+str(x)+")")
                             new.append(lines[x-1])
                         else:
-                            levels.append(check)
+                            current = check
                     new.append(lines[-1]+closestr*(len(levels)-1))
                     out.append("\n".join(new))
                 else:
