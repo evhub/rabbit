@@ -907,7 +907,7 @@ class evalfuncs(object):
         out = []
         for x in variables:
             if isinstance(x, codestr):
-                out.append(e.calc(str(x), info))
+                out.append(e.calc(str(x), info, -2))
             elif isinstance(x, strcalc):
                 out.append(e.calc(str(x), info, -1))
             else:
@@ -921,7 +921,7 @@ class evalfuncs(object):
         """Performs calc And Returns null."""
         for x in variables:
             if isinstance(x, codestr):
-                e.process(str(x), " | do", top=False)
+                e.process(str(x), " | do", top=-2)
             elif isinstance(x, strcalc):
                 e.process(str(x), " | do", top=-1)
             else:
@@ -1434,7 +1434,7 @@ class evalfuncs(object):
             new_e.processor.fresh(None)
             for x in variables:
                 if isinstance(x, codestr):
-                    item = new_e.calc(str(x), " | eval")
+                    item = new_e.calc(str(x), " | eval", -2)
                 elif isinstance(x, strcalc):
                     item = new_e.calc(str(x), " | eval", -1)
                 else:
@@ -1453,7 +1453,7 @@ class evalfuncs(object):
         out = []
         for x in variables:
             if isinstance(x, codestr):
-                test = e.calc(str(x), " | assertion")
+                test = e.calc(str(x), " | assertion", -2)
             elif isinstance(x, strcalc):
                 test = e.calc(str(x), " | assertion", -1)
             else:

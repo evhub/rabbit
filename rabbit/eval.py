@@ -1105,7 +1105,11 @@ Global Operator Precedence List:
 
     def proc_calc(self, original, top, command):
         """Gets The Value Of An Expression."""
-        item = self.do_pre(original, top)
+        if top < -1:
+            calc_top = False
+        else:
+            calc_top = top
+        item = self.do_pre(original, calc_top)
         self.printdebug("| "+str(item))
         if top:
             splitfunc = lambda x: splitany(x, [";;", "\n"])
@@ -1123,7 +1127,7 @@ Global Operator Precedence List:
             self.printdebug("=>> "+inputlist[x])
             self.recursion += 1
             try:
-                out = self.calc_proc(inputlist[x], top)
+                out = self.calc_proc(inputlist[x], calc_top)
                 self.printdebug(self.prepare(out, False, True, True)+" <<= "+inputlist[x])
             finally:
                 self.recursion -= 1
@@ -1220,7 +1224,15 @@ Global Operator Precedence List:
                             new.append(lines[x-1])
                         else:
                             levels.append(check)
-                    new.append(lines[-1]+closestr*(len(levels)-1))
+                    closers = closestr*(len(levels)-1)
+                    newline = ""
+                    for c in lines[-1]:
+                        if c in self.groupers.values():
+                            newline += closers+c
+                            closers = ""
+                        else:
+                            newline += c
+                    new.append(newline+closers)
                     out.append("\n".join(new))
                 else:
                     out.append(inputlist[x])

@@ -681,6 +681,10 @@ passert:: [1,2,3] != (1,2,3)
 passert:: type([true]:0) ?= "bool"
 passert:: type([i]:0) ?= "complex"
 passert:: type:((1,2)*(3,4)) ?= "list"
+passert:: "def" ?= <<
+ "abc"
+ "def"
+  >> ()
 
 # Final Testing:
 tag = "tag"
