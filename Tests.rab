@@ -490,8 +490,8 @@ passert:: [1,2,3] union [1,2,4] ?= [1,2,3,4]
 passert:: [1,2,3] intersect [1,2,4] ?= [1,2]
 passert:: ((Feq 1) 1) 1 ?= Feq 1 1 1
 passert:: retrieve([1,2,3], 1) ?= 2
-passert:: retriever([1,2,3])([1]) ?= 2
-passert:: caller(\x\x)([0]) ?= 0
+passert:: retriever([1,2,3])(1) ?= 2
+passert:: caller(\x\x)[0] ?= [0]
 passert:: hash("abc") ?= hash("abc")
 passert:: teq(1)(1)+1 ?= (teq+1)(1)(1)
 
