@@ -1014,7 +1014,7 @@ Global Operator Precedence List:
                     new = item[0][0]
                 else:
                     raise SyntaxError("Error in evaluating indentation len("+repr(item[0])+")>1")
-            if top:
+            if top > 0:
                 out = self.splitdedent(new, splitfunc, False)
             else:
                 out = [new]
@@ -1120,7 +1120,7 @@ Global Operator Precedence List:
         else:
             splitfunc = lambda x: x.split(";;")
         inputlist = []
-        for original in self.splitdedent(item, splitfunc, False):
+        for original in self.splitdedent(item, splitfunc, -1):
             original = basicformat(original)
             if not iswhite(original):
                 inputlist.append(original)
