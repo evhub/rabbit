@@ -428,7 +428,7 @@ class strfunc(funcfloat):
                 tailing, e.tailing = e.tailing, True
                 oldvars = e.setvars(variables)
                 try:
-                    out = e.calc(funcstr, " \\>", -1)
+                    out = e.calc(funcstr, " \\>")
                 except TailRecursion as params:
                     if not e.returned and funcstr == params.funcstr and variables == params.variables:
                         raise ExecutionError("LoopError", "Illegal infinite recursive loop in "+funcstr)
