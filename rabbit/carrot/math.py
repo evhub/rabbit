@@ -159,6 +159,14 @@ def defint(func, start, stop, accuracy=0.0001, strict=False):
         start += step
     return out
 
+def simpson(func, start, stop):
+    """Uses Simpson's Rule To Approximate The Definite Integral."""
+    return (func(start) + 4*func((start+stop)/2.0) + func(stop)) * (stop-start)/6.0
+
+def simpson2(func, start, stop):
+    """Uses Simpson's 3/8ths Rule To Approximate The Definite Integral."""
+    return (func(start) + 3*func((2*start+stop)/3.0) + 3*func((start+2*stop)/3.0) + func(stop)) * (stop-start)/8.0
+
 def Bnum(n):
     """Calculates The nth Second Bernouli Number."""
     n = int(n)

@@ -336,27 +336,7 @@ Global Operator Precedence List:
             self.calc_and,
             self.calc_unary,
             self.calc_eq,
-            self.calc_eval
-            ]
-        self.sets = [
-            self.set_def,
-            self.set_normal
-            ]
-        self.eval_splits = [
-            ("~", True),
-            (self.lambdamarker, False),
-            ("--", True),
-            ("++", True),
-            (self.lambdamarker, False),
-            ("**", True),
-            (self.lambdamarker, False),
-            ("+", True, ["-", self.callops, 2]),
-            (self.lambdamarker, False),
-            ("%", True),
-            ("//", True),
-            ("*", True, ["/"])
-            ]
-        self.eval_funcs = [
+            self.calc_eval,
             self.eval_loop,
             self.eval_lambda,
             self.eval_remove,
@@ -370,6 +350,10 @@ Global Operator Precedence List:
             self.eval_intdiv,
             self.eval_mul,
             self.eval_call
+            ]
+        self.sets = [
+            self.set_def,
+            self.set_normal
             ]
         self.calls = [
             (self.call_parenvar, True),
@@ -1794,64 +1778,21 @@ Global Operator Precedence List:
                         return False
             return True
 
-    def calc_eval(self, expression):
+    def calc_eval(self, expression, calc_funcs):
         """Evaluates An Expression."""
-        top, ops = self.eval_split(expression)
-        value = reassemble(top, ops)
-        self.printdebug("==> "+value)
+        self.unclean()
+        self.printdebug("==> "+expression)
         self.recursion += 1
         try:
-            out = self.eval_check(self.calc_next(top, self.eval_funcs, True), True)
-            self.printdebug(self.prepare(out, False, True, True)+" <== "+value)
+            out = self.eval_check(self.calc_next(expression, calc_funcs), True)
+            self.printdebug(self.prepare(out, False, True, True)+" <== "+expression)
         finally:
             self.recursion -= 1
         return out
 
-    def eval_split(self, expression):
-        """Splits An Expression By eval_splits."""
-        params = self.eval_splits[0]
-        if len(params) == 2:
-            (op, split), args = params, None
-        elif len(params) == 3:
-            op, split, args = params
-        else:
-            raise SyntaxError("Invalid eval_split "+repr(params))
-        if split:
-            top = expression.split(op)
-        else:
-            top = [expression]
-        if args is not None:
-            top = splitinplace(top, *args)
-        ops = [op]
-        if not split and top[0].startswith(op):
-            return top, ops
-        else:
-            return self.eval_split_do(top, ops, self.eval_splits[1:])
-
-    def eval_split_do(self, top, ops, eval_splits):
-        """Performs Splitting."""
-        if eval_splits:
-            params = eval_splits.pop(0)
-            if len(params) == 2:
-                (op, split), args = params, None
-            elif len(params) == 3:
-                op, split, args = params
-            else:
-                raise SyntaxError("Invalid eval_split "+repr(params))
-            ops.append(op)
-            for x in xrange(0, len(top)):
-                if split:
-                    top[x] = top[x].split(op)
-                else:
-                    top[x] = [top[x]]
-                if args is not None:
-                    top[x] = splitinplace(top[x], *args)
-                if split or not top[x][0].startswith(op):
-                    top[x], ops = self.eval_split_do(top[x], ops, eval_splits[:])
-        return top, ops
-
-    def eval_loop(self, complist, eval_funcs):
+    def eval_loop(self, expression, eval_funcs):
         """Performs List Comprehension."""
+        complist = expression.split("~")
         if len(complist) == 1:
             return self.calc_next(complist[0], eval_funcs)
         else:
@@ -1913,14 +1854,10 @@ Global Operator Precedence List:
             args.remove(value)
             return out
 
-    def eval_lambda(self, inputlist, eval_funcs=None):
+    def eval_lambda(self, expression, eval_funcs=None):
         """Evaluates Lambdas."""
-        if islist(inputlist[0]):
-            return self.calc_next(inputlist[0], eval_funcs)
-        else:
-            self.unclean()
-            inputstring = inputlist[0]
-            out = inputstring[1:].split(self.lambdamarker, 1)
+        if expression.startswith(self.lambdamarker):
+            out = expression[1:].split(self.lambdamarker, 1)
             out[0] = self.namefind(out[0])
             if len(out) == 1:
                 return strfloat(out[0])
@@ -1928,6 +1865,10 @@ Global Operator Precedence List:
                 return strfunc(out[1])
             else:
                 return self.eval_set(out[0], out[1])
+        elif eval_funcs is None:
+            raise SyntaxError("Invalid eval_lambda call")
+        else:
+            return self.calc_next(expression, eval_funcs)
 
     def eval_set(self, original, funcstr):
         """Performs Setting."""
@@ -2002,8 +1943,9 @@ Global Operator Precedence List:
                     inopt = 1
         return strfunc(funcstr, params, personals, allargs=allargs, reqargs=reqargs, memoize=memoize, lexical=lexical)
 
-    def eval_join(self, inputlist, eval_funcs):
+    def eval_join(self, expression, eval_funcs):
         """Performs Concatenation."""
+        inputlist = expression.split("++")
         if len(inputlist) == 1:
             return self.calc_next(inputlist[0], eval_funcs)
         else:
@@ -2130,8 +2072,9 @@ Global Operator Precedence List:
                 else:
                     raise ExecutionError("TypeError", "Could not concatenate items "+strlist(items, ", ", lambda x: self.prepare(x, False, True, True)))
 
-    def eval_remove(self, inputlist, eval_funcs):
+    def eval_remove(self, expression, eval_funcs):
         """Performs Removal."""
+        inputlist = expression.split("--")
         if len(inputlist) == 1:
             return self.calc_next(inputlist[0], eval_funcs)
         else:
@@ -2226,8 +2169,9 @@ Global Operator Precedence List:
                 raise ExecutionError("TypeError", "Could not remove from item "+self.prepare(item, False, True, True))
             return item
 
-    def eval_repeat(self, inputlist, eval_funcs):
+    def eval_repeat(self, expression, eval_funcs):
         """Evaluates Repeats."""
+        inputlist = expression.split("**")
         if len(inputlist) == 1:
             return self.calc_next(inputlist[0], eval_funcs)
         else:
@@ -2278,10 +2222,11 @@ Global Operator Precedence List:
             else:
                 return out
 
-    def eval_add(self, inputlist, eval_funcs):
+    def eval_add(self, expression, eval_funcs):
         """Evaluates The Addition Part Of An Expression."""
+        inputlist = splitinplace(expression.split("+"), "-", self.callops)
         if not inputlist:
-            return matrix(0)
+            raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
         elif len(inputlist) == 1:
             return self.calc_next(inputlist[0], eval_funcs)
         else:
@@ -2297,8 +2242,9 @@ Global Operator Precedence List:
                     value = value + item
             return value
 
-    def eval_mod(self, inputlist, eval_funcs):
+    def eval_mod(self, expression, eval_funcs):
         """Evaluates The Modulus Part Of An Expression."""
+        inputlist = expression.split("%")
         if len(inputlist) == 1:
             return self.calc_next(inputlist[0], eval_funcs)
         else:
@@ -2308,8 +2254,9 @@ Global Operator Precedence List:
                 value = value % self.calc_next(inputlist[x], eval_funcs)
             return value
 
-    def eval_intdiv(self, inputlist, eval_funcs):
+    def eval_intdiv(self, expression, eval_funcs):
         """Evaluates The Floor Division Part Of An Expression."""
+        inputlist = expression.split("//")
         if len(inputlist) == 1:
             return self.calc_next(inputlist[0], eval_funcs)
         else:
@@ -2319,22 +2266,27 @@ Global Operator Precedence List:
                 value = value // self.calc_next(inputlist[x], eval_funcs)
             return value
 
-    def eval_mul(self, inputlist, eval_funcs):
+    def eval_mul(self, expression, eval_funcs):
         """Evaluates The Multiplication Part Of An Expression."""
-        if not inputlist:
-            return matrix(0)
-        elif len(inputlist) == 1:
-            return self.calc_next(inputlist[0], eval_funcs)
+        original = expression.split("*")
+        if "" in original:
+            raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
         else:
-            self.unclean()
-            value = self.calc_next(inputlist[0], eval_funcs)
-            for x in xrange(1, len(inputlist)):
-                item = self.calc_next(inputlist[x], eval_funcs)
-                if isinstance(item, reciprocal):
-                    value = item * value
-                else:
-                    value = value * item
-            return value
+            inputlist = splitinplace(original, "/")
+            if not inputlist:
+                raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+            elif len(inputlist) == 1:
+                return self.calc_next(inputlist[0], eval_funcs)
+            else:
+                self.unclean()
+                value = self.calc_next(inputlist[0], eval_funcs)
+                for x in xrange(1, len(inputlist)):
+                    item = self.calc_next(inputlist[x], eval_funcs)
+                    if isinstance(item, reciprocal):
+                        value = item * value
+                    else:
+                        value = value * item
+                return value
 
     def eval_call(self, original, top=True):
         """Evaluates A Variable."""
@@ -2437,7 +2389,7 @@ Global Operator Precedence List:
     def call_lambda(self, inputstring):
         """Wraps Lambda Evaluation."""
         if inputstring.startswith(self.lambdamarker):
-            return self.eval_lambda([inputstring])
+            return self.eval_lambda(inputstring)
 
     def call_neg(self, inputstring):
         """Evaluates Unary -."""
@@ -2654,7 +2606,7 @@ Global Operator Precedence List:
         """Evaluates Lambda Coefficients."""
         parts = inputstring.split(self.lambdamarker, 1)
         if len(parts) > 1:
-            return self.eval_call(parts[0]+self.wrap(self.eval_lambda([self.lambdamarker+parts[1]])))
+            return self.eval_call(parts[0]+self.wrap(self.eval_lambda(self.lambdamarker+parts[1])))
 
     def call_method(self, inputstring):
         """Returns Method Instances."""

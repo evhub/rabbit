@@ -335,7 +335,7 @@ def fullsplit(expression, openstr="(", closestr=")", maxlevel=float("inf"), catc
     else:
         return clean(outlist, *args, **kwargs)
 
-def splitinplace(inputlist, findstr, reserved="", domod=None):
+def splitinplace(inputlist, findstr, reserved=""):
     """Splits A List In-Place By A String."""
     outlist = []
     for x in inputlist:
@@ -359,8 +359,6 @@ def splitinplace(inputlist, findstr, reserved="", domod=None):
                     test.pop(i)
                     if i < len(test):
                         temp += 1
-                        if domod is not None:
-                            temp %= domod
                         test[i] = temp*findstr+test[i]
                 else:
                     i += 1
