@@ -1214,7 +1214,14 @@ Global Operator Precedence List:
                                 lines[x-1] = lines[x-1]+openstr
                             elif check in levels:
                                 point = levels.index(check)+1
-                                lines[x-1] += closestr*(len(levels[point:])+1)
+                                closers = closestr*(len(levels[point:])+1)
+                                newline = ""
+                                for c in lines[x-1]:
+                                    if c in self.groupers.values():
+                                        newline += closers
+                                        closers = ""
+                                    newline += c
+                                lines[x-1] = newline+closers
                                 levels = levels[:point]
                                 current = levels.pop()
                             elif current != check:
@@ -1222,7 +1229,14 @@ Global Operator Precedence List:
                             new.append(lines[x-1])
                         else:
                             current = check
-                    new.append(lines[-1]+closestr*(len(levels)-1))
+                    closers = closestr*(len(levels)-1)
+                    newline = ""
+                    for c in lines[-1]:
+                        if c in self.groupers.values():
+                            newline += closers
+                            closers = ""
+                        newline += c
+                    new.append(newline+closers)
                     out.append("\n".join(new))
                 else:
                     out.append(inputlist[x])
