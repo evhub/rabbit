@@ -1344,10 +1344,11 @@ Global Operator Precedence List:
                     self.clean_end(cleaned)
                 return out
 
-    def unclean(self):
+    def unclean(self, all_clean=False):
         """Sets clean."""
         self.clean = False
-        self.all_clean = False
+        if all_clean is not None:
+            self.all_clean = all_clean
 
     def clean_begin(self, new_clean=False, new_all_clean=False):
         """Starts A Clean Block."""
@@ -1780,7 +1781,7 @@ Global Operator Precedence List:
 
     def calc_eval(self, expression, calc_funcs):
         """Evaluates An Expression."""
-        self.unclean()
+        self.unclean(None)
         self.printdebug("==> "+expression)
         self.recursion += 1
         try:
