@@ -191,7 +191,8 @@ Global Operator Precedence List:
             args[6],
             args[7],
             self.devariables(args[8]),
-            self.delist(args[9])
+            self.delist(args[9]),
+            args[10]
             ),
         "classcalc": lambda self, args: classcalc(
             self.devariables(args[0]),

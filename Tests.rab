@@ -493,6 +493,7 @@ passert:: retrieve([1,2,3], 1) ?= 2
 passert:: retriever([1,2,3])([1]) ?= 2
 passert:: caller(\x\x)([0]) ?= 0
 passert:: hash("abc") ?= hash("abc")
+passert:: teq(1)(1)+1 ?= (teq+1)(1)(1)
 
 # Import Tests:
 math = import:: math

@@ -851,12 +851,16 @@ class usefunc(funcfloat):
     """Allows A Function To Be Used As A Variable."""
     allownone = True
 
-    def __init__(self, func, funcstr=None, variables=None, extras=None, overflow=True, reqargs=None, evalinclude=False, memoize=None, memo=None, curried=None):
+    def __init__(self, func, name=None, variables=None, extras=None, overflow=True, reqargs=None, evalinclude=False, memoize=None, memo=None, curried=None, funcstr=None):
         """Creates A Callable Function."""
-        if funcstr:
-            self.funcstr = str(funcstr)
+        if name is None:
+            self.name = e.unusedarg()
         else:
-            self.funcstr = e.unusedarg()
+            self.name = str(name)
+        if funcstr is None:
+            self.funcstr = self.name
+        else:
+            self.funcstr = str(funcstr)
         self.overflow = bool(overflow)
         if variables is None:
             self.variables = []
@@ -888,11 +892,11 @@ class usefunc(funcfloat):
         if ismethod(self.base_func):
             return ("find", self.funcstr)
         else:
-            return ("usefunc", self.base_func, self.funcstr, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, getstates(self.memo), liststate(self.curried))
+            return ("usefunc", self.base_func, self.name, self.variables, self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, getstates(self.memo), liststate(self.curried), self.funcstr)
 
     def copy(self):
         """Copies The Function."""
-        return usefunc(self.base_func, self.funcstr, self.variables[:], self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, self.memo, self.curried[:])
+        return usefunc(self.base_func, self.name, self.variables[:], self.extras, self.overflow, self.reqargs, self.evalinclude, self.memoize, self.memo, self.curried[:], self.funcstr)
 
     def getextras(self):
         """Retrieves Extras."""
@@ -912,7 +916,7 @@ class usefunc(funcfloat):
         """Calls The Function."""
         params = varproc(params)
         if params is None:
-            return strfunc(self.funcstr+":"+strlist(self.variables,":"), self.variables)
+            return strfunc("("+self.funcstr+"):"+strlist(self.variables,":"), self.variables)
         elif not params and self.reqargs > 0:
             raise ExecutionError("ArgumentError", "No arguments were passed to a function that requires arguments")
         elif len(params) < self.reqargs:
@@ -933,38 +937,38 @@ class usefunc(funcfloat):
 
 class unifunc(funcfloat):
     """Universalizes Function Calls."""
-    def __init__(self, precall, funcstr=None):
+    def __init__(self, precall, name=None, funcstr=None):
         """Constructs The Universalizer."""
-        if funcstr:
-            self.funcstr = str(funcstr)
+        if name is None:
+            self.name = e.unusedarg()
         else:
-            self.funcstr = e.unusedarg()
+            self.name = str(name)
+        if funcstr is None:
+            self.funcstr = self.name
+        else:
+            self.funcstr = str(funcstr)
         self.store = []
         self.precall = precall
+        self.variables = [e.varname]
 
     def copy(self):
         """Copies The Universalizer Function."""
-        return unifunc(self.precall, self.funcstr)
+        return unifunc(self.precall, self.name, self.funcstr)
 
     def call(self, args):
         """Performs A Universalized Function Call."""
         args = varproc(args)
         if args is None:
-            otherarg = e.unusedarg()
-            return strfunc(self.funcstr+":"+otherarg, [otherarg])
-        elif islist(args):
+            return strfunc("("+self.funcstr+"):"+self.variables[0], self.variables)
+        else:
+            e.overflow = args[1:]
             x = args[0]
-            if len(args) > 1:
-                e.overflow = []
-                for x in xrange(1, len(args)):
-                    e.overflow.append(args[x])
-        x = getint(x)
-        try:
-            self.store[x]
-        except IndexError:
-            while len(self.store) <= x:
-                self.store.append(self.precall())
-        return self.store[x]
+            try:
+                self.store[x]
+            except IndexError:
+                while len(self.store) <= x:
+                    self.store.append(self.precall())
+            return self.store[x]
 
 class derivbase(object):
     """Holds Methods Used In Derivative Functions."""

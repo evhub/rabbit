@@ -1490,11 +1490,11 @@ class evalfuncs(object):
                     elif "`" in name:
                         raise ExecutionError("ValueError", "Cannot install files with a backtick in them")
                     elif hascall(impclass):
-                        value = funcfloat(e.getcall(impclass), funcname)
+                        value = funcfloat(e.getcall(impclass), funcstr=funcname)
                     elif hasattr(impclass, "precall"):
-                        value = usefunc(impclass.precall, funcname)
+                        value = usefunc(impclass.precall, funcstr=funcname)
                     elif hasattr(impclass, "unicall"):
-                        value = unifunc(impclass.unicall, funcname)
+                        value = unifunc(impclass.unicall, funcstr=funcname)
                     else:
                         value = evalwrap(impclass, funcname)
                 elif "`" in name:
@@ -1702,7 +1702,7 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to caller")
         else:
             e.overflow = variables[1:]
-            return evalwrap(e.getcall(variables[0]), "Meta.caller:("+e.prepare(variables[0], False, True)+")")
+            return funcfloat(e.getcall(variables[0]), funcstr="Meta.caller:("+e.prepare(variables[0], False, True)+")")
 
     def getitemcallcall(self, variables):
         """Wraps getcall."""
@@ -1710,7 +1710,7 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to retriever")
         else:
             e.overflow = variables[1:]
-            return evalwrap(e.getitemcall(variables[0]), "Meta.retriever:("+e.prepare(variables[0], False, True)+")")
+            return funcfloat(e.getitemcall(variables[0]), funcstr="Meta.retriever:("+e.prepare(variables[0], False, True)+")")
 
     def inputcall(self, variables):
         """Wraps raw_input."""
