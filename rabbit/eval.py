@@ -56,7 +56,7 @@ def _or(x, y):
 
 def _xor(x, y):
     """Performs xor."""
-    return (x and not y) or (not x and y)
+    return (not y and x) or (not x and y)
 
 def matrixconstructor(self, args):
     """Reconstructs A Matrix."""
@@ -2375,10 +2375,7 @@ Global Operator Precedence List:
                 if isinstance(value, bool):
                     return value
                 elif isinstance(value, complex):
-                    if value.imag == 0.0:
-                        return float(value.real)
-                    else:
-                        return value
+                    return value
                 elif value >= 0 or value <= 0:
                     return float(value)
                 else:
@@ -2861,6 +2858,8 @@ Global Operator Precedence List:
             return "complex"
         elif isinstance(item, bool):
             return "bool"
+        elif isint(item):
+            return "int"
         elif isnum(item):
             return "num"
         else:
