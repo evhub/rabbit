@@ -229,6 +229,14 @@ class evalfuncs(object):
             return variables[0].toclass()
         elif isinstance(variables[0], classcalc):
             return variables[0]
+        elif isinstance(variables[0], dictionary):
+            outvars = {}
+            for k,v in variables[0].a.items():
+                if isinstance(k, strcalc):
+                    outvars[str(k)] = v
+                else:
+                    raise ExecutionError("ValueError", "Class dictionaries must have strings as their keys")
+            return classcalc(outvars)
         elif isinstance(variables[0], strcalc):
             original = str(variables[0])
             out = classcalc()
@@ -385,7 +393,7 @@ class evalfuncs(object):
         elif len(variables) == 1 and isinstance(variables[0], matrix):
             return variables[0].det()
         else:
-            value = 1.0
+            value = 1
             for v in variables:
                 value *= v
             return value
@@ -410,7 +418,7 @@ class evalfuncs(object):
 
     def sumcall(self, variables):
         """Finds A Sum."""
-        value = 0.0
+        value = 0
         for x in variables:
             if ismatrix(x):
                 value += self.sumcall(getmatrix(x).items())
@@ -420,7 +428,7 @@ class evalfuncs(object):
 
     def prodcall(self, variables):
         """Finds A Product."""
-        value = 1.0
+        value = 1
         for x in variables:
             if ismatrix(x):
                 value *= self.prodcall(getmatrix(x).getitems())
@@ -502,19 +510,17 @@ class evalfuncs(object):
 
     def lencall(self, variables):
         """Finds A Length."""
-        tot = 0.0
+        tot = 0
         for x in variables:
-            try:
-                x.getlen
-            except AttributeError:
+            if hasattr(x, "getlen"):
+                tot += x.getlen()
+            else:
                 try:
                     test = len(x)
                 except:
-                    tot += 1.0
+                    tot += 1
                 else:
-                    tot += float(test)
-            else:
-                tot += float(x.getlen())
+                    tot += test
         return tot
 
     def rangecall(self, variables):
@@ -857,19 +863,19 @@ class evalfuncs(object):
         """Performs abs."""
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to abs")
-        elif len(variables) == 1:
-            return abs(variables[0])
         else:
-            return self.abscall([diagmatrixlist(variables)])
+            e.overflow = variables[1:]
+            return abs(variables[0])
 
     def datacall(self, variables):
         """Performs data."""
         if not variables:
             return data()
-        elif len(variables) == 1 and isinstance(variables[0], data):
-            return variables[0]
         elif len(variables) == 1:
-            return datamatrix(variables[0])
+            if isinstance(variables[0], data):
+                return variables[0]
+            else:
+                return datamatrix(variables[0])
         elif len(variables) == 2 and isinstance(variables[0], data) and isinstance(variables[1], data):
             return multidata(variables[0], variables[1])
         elif len(variables) == 2 and ismatrix(variables[0]) and ismatrix(variables[1]):
@@ -1335,11 +1341,21 @@ class evalfuncs(object):
         """Creates A Pair."""
         if not variables:
             return pair(matrix(0), matrix(0))
-        elif len(variables) == 1:
-            return pair(variables[0], matrix(0))
-        else:
+        elif len(variables) > 1:
             e.overflow = variables[2:]
             return pair(variables[0], variables[1])
+        elif isinstance(variables[0], dictionary):
+            if not variables[0].a:
+                return pair(matrix(0), matrix(0))
+            elif len(variables[0].a) == 1:
+                k = variables[0].keys()[0]
+                return pair(key, variables[0].a[key])
+            else:
+                raise ExecutionError("ValueError", "Only dictionaries of length <= 1 can be converted to pairs")
+        elif isinstance(variables[0], pair):
+            return variables[0]
+        else:
+            return pair(variables[0], matrix(0))
 
     def dictcall(self, variables):
         """Creates A Dictionary."""
@@ -1348,6 +1364,10 @@ class evalfuncs(object):
         elif len(variables) == 1:
             if isinstance(variables[0], dictionary):
                 return variables[0]
+            elif isinstance(variables[0], pair):
+                return dictionary({variables[0].k:variables[0].v})
+            elif isinstance(variables[0], classcalc):
+                return e.frompython(variables[0].getvars())
             else:
                 raise TypeError("Received non-dictionary object "+e.prepare(variables[0], False, True, True))
         else:

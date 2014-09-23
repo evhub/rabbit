@@ -2529,6 +2529,16 @@ class dictionary(pair):
         else:
             raise ExecutionError("TypeError", "Dictionaries can only be compared with other dictionaries")
 
+    @rabbit
+    def keys(self):
+        """Gets The Keys."""
+        return list(self.a.keys())
+
+    @rabbit
+    def values(self):
+        """Gets The Values."""
+        return list(self.a.values())
+
 class bracket(evalobject):
     """A To-Be-Calculated Row."""
     def __init__(self, items):
