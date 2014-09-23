@@ -496,7 +496,7 @@ passert:: hash("abc") ?= hash("abc")
 passert:: teq(1)(1)+1 ?= (teq+1)(1)(1)
 passert:: cons(1, [2,3]) ?= [1,2,3]
 passert:: 2 eq 2
-passert:: 2 lt 3
+passert:: lt:2:3
 passert:: len(dict(env()).keys())
 
 # Import Tests:
