@@ -719,9 +719,9 @@ class evalfuncs(object):
             else:
                 out = variables[0].items()
                 out.sort()
-                return matrixitems(out)
+                return rowmatrixlist(out)
         else:
-            return self.sortcall([self.mergecall(variables)])
+            return self.sortcall([diagmatrixlist(variables)])
 
     def reversecall(self, variables):
         """Performs reverse."""
