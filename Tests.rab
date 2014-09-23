@@ -10,7 +10,7 @@ assert:: iserr((try::(passert::0)):1)
 # Includes:
 passert:: include Meta
 passert:: unused(env()) ?= class<<x="don't touch me">>
-passert:: include(Math, Stats, Unicode)
+passert:: include(Math, Stats, Unicode, Ops)
 def:: sin := memoize(sin)
 def:: cos := memoize(cos)
 def:: tan := memoize(tan)
@@ -494,6 +494,9 @@ passert:: retriever([1,2,3])(1) ?= 2
 passert:: caller(\x\x)[0] ?= [0]
 passert:: hash("abc") ?= hash("abc")
 passert:: teq(1)(1)+1 ?= (teq+1)(1)(1)
+passert:: cons(1, [2,3]) ?= [1,2,3]
+passert:: 2 eq 2
+passert:: 2 lt 3
 
 # Import Tests:
 math = import:: math

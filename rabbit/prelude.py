@@ -1798,3 +1798,15 @@ class evalfuncs(object):
                 return evalwrap(type(variables[0].obj), "Meta.super:("+variables[0].ref+")")
             else:
                 raise ExecutionError("ValueError", "Can only get the super of a wrap")
+
+    def conscall(self, variables):
+        """Performs cons."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to cons")
+        else:
+            e.overflow = variables[2:]
+            cont = getmatrix(variables[1])
+            if cont.onlydiag():
+                return diagmatrixlist([variables[0]]+cont.getdiag())
+            else:
+                return rowmatrixlist([variables[0]]+cont.items())

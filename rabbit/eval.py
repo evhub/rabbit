@@ -19,6 +19,7 @@
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
 from .prelude import *
+import operator
 
 global e
 try:
@@ -402,6 +403,7 @@ Global Operator Precedence List:
             "while":funcfloat(self.funcs.whilecall, "while", reqargs=1),
             "zip":funcfloat(self.funcs.zipcall, "zip", reqargs=1),
             "zipwith":funcfloat(self.funcs.zipwithcall, "zipwith", reqargs=2),
+            "cons":funcfloat(self.funcs.conscall, "cons", reqargs=2),
             "row":funcfloat(self.funcs.rowcall, "row"),
             "list":funcfloat(self.funcs.listcall, "list"),
             "matrix":funcfloat(self.funcs.matrixcall, "matrix"),
@@ -468,6 +470,9 @@ Global Operator Precedence List:
             "open":funcfloat(self.funcs.opencall, "open", reqargs=1),
             "chr":funcfloat(self.funcs.chrcall, "chr", reqargs=1),
             "ord":funcfloat(self.funcs.ordcall, "ord", reqargs=1),
+            "bool":usefunc(bool, "bool", ["x"]),
+            "pow":usefunc(pow, "pow", ["y", "x", "m"]),
+            "hash":usefunc(hash, "hash", ["x"]),
             "Meta":classcalc({
                 "var":funcfloat(self.funcs.getvarcall, "var", reqargs=1),
                 "val":funcfloat(self.funcs.getvalcall, "val", reqargs=1),
@@ -493,11 +498,9 @@ Global Operator Precedence List:
                 "get":funcfloat(self.funcs.getattrcall, "get", reqargs=2),
                 "has":funcfloat(self.funcs.hasattrcall, "has", reqargs=2),
                 "memoize":funcfloat(self.funcs.memoizecall, "memoize"),
-                "hash":usefunc(hash, "hash", ["x"]),
                 "super":funcfloat(self.funcs.supercall, "super", reqargs=1)
                 }, name="Meta"),
             "Math":classcalc({
-                "pow":usefunc(pow, "pow", ["y", "x", "m"]),
                 "frac":funcfloat(self.funcs.fractioncall, "frac"),
                 "simp":funcfloat(self.funcs.simpcall, "simp"),
                 "det":funcfloat(self.funcs.detcall, "det", reqargs=1),
@@ -547,6 +550,24 @@ Global Operator Precedence List:
                 "chisqP":usefunc(chisqP, "chisqP", ["x", "df"]),
                 "FP":usefunc(FP, "FP", ["x", "dfT", "dfE"])
                 }, name="Stats"),
+            "Ops":classcalc({
+                "and":usefunc(lambda x,y: x and y, "and", ["x", "y"]),
+                "or":usefunc(lambda x,y: x or y, "or", ["x", "y"]),
+                "xor":usefunc(lambda x,y: (x and not y) or (not x and y), "xor", ["x", "y"]),
+                "not":usefunc(operator.not_, "not", ["x"]),
+                "add":usefunc(operator.add, "add", ["x", "y"]),
+                "sub":usefunc(operator.sub, "sub", ["x", "y"]),
+                "mul":usefunc(operator.mul, "mul", ["x", "y"]),
+                "div":usefunc(operator.truediv, "div", ["x", "y"]),
+                "mod":usefunc(operator.mod, "mod", ["x", "y"]),
+                "floordiv":usefunc(operator.floordiv, "floordiv", ["x", "y"]),
+                "eq":usefunc(operator.eq, "eq", ["x", "y"]),
+                "ne":usefunc(operator.ne, "ne", ["x", "y"]),
+                "lt":usefunc(operator.lt, "lt", ["x", "y"]),
+                "le":usefunc(operator.le, "le", ["x", "y"]),
+                "gt":usefunc(operator.gt, "gt", ["x", "y"]),
+                "ge":usefunc(operator.ge, "ge", ["x", "y"])
+                }, name="Ops"),
             "none":matrix(0),
             "true":True,
             "false":False,
@@ -554,11 +575,6 @@ Global Operator Precedence List:
             funcfloat.allargs : matrix(0)
             }
         self.variables.update({
-            "and":strfunc("x&y", ["x", "y"], name="and", lexical=False),
-            "or":strfunc("x|y", ["x", "y"], name="or", lexical=False),
-            "xor":strfunc("(x|y)&!(x&y)", ["x", "y"], name="xor", lexical=False),
-            "not":strfunc("!x", ["x"], name="not", lexical=False),
-            "bool":strfunc("?x", ["x"], name="bool", lexical=False),
             "prop":strfunc("class\xab__value__(^self,getter:getter)=getter()\xbb()", ["getter"], name="prop"),
             "Unicode":classcalc({
                 "__include__" : strfunc("""self.includes$self.aliases~~Meta.alias""", ["self"], name="__include__"),
