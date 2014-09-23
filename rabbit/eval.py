@@ -46,6 +46,18 @@ class Evaluate(BaseException):
         self.arg = arg
         self.funcs = funcs
 
+def _and(x, y):
+    """Performs and."""
+    return x and y
+
+def _or(x, y):
+    """Performs or."""
+    return x or y
+
+def _xor(x, y):
+    """Performs xor."""
+    return (x and not y) or (not x and y)
+
 def matrixconstructor(self, args):
     """Reconstructs A Matrix."""
     value = matrix(args[1], args[2], converter=args[3], fake=args[4])
@@ -551,9 +563,9 @@ Global Operator Precedence List:
                 "FP":usefunc(FP, "FP", ["x", "dfT", "dfE"])
                 }, name="Stats"),
             "Ops":classcalc({
-                "and":usefunc(lambda x,y: x and y, "and", ["x", "y"]),
-                "or":usefunc(lambda x,y: x or y, "or", ["x", "y"]),
-                "xor":usefunc(lambda x,y: (x and not y) or (not x and y), "xor", ["x", "y"]),
+                "and":usefunc(_and, "and", ["x", "y"]),
+                "or":usefunc(_or, "or", ["x", "y"]),
+                "xor":usefunc(_xor, "xor", ["x", "y"]),
                 "not":usefunc(operator.not_, "not", ["x"]),
                 "add":usefunc(operator.add, "add", ["x", "y"]),
                 "sub":usefunc(operator.sub, "sub", ["x", "y"]),
