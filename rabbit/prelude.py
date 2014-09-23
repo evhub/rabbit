@@ -1822,7 +1822,7 @@ class evalfuncs(object):
     def conscall(self, variables):
         """Performs cons."""
         if len(variables) < 2:
-            raise ExecutionError("ArgumentError", "Not enough arguments to cons")
+            raise ExecutionError("ArgumentError", "Not enough arguments to prepend")
         else:
             e.overflow = variables[2:]
             cont = getmatrix(variables[1])
@@ -1830,3 +1830,15 @@ class evalfuncs(object):
                 return diagmatrixlist([variables[0]]+cont.getdiag())
             else:
                 return rowmatrixlist([variables[0]]+cont.items())
+
+    def appendcall(self, variables):
+        """Performs append."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to prepend")
+        else:
+            e.overflow = variables[2:]
+            cont = getmatrix(variables[1])
+            if cont.onlydiag():
+                return diagmatrixlist(cont.getdiag()+[variables[0]])
+            else:
+                return rowmatrixlist(cont.items()+[variables[0]])
