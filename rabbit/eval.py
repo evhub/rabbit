@@ -471,7 +471,6 @@ Global Operator Precedence List:
             "bitxor":funcfloat(self.funcs.bitxorcall, "bitxor", reqargs=2),
             "rshift":funcfloat(self.funcs.rshiftcall, "rshift", reqargs=2),
             "lshift":funcfloat(self.funcs.lshiftcall, "lshift", reqargs=2),
-            "divmod":funcfloat(self.funcs.divmodcall, "divmod", reqargs=2),
             "union":funcfloat(self.funcs.unioncall, "union", reqargs=2),
             "intersect":funcfloat(self.funcs.intersectcall, "intersect", reqargs=2),
             "rand":funcfloat(self.funcs.randcall, "rand", reqargs=1),
@@ -484,7 +483,7 @@ Global Operator Precedence List:
             "chr":funcfloat(self.funcs.chrcall, "chr", reqargs=1),
             "ord":funcfloat(self.funcs.ordcall, "ord", reqargs=1),
             "bool":usefunc(bool, "bool", ["x"]),
-            "pow":usefunc(pow, "pow", ["y", "x", "m"]),
+            "pow":usefunc(pow, "pow", ["y", "x", "m"], reqargs=2),
             "hash":usefunc(hash, "hash", ["x"]),
             "Meta":classcalc({
                 "var":funcfloat(self.funcs.getvarcall, "var", reqargs=1),
@@ -514,9 +513,11 @@ Global Operator Precedence List:
                 "super":funcfloat(self.funcs.supercall, "super", reqargs=1)
                 }, name="Meta"),
             "Math":classcalc({
+                "divmod":funcfloat(self.funcs.divmodcall, "divmod", reqargs=2),
                 "frac":funcfloat(self.funcs.fractioncall, "frac"),
-                "simp":funcfloat(self.funcs.simpcall, "simp"),
+                "simp":funcfloat(self.funcs.simpcall, "simp", reqargs=1),
                 "det":funcfloat(self.funcs.detcall, "det", reqargs=1),
+                "dim":funcfloat(self.funcs.dimcall, "dim", reqargs=1),
                 "floor":usefunc(math.floor, "floor", ["x"]),
                 "ceil":usefunc(math.ceil, "ceil", ["x"]),
                 "log":usefunc(math.log10, "log", ["x"]),
@@ -548,7 +549,7 @@ Global Operator Precedence List:
             "Stats":classcalc({
                 "data":funcfloat(self.funcs.datacall, "data"),
                 "gamma":usefunc(gamma, "gamma", ["x"]),
-                "normdist":usefunc(normdist, "normdist", ["x", "mean", "stdev"]),
+                "normdist":usefunc(normdist, "normdist", ["x", "mean", "stdev"], reqargs=1),
                 "binomP":usefunc(binomP, "binomP", ["n", "p", "x"]),
                 "poissonP":usefunc(poissonP, "poissonP", ["lambda", "x"]),
                 "hypgeoP":usefunc(hypgeoP, "hypgeoP", ["x", "n", "K", "N"]),
@@ -558,7 +559,7 @@ Global Operator Precedence List:
                 "chisqeq":usefunc(chisqeq, "chisqeq", ["df"]),
                 "Fdist":usefunc(Fdist, "Fdist", ["x", "dfT", "dfE"]),
                 "Feq":usefunc(Feq, "Feq", ["dfT", "dfE"]),
-                "normP":usefunc(normP, "normP", ["x", "y", "mean", "stdev"]),
+                "normP":usefunc(normP, "normP", ["x", "y", "mean", "stdev"], reqargs=2),
                 "tP":usefunc(tP, "tP", ["x", "y", "df"]),
                 "chisqP":usefunc(chisqP, "chisqP", ["x", "df"]),
                 "FP":usefunc(FP, "FP", ["x", "dfT", "dfE"])

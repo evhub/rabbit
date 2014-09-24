@@ -568,89 +568,118 @@ class matrix(mctobject):
             auglen = int(auglen)
         return self.trans().a[-auglen:]
 
-    def solve(self, debug=False):
+    def solve(self, debug=False, debugfunc=print):
         """Solves The Matrix As An Augmented Matrix."""
         for y,x in self.coords():
             if x == y:
                 if debug:
-                    print("Scale Row "+str(y)+" By 1/"+str(self.retrieve(y,x)))
+                    debugfunc("Scale Row "+str(y)+" By 1/"+str(self.retrieve(y,x)))
                 self.scalerow(y, 1.0/self.retrieve(y,x))
                 if debug > 1:
-                    print(self)
+                    debugfunc(self)
             elif x < y:
                 if debug:
-                    print("Add To Row "+str(y)+" Row "+str(x)+" Scaled By "+str(-1.0*self.retrieve(y,x)))
+                    debugfunc("Add To Row "+str(y)+" Row "+str(x)+" Scaled By "+str(-1.0*self.retrieve(y,x)))
                 self.addrow(y, self.scaledrow(x, -1.0*self.retrieve(y,x)))
                 if debug > 1:
-                    print(self)
+                    debugfunc(self)
 
-    def solvetop(self, debug=False):
+    solvetypes = {
+        "solve": lambda out, *args, **kwargs: out.solve(*args, **kwargs),
+        "solve top": lambda out, *args, **kwargs: out.solvetop(*args, **kwargs),
+        "solve full": lambda out, *args, **kwargs: out.solvefull(*args, **kwargs),
+        "keep solving": lambda out, *args, **kwargs: out.keepsolving(*args, **kwargs),
+        "keep solving top": lambda out, *args, **kwargs: out.keepsolvingtop(*args, **kwargs),
+        "keep solving full": lambda out, *args, **kwargs: out.keepsolvingfull(*args, **kwargs)
+        }
+
+    @rabbit
+    def solved(self, solvetype="solve", debug=False, debugfunc=print):
+        """Gets A Solved Matrix."""
+        if debugfunc is print:
+            e.setreturned()
+        out = getcopy(self)
+        if solvetype in self.solvetypes:
+            self.solvetypes[solvetype](out, debug, debugfunc)
+        else:
+            raise ExecutionError("KeyError", "Unrecognized solve type "+solvetype)
+        return out
+
+    def solvetop(self, debug=False, debugfunc=print):
         """Solves The Top Of The Matrix As An Augmented Matrix."""
         for y,x in reversed(self.coords()):
             if x == y:
                 if debug:
-                    print("Scale Row "+str(y)+" By 1/"+str(self.retrieve(y,x)))
+                    debugfunc("Scale Row "+str(y)+" By 1/"+str(self.retrieve(y,x)))
                 self.scalerow(y, 1.0/self.retrieve(y,x))
                 if debug > 1:
-                    print(self)
+                    debugfunc(self)
             elif x < self.y and x > y:
                 if debug:
-                    print("Add To Row "+str(y)+" Row "+str(x)+" Scaled By "+str(-1.0*self.retrieve(y,x)))
+                    debugfunc("Add To Row "+str(y)+" Row "+str(x)+" Scaled By "+str(-1.0*self.retrieve(y,x)))
                 self.addrow(y, self.scaledrow(x, -1.0*self.retrieve(y,x)))
                 if debug > 1:
-                    print(self)
+                    debugfunc(self)
 
-    def solvefull(self, debug=False):
+    def solvefull(self, debug=False, debugfunc=print):
         """Fully Solves The Matrix As An Augmented Matrix."""
-        self.solvetop(debug)
-        self.solve(debug)
+        self.solvetop(debug, debugfunc)
+        self.solve(debug, debugfunc)
 
     def mixrows(self, func=lambda a: random().scramble(a)):
         """Scrambles The Rows Using A Function."""
         self.a = func(self.a)
 
-    def keepsolving(self, check=True, maxtries=float("inf"), debug=False):
+    @rabbit
+    def mixedrows(self, func=lambda a: random().scramble(a)):
+        """Gets A Scrambled Matrix."""
+        out = getcopy(self)
+        out.mixrows(func)
+        return out
+
+    def keepsolving(self, check=True, maxtries=float("inf"), debug=False, debugfunc=print):
         """Recursively Solves The Matrix As An Augmented Matrix."""
         if check and self.det() == 0.0:
             raise ValueError("Matrix cannot be solved on bottom because of 0 determinant")
         elif maxtries > 0:
             try:
-                self.solve(debug)
+                self.solve(debug, debugfunc)
             except ZeroDivisionError:
                 self.mixrows()
                 if debug:
-                    print("Mix Rows")
-                    print(self)
-                self.keepsolving(False, maxtries-1.0, debug)
+                    debugfunc("Mix Rows")
+                    debugfunc(self)
+                self.keepsolving(False, maxtries-1.0, debug, debugfunc)
 
-    def keepsolvingtop(self, check=True, maxtries=float("inf"), debug=False):
+    def keepsolvingtop(self, check=True, maxtries=float("inf"), debug=False, debugfunc=print):
         """Recursively Solves The Top Of The Matrix As An Augmented Matrix."""
         if check and self.det() == 0.0:
             raise ValueError("Matrix cannot be solved on top because of 0 determinant")
         elif maxtries > 0:
             try:
-                self.solvetop(debug)
+                self.solvetop(debug, debugfunc)
             except ZeroDivisionError:
                 self.mixrows()
                 if debug:
-                    print("Mix Rows")
-                    print(self)
-                self.keepsolvingtop(False, maxtries-1.0, debug)
+                    debugfunc("Mix Rows")
+                    debugfunc(self)
+                self.keepsolvingtop(False, maxtries-1.0, debug, debugfunc)
 
-    def keepsolvingfull(self, check=True, maxtries=float("inf"), debug=False):
+    def keepsolvingfull(self, check=True, maxtries=float("inf"), debug=False, debugfunc=print):
         """Recursively Fully Solves The Matrix As An Augmented Matrix."""
         if check and self.det() == 0.0:
             raise ValueError("Matrix cannot be solved because of 0 determinant")
         elif maxtries > 0:
             try:
-                self.solvefull(debug)
+                self.solvefull(debug, debugfunc)
             except ZeroDivisionError:
                 self.mixrows()
                 if debug:
-                    print("Mix Rows")
-                    print(self)
-                self.keepsolvingfull(False, maxtries-1.0, debug)
+                    debugfunc("Mix Rows")
+                    debugfunc(self)
+                self.keepsolvingfull(False, maxtries-1.0, debug, debugfunc)
 
+    @rabbit
     def solutions(self):
         """Retrieves The Solutions For A Solved Augmented Matrix."""
         answers = []
@@ -664,6 +693,7 @@ class matrix(mctobject):
         answers.reverse()
         return answers
 
+    @rabbit
     def topsolutions(self):
         """Retrieves The Solutions For A Top Solved Augmented Matrix."""
         answers = []
@@ -679,6 +709,13 @@ class matrix(mctobject):
     def swaprows(self, ya, yb):
         """Swaps Two Rows."""
         self.a[ya], self.a[yb] = self[yb], self[ya]
+
+    @rabbit
+    def swappedrows(self, ya, yb):
+        """Gets A Matrix With The Swap Done."""
+        out = getcopy(self)
+        out.swaprows(ya, yb)
+        return out
 
     @rabbit
     def lendiag(self):

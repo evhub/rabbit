@@ -398,6 +398,14 @@ class evalfuncs(object):
                 value *= v
             return value
 
+    def dimcall(self, variables):
+        """Returns The Dimensions Of The Matrix."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to dim")
+        else:
+            e.overflow = variables[1:]
+            return diagmatrixlist(list(getmatrix(variables[0]).dimensions()))
+
     def anycall(self, variables):
         """Wraps any."""
         if not variables:
