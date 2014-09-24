@@ -78,9 +78,13 @@ class matrix(mctobject):
     @rabbit
     def new(self, y=None, x=None, fake=None):
         """Creates A New Matrix With The Same Basic Attributes."""
+        if y is None:
+            y = self.y
+        if x is None:
+            x = self.x
         if fake is None:
             fake = self.onlydiag()
-        return matrix(y or self.y, x or self.x, converter=self.converter, fake=fake)
+        return matrix(y, x, converter=self.converter, fake=fake)
 
     def copy(self, fake=None):
         """Creates A Copy Of The Matrix."""
@@ -783,12 +787,10 @@ class matrix(mctobject):
         else:
             raise IndexError("Matrix Chi Squared invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
 
-    @rabbit
     def tomatrix(self):
         """Returns self."""
         return self
 
-    @rabbit
     def evaltype(item):
         """Calculates The Type."""
         if item.onlydiag():
@@ -797,6 +799,11 @@ class matrix(mctobject):
             return "row"
         else:
             return "matrix"
+
+    @rabbit
+    def dimensions(self):
+        """Gets The Dimensions."""
+        return (self.y, self.x)
 
     @rabbit
     def __eq__(self, other):

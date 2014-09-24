@@ -664,7 +664,6 @@ class data(mctobject):
         """Finds The Degrees Of Freedom."""
         return len(self)-1.0
 
-    @rabbit
     def tomatrix(self):
         """Creates A Matrix Out Of The Data."""
         return diagmatrixlist(self.items())
@@ -1018,7 +1017,6 @@ class multidata(mctobject):
         """Finds The Error Degrees Of Freedom."""
         return self.x.df()+self.y.df()
 
-    @rabbit
     def tomatrix(self):
         """Creates A Matrix Out Of The Data."""
         out = matrix(len(self), 2)

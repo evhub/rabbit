@@ -2469,7 +2469,6 @@ class dictionary(pair):
         """Performs in."""
         return other in self.a
 
-    @rabbit
     def tomatrix(self):
         """Converts To A Matrix."""
         items = list(self.a.items())

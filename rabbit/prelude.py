@@ -468,21 +468,19 @@ class evalfuncs(object):
             else:
                 keep = False
             if keep:
-                for i in xrange(1, len(variables)):
-                    if variables[i].onlydiag():
-                        variables[0].newrow(variables[i].getitems())
-                    else:
-                        for row in variables[i].a:
-                            variables[0].newrow(row)
-                return variables[0]
+                out = variables[0].new(0, fake=False)
+                for i in xrange(0, len(variables)):
+                    for row in variables[i].a:
+                        out.newrow(list(row))
+                return out
             else:
                 out = []
                 for i in variables:
                     if ismatrix(i):
-                        out += getmatrix(i).getitems()
+                        out += getmatrix(i).items()
                     else:
                         out.append(i)
-                return diagmatrixlist(out)
+                return rowmatrixlist(out)
 
     def findcall(self, variables):
         """Finds Equivalencies."""
