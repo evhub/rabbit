@@ -108,7 +108,7 @@ class evalfuncs(object):
             for arg in variables:
                 last = None
                 while isinstance(arg, instancecalc):
-                    if last is None or not self.iseq(last, arg):
+                    if last is None or not e.iseq(last, arg):
                         last = arg
                         arg = arg.include()
                     else:
@@ -305,7 +305,7 @@ class evalfuncs(object):
         if 0 < variables[0] and variables[0] < len(e.parens):
             return codestr(e.prepare(e.getparen(variables[0]), False, True))
         else:
-            raise ExecutionError("KeyError", "Could not find "+self.parenchar+str(variables[0])+self.parenchar+" in parens")
+            raise ExecutionError("KeyError", "Could not find "+e.parenchar+str(variables[0])+e.parenchar+" in parens")
 
     def getvarcall(self, variables):
         """Gets The Value Of A Variable."""
@@ -736,7 +736,7 @@ class evalfuncs(object):
                 out.reverse()
                 return matrixitems(out, variables[0].y)
         else:
-            return self.reversecall([self.connectcall(variables)])
+            return self.reversecall([diagmatrixlist(variables)])
 
     def containscall(self, variables):
         """Performs in."""
@@ -1644,7 +1644,7 @@ class evalfuncs(object):
             if isfunc(variables[0]):
                 return variables[0]
             else:
-                raise ExecutionError("ValueError", "Could not convert to function "+self.prepare(variables[0]))
+                raise ExecutionError("ValueError", "Could not convert to function "+e.prepare(variables[0], False, True))
         elif len(variables) == 1:
             return strfloat(str(variables[0]))
         elif isinstance(variables[1], strcalc):
