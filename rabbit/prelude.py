@@ -1427,7 +1427,7 @@ class evalfuncs(object):
                     original = str(arg)
                 else:
                     raise ExecutionError("ValueError", "Can't run non-string valueS")
-                if not e.processor.evalfile(original):
+                if not e.processor.evalfile(original, False):
                     raise ExecutionError("IOError", "Failed to execute file "+str(original))
                 else:
                     e.processor.dumpdebug(True)

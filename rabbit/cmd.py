@@ -157,7 +157,7 @@ class mathbase(safebase):
         elif len(self.box.commands) > 1:
             self.evaltext(self.box.commands[-2])
 
-    def evalfile(self, original):
+    def evalfile(self, original, top=True):
         """Runs A File."""
         name = self.e.findfile(original)
         try:
@@ -165,11 +165,11 @@ class mathbase(safebase):
         except IOError:
             return False
         else:
-            self.evaltext(readfile(tempfile))
+            self.evaltext(readfile(tempfile), top)
             tempfile.close()
             return True
 
-    def evaltext(self, inputstring):
+    def evaltext(self, inputstring, top=True):
         """Runs Text."""
         cmds = []
         lines = inputstring.splitlines()
@@ -183,19 +183,30 @@ class mathbase(safebase):
                 else:
                     self.adderror("IndentationError", "Illegal starting indent in line "+line+" (#"+str(x)+")", True)
                     break
-        for cmd in cmds:
-            self.reset()
-            self.process(cmd)
+        if not top:
+            addcommand, self.addcommand = self.addcommand, always(None)
+        try:
+            for cmd in cmds:
+                self.reset()
+                self.process(cmd, top)
+        finally:
+            if not top:
+                self.addcommand = addcommand
 
-    def process(self, inputstring):
+    def process(self, inputstring, top=True):
         """Processes A Command."""
         inputstring = basicformat(inputstring)
         if inputstring != "":
-            if self.debug:
+            if not top:
+                info = " <<| Run"
+            elif self.debug:
                 info = self.info
             else:
                 info = " <<| Traceback"
-            self.saferun(self.e.process, inputstring, info, self.normcommand)
+            if top:
+                self.saferun(self.e.process, inputstring, info, self.normcommand)
+            else:
+                self.e.process(inputstring, info, always(None))
 
     def addcommand(self, inputstring):
         """Adds A Command To The Commands."""

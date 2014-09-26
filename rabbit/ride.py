@@ -26,6 +26,7 @@ from .cmd import *
 
 class editor(mathbase):
     """The Rabbit Integrated Development Environment."""
+    addcommand = always(None)
 
     def __init__(self, name="RIDE", tablen=1, width=100, height=40, refresh=600, debug=False, *initializers):
         """Initializes A PythonPlus Evaluator"""

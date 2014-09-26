@@ -26,6 +26,7 @@ from .cmd import *
 
 class grapher(mathbase):
     """Rabbit Graphing Module."""
+    addcommand = always(None)
 
     def __init__(self, directory=None, name="Grapher", width=800, height=600, debug=False, *initializers):
         """Initializes A PythonPlus Grapher."""
