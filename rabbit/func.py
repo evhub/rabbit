@@ -1288,6 +1288,15 @@ class classcalc(cotobject):
         out += " \xbb"
         return out
 
+    def modref(self, value, name):
+        """Modifies An Item's Reference By A Name."""
+        name = str(name)
+        if isinstance(value, funcfloat) and not isinstance(value, strfunc):
+            value.funcstr = name+"."+value.funcstr
+        elif isinstance(value, evalwrap):
+            value.ref = name+"."+value.ref
+        return value
+
     def store(self, key, value, bypass=False, name=None):
         """Stores An Item."""
         test = basicformat(e.prepare(key, False, False))
@@ -1296,8 +1305,8 @@ class classcalc(cotobject):
         elif not bypass and not e.validvar(test):
             raise ExecutionError("ClassError", "Could not store "+test+" in "+e.prepare(self, False, True, True))
         else:
-            if name is not None and isinstance(value, funcfloat) and not isinstance(value, strfunc):
-                value.funcstr = str(name)+"."+value.funcstr
+            if name is not None:
+                value = self.modref(value, name)
             self.variables[test] = value
             if self.doset:
                 self.doset[test] = haskey(e.variables, test)
@@ -1610,8 +1619,8 @@ class instancecalc(numobject, classcalc):
         else:
             if isinstance(value, strfunc):
                 value.curryself(self)
-            elif name is not None and isinstance(value, funcfloat):
-                value.funcstr = str(name)+"."+value.funcstr
+            if name is not None:
+                value = self.modref(value, name)
             self.variables[test] = value
             if self.doset:
                 self.doset[test] = haskey(e.variables, test)

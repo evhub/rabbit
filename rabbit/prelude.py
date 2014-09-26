@@ -1147,7 +1147,7 @@ class evalfuncs(object):
     def randcall(self, variables):
         """Returns A Random Number Generator Object."""
         if not variables:
-            raise ExecutionError("ArgumentError", "Not enough arguments to d")
+            raise ExecutionError("ArgumentError", "Not enough arguments to die")
         else:
             e.setreturned()
             key = None
@@ -1191,7 +1191,7 @@ class evalfuncs(object):
 
     def purecall(self, variables):
         """Ensures Purity."""
-        pure, e.pure = e.pure, True
+        pure, e.pure = e.pure, 2
         try:
             out = self.docalc(variables)
         finally:

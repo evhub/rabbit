@@ -10,14 +10,14 @@ assert:: iserr((try::(passert::0)):1)
 # Includes:
 passert:: include Meta
 passert:: unused(env()) ?= class<<x="don't touch me">>
-passert:: include(Math, Stats, Unicode, Ops)
+passert:: include(Math, Stats, Unicode, Ops, Rand)
 def:: sin := memoize(sin)
 def:: cos := memoize(cos)
 def:: tan := memoize(tan)
 def:: asin := memoize(asin)
 def:: acos := memoize(acos)
 def:: atan := memoize(atan)
-d = rand
+d = die
 
 # Begin Pure Section:
 ---------------------
@@ -693,6 +693,7 @@ passert:: "def" ?= <<
  "abc"
  "def"
   >> ()
+passert:: (try<<pure::--->>:1).name ?= "PureError"
 
 # Final Testing:
 tag = "tag"

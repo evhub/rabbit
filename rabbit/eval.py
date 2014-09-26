@@ -473,7 +473,6 @@ Global Operator Precedence List:
             "lshift":funcfloat(self.funcs.lshiftcall, "lshift", reqargs=2),
             "union":funcfloat(self.funcs.unioncall, "union", reqargs=2),
             "intersect":funcfloat(self.funcs.intersectcall, "intersect", reqargs=2),
-            "rand":funcfloat(self.funcs.randcall, "rand", reqargs=1),
             "inside":funcfloat(self.funcs.insidecall, "inside", reqargs=1),
             "python":funcfloat(self.funcs.pythonevalcall, "python", reqargs=1),
             "input":funcfloat(self.funcs.inputcall, "input"),
@@ -485,6 +484,10 @@ Global Operator Precedence List:
             "bool":usefunc(bool, "bool", ["x"]),
             "pow":usefunc(pow, "pow", ["y", "x", "m"], reqargs=2),
             "hash":usefunc(hash, "hash", ["x"]),
+            "Rand":classcalc({
+                "die":funcfloat(self.funcs.randcall, "die", reqargs=1),
+                "gen":evalwrap(random, "gen")
+                }, name="Rand"),
             "Meta":classcalc({
                 "var":funcfloat(self.funcs.getvarcall, "var", reqargs=1),
                 "val":funcfloat(self.funcs.getvalcall, "val", reqargs=1),
@@ -1454,11 +1457,13 @@ Global Operator Precedence List:
     def calc_pure(self, expression, calc_funcs):
         """Toggles Pure On And Off."""
         if madeof(expression, self.purechar):
-            if len(expression) >= 3:
+            if len(expression) < 3:
+                raise ExecutionError("SyntaxError", "Pure toggles must be at least three characters")
+            elif self.pure > 1:
+                raise ExecutionError("PureError", "A pure toggle was attempted inside of a pure statement")
+            else:
                 self.pure = not self.pure
                 return self.pure
-            else:
-                raise ExecutionError("SyntaxError", "Pure toggles must be at least three characters")
         else:
             return self.calc_next(expression, calc_funcs)
 
