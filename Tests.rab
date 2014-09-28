@@ -20,7 +20,7 @@ def:: atan := memoize(atan)
 d = die
 
 # Begin Pure Section:
----------------------
+passert:: (---------)
 
 # Boolean Operator Tests:
 passert:: 1 ?= 1
@@ -377,7 +377,7 @@ passert:: (try<< >= >>:1).name ?= "SyntaxError"
 passert:: (try<< <= >>:1).name ?= "SyntaxError"
 
 # End Pure Section:
----------------------
+passert:: !(------)
 
 # Built-Ins Tests:
 passert:: (( try:: 1/0 ):1).name ?= "ZeroDivisionError"
@@ -694,6 +694,11 @@ passert:: "def" ?= <<
  "def"
   >> ()
 passert:: (try<<pure::--->>:1).name ?= "PureError"
+passert:: !(
+ ---;;
+ new = 4
+ ;;---
+ ) & new ?= 4
 
 # Final Testing:
 tag = "tag"
