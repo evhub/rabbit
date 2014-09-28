@@ -173,7 +173,7 @@ passert:: (?nil) ?= 0
 passert:: nil**2 ?= [nil,nil]
 passert:: 2**nil ?= ()
 passert:: class<<>> ++ class << x = 1 >> ?= class << x = 1 >>
-passert:: type(class<<>>() ++ class << x = 1 >>) ?= "instance"
+passert:: type(class<<>>() ++ class << x = 1 >>) ?= "object"
 passert:: class << nothing := nothing ;; nil := nil >> ?= class << nil := nil ;; nothing := nothing >>
 passert:: nil ++ 1 ?= nil
 passert:: ! (nil) in (nil)
@@ -471,7 +471,7 @@ passert:: dict() ?= {}
 passert:: max(1,0,5,4) ?= 5
 passert:: min(1,0,5,4) ?= 0
 passert:: 5x^2 ?= 20                $ (do:: x = 2)
-passert:: (function:: x :: x) ?= \x\x
+passert:: (func:: x :: x) ?= \x\x
 passert:: memoize:\x\x != \x\x
 passert:: memoize:\x\x ?= \%x\x
 passert:: deserialize(serialize(class<<>>)) ?= class<<>>
@@ -481,6 +481,7 @@ passert:: python"1+1" ?= 2
 passert:: has(\x\x, "__closure__")
 passert:: map(\x\x+1, [1,2]) ?= [2,3]
 passert:: filter(\x\(x<3), [0,1,2,3,4,5]) ?= [0,1,2]
+passert:: filter:str:[1,""] ?= [1]
 passert:: fold(\x,y\x+y, 1**5) ?= 5
 passert:: sqrt(-1) ?= i
 passert:: chr(ord("a")) ?= "a"
@@ -706,6 +707,8 @@ passert::
   new_c = 9
  new_d = 13
 passert:: new_a==4 & new_b==7 & new_c==9 & new_d==13
+passert:: f:"012":"345":1:-2 ?= "1234"        $ f(x,y) = sum(__)
+passert:: fold:str:[1] ?= "1"
 
 # Final Testing:
 tag = "tag"

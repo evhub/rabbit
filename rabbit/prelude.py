@@ -426,23 +426,29 @@ class evalfuncs(object):
 
     def sumcall(self, variables):
         """Finds A Sum."""
-        value = 0
-        for x in variables:
-            if ismatrix(x):
-                value += self.sumcall(getmatrix(x).items())
-            else:
-                value += x
-        return value
+        if not variables:
+            return 0
+        else:
+            value = variables[0]
+            for x in xrange(1, len(variables)):
+                if ismatrix(variables[x]):
+                    value += self.sumcall(getmatrix(variables[x]).getitems())
+                else:
+                    value += variables[x]
+            return value
 
     def prodcall(self, variables):
         """Finds A Product."""
-        value = 1
-        for x in variables:
-            if ismatrix(x):
-                value *= self.prodcall(getmatrix(x).getitems())
-            else:
-                value *= x
-        return value
+        if not variables:
+            return 1
+        else:
+            value = variables[0]
+            for x in xrange(1, len(variables)):
+                if ismatrix(variables[x]):
+                    value *= self.prodcall(getmatrix(variables[x]).getitems())
+                else:
+                    value *= variables[x]
+            return value
 
     def maxcall(self, variables):
         """Performs max."""
@@ -960,6 +966,8 @@ class evalfuncs(object):
             items = getmatrix(variables[1]).getitems()
             if not items:
                 return matrix(0)
+            elif len(items) == 1:
+                return func(items)
             else:
                 acc = items[0]
                 for x in xrange(1, len(items)):

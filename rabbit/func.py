@@ -145,7 +145,7 @@ class negative(numobject):
 class funcfloat(numobject):
     """Allows The Creation Of A Float Function."""
     allownone = False
-    evaltype = "function"
+    evaltype = "func"
     overflow = False
     memoize = False
     allargs = "__"
@@ -346,7 +346,18 @@ class strfunc(funcfloat):
     personalsvar = "__class__"
     method = None
 
-    def __init__(self, funcstr, variables=None, personals=None, name=None, overflow=None, allargs=None, reqargs=None, memoize=None, memo=None, method=None, lexical=True):
+    def __init__(self,
+                 funcstr,
+                 variables=None,
+                 personals=None,
+                 name=None,
+                 overflow=None,
+                 allargs=None,
+                 reqargs=None,
+                 memoize=None,
+                 memo=None,
+                 method=None,
+                 lexical=True):
         """Creates A Callable String Function."""
         self.funcstr = e.namefind(str(funcstr))
         if name:
@@ -455,12 +466,13 @@ class strfunc(funcfloat):
                 out.curry(arg)
             return out
         else:
-            allvars = diagmatrixlist(variables)
+            allvars = variables
             if self.overflow:
+                allvars = allvars[:len(self.variables)]
                 items, e.overflow = useparams(variables, self.variables, matrix(0))
             else:
                 items, _ = useparams(variables, self.variables, matrix(0))
-            items[self.allargs] = allvars
+            items[self.allargs] = diagmatrixlist(allvars)
             personals = self.getpers()
             for k in personals:
                 if (not k in items) or isnull(items[k]):
@@ -1532,7 +1544,7 @@ class namespace(classcalc):
 
 class instancecalc(numobject, classcalc):
     """An Evaluator Class Instance."""
-    evaltype = "instance"
+    evaltype = "object"
     parentvar = "__parent__"
 
     def __init__(self, variables=None, parent=None, name=None, top=True, selfvar=None, parentvar=None, restricted=None):

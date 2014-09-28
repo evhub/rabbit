@@ -450,8 +450,8 @@ Global Operator Precedence List:
             "from":funcfloat(self.funcs.instanceofcall, "from", reqargs=2),
             "iserr":funcfloat(self.funcs.iserrcall, "iserr", reqargs=1),
             "class":funcfloat(self.funcs.classcall, "class"),
-            "instance":funcfloat(self.funcs.instancecall, "instance"),
-            "function":funcfloat(self.funcs.functioncall, "function"),
+            "object":funcfloat(self.funcs.instancecall, "object"),
+            "func":funcfloat(self.funcs.functioncall, "func"),
             "namespace":funcfloat(self.funcs.namespacecall, "namespace"),
             "try":funcfloat(self.funcs.trycall, "try"),
             "raise":funcfloat(self.funcs.raisecall, "raise"),
@@ -1640,7 +1640,7 @@ Global Operator Precedence List:
             sides[0] = sides[0].split(self.parenchar, 1)
             sides[0][0] = basicformat(sides[0][0])
             sides[0][1] = self.namefind(self.parenchar+sides[0][1])
-            return (sides[0][0], self.eval_set(sides[0][1], sides[1]))
+            return (sides[0][0], self.eval_set(sides[0][1], sides[1], sides[0][0]))
 
     def set_normal(self, sides):
         """Performs =."""
@@ -1923,7 +1923,7 @@ Global Operator Precedence List:
         else:
             return self.calc_next(expression, eval_funcs)
 
-    def eval_set(self, original, funcstr):
+    def eval_set(self, original, funcstr, name=None):
         """Performs Setting."""
         temp = self.outersplit(self.namefind(basicformat(original)), ",", top=False)
         params = []
@@ -1994,7 +1994,7 @@ Global Operator Precedence List:
                     params.append(x)
                 if inopt > 1:
                     inopt = 1
-        return strfunc(funcstr, params, personals, allargs=allargs, reqargs=reqargs, memoize=memoize, lexical=lexical)
+        return strfunc(funcstr, params, personals, name, allargs=allargs, reqargs=reqargs, memoize=memoize, lexical=lexical)
 
     def eval_join(self, expression, eval_funcs):
         """Performs Concatenation."""
