@@ -281,17 +281,17 @@ class evalobject(object):
     @rabbit
     def __bin__(self):
         """Gets A Binary Representation."""
-        return bin(float(self))
+        return bin(self.__index__())
 
     @rabbit
     def __oct__(self):
         """Gets An Octal Representation."""
-        return oct(float(self))
+        return oct(self.__index__())
 
     @rabbit
     def __hex__(self):
         """Gets A Hex Representation."""
-        return hex(float(self))
+        return hex(self.__index__())
 
     def __call__(self, *args):
         """Calls The Rabbit Function."""

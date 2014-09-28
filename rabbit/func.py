@@ -665,12 +665,12 @@ class strcalc(numobject):
         """Attempts To Get An Integer."""
         return int(self.calcstr)
 
-    def __repr__(self):
+    def dorepr(self, func):
         """Retrieves A Representation."""
         out = []
         inside = False
         special = False
-        for c in repr(self.calcstr):
+        for c in func(self.calcstr):
             if special:
                 if c not in "\"'":
                     out.append("\\")
@@ -686,6 +686,14 @@ class strcalc(numobject):
             elif c in "\"'":
                 inside = c
         return '"'+"".join(out).replace('"', "\\'")+'"'
+
+    def getascii(self):
+        """Gets An ASCII Representation."""
+        return self.dorepr(ascii)
+
+    def __repr__(self):
+        """Gets A Representation."""
+        return self.dorepr(repr)
 
     def __str__(self):
         """Retrieves The Evaluator String."""

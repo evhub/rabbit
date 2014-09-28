@@ -18,6 +18,11 @@
 
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
+try:
+    from future_builtins import map, filter
+except ImportError:
+    pass
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,6 +40,11 @@ except NameError:
     long = int
 
 encoding = "UTF"
+
+try:
+    ascii
+except NameError:
+    ascii = repr
 
 try:
     unichr

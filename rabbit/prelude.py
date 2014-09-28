@@ -1849,3 +1849,14 @@ class evalfuncs(object):
                 return diagmatrixlist(cont.getdiag()+[variables[0]])
             else:
                 return rowmatrixlist(cont.items()+[variables[0]])
+
+    def asciicall(self, variables):
+        """Wraps ascii."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to ascii")
+        else:
+            e.overflow = variables[1:]
+            if isinstance(variables[0], strcalc):
+                return rawstrcalc(variables[0].getascii())
+            else:
+                raise ExecutionError("ValueError", "Can only use ascii on strings")

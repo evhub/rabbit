@@ -484,6 +484,7 @@ Global Operator Precedence List:
             "bool":usefunc(bool, "bool", ["x"]),
             "pow":usefunc(pow, "pow", ["y", "x", "m"], reqargs=2),
             "hash":usefunc(hash, "hash", ["x"]),
+            "ascii":funcfloat(self.funcs.asciicall, "ascii", reqargs=1),
             "Rand":classcalc({
                 "die":funcfloat(self.funcs.randcall, "die", reqargs=1),
                 "gen":evalwrap(random, "gen")
