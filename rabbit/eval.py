@@ -2489,7 +2489,7 @@ Global Operator Precedence List:
                 params = []
                 for x in xrange(1, len(inputlist)):
                     if inputlist[x]:
-                        params.append(getcopy(self.eval_call(inputlist[x])))
+                        params.append(getcopy(self.eval_check(self.eval_call(inputlist[x]), True)))
                 self.clean_end(cleaned)
                 return self.call_colon_set(item, params)
             else:

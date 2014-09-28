@@ -710,6 +710,7 @@ passert:: new_a==4 & new_b==7 & new_c==9 & new_d==13
 passert:: f:"012":"345":1:-2 ?= "1234"        $ f(x,y) = sum(__)
 passert:: "abc":-1:0 ?= "cba"
 passert:: fold:str:[1] ?= "1"
+passert:: type:-1 ?= "int"
 
 # Final Testing:
 tag = "tag"
