@@ -716,6 +716,7 @@ passert:: contents ?= str(list(open("Tests.save")))
 passert:: ! using()
 use(calc) ;; use(using())
 passert:: using() ?= calc ?= used             $ used = prop(using)
+passert:: print("Make sure you don't see anything until you get your next <#>:")
 passert:: require("Tests.save").tag ?= "tag"
 use() ;; use(using())
 passert:: ! using()

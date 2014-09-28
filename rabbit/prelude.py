@@ -942,9 +942,10 @@ class evalfuncs(object):
 
     def cmdcall(self, variables):
         """Performs exec."""
+        e.setreturned()
         for item in variables:
             if isinstance(item, strcalc):
-                e.processor.evaltext(str(item))
+                e.processor.evaltext(str(item), False)
             else:
                 raise ExecutionError("ValueError", "Can't exec non-string values")
         return matrix(0)
