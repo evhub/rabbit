@@ -703,8 +703,8 @@ passert::
  pure::
   new_b = 7
   new_c = 9
- ?= 9 ?= new_c & new_b ?= 7
-passert:: new_a==4 & new_b==7 & new_c==9
+ new_d = 13
+passert:: new_a==4 & new_b==7 & new_c==9 & new_d==13
 
 # Final Testing:
 tag = "tag"
