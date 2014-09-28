@@ -1153,11 +1153,7 @@ Global Operator Precedence List:
         else:
             splitfunc = lambda x: x.split(";;")
         inputlist = []
-        if top:
-            split_top = True
-        else:
-            split_top = -1
-        for original in self.splitdedent(item, splitfunc, split_top):
+        for original in self.splitdedent(item, splitfunc):
             original = basicformat(original)
             if not iswhite(original):
                 inputlist.append(original)
