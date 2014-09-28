@@ -79,9 +79,10 @@ Global Operator Precedence List:
 
     ;;      Separates top-level commands.
 
-    $       Seperates with clauses (read as 'with' or 'where').
+    ---     Toggles pure blocks.
+    =       Sets variable names.
     ::      Calls a meta-function.
-
+    $       Seperates with clauses (read as 'with' or 'where').
     ,       Seperates list elements.
     ->      Creates a key-value pair.
     ;       Seperates conditionals (read as 'else').
@@ -90,7 +91,6 @@ Global Operator Precedence List:
     |       Performs logical or.
     &       Performs logical and.
     >?!=<   Performs equality or inequality checks.
-
     ~       Applies a list to a function for looping.
     \\       Creates a lambda.
     --      Performs removal.
