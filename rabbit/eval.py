@@ -2907,7 +2907,9 @@ Global Operator Precedence List:
 
     def topython(self, item):
         """Converts A Rabbit Object To A Python Object."""
-        if isinstance(item, atom):
+        if isinstance(item, self.tempobjects):
+            out = self.topython(item.calc())
+        elif isinstance(item, atom):
             out = None
         elif isinstance(item, strcalc):
             out = str(item)

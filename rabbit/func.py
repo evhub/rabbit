@@ -795,10 +795,19 @@ class strcalc(numobject):
         if len(params) == 0:
             value = rawstrcalc(item[-1])
         elif len(params) == 1:
-            value = rawstrcalc(item[int(params[0])])
+            value = rawstrcalc(item[params[0]])
         else:
-            value = rawstrcalc(item[int(params[0]):int(params[1])])
             e.overflow = params[2:]
+            if params[0] < 0:               
+                params[0] += len(self)+1
+            if params[1] < 0:
+                params[1] += len(self)+1
+            if params[0] == params[1]:
+                value = rawstrcalc(item[params[0]])
+            elif params[0] < params[1]:
+                value = rawstrcalc(item[params[0]:params[1]])
+            else:
+                value = rawstrcalc(strlist(reversed(item[params[1]:params[0]]), ""))
         return value
 
     def getrepr(self, top, bottom, indebug, maxrecursion):

@@ -127,13 +127,13 @@ class matrix(mctobject):
             else:
                 out = []
                 if params[0].retrieve(0) <= params[1].retrieve(0):
-                    ymin, ymax = int(params[0].retrieve(0)), int(params[1].retrieve(0))
+                    ymin, ymax = params[0].retrieve(0), params[1].retrieve(0)
                 else:
-                    ymin, ymax = int(params[1].retrieve(0)), int(params[0].retrieve(0))
+                    ymin, ymax = params[1].retrieve(0), params[0].retrieve(0)
                 if params[0].retrieve(1) <= params[1].retrieve(1):
-                    xmin, xmax = int(params[0].retrieve(1)), int(params[1].retrieve(1))
+                    xmin, xmax = params[0].retrieve(1), params[1].retrieve(1)
                 else:
-                    xmin, xmax = int(params[1].retrieve(1)), int(params[0].retrieve(1))
+                    xmin, xmax = params[1].retrieve(1), params[0].retrieve(1)
                 for y in xrange(ymin, ymax+1):
                     out.append([])
                     for x in xrange(xmin, xmax+1):
@@ -141,19 +141,17 @@ class matrix(mctobject):
                 value = matrixlist(out)
         else:
             length = item.lendiag()
-            params[0] = float(params[0])
-            params[1] = float(params[1])
             if params[0] < 0:                
-                params[0] += length+1.0
+                params[0] += length+1
             if params[1] < 0:
-                params[1] += length+1.0
+                params[1] += length+1
             if params[0] == params[1]:
-                value = matrix(1,1, item.retrieve(int(params[1])), fake=True)
+                value = matrix(1,1, item.retrieve(params[0]), fake=True)
             elif params[0] < params[1]:
-                out = item.getdiag()[int(params[0]):int(params[1])]
+                out = item.getdiag()[params[0]:params[1]]
                 value = diagmatrixlist(out)
             else:
-                out = item.getdiag()[int(params[1]):int(params[0])]
+                out = item.getdiag()[params[1]:params[0]]
                 out.reverse()
                 value = diagmatrixlist(out)
         return value
