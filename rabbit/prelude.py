@@ -88,14 +88,13 @@ class evalfuncs(object):
             return out
 
     def iseqcall(self, variables):
-        """Determins Whether All Arguments Are Equal."""
+        """Determines Whether All Arguments Are Equal."""
         if len(variables) < 2:
             raise ExecutionError("ArgumentError", "Not enough arguments to is")
         else:
             out = True
-            last = variables[0]
-            for x in xrange(1, len(variables)):
-                out = out and iseq(last, variables[x])
+            for x in xrange(0, len(variables)-1):
+                out = out and e.iseq(variables[x], variables[x+1])
             return out
 
     def includecall(self, variables):
@@ -114,8 +113,7 @@ class evalfuncs(object):
                     else:
                         raise ExecutionError("LoopError", "Illegal infinite recursive loop in __include__")
                 if isinstance(arg, classcalc):
-                    oldvars = e.setvars(arg.getvars(True))
-                    out.append(classcalc(oldvars))
+                    out.append(classcalc(e.setvars(arg.getvars(True))))
                 else:
                     raise ExecutionError("ValueError", "Can only include a class")
             if len(out) == 1:
@@ -215,10 +213,14 @@ class evalfuncs(object):
 
     def iserrcall(self, variables):
         """Determines Whether Something Is An Error."""
-        for item in variables:
-            if not (isinstance(item, instancecalc) and item.getmethod(e.errorvar)):
+        if not variables:
+            return False
+        else:
+            e.overflow = variables[1:]
+            if isinstance(variables[0], instancecalc) and variables[0].getmethod(e.errorvar):
+                return True
+            else:
                 return False
-        return True
 
     def classcall(self, variables):
         """Converts To A Class."""
@@ -229,6 +231,12 @@ class evalfuncs(object):
             return variables[0].toclass()
         elif isinstance(variables[0], classcalc):
             return variables[0]
+        elif isinstance(variables[0], strcalc):
+            original = str(variables[0])
+            out = classcalc()
+            for cmd in e.splitdedent(original, lambda x: x.splitlines()):
+                out.process(cmd)
+            return out
         elif isinstance(variables[0], dictionary):
             outvars = {}
             for k,v in variables[0].a.items():
@@ -237,12 +245,6 @@ class evalfuncs(object):
                 else:
                     raise ExecutionError("ValueError", "Class dictionaries must have strings as their keys")
             return classcalc(outvars)
-        elif isinstance(variables[0], strcalc):
-            original = str(variables[0])
-            out = classcalc()
-            for cmd in e.splitdedent(original, lambda x: x.splitlines()):
-                out.process(cmd)
-            return out
         else:
             raise ExecutionError("ClassError", "Cannot convert "+e.prepare(variables[0], False, True, True)+" to class")
 
@@ -255,6 +257,8 @@ class evalfuncs(object):
             return variables[0]
         elif isinstance(variables[0], classcalc):
             return variables[0].toinstance()
+        elif isinstance(variables[0] (strcalc, dictionary)):
+            return self.instancecall([self.classcall([variables[0]])])
         else:
             raise ExecutionError("ClassError", "Cannot convert "+e.prepare(variables[0], False, True, True)+" to instance")
 
@@ -267,6 +271,8 @@ class evalfuncs(object):
             return variables[0]
         elif isinstance(variables[0], classcalc):
             return namespace(variables[0].getvars(True))
+        elif isinstance(variables[0], (strcalc, dictionary)):
+            return self.namespacecall([self.classcall([variables[0]])])
         else:
             raise ExecutionError("ClassError", "Cannot convert "+e.prepare(variables[0], False, True, True)+" to namespace")
 
@@ -505,11 +511,11 @@ class evalfuncs(object):
             if variables[1].onlydiag():
                 for x in xrange(0, variables[1].lendiag()):
                     if variables[1].retrieve(x) == variables[0]:
-                        return float(x)
+                        return x
             else:
                 for x,y in variables[1].coords():
                     if variables[1].retrieve(x,y) == variables[0]:
-                        return diagmatrixlist([float(x),float(y)])
+                        return diagmatrixlist([x,y])
             return matrix(0)
 
     def mergecall(self, variables):
@@ -1258,10 +1264,7 @@ class evalfuncs(object):
     def aliasescall(self, variables):
         """Gets Aliases."""
         e.overflow = variables
-        out = dictionary()
-        for k,v in e.aliases.items():
-            out.store(rawstrcalc(k), rawstrcalc(v))
-        return out
+        return e.frompython(e.aliases)
 
     def bitnotcall(self, variables):
         """Wraps ~."""
@@ -1411,7 +1414,7 @@ class evalfuncs(object):
     def intersectcall(self, variables):
         """Performs intersect."""
         if len(variables) < 2:
-            raise ExecutionError("ArgumentError", "Not enough arguments to union")
+            raise ExecutionError("ArgumentError", "Not enough arguments to intersect")
         elif len(variables) == 2:
             a,b = getmatrix(variables[0]), getmatrix(variables[1])
             out = list(set(a.getitems()) & set(b.getitems()))
@@ -1604,6 +1607,7 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to wrap")
         else:
+            e.setreturned()
             ref = "Meta.wrap:("+e.prepare(variables[0], False, True)+")"
             if len(variables) > 1:
                 ref += ":("+e.prepare(variables[1], False, True)+")"
@@ -1698,6 +1702,7 @@ class evalfuncs(object):
 
     def pipecall(self, variables):
         """Wraps A Python Global."""
+        e.setreturned()
         if not variables:
             return e.frompython(globals().keys(), "wrap()")
         else:
@@ -1750,6 +1755,7 @@ class evalfuncs(object):
     def inputcall(self, variables):
         """Wraps raw_input."""
         if variables:
+            e.setreturned()
             e.overflow = variables[1:]
             if isinstance(variables[0], strcalc):
                 return rawstrcalc(raw_input(str(variables[0])))
@@ -1787,6 +1793,7 @@ class evalfuncs(object):
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to open")
         else:
+            e.setreturned()
             if isinstance(variables[0], strcalc):
                 name = str(variables[0])
             else:

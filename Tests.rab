@@ -711,6 +711,8 @@ passert:: f:"012":"345":1:-2 ?= "1234"        $ f(x,y) = sum(__)
 passert:: "abc":-1:0 ?= "cba"
 passert:: fold:str:[1] ?= "1"
 passert:: type:-1 ?= "int"
+passert:: namespace << x=1 >> : "x" ?= 1
+passert:: "a" is `a`
 
 # Final Testing:
 tag = "tag"
