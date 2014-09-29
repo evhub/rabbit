@@ -503,6 +503,7 @@ passert:: len(sort(dict(env()).keys()))
 passert:: type(xor(0,1)) ?= "int"
 passert:: type(1+0*i) ?= "complex"
 passert:: "≈" ?= eval: ascii "≈"
+passert:: null ?= ()
 
 # Import Tests:
 math = import:: math

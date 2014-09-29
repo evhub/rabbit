@@ -586,7 +586,7 @@ Global Operator Precedence List:
                 "gt":usefunc(operator.gt, "gt", ["x", "y"]),
                 "ge":usefunc(operator.ge, "ge", ["x", "y"])
                 }, name="Ops"),
-            "none":matrix(0),
+            "null":matrix(0),
             "true":True,
             "false":False,
             "_":atom(),
@@ -617,7 +617,7 @@ Global Operator Precedence List:
                     "\u225f":"?="
                     }),
                 "includes" : classcalc({
-                    "\xf8" : "none",
+                    "\xf8" : "null",
                     "\u221e" : "inf",
                     "\u2211" : "sum",
                     "\u03c0" : "Math.pi",
@@ -795,7 +795,7 @@ Global Operator Precedence List:
         if istext(item):
             out = str(item)
         elif item is None:
-            out = "none"
+            out = "null"
         elif isinstance(item, bool):
             if item:
                 out = "true"
@@ -2851,7 +2851,7 @@ Global Operator Precedence List:
 
     def evaltypestr(self, item):
         if isnull(item):
-            return "none"
+            return "null"
         elif hasattr(item, "evaltype"):
             if istext(item.evaltype):
                 return item.evaltype
