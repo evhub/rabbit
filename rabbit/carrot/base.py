@@ -305,6 +305,16 @@ class evalobject(object):
         """Gets An Item."""
         return self.itemcall(list(map(e.frompython, args)))
 
+    @rabbit
+    def __neg__(self):
+        """Implements Unary -."""
+        return self*-1.0
+
+    @rabbit
+    def __pos__(self):
+        """Implements Unary +."""
+        return self*1.0
+
 class numobject(evalobject):
     """A Base Class For Objects."""
 
@@ -352,16 +362,6 @@ class numobject(evalobject):
     def __int__(self):
         """Retrieves An Integer."""
         return int(self.calc())
-
-    @rabbit
-    def __neg__(self):
-        """Implements Unary -."""
-        return self*-1.0
-
-    @rabbit
-    def __pos__(self):
-        """Implements Unary +."""
-        return self*1.0
 
     @rabbit
     def copy(self):

@@ -721,6 +721,7 @@ passert:: type:-1 ?= "int"
 passert:: namespace << x=1 >> : "x" ?= 1
 passert:: "a" is `a`
 passert:: "%s" % "a thing" ?= "a thing"
+passert:: -"abc" ?= "cba"
 
 # Final Testing:
 tag = "tag"
