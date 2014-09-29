@@ -108,7 +108,7 @@ Global Operator Precedence List:
     :       Performs function calls.
     \xa7       Denotes parentheses.
     ..      Performs function composition.
-    .       Denotes methods and functions of functions.
+    .       Denotes methods.
     normal  Evaluates numbers."""
     constructors = {
         "atom": lambda self, args: atom(
@@ -1620,7 +1620,7 @@ Global Operator Precedence List:
                         if docalc:
                             out = value[1]
                         else:
-                            out = strfunc(useclass.selfvar+"."+value[0], [], {useclass.selfvar:useclass}, value[0])
+                            out = strfunc(useclass.selfvar+".("+value[0]+")", [], {useclass.selfvar:useclass}, value[0])
                     if delfrom is not None and value[0] in delfrom:
                         del delfrom[value[0]]
                     return out

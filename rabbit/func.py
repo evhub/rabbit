@@ -1321,9 +1321,9 @@ class classcalc(cotobject):
         """Modifies An Item's Reference By A Name."""
         name = str(name)
         if isinstance(value, funcfloat) and not isinstance(value, strfunc):
-            value.funcstr = name+"."+value.funcstr
+            value.funcstr = name+".("+value.funcstr+")"
         elif isinstance(value, evalwrap):
-            value.ref = name+"."+value.ref
+            value.ref = name+".("+value.ref+")"
         return value
 
     def store(self, key, value, bypass=False, name=None):
@@ -2737,7 +2737,7 @@ class evalwrap(evalobject):
         """Gets A Method."""
         if hasattr(self.obj, key):
             self.checksafe(key)
-            return self.prepare(getattr(self.obj, key), self.getref()+"."+key)
+            return self.prepare(getattr(self.obj, key), self.getref()+".("+key+")")
         else:
             return None
 
