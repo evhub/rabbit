@@ -166,6 +166,8 @@ class evalfuncs(object):
                 else:
                     fatal = False
                 raise ExecutionError(name, message, fatal, variables[0])
+            elif isinstance(variables[0], evalwrap):
+                raise variables[0].obj
             else:
                 raise ExecutionError("Error", e.prepare(variables[0], False, False))
         else:
@@ -1704,7 +1706,7 @@ class evalfuncs(object):
         """Wraps A Python Global."""
         e.setreturned()
         if not variables:
-            return e.frompython(globals().keys(), "wrap()")
+            return e.frompython(globals(), "wrap()")
         else:
             e.overflow = variables[1:]
             if isinstance(variables[0], strcalc):

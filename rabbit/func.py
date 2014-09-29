@@ -2126,6 +2126,22 @@ class instancecalc(numobject, classcalc):
         else:
             return NotImplemented
 
+    def op_remove(self, params):
+        """Performs --."""
+        item = self.getmethod("__rem__")
+        if item:
+            return self.domethod(item, params)
+        else:
+            return NotImplemented
+
+    def rop_remove(self, other):
+        """Performs Reverse --."""
+        item = self.getmethod("__rrem__")
+        if item:
+            return self.domethod(item, other)
+        else:
+            return NotImplemented
+
     def getrepr(self, top, bottom, indebug, maxrecursion):
         """Gets A Representation."""
         if indebug or maxrecursion <= 0:
@@ -2640,7 +2656,7 @@ class evalwrap(evalobject):
     def getstate(self):
         """Returns A Pickleable Reference Object."""
         if self.ref is None:
-            raise ExecutionError("WrapperError", "Cannot get the state of a temporary wrapper object")
+            return ("wrap", self.obj)
         else:
             return ("find", self.ref)
 

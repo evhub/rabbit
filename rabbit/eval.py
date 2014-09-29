@@ -229,6 +229,9 @@ Global Operator Precedence List:
             ),
         "bracket": lambda self, args: bracket(
             args[0]
+            ),
+        "wrap": lambda self, args: evalwrap(
+            args[0]
             )
         }
     testers = {
@@ -2036,8 +2039,9 @@ Global Operator Precedence List:
                 dodict = 0
                 rowlen = None
                 tot = len(items)
-                for x in items:
-                    if hasattr(x, "rop_join"):
+                for i in xrange(0, len(items)):
+                    x = items[i]
+                    if i and hasattr(x, "rop_join"):
                         params = items[:]
                         params.remove(x)
                         try:
@@ -2143,7 +2147,25 @@ Global Operator Precedence List:
             for x in xrange(1, len(inputlist)):
                 params.append(self.calc_next(inputlist[x], eval_funcs))
             item = getcopy(item)
-            if isinstance(item, classcalc):
+            test = NotImplemented
+            if hasattr(item, "op_remove"):
+                try:
+                    test = item.op_remove(params)
+                except NotImplementedError:
+                    test = NotImplemented
+            if test is NotImplemented:
+                for param in params:
+                    if hasattr(param, "rop_remove"):
+                        try:
+                            temp = param.rop_remove(args)
+                        except NotImplementedError:
+                            temp = NotImplemented
+                        if temp is not NotImplemented:
+                            params.remove(param)
+                            item = temp
+            if test is not NotImplemented:
+                item = test
+            elif isinstance(item, classcalc):
                 item.calcall()
                 while len(params) > 0:
                     arg = params.pop(0)

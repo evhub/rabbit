@@ -142,7 +142,10 @@ nothing := class <<
  __bool__(self) = 0
  __rep__(self, other) = [self]**other
  __rrep__(self, other) = ()
+ __join__(self, __) = self
  __rjoin__(self, __) = self
+ __rem__(self, __) = self
+ __rrem__(self, other) = self
  __in__(self, item) = false
  >>
 nil := nothing()
@@ -175,7 +178,10 @@ passert:: 2**nil ?= ()
 passert:: class<<>> ++ class << x = 1 >> ?= class << x = 1 >>
 passert:: type(class<<>>() ++ class << x = 1 >>) ?= "object"
 passert:: class << nothing := nothing ;; nil := nil >> ?= class << nil := nil ;; nothing := nothing >>
-passert:: nil ++ 1 ?= nil
+passert:: nil ++ (1,) ?= nil
+passert:: 1 ++ nil ?= nil
+passert:: nil -- [1] ?= nil
+passert:: 1 -- nil ?= nil
 passert:: ! (nil) in (nil)
 
 # Multi-Line Tests:
