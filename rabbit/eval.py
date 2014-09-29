@@ -87,9 +87,9 @@ Global Operator Precedence List:
     ->      Creates a key-value pair.
     ;       Seperates conditionals (read as 'else').
     @       Checks a conditional (read as 'at' or 'if').
-    ?!      Performs logical unary operations.
     |       Performs logical or.
     &       Performs logical and.
+    ?!      Performs logical unary operations.
     >?!=<   Performs equality or inequality checks.
     ~       Applies a list to a function for looping.
     \\       Creates a lambda.
@@ -1804,7 +1804,10 @@ Global Operator Precedence List:
                         elif c == "\u2260":
                             hasne = True
                         elif c == "!":
-                            inv = not inv
+                            if inv:
+                                raise ExecutionError("SyntaxError", "Illegal double negation")
+                            else:
+                                inv = True
                         elif c in self.testers:
                             found[c] = testers[c]
                     if haseq and hasne:
