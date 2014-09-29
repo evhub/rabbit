@@ -1802,7 +1802,10 @@ Global Operator Precedence List:
                             else:
                                 haslt = True
                         elif c == "\u2260":
-                            hasne = True
+                            if hasne:
+                                raise ExecutionError("SyntaxError", "Illegal double not equals")
+                            else:
+                                hasne = True
                         elif c == "!":
                             if inv:
                                 raise ExecutionError("SyntaxError", "Illegal double negation")
