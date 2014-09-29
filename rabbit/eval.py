@@ -464,7 +464,6 @@ Global Operator Precedence List:
             "is":funcfloat(self.funcs.iseqcall, "is", reqargs=2),
             "include":funcfloat(self.funcs.includecall, "include", reqargs=1),
             "def":funcfloat(self.funcs.defcall, "def", reqargs=1),
-            "effect":usefunc(self.setreturned, "effect"),
             "require":funcfloat(self.funcs.requirecall, "require", reqargs=1),
             "assert":funcfloat(self.funcs.assertcall, "assert", reqargs=1),
             "import":funcfloat(self.funcs.importcall, "import", reqargs=1),
@@ -517,7 +516,8 @@ Global Operator Precedence List:
                 "get":funcfloat(self.funcs.getattrcall, "get", reqargs=2),
                 "has":funcfloat(self.funcs.hasattrcall, "has", reqargs=2),
                 "memoize":funcfloat(self.funcs.memoizecall, "memoize"),
-                "super":funcfloat(self.funcs.supercall, "super", reqargs=1)
+                "super":funcfloat(self.funcs.supercall, "super", reqargs=1),
+                "effect":usefunc(self.setreturned, "effect")
                 }, name="Meta"),
             "Math":classcalc({
                 "divmod":funcfloat(self.funcs.divmodcall, "divmod", reqargs=2),
