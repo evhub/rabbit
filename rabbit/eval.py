@@ -1870,51 +1870,52 @@ Global Operator Precedence List:
                     argnum = 1
             if argnum > 1:
                 lists.append((matrix(0), argnum))
-            return self.eval_loop_set(lists, [], item)
+            return self.eval_loop_set(lists, item)
 
-    def eval_loop_set(self, lists, args, func):
+    def eval_loop_set(self, lists, func):
         """Performs Recursive Comprehension."""
-        value, argnum = lists.pop()
-        if hasmatrix(value):
-            fromstring = isinstance(value, strcalc)
-            value = getmatrix(value)
-            units = value.getitems()
-            new = []
-            for x in xrange(0, len(units)//argnum):
-                for y in xrange(0, argnum):
-                    args.append(units[argnum*x+y])
-                if len(lists) == 0:
-                    if isfunc(func):
-                        item = self.getcall(func)(args)
-                    else:
-                        item = func
-                else:
-                    item = self.eval_loop_set(lists[:], args, func)
-                for y in xrange(0, argnum):
-                    args.remove(units[argnum*x+y])
-                new.append(item)
-            if fromstring:
-                outstr = ""
-                for item in new:
-                    if not isnull(item):
-                        outstr += self.prepare(item, True, False)
-                out = rawstrcalc(outstr)
-            elif value.onlydiag():
-                out = diagmatrixlist(new)
-            else:
-                out = rowmatrixlist(new)
-            return out
+        original = getcopy(func)
+        if hascall(original):
+            func = self.getcall(original)
         else:
-            args.append(value)
-            if len(lists) == 0:
-                if isfunc(func):
-                    out = self.getcall(func)(args)
-                else:
-                    out = func
+            raise ExecutionError("ValueError", "Can only loop with a function")
+        new_lists = []
+        out_type = "list"
+        for value, argnum in reversed(lists):
+            value = getcopy(value)
+            if hasmatrix(value):
+                if isinstance(value, strcalc):
+                    out_type = "str"
+                elif out_type == "list" and not value.onlydiag():
+                    out_type = "row"
+                value = getmatrix(value).getitems()
             else:
-                out = self.eval_loop_set(lists, args, func)
-            args.remove(value)
-            return out
+                value = [value]
+            new_lists.append((value, argnum))
+        lists = new_lists
+        out = []
+        while lists:
+            params = []
+            new_lists = []
+            for units, argnum in lists:
+                params += units[:argnum]
+                units = units[argnum:]
+                if units:
+                    new_lists.append((units, argnum))
+            overflow, self.overflow = self.overflow, []
+            out.append(func(params))
+            if self.overflow:
+                raise ExecutionError("ArgumentError", "Excess arguments of "+strlist(self.overflow, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(original, False, True, True))
+            self._overflow = overflow
+            lists = new_lists
+        if out_type == "list":
+            return diagmatrixlist(out)
+        elif out_type == "row":
+            return rowmatrixlist(out)
+        elif out_type == "str":
+            return rawstrcalc(strlist(out, "", lambda x: self.prepare(x, True, False)))
+        else:
+            raise SyntaxError("Invalid eval_loop lists out_type of "+str(out_type))
 
     def eval_lambda(self, expression, eval_funcs=None):
         """Evaluates Lambdas."""
@@ -2541,7 +2542,7 @@ Global Operator Precedence List:
         elif len(params) == 0:
             value = item
         else:
-            raise ExecutionError("ArgumentError", "Excess argument"+"s"*(len(params) > 1)+" of "+strlist(params, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(item, False, True, True))
+            raise ExecutionError("ArgumentError", "Excess arguments of "+strlist(params, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(item, False, True, True))
         while docalc or len(self.overflow) > 0:
             docalc = False
             temp = self.overflow[:]
