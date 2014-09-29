@@ -2157,7 +2157,7 @@ Global Operator Precedence List:
                 for param in params:
                     if hasattr(param, "rop_remove"):
                         try:
-                            temp = param.rop_remove(args)
+                            temp = param.rop_remove(item)
                         except NotImplementedError:
                             temp = NotImplemented
                         if temp is not NotImplemented:
