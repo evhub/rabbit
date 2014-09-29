@@ -883,7 +883,7 @@ def nonull(inputlist):
     """Cleans The Input Of Empty Matrices."""
     return clean(inputlist, isnull, True)
 
-def diagmatrixlist(inputlist=None, converter=proper, func=None, fake=True, clean=True):
+def diagmatrixlist(inputlist=None, converter=proper, func=None, fake=True, clean=False):
     """Constructs A Diagonal Matrix From A List."""
     if inputlist is None:
         inputlist = []
@@ -905,7 +905,7 @@ def rowmatrixlist(inputlist=None, converter=proper, func=None, fake=False, clean
     if inputlist is None:
         inputlist = []
     if func is None:
-        func = diagmatrixlist
+        func = rowmatrixlist
     outlist = []
     for item in inputlist:
         if islist(item):

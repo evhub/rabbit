@@ -1884,11 +1884,12 @@ Global Operator Precedence List:
         for value, argnum in reversed(lists):
             value = getcopy(value)
             if hasmatrix(value):
+                value = getmatrix(value)
                 if isinstance(value, strcalc):
                     out_type = "str"
                 elif out_type == "list" and not value.onlydiag():
                     out_type = "row"
-                value = getmatrix(value).getitems()
+                value = value.getitems()
             else:
                 value = [value]
             new_lists.append((value, argnum))
@@ -2924,7 +2925,7 @@ Global Operator Precedence List:
         elif isinstance(item, tuple):
             out = diagmatrixlist(map(self.frompython, item), clean=False)
         elif islist(item):
-            out = rowmatrixlist(map(self.frompython, item))
+            out = rowmatrixlist(map(self.frompython, item), clean=False)
         elif isinstance(item, dict):
             out = {}
             for k,v in item.items():
