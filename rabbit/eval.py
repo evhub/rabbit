@@ -2162,7 +2162,7 @@ Global Operator Precedence List:
                             temp = NotImplemented
                         if temp is not NotImplemented:
                             params.remove(param)
-                            item = temp
+                            item = getcopy(temp)
             if test is not NotImplemented:
                 item = test
             elif isinstance(item, classcalc):

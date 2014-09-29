@@ -2686,7 +2686,7 @@ class evalwrap(evalobject):
     def getref(self):
         """Gets The Reference."""
         if self.ref is None:
-            raise ExecutionError("WrapperError", "Cannot do operations on an unreferenced wrapper")
+            return '(raise:"WrapperError":"Cannot do operations on an unreferenced wrapper")'
         else:
             return "("+self.ref+")"
 
@@ -2713,14 +2713,15 @@ class evalwrap(evalobject):
 
     def getrepr(self, top, bottom, indebug, maxrecursion):
         """Gets A Representation."""
-        if indebug or maxrecursion <= 0:
-            return self.ref
-        elif not bottom:
-            return str(self)
-        elif not top:
-            return self.ref
-        else:
+        if indebug or maxrecursion <= 0 or (bottom and not top):
+            if self.ref is None:
+                return e.speedyprep(self, top, bottom, indebug, maxrecursion)
+            else:
+                return self.ref
+        elif bottom:
             return repr(self)
+        else:
+            return str(self)
 
     def __repr__(self):
         """Gets A Representation."""
