@@ -1903,9 +1903,11 @@ Global Operator Precedence List:
                 if units:
                     new_lists.append((units, argnum))
             overflow, self.overflow = self.overflow, []
-            out.append(func(params))
+            value = func(params)
             if self.overflow:
                 raise ExecutionError("ArgumentError", "Excess arguments of "+strlist(self.overflow, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(original, False, True, True))
+            elif not isnull(value):
+                out.append(value)
             self._overflow = overflow
             lists = new_lists
         if out_type == "list":
