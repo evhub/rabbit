@@ -628,7 +628,7 @@ class strfloat(strfunc):
         if isinstance(test, strfunc):
             self.merge(test)
 
-class strcalc(numobject):
+class strcalc(evalobject):
     """Allows Strings Inside Evaluation."""
     evaltype = "str"
     notmatrix = True
@@ -819,12 +819,8 @@ class strcalc(numobject):
 
     def __imod__(self, other):
         """Performs String Formatting."""
-        if isinstance(other, dictionary):
-            self.calcstr %= other.a
-        elif ismatrix(other):
-            self.calcstr %= tuple(getmatrix(other).getitems())
-        else:
-            raise TypeError("Strings can only be formatted by dictionaries and matrices")
+        self.calcstr %= e.topython(other)
+        return self
 
     def getmethod(self, key):
         """Gets A Method."""
@@ -1508,6 +1504,7 @@ class classcalc(cotobject):
     def __imul__(self, other):
         """Performs Multiplication In-Place."""
         self.extend(other)
+        return self
 
     def toinstance(self):
         """Creates An Instance Of The Class."""
@@ -2821,7 +2818,7 @@ class evalwrap(evalobject):
         self.checksafe("__ge__")
         return self.obj >= self.convert(other)
 
-    def __add__(self, other):
+    def __iadd__(self, other):
         """Performs Addition."""
         self.checksafe("__add__")
         def _ref():
@@ -2835,7 +2832,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+")+"+self.getref()
         return self.prepare(self.convert(other) + self.obj, _ref)
 
-    def __sub__(self, other):
+    def __isub__(self, other):
         """Performs Subtraction."""
         self.checksafe("__sub__")
         def _ref():
@@ -2849,7 +2846,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+")-"+self.getref()
         return self.prepare(self.convert(other) - self.obj, _ref)
 
-    def __mul__(self, other):
+    def __imul__(self, other):
         """Performs Multiplication."""
         self.checksafe("__mul__")
         def _ref():
@@ -2863,7 +2860,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+")*"+self.getref()
         return self.prepare(self.convert(other) * self.obj, _ref)
 
-    def __div__(self, other):
+    def __idiv__(self, other):
         """Performs Division."""
         self.checksafe("__div__")
         def _ref():
@@ -2877,7 +2874,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+")/"+self.getref()
         return self.prepare(self.convert(other) / self.obj, _ref)
 
-    def __floordiv__(self, other):
+    def __ifloordiv__(self, other):
         """Performs Floor Division."""
         self.checksafe("__floordiv__")
         def _ref():
@@ -2891,7 +2888,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+")//"+self.getref()
         return self.prepare(self.convert(other) // self.obj, _ref)
 
-    def __mod__(self, other):
+    def __imod__(self, other):
         """Performs Modulus."""
         self.checksafe("__mod__")
         def _ref():
@@ -2905,7 +2902,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+")%"+self.getref()
         return self.prepare(self.convert(other) % self.obj, _ref)
 
-    def __pow__(self, other):
+    def __ipow__(self, other):
         """Performs Exponentiation."""
         self.checksafe("__pow__")
         def _ref():
@@ -2919,7 +2916,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+")^"+self.getref()
         return self.prepare(self.convert(other) ** self.obj, _ref)
 
-    def __lshift__(self, other):
+    def __ilshift__(self, other):
         """Performs Left Shift."""
         self.checksafe("__lshift__")
         def _ref():
@@ -2933,7 +2930,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+") lshift "+self.getref()
         return self.prepare(self.convert(other) << self.obj, _ref)
 
-    def __rshift__(self, other):
+    def __irshift__(self, other):
         """Performs Right Shift."""
         self.checksafe("__rshift__")
         def _ref():
@@ -2947,7 +2944,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+") rshift "+self.getref()
         return self.prepare(self.convert(other) >> self.obj, _ref)
 
-    def __or__(self, other):
+    def __ior__(self, other):
         """Performs Bitwise Or."""
         self.checksafe("__or__")
         def _ref():
@@ -2961,7 +2958,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+") bitor "+self.getref()
         return self.prepare(self.convert(other) | self.obj, _ref)
 
-    def __and__(self, other):
+    def __iand__(self, other):
         """Performs Bitwise And."""
         self.checksafe("__and__")
         def _ref():
@@ -2975,7 +2972,7 @@ class evalwrap(evalobject):
             return "("+e.prepare(other, False, True)+") bitand "+self.getref()
         return self.prepare(self.convert(other) & self.obj, _ref)
 
-    def __xor__(self, other):
+    def __ixor__(self, other):
         """Performs Bitwise Xor."""
         self.checksafe("__xor__")
         def _ref():

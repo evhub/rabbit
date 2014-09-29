@@ -720,6 +720,7 @@ passert:: fold:str:[1] ?= "1"
 passert:: type:-1 ?= "int"
 passert:: namespace << x=1 >> : "x" ?= 1
 passert:: "a" is `a`
+passert:: "%s" % "a thing" ?= "a thing"
 
 # Final Testing:
 tag = "tag"

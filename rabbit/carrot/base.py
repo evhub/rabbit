@@ -60,11 +60,15 @@ except NameError:
 
 def rabbit(func):
     """Decorates A Method To Allow Its Use In Rabbit As A Pure Function."""
+    if not hasattr(func, "__doc__") or not func.__doc__:
+        func.__doc__ = "A Rabbit Object."
     func.__doc__ = "(|rabbit:=True|) "+func.__doc__
     return func
 
 def dirty_rabbit(func):
     """Decorates A Method To Allow Its Use In Rabbit As An Impure Function."""
+    if not hasattr(func, "__doc__") or not func.__doc__:
+        func.__doc__ = "A Dirty Rabbit Object."
     func.__doc__ = "(|rabbit:=False|) "+func.__doc__
     return func
 
@@ -164,7 +168,7 @@ class evalobject(object):
         return out
     def __imod__(self, other):
         """Raises An Error."""
-        raise ExecutionError("OperatorError", "Addition not defined for object")
+        raise ExecutionError("OperatorError", "Modulus not defined for object")
 
     @rabbit
     def __or__(self, other):
