@@ -19,7 +19,7 @@ It is recommended that anyone who wishes to become familiar with the Rabbit prog
 
 ## Code Examples
 
-The example code file in the documentation provides comparisons between Rabbit code and code in other languages used to solve the same problem, allowing one to see the differences between the way things are done in Rabbit and the way things are done in other languages. That file can be accessed at [docs](/docs)/[Code Examples.mx](/docs/Code%20Examples.md).
+The example code file in the documentation provides comparisons between Rabbit code and code in other languages used to solve the same problem, allowing one to see the differences between the way things are done in Rabbit and the way things are done in other languages. That file can be accessed at [docs](/docs)/[Code Examples.md](/docs/Code%20Examples.md).
 
 Example Rabbit code can be found in many other places as well. The tests for the programming language itself function as good code examples, since, because of their nature as tests of all the features in Rabbit, they cover all the features in Rabbit. They can be accessed at [Tests.rab](/Tests.rab).
 

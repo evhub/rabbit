@@ -1,9 +1,9 @@
 Code Examples
 =============
 
-# Quicksort
+### Quicksort
 
-## Python:
+#### Python:
 ```
 def quickSort(arr):
     less = []
@@ -26,7 +26,7 @@ def quickSort(arr):
 ```
 Source: [Rosetta Code](http://rosettacode.org/wiki/Sorting_algorithms/Quicksort#Python)
 
-## Haskell:
+#### Haskell:
 ```
 quicksort :: (Ord a) => [a] -> [a]
 quicksort [] = []
@@ -37,7 +37,7 @@ quicksort (x:xs) =
 ```
 Source: [Learn You A Haskell For Great Good!](http://learnyouahaskell.com/recursion#quick-sort)
 
-## Rabbit:
+#### Rabbit:
 
 Uncommented:
 ```
