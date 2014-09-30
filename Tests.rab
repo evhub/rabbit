@@ -299,6 +299,34 @@ passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9) $
    qsort:(as~\^%x,a:a\(x@x<=a)) ++ a ++ qsort:(as~\^%x,a:a\(x@x>a))
    $ a,as = l
    ) @ (l,)
+passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9) $
+ qsort(l) = # qsort is defined as a function of one argument, l
+    (
+
+        qsort: # The qsort function is called recursively on all the
+               #  elements in the list less than or equal to the pivot.
+            (as ~ # The tilde operator loops over the list with a function
+                 \x\( # An in-line function definition using backslashes
+                     x @ x<=a # The main body of the function
+                     ))
+
+        ++ a ++ # That sort is joined with the pivot, which is then joined
+                #  with the next sort.
+
+        qsort: # The qsort function is called recursively on all the
+               #  elements in the list greater than the pivot.
+            (as ~ # The tilde operator loops over the list with a function
+                 \x\( # An in-line function definition using backslashes
+                     x @ x>a # The main body of the function
+                     ))
+
+        $ a,as = l # The original argument, l, is split up into two parts,
+                   #  its head, a, which will be used as the pivot, and its
+                   #  tail, as, which will be the list that is split up
+                   #  into two parts and each part sorted.
+
+    ) @ len:l # The whole body of the function is only performed if l is not
+            #  empty, otherwise null, the empty list, is returned
 passert:: range(1,16) ~ crackle pop ?= (1,2,"Crackle",4,"Pop","Crackle",7,8,"Crackle","Pop",11,"Crackle",13,14,"CracklePop") $
  crackle pop (x) = (
     "CracklePop"

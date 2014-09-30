@@ -1004,7 +1004,7 @@ Global Operator Precedence List:
     def splitdedent(self, inputstring, splitfunc=lambda x: x.splitlines(), top=True):
         """Splits And Unsplits By Dedents."""
         inputstring = str(inputstring)
-        split = fullsplit(inputstring, self.indentchar, self.dedentchar, 1, not top, iswhite, True)
+        split = fullsplit(inputstring, self.indentchar, self.dedentchar, 1, False, iswhite, True)
         if len(split) > 1 or (split and istext(split[0])):
             out = []
             join = False
