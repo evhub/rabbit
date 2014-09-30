@@ -1016,8 +1016,8 @@ class evalfuncs(object):
             raise ExecutionError("ArgumentError", "Not enough arguments to for")
         else:
             e.overflow = variables[2:]
-            func = e.getcall(variables[0])
-            for item in getmatrix(variables[1]).getitems():
+            func = e.getcall(variables[1])
+            for item in getmatrix(variables[0]).getitems():
                 func(item)
             return matrix(0)
 

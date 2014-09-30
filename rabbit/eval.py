@@ -1903,13 +1903,16 @@ Global Operator Precedence List:
                 units = units[argnum:]
                 if units:
                     new_lists.append((units, argnum))
-            overflow, self.overflow = self.overflow, []
-            value = func(params)
-            if self.overflow:
-                raise ExecutionError("ArgumentError", "Excess arguments of "+strlist(self.overflow, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(original, False, True, True))
-            elif not isnull(value):
-                out.append(value)
-            self._overflow = overflow
+            if params:
+                overflow, self.overflow = self.overflow, []
+                value = func(params)
+                if self.overflow:
+                    raise ExecutionError("ArgumentError", "Excess arguments of "+strlist(self.overflow, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(original, False, True, True))
+                elif not isnull(value):
+                    out.append(value)
+                self._overflow = overflow
+            else:
+                break
             lists = new_lists
         if out_type == "list":
             return diagmatrixlist(out)
