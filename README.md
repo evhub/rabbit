@@ -9,13 +9,13 @@ Rabbit is a modern, functional programming language built on top of Python.
 
 This repository hosts all the code for the Rabbit interpreter. Simple wrapper python files for booting up common features are provided in the main repository. These are:
 
-`runcli.py`: Boots up the Rabbit interpreter Command Line Interface.
-`runcmd.py`: Boots up the Rabbit interpreter GUI Command Line.
-`runcomp.py`: Boots up the Rabbit interpeter data serializer and program executer.
-`rungraph.py`: Boots up the Rabbit interpreter function grapher.
-`runride.py`: Boots up the Rabbit interpreter Integrated Development Environment.
-`runtests.py`: Runs the tests for the Rabbit interpreter.
-`runall.py`: Imports all the Rabbit interpreter libraries for use in Python.
+* `runcli.py`: Boots up the Rabbit interpreter Command Line Interface.
+* `runcmd.py`: Boots up the Rabbit interpreter GUI Command Line.
+* `runcomp.py`: Boots up the Rabbit interpeter data serializer and program executer.
+* `rungraph.py`: Boots up the Rabbit interpreter function grapher.
+* `runride.py`: Boots up the Rabbit interpreter Integrated Development Environment.
+* `runtests.py`: Runs the tests for the Rabbit interpreter.
+* `runall.py`: Imports all the Rabbit interpreter libraries for use in Python.
 
 The actual code for the interpreter can be found inside the [rabbit](/rabbit) folder. Inside that, the [rabbit](/rabbit)/[carrot](/rabbit/carrot) folder holds the carrot library, a library for the more general features that the Rabbit interpreter makes use of.
 
