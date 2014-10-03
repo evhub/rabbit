@@ -2410,9 +2410,7 @@ Global Operator Precedence List:
             if check > 0:
                 return value
             elif check == 0:
-                if isinstance(value, bool):
-                    return value
-                elif isinstance(value, complex):
+                if isinstance(value, (bool, complex)):
                     return value
                 elif value >= 0 or value <= 0:
                     return float(value)

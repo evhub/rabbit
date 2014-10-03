@@ -71,7 +71,7 @@ def ismatrix(inputobject):
 
 def isprop(inputobject):
     """Checks Whether An Object Is A Property."""
-    return hasnum(inputobject) and hasattr(inputobject, "isprop") and ((isinstance(inputobject.isprop, bool) and inputobject.isprop) or inputobject.isprop())
+    return iseval(inputobject) and hasattr(inputobject, "isprop") and ((isinstance(inputobject.isprop, bool) and inputobject.isprop) or inputobject.isprop())
 
 def getmatrix(inputobject, func=diagmatrixlist):
     """Converts The Object To A Matrix."""
