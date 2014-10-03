@@ -753,6 +753,7 @@ passert:: zipwith:\x,y\(x+1,y*2):(1,2,3):(4,5,6) ?= (1,2,3)~ (4,5,6)~ \x,y\(x+1,
 to_eval = (?true)
 passert:: to_eval
 passert:: ! "to_eval" in (dict(unused(env())))
+passert:: repr() ?= "()"
 
 # Final Testing:
 tag = "tag"

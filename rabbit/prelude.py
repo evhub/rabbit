@@ -850,7 +850,7 @@ class evalfuncs(object):
     def reprcall(self, variables):
         """Finds A Representation."""
         if len(variables) != 1:
-            variables = diagmatrixlist(variables)
+            variables = [diagmatrixlist(variables)]
         return rawstrcalc(e.prepare(variables[0], True, True))
 
     def joincall(self, variables):
