@@ -750,7 +750,7 @@ passert:: "a" is `a`
 passert:: "%s" % "a thing" ?= "a thing"
 passert:: -"abc" ?= "cba"
 passert:: zipwith:\x,y\(x+1,y*2):(1,2,3):(4,5,6) ?= (1,2,3)~ (4,5,6)~ \x,y\(x+1,y*2)
-to_eval = ? true
+to_eval = (?true)
 passert:: to_eval
 passert:: ! "to_eval" in (dict(unused(env())))
 
