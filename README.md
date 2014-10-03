@@ -7,7 +7,7 @@ Rabbit is a modern, functional programming language built on top of Python.
 
 ## The Code
 
-This repository hosts all the code for the Rabbit interpreter. Simple wrapper python files for booting up common features are provided in the main repository. These are:
+This repository hosts all the code for the Rabbit interpreter. Simple wrapper Python files for booting up common features are provided in the main repository. These are:
 
 * `runcli.py`: Boots up the Rabbit interpreter Command Line Interface.
 * `runcmd.py`: Boots up the Rabbit interpreter GUI Command Line.
