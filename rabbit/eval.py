@@ -2823,26 +2823,21 @@ Global Operator Precedence List:
 
     def getfind(self, key, follow=False):
         """Finds A String."""
-        old = ""
-        if istext(key):
-            new = basicformat(key)
-        else:
-            new = key
-        while not self.iseq(old, new):
-            key = old
-            old = new
-            new = self.finding(old, follow)
-        return new, key
+        out = key
+        old = None
+        while not self.iseq(old, out):
+            old = out
+            out, key = self.finding(key, follow)
+        return out, key
 
     def finding(self, key, follow=False):
         """Performs String Finding."""
+        out = key
         if istext(key):
             out = self.namefind(key, follow)
-        else:
-            out = key
-        if istext(out) and out in self.variables and (follow or istext(self.variables[out])):
-            out = self.variables[out]
-        return out
+            if istext(out) and out in self.variables and (follow or istext(self.variables[out])):
+                key, out = out, self.variables[key]
+        return out, key
 
     def condense(self):
         """Simplifies Variable Hierarchies."""
