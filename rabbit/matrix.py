@@ -89,9 +89,8 @@ class matrix(mctobject):
     def copy(self, fake=None):
         """Creates A Copy Of The Matrix."""
         out = self.new(fake=fake)
-        for y,x in self.coords():
-            item = self.retrieve(y,x)
-            out.store(y,x, getcopy(item))
+        for y,x in self.coords(None):
+            out.store(y,x, getcopy(self.retrieve(y,x)))
         return out
 
     def itemcall(item, params):
@@ -160,9 +159,9 @@ class matrix(mctobject):
         """Retrieves A Boolean."""
         return self.y != 0
 
-    def code(self, func):
+    def code(self, func, diag=None):
         """Codes A Function Over The Matrix."""
-        for y,x in self.coords():
+        for y,x in self.coords(diag):
             self.store(y,x, func(self.retrieve(y,x)))
 
     def prepare(self, v):
@@ -196,7 +195,7 @@ class matrix(mctobject):
     def items(self):
         """Returns A List Of All Items In A Matrix."""
         out = []
-        for y,x in self.coords():
+        for y,x in self.coords(False):
             out.append(self.retrieve(y, x))
         return out
 
@@ -253,7 +252,7 @@ class matrix(mctobject):
                 raise IndexError("Matrix multiplication invalid between empty matrix and non-empty matrix")
             elif self.x == other.y:
                 out = self.new(self.y, other.x)
-                for y,x in out.coords():
+                for y,x in out.coords(False):
                     v = 0
                     for z in xrange(0, self.x):
                         v += self.retrieve(y, z)*other.retrieve(z, x)
@@ -264,9 +263,8 @@ class matrix(mctobject):
                 except IndexError:
                     raise IndexError("Matrix multiplication invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
         else:
-            out = self.new()
-            for y,x in self.coords():
-                out.store(y, x, self.retrieve(y, x)*other)
+            out = getcopy(self)
+            out.code(lambda x: x*other)
         return out
 
     def __imul__(self, other):
@@ -274,8 +272,7 @@ class matrix(mctobject):
         if isinstance(other, matrix):
             self = self*other
         else:
-            for y,x in self.coords():
-                self.store(y, x, self.retrieve(y, x)*other)
+            self.code(lambda x: x*other)
         return self
 
     @rabbit
@@ -284,38 +281,25 @@ class matrix(mctobject):
         if isinstance(other, matrix):
             if self.y == other.y and self.x == other.x:
                 out = self.new()
-                for y,x in self.coords():
+                for y,x in self.coords(False):
                     out.store(y, x, self.retrieve(y, x)+other.retrieve(y, x))
             else:
                 raise IndexError("Matrix addition invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
-        elif other == 0:
-            out = getcopy(self)
-        elif self.onlydiag():
-            length = self.lendiag()
-            out = self.new(length, length)
-            for x in xrange(0, length):
-                out.store(x, x, self.retrieve(x)+other)
         else:
-            out = self.new()
-            for y in xrange(0, self.y):
-                for x in xrange(0, self.x):
-                    out.store(y, x, self.retrieve(y, x)+other)
+            out = getcopy(self)
+            out.code(lambda x: x+other)
         return out
 
     def __iadd__(self, other):
         """Performs Addition In-Place."""
         if isinstance(other, matrix):
             if self.y == other.y and self.x == other.x:
-                for y,x in self.coords():
+                for y,x in self.coords(None):
                     self.store(y, x, self.retrieve(y, x)+other.retrieve(y, x))
             else:
                 raise IndexError("Matrix addition invalid for dimensions "+str(self.y)+"x"+str(self.x)+" and "+str(other.y)+"x"+str(other.x))
-        elif other != 0 and self.onlydiag():
-            for x in xrange(0, self.lendiag()):
-                self.store(x, x, self.retrieve(x)+other)
-        elif other != 0:
-            for y,x in self.coords():
-                self.store(y, x, self.retrieve(y, x)+other)
+        else:
+            self.code(lambda x: x+other)
         return self
 
     @rabbit
@@ -351,22 +335,10 @@ class matrix(mctobject):
         else:
             raise TypeError("Matrix exponentiation invalid with "+repr(other))
 
-    @rabbit
-    def __div__(self, other):
-        """Performs Division."""
-        if hasnum(other):
-            out = self.new()
-            for y,x in self.coords():
-                out.store(y, x, self.retrieve(y, x)/other)
-            return out
-        else:
-            raise TypeError("Matrix division invalid with "+repr(other))
-
     def __idiv__(self, other):
         """Performs Division In-Place."""
         if hasnum(other):
-            for y,x in self.coords():
-                self.store(y, x, self.retrieve(y, x)/other)
+            self.code(lambda x: x/other)
             return self
         else:
             raise TypeError("Matrix division invalid with "+repr(other))
@@ -377,9 +349,8 @@ class matrix(mctobject):
         if isinstance(other, matrix):
             out = self.cross(other)
         else:
-            out = self.new()
-            for y,x in self.coords():
-                out.store(y, x, self.retrieve(y, x)%other)
+            out = getcopy(self)
+            out.code(lambda x: x%other)
         return out
 
     def __imod__(self, other):
@@ -402,17 +373,22 @@ class matrix(mctobject):
     def entries(self):
         """Returns A List Of Items With Coordinates."""
         out = []
-        for y,x in self.coords():
+        for y,x in self.coords(False):
             out.append((y,x,self.retrieve(y,x)))
         return out
 
     @rabbit
-    def coords(self):
+    def coords(self, diag=False):
         """Returns A List Of Coordinates."""
+        if diag is None:
+            diag = self.onlydiag()
         out = []
         for y in xrange(0, self.y):
-            for x in xrange(0, self.x):
-                out.append((y,x))
+            if not diag:
+                for x in xrange(0, self.x):
+                    out.append((y,x))
+            elif y < self.x:
+                out.append((y,y))
         return out
 
     @rabbit
@@ -441,9 +417,16 @@ class matrix(mctobject):
             out[x] = out[x]+addlist[x]
         return out
 
-    def fill(self, func=lambda: random().getdigits(1)):
+    @rabbit
+    def filled(self, *args, **kwargs):
+        """Returns A Filled Matrix."""
+        out = getcopy(self)
+        out.fill(*args, **kwargs)
+        return out
+
+    def fill(self, func=lambda: random().getdigits(1), diag=None):
         """Fills The Matrix With The Results From A Function."""
-        for y,x in self.coords():
+        for y,x in self.coords(diag):
             self.store(y,x, func())
 
     def newrow(self, rowlist):
@@ -568,7 +551,7 @@ class matrix(mctobject):
 
     def solve(self, debug=False, debugfunc=print):
         """Solves The Matrix As An Augmented Matrix."""
-        for y,x in self.coords():
+        for y,x in self.coords(False):
             if x == y:
                 if debug:
                     debugfunc("Scale Row "+str(y)+" By 1/"+str(self.retrieve(y,x)))
@@ -605,7 +588,7 @@ class matrix(mctobject):
 
     def solvetop(self, debug=False, debugfunc=print):
         """Solves The Top Of The Matrix As An Augmented Matrix."""
-        for y,x in reversed(self.coords()):
+        for y,x in reversed(self.coords(False)):
             if x == y:
                 if debug:
                     debugfunc("Scale Row "+str(y)+" By 1/"+str(self.retrieve(y,x)))
@@ -774,8 +757,7 @@ class matrix(mctobject):
     def __round__(self, n=0):
         """Performs round."""
         out = getcopy(self)
-        for y,x in out.coords():
-            out.store(y,x, round(out.retrieve(y,x), n))
+        out.code(lambda x: round(x, n))
         return out
 
     @rabbit
@@ -805,7 +787,7 @@ class matrix(mctobject):
     def indep(self):
         """Returns Expected Values For A Chi Squared Independence Test."""
         out = self.new()
-        for y,x in self.coords():
+        for y,x in self.coords(False):
             out.store(y,x, float(self.xmarg(x)*self.ymarg(y))/float(self.sum()))
         return out
 
@@ -816,7 +798,7 @@ class matrix(mctobject):
             expected = self.indep()
         if self.y == expected.y and self.x == expected.x:
             tot = 0.0
-            for y,x in self.coords():
+            for y,x in self.coords(False):
                 tot += float(self.retrieve(y,x)-expected.retrieve(y,x))**2.0/float(expected.retrieve(y,x))
             return tot
         else:
@@ -862,7 +844,7 @@ def matrixitems(inputitems, y, x=None, converter=proper, fake=False):
         x = len(inputitems)/y
     out = matrix(y, x, converter=converter, fake=fake)
     z = 0
-    for y,x in out.coords():
+    for y,x in out.coords(False):
         out.store(y,x, inputitems[z])
         z += 1
     return out

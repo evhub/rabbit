@@ -1365,7 +1365,7 @@ Global Operator Precedence List:
             if istext(arg):
                 arg = basicformat(arg)
             if not arg:
-                raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+                raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
             funcs = funcs[:]
             if top:
                 func = funcs.pop(0)
@@ -1480,7 +1480,7 @@ Global Operator Precedence List:
                 if x:
                     withclass.process(x)
                 else:
-                    raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+                    raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
             self.clean_end(cleaned)
             return withclass.calc(item)
         else:
@@ -1659,10 +1659,9 @@ Global Operator Precedence List:
             self.unclean()
             out = []
             for x in xrange(0, len(inputlist)):
+                inputlist[x] = basicformat(inputlist[x])
                 if inputlist[x]:
-                    item = self.calc_next(inputlist[x], calc_funcs)
-                    if not isnull(item):
-                        out.append(item)
+                    out.append(self.calc_next(inputlist[x], calc_funcs))
             if len(out) == 0:
                 return matrix(0)
             elif len(out) == 1:
@@ -1773,13 +1772,13 @@ Global Operator Precedence List:
                 if istext(inputlist[x]) and madeof(inputlist[x], self.bools):
                     args = []
                     if x == 0:
-                        raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+                        raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
                     else:
                         if istext(inputlist[x-1]):
                             inputlist[x-1] = self.calc_next(inputlist[x-1], calc_funcs)
                         args.append(inputlist[x-1])
                     if x == len(inputlist)-1:
-                        raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+                        raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
                     else:
                         if istext(inputlist[x+1]):
                             inputlist[x+1] = self.calc_next(inputlist[x+1], calc_funcs)
@@ -2314,7 +2313,7 @@ Global Operator Precedence List:
         """Evaluates The Addition Part Of An Expression."""
         inputlist = splitinplace(expression.split("+"), "-", self.callops)
         if not inputlist:
-            raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+            raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
         elif len(inputlist) == 1:
             return self.calc_next(inputlist[0], eval_funcs)
         else:
@@ -2322,9 +2321,7 @@ Global Operator Precedence List:
             value = self.calc_next(inputlist[0], eval_funcs)
             for x in xrange(1, len(inputlist)):
                 item = self.calc_next(inputlist[x], eval_funcs)
-                if isnull(value):
-                    value = item
-                elif isinstance(item, negative):
+                if isinstance(item, negative):
                     value = item + value
                 else:
                     value = value + item
@@ -2358,11 +2355,11 @@ Global Operator Precedence List:
         """Evaluates The Multiplication Part Of An Expression."""
         original = expression.split("*")
         if "" in original:
-            raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+            raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
         else:
             inputlist = splitinplace(original, "/")
             if not inputlist:
-                raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+                raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
             elif len(inputlist) == 1:
                 return self.calc_next(inputlist[0], eval_funcs)
             else:
@@ -2395,7 +2392,7 @@ Global Operator Precedence List:
                 self.recursion -= 1
             return out
         else:
-            raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+            raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
 
     def eval_check(self, value, top=False):
         """Checks A Value."""
@@ -2478,21 +2475,21 @@ Global Operator Precedence List:
         """Evaluates Unary -."""
         if inputstring.startswith("-"):
             self.unclean()
-            item = self.eval_call(inputstring[1:])
-            if isnull(item):
-                return -1.0
+            inputstring = basicformat(inputstring[1:])
+            if inputstring:
+                return negative(self.eval_call(inputstring))
             else:
-                return negative(item)
+                return -1
 
     def call_reciproc(self, inputstring):
         """Evaluates /."""
         if inputstring.startswith("/"):
             self.unclean()
-            item = self.eval_call(inputstring[1:])
-            if isnull(item):
-                return item
+            inputstring = basicformat(inputstring[1:])
+            if inputstring:
+                return reciprocal(self.eval_call(inputstring))
             else:
-                return reciprocal(item)
+                raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
 
     def call_exp(self, inputstring):
         """Evaluates The Exponential Part Of An Expression."""
@@ -2507,7 +2504,7 @@ Global Operator Precedence List:
                     value = knuth(self.eval_call(item), value, level)
                     level = 1
                 elif x == 0 or x == len(inputlist)-1:
-                    raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+                    raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
                 else:
                     level += 1
             return value
@@ -2526,17 +2523,16 @@ Global Operator Precedence List:
                 self.clean_end(cleaned)
                 return self.call_colon_set(item, params)
             else:
-                raise ExecutionError("SyntaxError", "Nothing must be enclosed in parentheses")
+                raise ExecutionError("SyntaxError", "Null must be enclosed in parentheses")
 
     def call_colon_set(self, item, params):
         """Performs Colon Function Calls."""
         overflow, self.overflow = self.overflow, []
-        docalc = False
         if isnull(item):
             if params:
-                raise ExecutionError("NoneError", "Nothing cannot be called")
+                raise ExecutionError("NullError", "Null cannot be called")
             else:
-                return item
+                value = item
         elif hasitemcall(item):
             value = self.getitemcall(item)(params)
         elif ismatrix(item):
@@ -2547,8 +2543,7 @@ Global Operator Precedence List:
             value = item
         else:
             raise ExecutionError("ArgumentError", "Excess arguments of "+strlist(params, ", ", lambda x: self.prepare(x, False, True, True))+" to "+self.prepare(item, False, True, True))
-        while docalc or len(self.overflow) > 0:
-            docalc = False
+        while len(self.overflow) > 0:
             temp = self.overflow[:]
             self.overflow = []
             value = self.call_colon_set(value, temp)
@@ -2680,9 +2675,7 @@ Global Operator Precedence List:
             self.unclean()
             funclist = []
             for item in inputstring.split(".."):
-                func = self.eval_call(item)
-                if not isnull(func):
-                    funclist.append(self.wrap(func))
+                funclist.append(self.wrap(self.eval_call(item)))
             return strfunc(strlist(funclist, "(")+"("*bool(funclist)+strfunc.allargs+")"*len(funclist), overflow=False)
 
     def call_lambdacoeff(self, inputstring):

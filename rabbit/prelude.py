@@ -1510,7 +1510,7 @@ class evalfuncs(object):
     def importcall(self, variables):
         """Performs import."""
         if not variables:
-            raise ExecutionError("NoneError", "Nothing is not a file name")
+            raise ExecutionError("NullError", "Null is not a file name")
         else:
             e.setreturned()
             out = []

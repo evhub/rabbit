@@ -298,7 +298,7 @@ passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9) $
  qsort(l) = (
    qsort:(as~\^%x,a:a\(x@x<=a)) ++ a ++ qsort:(as~\^%x,a:a\(x@x>a))
    $ a,as = l
-   ) @ (l,)
+   ) @ l
 passert:: qsort(9,0,6,3,8) ?= (0,3,6,8,9) $
  qsort(l) = # qsort is defined as a function of one argument, l
     (
@@ -754,6 +754,7 @@ to_eval = (?true)
 passert:: to_eval
 passert:: ! "to_eval" in (dict(unused(env())))
 passert:: repr() ?= "()"
+passert:: len:((),()) ?= 2
 
 # Final Testing:
 tag = "tag"

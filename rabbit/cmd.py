@@ -290,7 +290,7 @@ class mathbase(safebase):
     def savecall(self, variables):
         """Performs save."""
         if not variables:
-            raise ExecutionError("NoneError", "Nothing is not a file name")
+            raise ExecutionError("NullError", "Null is not a file name")
         else:
             self.e.overflow = variables[1:]
             self.e.setreturned()

@@ -2202,7 +2202,7 @@ class atom(evalobject):
 
     @rabbit
     def calc(self):
-        """Converts To Nothing."""
+        """Converts To Null."""
         return matrix(0)
 
     @rabbit
