@@ -779,15 +779,13 @@ Global Operator Precedence List:
 
     def speedyprep(self, item, top=False, bottom=False, indebug=False, maxrecursion=0):
         """Speedily Prepares The Output Of An Evaluation."""
-        out = "class \xab"+"\n"*top
+        out = "class \xab"+"\n"*top+" "
         if not indebug and bottom and not top:
             out += 'raise("LoopError", "Maximum recursion depth exceeded in object preparation")'
+        elif istext(item):
+            out += item
         else:
-            out += " __type__ "
-            if istext(item):
-                out += "= "+str(item)
-            else:
-                out += ":= `"+self.evaltypestr(item)+"`"
+            out += "__type__ := `"+self.evaltypestr(item)+"`"
         out += "\n"*top+" \xbb"
         return out
 
