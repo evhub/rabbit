@@ -44,7 +44,7 @@ Uncommented:
 qsort(l) = (
     qsort: (as ~ \x\(x @ x<=a)) ++ a ++ qsort: (as ~ \x\(x @ x>a))
     $ a,as = l
-    ) @ len:l
+    ) @ l
 ```
 
 Commented:
@@ -77,6 +77,6 @@ qsort(l) = # qsort is defined as a function of one argument, l
                    #  into two parts and each part sorted.
         )
 
-    @ len:l # The whole body of the function is only performed if l is not
-            #  empty, otherwise null, the empty list, is returned
+    @ l # The whole body of the function is only performed if l is not
+        #  empty, otherwise null, the empty list, is returned
 ```
