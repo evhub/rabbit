@@ -32,7 +32,9 @@ Key:
     name_of_module (dependency_one, dependency_two) : A description of the module.
 
 File List:
-    obj () : Functions for managing objects at a base level.
+    root () : Wrappers for functioning equivalently on any Python version.
+
+    obj (root) : Functions for managing objects at a base level.
 
     base (obj) : Base classes for custom objects.
     math (obj) : Advanced mathematical functions.

@@ -18,50 +18,11 @@
 
 from __future__ import with_statement, print_function, absolute_import, unicode_literals, division
 
-try:
-    from future_builtins import map, filter
-except ImportError:
-    pass
+from .root import *
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-try:
-    xrange
-except NameError:
-    xrange = range
-else:
-    range = xrange
-
-try:
-    long
-except NameError:
-    long = int
-
-encoding = "UTF"
-
-try:
-    ascii
-except NameError:
-    ascii = repr
-
-try:
-    unichr
-except NameError:
-    unichr = chr
-
-old_print = print
-def_str = str
-try:
-    unicode
-except NameError:
-    old_str = bytes
-    unicode = str
-else:
-    old_str = str
-    str = unicode
-    print = lambda *args: old_print(*(map(lambda x: str(x).encode(encoding), args)))
 
 old_int = int
 def int(x, *args, **kwargs):
