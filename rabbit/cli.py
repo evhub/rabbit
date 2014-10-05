@@ -91,12 +91,16 @@ class commandline(mathbase):
 
     def handler(self, original, old=None):
         """Handles Raw Input."""
-        cmd = self.e.remcomment(original)
-        fcmd = basicformat(cmd)
+        rem_original = self.e.remcomment(original)
+        if old is None or not self.e.insideouter(old+"\n"+rem_original, {}):
+            cmd = rem_original
+        else:
+            cmd = original
         if old is not None:
             whole = old+"\n"+cmd
         else:
             whole = cmd
+        fcmd = basicformat(cmd)
         if iswhite(whole):
             return None
         elif old is not None and not cmd == "":
