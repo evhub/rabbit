@@ -453,7 +453,7 @@ Global Operator Precedence List:
             "from":funcfloat(self.funcs.instanceofcall, "from", reqargs=2),
             "iserr":funcfloat(self.funcs.iserrcall, "iserr", reqargs=1),
             "class":funcfloat(self.funcs.classcall, "class"),
-            "object":funcfloat(self.funcs.instancecall, "object"),
+            "obj":funcfloat(self.funcs.instancecall, "obj"),
             "func":funcfloat(self.funcs.functioncall, "func"),
             "namespace":funcfloat(self.funcs.namespacecall, "namespace"),
             "try":funcfloat(self.funcs.trycall, "try"),

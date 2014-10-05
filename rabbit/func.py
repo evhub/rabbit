@@ -1550,7 +1550,7 @@ class namespace(classcalc):
 
 class instancecalc(numobject, classcalc):
     """An Evaluator Class Instance."""
-    evaltype = "object"
+    evaltype = "obj"
     parentvar = "__parent__"
 
     def __init__(self, variables=None, parent=None, name=None, top=True, selfvar=None, parentvar=None, restricted=None):

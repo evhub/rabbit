@@ -176,7 +176,7 @@ passert:: (?nil) ?= 0
 passert:: nil**2 ?= [nil,nil]
 passert:: 2**nil ?= ()
 passert:: class<<>> ++ class << x = 1 >> ?= class << x = 1 >>
-passert:: type(class<<>>() ++ class << x = 1 >>) ?= "object"
+passert:: type(class<<>>() ++ class << x = 1 >>) ?= "obj"
 passert:: class << nothing := nothing ;; nil := nil >> ?= class << nil := nil ;; nothing := nothing >>
 passert:: nil ++ (1,) ?= nil
 passert:: 1 ++ nil ?= nil
@@ -538,6 +538,7 @@ passert:: type(xor(0,1)) ?= "int"
 passert:: type(1+0*i) ?= "complex"
 passert:: "≈" ?= eval: ascii "≈"
 passert:: null ?= ()
+passert:: obj ( class<< x=1 >> ) ?= class<< x=1 >>()
 
 # Import Tests:
 math = import:: math
