@@ -181,7 +181,7 @@ class mathbase(safebase):
                 elif cmds:
                     cmds[-1] += "\n"+line
                 else:
-                    self.adderror("IndentationError", "Illegal starting indent in line "+line+" (#"+str(x)+")", True)
+                    self.adderror("IndentationError", "Illegal initial indent in line "+line+" (#"+str(x)+")", True)
                     break
         if not top:
             addcommand, self.addcommand = self.addcommand, always(None)
