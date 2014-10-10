@@ -504,7 +504,7 @@ class matrix(mctobject):
         else:
             out = 0.0
             for x in xrange(0, self.x):
-                out += self.retrieve(1,x)*self.C(1,x)
+                out += self.retrieve(0,x)*self.C(0,x)
             return out
 
     @rabbit
