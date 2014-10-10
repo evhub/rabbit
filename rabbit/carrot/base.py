@@ -299,11 +299,11 @@ class evalobject(object):
 
     def __call__(self, *args):
         """Calls The Rabbit Function."""
-        return e.getcall(self)(list(map(e.frompython, args)))
+        return e.topython(e.getcall(self)(list(map(e.frompython, args))))
 
     def __getitem__(self, *args):
         """Gets An Item."""
-        return self.itemcall(list(map(e.frompython, args)))
+        return e.topython(self.itemcall(list(map(e.frompython, args))))
 
     @rabbit
     def __neg__(self):

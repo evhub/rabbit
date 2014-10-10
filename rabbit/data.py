@@ -901,7 +901,7 @@ class multidata(mctobject):
         """Finds The Linear Regression Line."""
         b = self.b()
         a = self.a()
-        return lambda x: a+b*x
+        return strfunc(e.prepare(a, False, True)+"+"+e.prepare(b, False, True)+"*x", ["x"])
 
     @rabbit
     def medmed(self):
@@ -918,21 +918,21 @@ class multidata(mctobject):
         b = (ylast-yfirst)/(xlast-xfirst)
         yhat = b*(xmid-xfirst)+yfirst
         a = yhat + (ymid-yhat)/3.0 - b*xmid
-        return lambda x: a+b*x
+        return strfunc(e.prepare(a, False, True)+"+"+e.prepare(b, False, True)+"*x", ["x"])
 
     @rabbit
     def poweq(self):
         """Finds The Power Regression Line Given That This Is powdata."""
         a = math.e**self.a()
         b = self.b()
-        return lambda x: a*x**b
+        return strfunc(e.prepare(a, False, True)+"*x^"+e.prepare(b, False, True), ["x"])
 
     @rabbit
     def expeq(self):
         """Finds The Exponential Regression Line Given That This Is expdata."""
         a = math.e**self.a()
         b = math.e**self.b()
-        return lambda x: a*b**x
+        return strfunc(e.prepare(a, False, True)+"*"+e.prepare(b, False, True)+"^x", ["x"])
 
     @rabbit
     def powreg(self):
