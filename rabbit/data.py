@@ -108,6 +108,7 @@ class data(mctobject):
 
     def extend(self, units):
         """Adds More Data."""
+        units = e.topython(units)
         if isinstance(units, dict):
             for x in units:
                 for i in xrange(0, int(units[x])):
@@ -776,8 +777,9 @@ class multidata(mctobject):
         self.x.code(func)
         self.y.code(func)
 
-    def extend(self, x, y):
+    def extend(self, pair):
         """Adds Pairs."""
+        x, y = e.topython(pair)
         self.x.extend(x)
         self.y.extend(y)
 
@@ -786,8 +788,9 @@ class multidata(mctobject):
         self.x.append(x)
         self.y.append(y)
 
-    def remove(self, x, y):
+    def remove(self, pair):
         """Removes A Pair."""
+        x,y = e.topython(pair)
         for n in xrange(0, len(self)):
             if self.x.units[n] == x and self.y.units[n] == y:
                 self.x.units.pop(n)

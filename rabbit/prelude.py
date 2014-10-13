@@ -1388,6 +1388,8 @@ class evalfuncs(object):
                 return dictionary({variables[0].k:variables[0].v})
             elif isinstance(variables[0], classcalc):
                 return e.frompython(variables[0].getvars())
+            elif isinstance(variables[0], multidata):
+                return dictionary(variables[0].todict())
             else:
                 raise TypeError("Received non-dictionary object "+e.prepare(variables[0], False, True, True))
         else:
