@@ -756,6 +756,7 @@ passert:: to_eval
 passert:: ! "to_eval" in (dict(unused(env())))
 passert:: repr() ?= "()"
 passert:: len:((),()) ?= 2
+passert:: dict(data:[0,1]:[1,2] ++ [2,3]) ?= {0->1, 1->2, 2->3}
 
 # Final Testing:
 tag = "tag"
