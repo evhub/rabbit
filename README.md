@@ -21,7 +21,11 @@ The actual code for the interpreter can be found inside the [rabbit](/rabbit) fo
 
 ## Executive Summary
 
-For a short explanation of what Rabbit is and what it can do in layman's terms, see the Executive Summary, which can be accessed at [docs](/docs)/[Executive Summary.docx](/docs/Executive%20Summary.docx).
+For a short explanation of what Rabbit is and what it can do in layman's terms, see the Executive Summary, which can be accessed at [docs](/docs)/[Executive Summary.pdf](/docs/Executive%20Summary.pdf).
+
+## Academic Paper
+
+The full academic research report written on the Rabbit programming language is hosted here, and can be accessed at [docs](/docs)/[The Rabbit Language.pdf](/docs/The%20Rabbit%20Language.pdf).
 
 ## Technical Whitepaper
 
@@ -32,7 +36,3 @@ It is recommended that anyone who wishes to become familiar with the Rabbit prog
 The example code file in the documentation provides comparisons between Rabbit code and code in other languages used to solve the same problem, allowing one to see the differences between the way things are done in Rabbit and the way things are done in other languages. That file can be accessed at [docs](/docs)/[Code Examples.md](/docs/Code%20Examples.md).
 
 Example Rabbit code can be found in many other places as well. The tests for the programming language itself function as good code examples, since, because of their nature as tests of all the features in Rabbit, they cover all the features in Rabbit. They can be accessed at [Tests.rab](/Tests.rab).
-
-## Academic Paper
-
-The full academic research report written on the Rabbit programming language is hosted here, and can be accessed at [docs](/docs)/[The Rabbit Language.docx](/docs/The%20Rabbit%20Language.docx).
