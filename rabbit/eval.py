@@ -39,6 +39,28 @@ def set_e(new_e):
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+def check_e():
+    """Ensures That The e Global Is Set."""
+    try:
+        e
+    except NameError:
+        evaluator()
+
+def rabbit(code):
+    """Evaluates Rabbit Code And Returns The Result."""
+    check_e()
+    return e.calc(code)
+
+def fromrabbit(obj):
+    """Converts A Rabbit Object To A Python Object."""
+    check_e()
+    return e.topython(obj)
+
+def torabbit(obj):
+    """Converts A Python Object To A Rabbit Object."""
+    check_e()
+    return e.frompython(obj)
+
 class Evaluate(BaseException):
     """A Stack-Killer Evaluation Exception."""
     def __init__(self, arg, funcs):
@@ -1325,7 +1347,7 @@ Global Operator Precedence List:
                 if len(x) < 1:
                     original = ""
                 else:
-                    original = x[0]
+                    original = self.precalc_brace(self.precalc_brack(x[0]))
                 command += self.wrap(brace(self.splitdedent(original, lambda x: x.split(","))))
             else:
                 raise SyntaxError("Error in evaluating braces len("+repr(x)+")>1")
@@ -1342,7 +1364,7 @@ Global Operator Precedence List:
                 if len(x) < 1:
                     original = ""
                 else:
-                    original = x[0]
+                    original = self.precalc_brack(x[0])
                 command += self.wrap(bracket(self.splitdedent(original, lambda x: x.split(","))))
             else:
                 raise SyntaxError("Error in evaluating brackets len("+repr(x)+")>1")
