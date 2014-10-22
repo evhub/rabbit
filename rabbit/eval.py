@@ -358,7 +358,7 @@ Global Operator Precedence List:
         self.precalcs = [
             self.precalc_paren,
             self.precalc_block,
-            self.precalc_dict,
+            self.precalc_brace,
             self.precalc_brack,
             self.precalc_cmd
             ]
@@ -1336,7 +1336,7 @@ Global Operator Precedence List:
                 raise SyntaxError("Error in evaluating block len("+repr(x)+")>1")
         return command
 
-    def precalc_dict(self, expression):
+    def precalc_brace(self, expression):
         """Evaluates The Curly Brackets In An Expression."""
         curlylist = fullsplit(expression, "{", "}", 1)
         command = ""
