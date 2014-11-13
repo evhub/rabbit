@@ -271,10 +271,9 @@ def taylor_terms(f, p=0, n=5, accuracy=0.0001, scaledown=1.25):
         yield lambda x: coef*(x-p)**i
 def taylor(f, p=0, n=5, accuracy=0.0001, scaledown=1.25):
     """Returns The Taylor Expansion For The Function."""
-    terms = taylor_terms(f, p, n, accuracy, scaledown)
     def expansion(x):
         """The Series Expansion Of A Function."""
-        return sum((term(x) for term in terms))
+        return sum((term(x) for term in taylor_terms(f, p, n, accuracy, scaledown)))
     return expansion
 def maclaurin(f, n=5, accuracy=0.0001, scaledown=1.25):
     """Returns The Maclaurin Series For The Function."""
@@ -329,9 +328,9 @@ def atan_series(x, n):
     """Expansion Of The Series For atan(x)."""
     return sum((atan_term(x, i) for i in xrange(0, n)))
 
-def polarline(m, b):
-    """Converts A Slope Y-Intercept Line To Polar.""""
-    return lambda theta: b/(math.sin(theta)-m*math.cos(theta))
+def polarline(m, b, a=0):
+    """Converts A Point-Slope Line To Polar."""
+    return lambda theta: (b-m*a)/(math.sin(theta)-m*math.cos(theta))
 
 def sqcos(x):
     """Calculates cos(x)**2."""

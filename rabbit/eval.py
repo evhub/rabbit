@@ -2883,16 +2883,12 @@ Global Operator Precedence List:
                 out = self.calc(item)
             finally:
                 self.setvars(oldvars)
-        elif isfunc(item):
+        elif hascall(item):
             out = self.getcall(item)(varproc(value))
         elif hasnum(item):
             return item
         else:
-            oldvars = self.setvars({varname: value})
-            try:
-                out = self.getcall(item)(None)
-            finally:
-                self.setvars(oldvars)
+            raise ValueError("Unkown call item "+repr(item))
         return self.call(out, value, varname)
 
     def evaltypestr(self, item):
