@@ -934,7 +934,7 @@ Global Operator Precedence List:
             else:
                 out += "("+b+")"
         elif bottom and isinstance(item, rollfunc):
-            out = "rand:"+self.prepare(item.stop, False, bottom, indebug, maxrecursion)
+            out = "Rand.die:"+self.prepare(item.stop, False, bottom, indebug, maxrecursion)
         elif bottom and isinstance(item, strfunc):
             out = ""
             if isinstance(item, integbase):
