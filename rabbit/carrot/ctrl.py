@@ -23,7 +23,10 @@ import os
 import subprocess
 import imp
 import time
-import readline
+try:
+    import readline
+except ImportError:
+    pass
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
