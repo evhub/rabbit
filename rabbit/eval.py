@@ -516,6 +516,7 @@ Global Operator Precedence List:
             "Meta":classcalc({
                 "var":funcfloat(self.funcs.getvarcall, "var", reqargs=1),
                 "val":funcfloat(self.funcs.getvalcall, "val", reqargs=1),
+                "exists":funcfloat(self.funcs.existscall, "exists", reqargs=1),
                 "use":funcfloat(self.funcs.usecall, "use"),
                 "using":funcfloat(self.funcs.usingcall, "using"),
                 "alias":funcfloat(self.funcs.aliascall, "alias", reqargs=1),

@@ -331,6 +331,19 @@ class evalfuncs(object):
             else:
                 raise ExecutionError("KeyError", "Could not find "+original+" in variables")
 
+    def existscall(self, variables):
+        """Determines If A Variable Exists."""
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to var")
+        else:
+            e.setreturned()
+            e.overflow = variables[1:]
+            if isinstance(variables[0], strcalc):
+                name = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "Variable names must be strings")
+            return name in e.variables
+
     def copycall(self, variables):
         """Makes Copies Of Items."""
         if not variables:
