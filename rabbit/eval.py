@@ -514,6 +514,7 @@ Global Operator Precedence List:
                 "gen":evalwrap(random, "gen")
                 }, name="Rand"),
             "Meta":classcalc({
+                "new":funcfloat(self.funcs.newcall, "new", reqargs=2),
                 "var":funcfloat(self.funcs.getvarcall, "var", reqargs=1),
                 "val":funcfloat(self.funcs.getvalcall, "val", reqargs=1),
                 "exists":funcfloat(self.funcs.existscall, "exists", reqargs=1),

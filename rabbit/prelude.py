@@ -292,7 +292,7 @@ class evalfuncs(object):
             if original in e.variables:
                 return e.funcfind(original)
             else:
-                raise ExecutionError("KeyError", "Could not find "+original+" in variables")
+                raise ExecutionError("VariableError", "Could not find "+original+" in variables")
 
     def getparenscall(self, variables):
         """Retreives The Number Of Parentheses."""
@@ -329,7 +329,7 @@ class evalfuncs(object):
             if original in e.variables:
                 return rawstrcalc(e.prepare(e.variables[original], False, True))
             else:
-                raise ExecutionError("KeyError", "Could not find "+original+" in variables")
+                raise ExecutionError("VariableError", "Could not find "+original+" in variables")
 
     def existscall(self, variables):
         """Determines If A Variable Exists."""
@@ -343,6 +343,22 @@ class evalfuncs(object):
             else:
                 raise ExecutionError("ValueError", "Variable names must be strings")
             return name in e.variables
+
+    def newcall(self, variables):
+        """Creates A New Variable."""
+        if len(variables) < 2:
+            raise ExecutionError("ArgumentError", "Not enough arguments to new")
+        else:
+            e.overflow = variables[2:]
+            if isinstance(variables[0], strcalc):
+                name = str(variables[0])
+            else:
+                raise ExecutionError("ValueError", "Variable names must be strings")
+            if name in e.variables:
+                raise ExecutionError("VariableError", "Variable "+name+" already exists")
+            else:
+                e.variables[name] = variables[1]
+            return matrix(0)
 
     def copycall(self, variables):
         """Makes Copies Of Items."""
