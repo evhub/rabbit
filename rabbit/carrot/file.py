@@ -44,8 +44,7 @@ def writefile(openedfile, writer):
 def readfile(openedfile):
     """Reads The Contents Of A File."""
     openedfile.seek(0)
-    out = openedfile.read()
-    return out
+    return openedfile.read()
 
 def createfile(filename, opentype="r+b"):
     """Creates A File And Returns An Open File Object For It."""
