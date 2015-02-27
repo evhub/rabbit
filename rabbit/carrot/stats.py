@@ -78,7 +78,7 @@ def hypgeostdev(n, K, N):
 
 def birthdayP(n, x):
     """Determines The Probability Of An Overlap With N Possible States And X Being Used."""
-    return perm(n, x)/n**x
+    return 1-perm(n, x)/n**x
 
 def normdist(x, mean=0.0, stdev=1.0):
     """Implements The Normal Distribution."""
