@@ -409,10 +409,10 @@ Global Operator Precedence List:
             (self.call_normal, True)
             ]
         self.funcs = evalfuncs()
+        self.parens = []
 
     def fresh(self):
         """Resets The Variables To Their Defaults."""
-        self.parens = []
         self.variables = {
             "Warning":classcalc({
                 self.errorvar: True,
@@ -1458,7 +1458,7 @@ Global Operator Precedence List:
             func = basicformat(func)
             original = []
             for arg in args:
-                original.append(self.namefind(basicformat(arg)))
+                original.append(self.namefind(arg))
             displayer = func+" :: "+strlist(original, " :: ")
             self.printdebug("::> "+displayer)
             self.recursion += 1
@@ -1571,7 +1571,7 @@ Global Operator Precedence List:
                     sides[0] = sides[0][0]
                     return self.calc_set_do(sides, docalc)
         return self.calc_next(original, calc_funcs)
-                
+
     def calc_set_do(self, sides, docalc):
         """Performs The Definition Command."""
         if not self.readytofunc(sides[0], allowed="."):
@@ -2588,7 +2588,7 @@ Global Operator Precedence List:
         """Evaluates Parentheses."""
         inputstring = (self.parenchar*2).join(switchsplit(self.replacer.sub(self.parenchar*2, original), self.digits, notstring=self.reserved))
         if self.parenchar in inputstring:
-            self.printdebug("(|) "+inputstring) 
+            self.printdebug("(|) "+inputstring)
             templist = inputstring.split(self.parenchar)
             checkops = delspace(self.callops, self.subparenops)
             inputlist = [[]]
