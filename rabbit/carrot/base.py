@@ -376,12 +376,7 @@ class numobject(evalobject):
     @rabbit
     def __complex__(self):
         """Implements complex."""
-        return complex(float(self))
-
-    @rabbit
-    def __int__(self):
-        """Implements int."""
-        return int(float(self))
+        return complex(self.calc())
 
     def __imod__(self, other):
         """Implements Modulus In-Place."""
@@ -392,32 +387,32 @@ class numobject(evalobject):
     @rabbit
     def __rmod__(self, other):
         """Implements Reverse Modulus."""
-        return other % float(self)
+        return other % self.calc()
 
     def __iadd__(self, other):
         """Performs Addition In-Place."""
-        return float(self) + other
+        return self.calc() + other
 
     def __idiv__(self, other):
         """Performs Division In-Place."""
-        return float(self) / other
+        return self.calc() / other
 
     def __imul__(self, other):
         """Performs Multiplication In-Place."""
-        return float(self) * other
+        return self.calc() * other
 
     def __ipow__(self, other):
         """Performs Exponentiation In-Place."""
-        return float(self) ** other
+        return self.calc() ** other
 
     def __rpow__(self, other):
         """Performs Reverse Exponentiation In-Place."""
-        return other ** float(self)
+        return other ** self.calc()
 
     @rabbit
     def __cmp__(self, other):
         """Performs Comparison."""
-        test = float(self-float(other))
+        test = float(self-other)
         if test > 0:
             return 1
         elif test < 0:
@@ -440,32 +435,32 @@ class numobject(evalobject):
     @rabbit
     def __abs__(self):
         """Implements abs."""
-        return abs(float(self))
+        return abs(self.calc())
 
     @rabbit
     def __round__(self, n=0):
         """Implements round."""
-        return round(float(self), n)
+        return round(self.calc(), n)
 
     def __ior__(self, other):
         """Performs Bitwise Or In-Place."""
-        return float(self) | other
+        return self.calc() | other
 
     def __iand__(self, other):
         """Performs Bitwise And In-Place."""
-        return float(self) & other
+        return self.calc() & other
 
     def __ixor__(self, other):
         """Performs Bitwise Xor In-Place."""
-        return float(self) ^ other
+        return self.calc() ^ other
 
     def __irshift__(self, other):
         """Performs Bitwise Right Shift In-Place."""
-        return float(self) >> other
+        return self.calc() >> other
 
     def __ilshift__(self, other):
         """Performs Bitwise Left Shift In-Place."""
-        return float(self) << other
+        return self.calc() << other
 
 class cotobject(evalobject):
     """A Base Class For Container Objects."""
