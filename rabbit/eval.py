@@ -311,7 +311,7 @@ Global Operator Precedence List:
     tailing = False
     infix = True
 
-    def __init__(self, variables=None, processor=None, color=None, speedy=False, maxrecursion=10):
+    def __init__(self, variables=None, processor=None, color=None, speedy=False, maxrecursion=10, parens=None):
         """Initializes The Evaluator."""
         set_e(self)
         self.processor = processor
@@ -324,14 +324,14 @@ Global Operator Precedence List:
         self.speedy = bool(speedy)
         self.maxrecursion = int(maxrecursion)
         self.color = color
-        self.setup()
+        self.setup(parens)
         self.fresh()
         if variables is not None:
             self.makevars(variables)
 
     def new(self):
         """Makes A New Essentially Identically-Configured Evaluator."""
-        return evaluator(None, self.processor, self.color, self.speedy, self.maxrecursion)
+        return evaluator(None, self.processor, self.color, self.speedy, self.maxrecursion, self.parens)
 
     @property
     def overflow(self):
@@ -345,7 +345,7 @@ Global Operator Precedence List:
             self.unclean()
         self._overflow = inputlist
 
-    def setup(self):
+    def setup(self, parens=None):
         """Performs Basic Setup."""
         self._overflow = []
         self.debuglog = []
@@ -409,7 +409,10 @@ Global Operator Precedence List:
             (self.call_normal, True)
             ]
         self.funcs = evalfuncs()
-        self.parens = []
+        if parens is None:
+            self.parens = []
+        else:
+            self.parens = parens
 
     def fresh(self):
         """Resets The Variables To Their Defaults."""
