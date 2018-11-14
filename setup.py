@@ -4,6 +4,6 @@ import setuptools
 
 setuptools.setup(
     name="rabbit",
-    version=0.1,
+    version="1.0.2",
     packages=setuptools.find_packages(),
 )
